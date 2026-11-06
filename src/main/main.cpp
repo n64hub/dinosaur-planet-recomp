@@ -424,6 +424,7 @@ static double story_reported = -1.0;
 
 extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     double now = script_seconds();
+    dino::story_timed_bits(rdram, ctx, now);
     if (story_due && now >= story_at) {
         story_due = false;
         story_reported = now;

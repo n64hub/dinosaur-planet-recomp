@@ -22,6 +22,7 @@ namespace dino {
     void story_set_place(const char* list);
     void story_start(uint8_t* rdram, recomp_context* ctx);
     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
+    void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
 
     // The settings (config.cpp): RecompFrontend's tabs.
     void init_config();

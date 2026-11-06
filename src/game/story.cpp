@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -48,6 +49,7 @@ namespace {
     struct StoryBit {
         int bit;
         int value;
+        double at = -1.0; // with --bits <hex>@<seconds>, when on the --input clock; -1 is at the story's start
     };
 
     struct Place {
@@ -111,6 +113,7 @@ namespace {
 
     const StoryPoint* chosen = &points[0];
     std::vector<StoryBit> extra_bits;
+    std::vector<StoryBit> timed_bits;
     int chosen_warp = -1;
     std::vector<int> watched_bits;
     bool watch_all_bits = false;
@@ -183,7 +186,15 @@ void dino::story_add_bits(const char* list) {
     for (const char* p = list; p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
         StoryBit b{ 0, 1 };
         if (sscanf(p, "%x=%d", &b.bit, &b.value) >= 1) {
-            extra_bits.push_back(b);
+            const char* at = strchr(p, '@');
+            const char* next = strchr(p, ',');
+            if (at != nullptr && (next == nullptr || at < next)) {
+                b.at = atof(at + 1);
+                timed_bits.push_back(b);
+            }
+            else {
+                extra_bits.push_back(b);
+            }
         }
     }
 }
@@ -211,6 +222,17 @@ extern "C" void dino_bit_setting(uint8_t* rdram, recomp_context* ctx) {
     *ctx = saved;
     if (!watch_all_bits || old != value) {
         fprintf(stderr, "bits: %.1f s 0x%X = %d, was %d\n", dino_script_seconds(), bit, value, old);
+    }
+}
+
+// Each pass of the main loop: the --bits given a time, once it has come, as a test's own object would set them.
+void dino::story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds) {
+    for (StoryBit& b : timed_bits) {
+        if (b.at >= 0.0 && seconds >= b.at) {
+            b.at = -1.0;
+            set_game_bit(rdram, ctx, b);
+            fprintf(stderr, "--bits: 0x%X = %d at %.1f s\n", b.bit, b.value, seconds);
+        }
     }
 }
 
