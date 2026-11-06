@@ -352,13 +352,15 @@ static std::string game_thread_name(const OSThread* t) {
     return "[Game] " + std::to_string(t->id) + " (priority " + std::to_string(t->priority) + ")";
 }
 
-// --input <file> (development): scripted port 1 input for unattended runs. Each line is "<seconds> <buttons hex> [x y]",
-// seconds counted from the game's first input read, and the last line whose time has passed is held. Lines starting
-// with # are comments.
+// --input <file> (development): scripted port 1 input for unattended runs. Each line is
+// "<seconds> <buttons hex> [x y [camera_x camera_y]]", seconds counted from the game's first input read, camera_x and
+// camera_y the right stick the free camera reads, and the last line whose time has passed is held. Lines starting with
+// # are comments.
 struct ScriptedInput {
     double at;
     uint32_t buttons;
     float x, y;
+    float camera_x, camera_y;
 };
 static std::vector<ScriptedInput> input_script;
 
@@ -371,7 +373,7 @@ static void load_input_script(const char* path) {
     char line[256];
     while (fgets(line, sizeof(line), f) != nullptr) {
         ScriptedInput in{};
-        if (line[0] != '#' && sscanf(line, "%lf %x %f %f", &in.at, &in.buttons, &in.x, &in.y) >= 2) {
+        if (line[0] != '#' && sscanf(line, "%lf %x %f %f %f %f", &in.at, &in.buttons, &in.x, &in.y, &in.camera_x, &in.camera_y) >= 2) {
             input_script.push_back(in);
         }
     }
@@ -432,6 +434,9 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
 
 static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out, float* y_out) {
     bool ret = recompinput::profiles::get_n64_input(player_index, buttons_out, x_out, y_out);
+    if (player_index == 0) {
+        dino::add_mouse_buttons(buttons_out);
+    }
     if (!script_clock_started.exchange(true)) {
         script_clock_start = std::chrono::steady_clock::now();
     }
@@ -442,6 +447,7 @@ static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out,
                 *buttons_out = (uint16_t)in.buttons;
                 *x_out = in.x;
                 *y_out = in.y;
+                dino::set_scripted_camera(in.camera_x, in.camera_y);
                 ret = true;
             }
         }
@@ -615,6 +621,7 @@ int main(int argc, char** argv) {
     // One player, on any pad or the keyboard.
     recompinput::players::set_single_player_mode(true);
 
+    dino::init_camera();
     dino::init_config();
 
     recompui::register_launcher_init_callback(on_launcher_init);
