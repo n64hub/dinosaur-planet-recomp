@@ -150,7 +150,7 @@ publish)
         [ "$(cat "$f.booted" 2> /dev/null)" = "$(sha256sum "$f" | cut -d' ' -f1)" ] ||
             { echo "$f hasn't booted: run tools/release.sh boot windows and linux first" >&2; exit 1; }
     done
-    gh release create "$tag" "${files[@]}" --target "$commit" --title "Dinosaur Planet (prototype) $tag" --notes-file "$notes"
+    gh release create "$tag" "${files[@]}" --target "$commit" --title "Dinosaur Planet: AI Slop Recomp $tag" --notes-file "$notes"
     ;;
 *)
     echo "usage: tools/release.sh windows|linux|boot <os>|publish" >&2
