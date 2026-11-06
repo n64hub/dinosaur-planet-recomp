@@ -74,7 +74,8 @@ file 19, each task's name and clue), which says when the player swaps.
 - `before-gp-shrine` (42), `before-nw-shrine` (37), `before-cc-shrine` (41), `before-wg-shrine` (39): Krystal with all
   four of those spirits. The task list stops before these (from task 107 it holds placeholders), so their order and
   who plays them are not known from the ROM.
-- `before-cloudrunner`: Krystal at Moon Mountain Pass (warp 73), with two spirits and the first SpellStone placed.
+- `before-cloudrunner`: Krystal at Moon Mountain Pass (warp 73), with two spirits and the first SpellStone placed,
+  and SwapStone Circle at its act 9, where its chief gives the pass's key (CloudRunner Fortress).
 - `before-desert-force-point`: Krystal in Golden Plains (warp 31), carrying CloudRunner's SpellStone.
 - `before-walled-city`: Sabre in Walled City (warp 91), with the second SpellStone placed.
 - `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone.
