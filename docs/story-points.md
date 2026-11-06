@@ -178,7 +178,8 @@ The spirits, set in this order by WL_seqpoint (611) and read by WL_LevelControl 
 - First: 0x316, 0x21F. Second: 0x277, 0x21B. Third: 0x317, 0x21C. Fourth: 0x318, 0x21D.
 
 `first_stone`: 0x104 (task 29) and 0x22E (task 39) on the way there, and 0x877, placed: VFP_SpellPlace (637) in the
-Volcano Force Point takes it as its placed bit, with 0x123 as the stone carried. Carrying is 0x123 or 0x2E8, which
+Volcano Force Point takes it as its placed bit, with 0x123 as the stone carried. And 0x4E9, which VFP_LevelControl
+(619) sets on that visit and Diamond Bay's act counts (The maps' acts). Carrying is 0x123 or 0x2E8, which
 SHswapstone refuses a swap on ("You cannot swap when holding a SpellStone"), so a point leaves both clear.
 
 SwapStone Hollow's own, as played: 0xC2 counts the white mushrooms given to the Queen Earthwalker and 0xB0 is her
@@ -242,7 +243,37 @@ the map the playing object is in), and ROM file 13 holds one such event, which s
   WCLevelControl's (779) bits that open the Sun and Moon temples are act 2's only; the RedEye teeth are act 1's.
 
 A map's act is kept in the save, so a death or retry restores the act the map had when the level started, and the
-map's next load moves it on again.
+map's next load moves it on again. Diamond Bay moves by itself: act 2 from the first SpellStone (0x4E9) holds the
+Pointback's second egg (DBPointMum, 658: step 0x3FF, then the egg, 0x39E), and act 3, the nest and the stealer worms,
+comes with 0x63C once the volcano has been entered in its act 3.
+
+## The third SpellStone and the moonseeds
+
+Tasks 84 to 106, as played from `before-third-stone`. An item is used as a player uses it: C-right opens the
+inventory with it selected, and A uses it on what is in reach (`--input` lines `5 0001`, `5.2 0000`, `6.5 8000`,
+`6.7 0000`).
+
+- The volcano's second path: the podium of act 2 (VFP_PodiumPoint, 633, at -14788,-1568,-1161) takes the stone
+  from 100 units, plays its sequence, which opens the round door down a corridor, and the sequence's event sets
+  0x515 (dll633 0x3EC, by the map's act).
+- The third SpellStone: the SpellPlace of act 2 (637) loads within 224 units of (-14849,-1169,-1279), above the
+  core, and takes the stone with no reach of its own: it sets 0x878, and `src/game/moonseeds.cpp` gives four
+  moonseeds then (0x86A, which nothing in the ROM raises). The SpellPlace's seqpoint (630 @1380) holds 0x878 as
+  both its trigger and its done bit, so by its code its sequence, the only one that sets 0x63C (sequence 1032), never
+  plays; VFP_LevelControl's act 3 sets it instead.
+- The moonseeds: each of Moon Mountain Pass's four MMP_mseedrecept (722) takes one used beside it, lowers 0x86A and
+  sets its planted bit (0x868 for the one at -7692,1006,15565, in the pass's group 6). What grows it is Kyte's
+  flame (0x46E) at night.
+- Walled City in act 2 loads the Sun and Moon Stones (WCSunStone, 272), the TRex statues' sockets (785) and its
+  level control's act 2 (779).
+- The volcano in act 3 (`--story before-third-stone,81 --bits 878,500=1024`, group 10 holding VFP_LevelControl):
+  its act-3 timer (130, less the frame's time each frame, 0x69C) runs out 2 to 4 s in and sets 0x63C and 0x83C, and
+  Diamond Bay goes to act 3. That was two runs of three: in the other, nothing was set in 48 s, and why is not known.
+
+Not played from here: the second egg given to the Pointback's mother (talking to her plays her act-2 sequence, and
+a script's inventory stays on the SpellStone, above the egg), the log of task 84 (no ThornTail sells one, as for
+the first), the meteor of task 94 (MMP_moonrock, 445, three of them into MMP_gyservent's vents, 446, which sets
+0x89B at three), the night the Moon Stone shows in, and the statues' sockets taking the stones.
 
 ## The shrines
 

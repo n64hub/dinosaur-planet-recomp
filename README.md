@@ -59,6 +59,10 @@ Fixed:
 - SwapStone Hollow: Tricky's run to his mother, the Queen Earthwalker, never started, and with no Tricky beside Sabre
   it would have crashed. And the SwapStone could stop answering in its own corner of the hollow, and answer only
   outside it, after a trip through the Swap Store or the SwapStone's warp.
+- The third SpellStone: the Volcano Force Point loaded as on the first visit every time, so Walled City's SpellStone
+  had no path to open and no place to go, and Walled City never showed its Sun and Moon Stones. And the moonseeds
+  Krystal plants in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives
+  Sabre four, one for each of the pass's receptacles.
 
 Under way:
 

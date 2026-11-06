@@ -96,6 +96,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Finished by default, finishes them out
   of what the ROM holds, and Original leaves them as the console plays them (`src/game/krazoa.cpp`'s header has the
   order, the bits and the evidence).
+- **Acts.** A map's act, a story value, picks which of its objects load. The Volcano Force Point and Walled City never
+  leave act 1 on the ROM, and `src/game/acts.cpp` moves them with the story (docs/story-points.md, The maps' acts);
+  the moonseeds nothing gives come with the third SpellStone's placing (`src/game/moonseeds.cpp`).
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
@@ -106,7 +109,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   the player by the game's own warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads,
   `DINO_LOG_CUTS=1` each camera cut and object jump `src/game/interpolation.cpp` finds, with each origin step,
   `DINO_LOG_KRAZOA=1` each object `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each
-  event of Golden Plains' shrine, and `DINO_CHECK_HEAP=1` each block of the game's heaps written past its end, with
+  event of Golden Plains' shrine, `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves, and `DINO_CHECK_HEAP=1` each block of the game's heaps written past its end, with
   the tag of what asked for it (`src/game/heap.cpp`).
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the game's
   bits, the character and the place set as the save would have them, in memory and with nothing written to Flash:
