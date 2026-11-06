@@ -156,6 +156,46 @@ create, `func_800213EC`, passes what it made to `func_80021A84` with no test, so
 memory crashes there, under the MagicPlant (dll290) or SHBirchTree (dll520) that asked for it, as all of them on did
 with what the title holds still held (src/game/story.cpp lets go of it).
 
+## CloudRunner Fortress
+
+Tasks 56 to 68, played from `before-cloudrunner` on the desktop build a link at a time, each started with `--place`
+and the bits of the links before it. None of it needed a fix to the game; the story point did (SwapStone Circle's act).
+World coordinates: the fortress (map 12) lies at cell (-15, 29), its treasure caves (15) at (-20, 28) on layer -1 and
+the race (43) at (-20, 29) on layer -2.
+
+- The key. SwapStone Circle's chief (SC_chieflightfoot, 518) gives it only at the circle's act 9, the 4-bit field
+  0xE7, which SC_levelcontrol (519) moves on as the player enters map 14. Talked to, he sets 0x60E and 0x60F, and his
+  sequence sets 0x611, the bit Moon Mountain Pass's padlock needs. Played.
+- The courtyard. Its roof (CFBlastedRoof, 389) sets 0x2E1 after two explosions; with 0x2E1 the floor below
+  (CFExplodeFloor, 390) blows, its pieces set 0x43, and the force field fades (0x34F, 0x359). Played from 0x2E1 set:
+  what explodes on the roof is not played.
+- The explosive key. The courtyard's guard, beaten, sets 0x4DF, and CFExplosiveKey (272) appears, 0x8FC once picked
+  up. Its door, CCExplosiveDoor (308) in the corridor's east wall at (-13003, 2049, 18679), takes it from the item
+  menu: 0x8FC is taken and the door's sequence sets 0x8FF. Played, the key's pickup by bit.
+- The wall. Behind that door are four CFbarrels (388). A barrel explodes at its third hit, or at once to an explosion
+  or fire, but counts hits only after it has been picked up, and a script beside one pressing A, B, Z, L, R or a C
+  button never lifted it, so carrying one is not played. An explosion at CFBlastedWall (389), in the same wall at
+  z 18879, sets 0x8C9; CFExplodeWall (390) then blows (0x8CA), and walking east through it drops the player into the
+  treasure caves in two seconds. Played from 0x8C9 set.
+- The race. Its bikes are in map 43's group 1 (`--bits 4a3=7`). Beating the ClubSharpClaw sets 0x4BA. A beside
+  CRSnowBike mounts it (0x49D, 0x497) and the race runs; a lost race (0x499) puts the player back beside the bike. Five
+  rams on CRSnowClaw drop the SpellStone (CRSpellstone, 730), 0x2E8 once picked up, and 0x49A then runs the
+  sequence that sets 0x49F. Played to a lost race; the win is read from the code.
+- Bonehead, CFGuardian (369) in map 43, keeps its state in the field 0x4B and starts from it: 6 with the power on
+  (0x57), 9 with 0x43, 10 with 0x4BE (which needs 0x8D1 and 0x300), 12 with 0x4C1. At 12, 0x4B7 plays its sequence
+  11 and with 0x49A moves it to 13; at 13 the SpellStone used on it from the item menu sets 0x4AB, its sequence sets
+  0x4AA, and it goes to 14. Played from 13.
+
+An object that wants an item (a lock, dll308, its item at +0x1E; CFGuardian) takes it only as used from the item menu,
+never from the bit alone. C-right opens Krystal's items (dll1's menu 1), A uses the one shown and closes the menu, and
+the object takes it in the frame the player presses A with it targeted: dll2 sets the target's +0xAF bit 0 then, with
+the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
+one asked for. In an `--input` script, standing at the object: A, C-right, A.
+
+Not played: the dungeon (map 16), the power, Kyte, the five baby CloudRunners (the fifth is in map 15, from the master
+chest, which needs 0x529 and 0x8CC), the gold, and the way from the treasure caves to the race. Nothing sets 0x4B8, the
+bit CFGuardian's sequence at 0x1D5C waits on.
+
 ## The bits
 
 Each with what shows it, by the DLL that reads or sets it (`dll <n>`) or the task the table in file 55 gives it.
@@ -205,8 +245,8 @@ A map's objects come in groups, and most of a level's enemies and props load onl
 object's setup in ROM file 31 has a flags byte at +4 and its group at +6: with flag 0x10 the object loads only while
 bit `group` of its map's group field is set. A map's field is a story value of 32 bits, numbered by the u16 at
 +0xF0 + 2 × map in dll29's data, and dll29's export 18 reads it. Some maps' fields: 0x480 Discovery Falls (6), 0x4A6
-SwapStone Circle (14), 0x42E Moon Mountain Pass (18), 0x3B7 Cape Claw (29), 0x601 Swap Store (51), 0x5DC Dragon
-Rock - Bottom (52).
+SwapStone Circle (14), 0x42E Moon Mountain Pass (18), 0x458 CloudRunner Fortress (12), 0x45A its treasure caves (15),
+0x4A3 its race (43), 0x3B7 Cape Claw (29), 0x601 Swap Store (51), 0x5DC Dragon Rock - Bottom (52).
 
 A story point turns no group on, so a level started from one has only its ungrouped objects: Moon Mountain Pass's
 Lunaimars are in groups 3 to 7, Cape Claw's worm in group 10 and its SandEels in 11 and 12, and the Swap Store's
