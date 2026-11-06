@@ -43,6 +43,8 @@ Fixed:
 - Crashes in the game's own code: the Lunaimars of Moon Mountain Pass and Cape Claw's sand worm with no Kyte beside
   Krystal, the Swap Store's item beams as the player walks in, and a crash after a long while in Cape Claw, where more
   sounds at once than an audio frame's command list holds wrote past its end.
+- Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
+  started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
   there it vanished without counting, so only nine of the ten for the Queen Earthwalker could be brought to her.
 
