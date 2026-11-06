@@ -527,3 +527,10 @@ text = '{ void dino_krazoa_gp_won(uint8_t*, recomp_context*); dino_krazoa_gp_won
 func = "dll472_0290"
 before_vram = 0x901ED754
 text = '{ void dino_krazoa_gp_timeout(uint8_t*, recomp_context*); dino_krazoa_gp_timeout(rdram, ctx); }'
+
+# Golden Plains' shrine (dll472): its win's sequence sends event 4 (back to state 4) after event 6 (state 5, the
+# reward), at the callback's dispatch (0x1134).
+[[patches.hook]]
+func = "dll472_1024"
+before_vram = 0x901EDD60
+text = '{ void dino_krazoa_gp_event(uint8_t*, recomp_context*); dino_krazoa_gp_event(rdram, ctx); }'

@@ -431,6 +431,9 @@ extern "C" void dino_krazoa_gp_won(uint8_t* rdram, recomp_context* ctx) {
         Calls calls(rdram, ctx);
         won = warlock_act_now(rdram, ctx) >= 8;
     }
+    if (logging) {
+        fprintf(stderr, "krazoa: Golden Plains' test passed, %s\n", won ? "already won" : "won now");
+    }
     ctx->r2 = won;
 }
 
@@ -443,6 +446,9 @@ extern "C" void dino_krazoa_gp_timeout(uint8_t* rdram, recomp_context* ctx) {
     int32_t list = (int32_t)ctx->r2;
     int32_t count = word(rdram, (int32_t)ctx->r29 + 0x34);
     int32_t player = word(rdram, (int32_t)ctx->r29 + 0x50);
+    if (logging) {
+        fprintf(stderr, "krazoa: Golden Plains' test timed out, %d carryables\n", count);
+    }
     if (!player) {
         return;
     }
@@ -460,6 +466,22 @@ extern "C" void dino_krazoa_gp_timeout(uint8_t* rdram, recomp_context* ctx) {
                 fprintf(stderr, "krazoa: Golden Plains' timeout drops the carried object 0x%X\n", (unsigned)held);
             }
             return;
+        }
+    }
+}
+
+// us.toml's hook in Golden Plains' sequence callback (dll472 0x1134), with the event less one in t4 (event 4 is
+// 0x11DC: state 4). The shrine's update doesn't run while its sequence plays: the win's sequence 1 sends event 6
+// (state 5, the reward) and then event 4, so the shrine came back to state 4, played the win again and never paid out.
+// While state 5 is pending, event 4 is dropped (t4 past the table, as an unknown event is).
+extern "C" void dino_krazoa_gp_event(uint8_t* rdram, recomp_context* ctx) {
+    if (!finished()) {
+        return;
+    }
+    if ((int32_t)ctx->r12 == 4 - 1 && MEM_BU(0x15, ctx->r16) == 5) {
+        ctx->r12 = 0xFF;
+        if (logging) {
+            fprintf(stderr, "krazoa: Golden Plains' win keeps its reward\n");
         }
     }
 }
