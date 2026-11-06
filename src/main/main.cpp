@@ -463,7 +463,8 @@ static bool dev_option(int argc, char** argv, int& i) {
 // options as one line from the page's thread: they write it, ended by a 0, into the buffer _dino_web_options_line()
 // gives, then call _dino_web_options() (tools/survey.js's options()). The game's main thread takes the line at its
 // next pass (dino_story_pass, below), so the times in it are on the --input clock as it is by then: a --warp's @0 and
-// a --story's default 2 s are at once. Until it is taken there is no buffer for another (null).
+// a --story's default 2 s are at once. Each line is a start of its own: the --bits and --place of the line before are
+// forgotten. Until it is taken there is no buffer for another (null).
 static char web_line[1024];
 static std::atomic<bool> web_line_ready = false;
 
@@ -481,6 +482,7 @@ static void take_web_options() {
         return;
     }
     fprintf(stderr, "dino_web_options: %s\n", web_line);
+    dino::story_forget();
     std::vector<char*> args{ nullptr };
     for (char* word = strtok(web_line, " "); word != nullptr; word = strtok(nullptr, " ")) {
         args.push_back(word);
