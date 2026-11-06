@@ -475,6 +475,9 @@ extern "C" void dino_krazoa_gp_timeout(uint8_t* rdram, recomp_context* ctx) {
 // (state 5, the reward) and then event 4, so the shrine came back to state 4, played the win again and never paid out.
 // While state 5 is pending, event 4 is dropped (t4 past the table, as an unknown event is).
 extern "C" void dino_krazoa_gp_event(uint8_t* rdram, recomp_context* ctx) {
+    if (logging) {
+        fprintf(stderr, "krazoa: Golden Plains' event %d in state %d\n", (int)ctx->r12 + 1, (int)MEM_BU(0x15, ctx->r16));
+    }
     if (!finished()) {
         return;
     }
