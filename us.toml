@@ -165,6 +165,14 @@ func = "dll461_05E0"
 before_vram = 0x901E59B4
 text = "{ if (MEM_W(0x8, ctx->r16) == 0) goto L_901E5A98; }"
 
+# The other DLLs that use func_8002394C's sidekick with no test reach that use only while one is out, so they have no
+# hook. The perches' query 1 (PerchObject dll718_03A0, RestPerch dll726_0410) is asked by Kyte (dll212) about herself.
+# CCvines (dll719) reads it in the state Kyte's own call to its export 7 starts. SC_lightfoot (dll516_1B8C) commands it
+# in a countdown its setup's bit at +0x1C starts, and SwapStone Circle's two have no bit (-1). NWtricky's (dll497)
+# cutscene callback runs only in the sequences its update starts on the sidekick, an update that does nothing with
+# none. Played with no sidekick beside them in CloudRunner Fortress, Northern Wastes and SwapStone Circle, none of those
+# uses ran.
+
 # The Swap Store's item beams (SPitembeam, dll772) the same: a beam's constructor keeps the nearest object of list 0xA,
 # the item under it, at +0xDC, and its update asks that item's interface +0x28 at 0x902C5888 with no test. With no item
 # it goes on as for an item that is gone, at 0x902C58D8, which hides the beam.
@@ -172,6 +180,14 @@ text = "{ if (MEM_W(0x8, ctx->r16) == 0) goto L_901E5A98; }"
 func = "dll772_0088"
 before_vram = 0x902C5888
 text = "{ if (ctx->r4 == 0) goto L_902C58D8; }"
+
+# The Swap Store's send-out and the Magic Plant need no hook. Being sent out (dll769_0A1C) warps to entry 15 for a
+# player whose +0x46 is 0 and 14 otherwise, and played with the shopkeeper there (group 0 of bit 0x601) it walks the
+# player out to SwapStone Circle. MagicPlant (dll290_05F8) keeps its MagicDust (dll291) at +0 of its state and the dust
+# keeps the plant at +0xC4, which the dust only tests for 0 (dll291_03F0) before it calls DLL 27's export 7 on itself,
+# so a dust that outlives its plant reads nothing of it, and a plant hit from the west in SwapStone Hollow plays on. The
+# one way in, a dust create that fails (func_800213EC hands func_80021A84 what it made with no test, and dll290_05F8 writes its
+# +0xC4), takes an object heap that is full, which all of SwapStone Hollow's groups at once doesn't make.
 
 # RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
 # write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
