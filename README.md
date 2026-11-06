@@ -35,6 +35,24 @@ this repo.
 The prototype's ROM as a big-endian `.z64` of 64 MiB with MD5 `49f7bb346ade39d1915c22e090ffd748` (SHA-1
 `cb9760b49198f7b754593a01c8ed642211caacde`). No other build of the game is supported.
 
+## Options
+
+Each option a modern port adds has a value that plays as the console does. The defaults are the modern ones.
+
+- **Aspect Ratio** (Graphics): Expand widens the world to the window, and a cutscene's bars and the screen's clear
+  reach its sides. Original is the console's 4:3.
+- **HUD Placement** (Graphics): the minimap and the panels at the picture's sides move out to 16:9's edges with
+  16:9 and the window's with Expand. Original keeps them where the console puts them. Dialogue and subtitles stay
+  centred.
+- **Free Camera** (General): the right stick and the mouse turn the camera around the player, who walks by the turned
+  view. A turned view keeps to the player's side of the walls, and the D-pad plays the C buttons in the stick's place.
+  Original is the console's camera, which follows by itself, with the right stick on the C buttons.
+- **Mouse Sensitivity** (General): how far the mouse turns the camera, with left click B and right click Z. 0% is no
+  mouse, as on a console, and leaves the pointer free.
+- **Invert Camera Y** (General): moving the mouse or the right stick up looks down.
+
+Controls are rebound in Controls. A cutscene's camera and the first person view are the game's own in either mode.
+
 ## Building
 
 You need that ROM at `roms/dinoplanet.z64`. On Windows: LLVM's clang-cl, CMake 3.31 and Ninja, and a clang

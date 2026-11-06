@@ -19,8 +19,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   (`patches/Makefile`'s header says how they build). A patch declares what it touches by address.
 - `src/`: RecompFrontend's main (`src/main/main.cpp`, with the GameEntry), the code sections it gives the runtime
   (`src/main/register_overlays.cpp`), the DLLs' loading (`src/game/dlls.cpp`), the natives the patches call
-  (`src/game/recomp_api.cpp`), the libultra functions the runtime lacks (`src/game/libultra.cpp`), the settings, and on
-  Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
+  (`src/game/recomp_api.cpp`), the libultra functions the runtime lacks (`src/game/libultra.cpp`), the HUD's and the
+  clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
+  settings, and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
