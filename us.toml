@@ -399,3 +399,68 @@ text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(voi
 func = "func_80014670"
 before_vram = 0x80014670
 text = '{ void dino_bit_setting(uint8_t*, recomp_context*); dino_bit_setting(rdram, ctx); }'
+
+# The Krazoa shrines (src/game/krazoa.cpp, whose header has the evidence): WARP_ENTRY once it has read an entry of the
+# warp table into its buffer, the end of func_80045BF4 once a map is loaded, and func_80046BC8 once the loaded maps'
+# objects are placed.
+[[patches.hook]]
+func = "func_8004D1D4"
+before_vram = 0x8004D208
+text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); dino_krazoa_warp_entry(rdram, ctx); }'
+
+[[patches.hook]]
+func = "func_80045BF4"
+before_vram = 0x80045D38
+text = '{ void dino_krazoa_map_loaded(uint8_t*, recomp_context*); dino_krazoa_map_loaded(rdram, ctx); }'
+
+[[patches.hook]]
+func = "func_80046BC8"
+before_vram = 0x80047330
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); }'
+
+# WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
+# whether their spirit is released by 0x366, a bit nothing sets: they ask CC's (0x221) and WG's (0x222) released bits
+# (addiu $a0, $zero, 0x366 -> 0x221 at 0x1544, 0x222 at 0x17D4). Neither act is reached without the Krazoa shrines'
+# ways in.
+[[patches.hook]]
+func = "dll607_025C"
+before_vram = 0x90243044
+text = '{ void dino_krazoa_warlock(uint8_t*, recomp_context*); dino_krazoa_warlock(rdram, ctx); }'
+
+[[patches.instruction]]
+func = "dll607_14FC"
+vram = 0x902442F0
+value = 0x24040221
+
+[[patches.instruction]]
+func = "dll607_1788"
+vram = 0x90244580
+value = 0x24040222
+
+# WL_seqpoint's release events (dll611), before the player's export 0xA0 takes back WG's mask (0x778) and CC's (0x8D4).
+[[patches.hook]]
+func = "dll611_04B4"
+before_vram = 0x90246DE4
+text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_release_mask(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll611_04B4"
+before_vram = 0x90246F40
+text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_release_mask(rdram, ctx); }'
+
+# Willow Grove's shrine (dll488): state 3 on GET_BIT(0x1D1)'s answer (0x8FC), and state 4, its win (0xA18).
+[[patches.hook]]
+func = "dll488_0244"
+before_vram = 0x901F7748
+text = '{ void dino_krazoa_wg_won(uint8_t*, recomp_context*); dino_krazoa_wg_won(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll488_0244"
+before_vram = 0x901F7864
+text = '{ void dino_krazoa_wg_win(uint8_t*, recomp_context*); dino_krazoa_wg_win(rdram, ctx); }'
+
+# Golden Plains' shrine (dll472): state 4 on GET_BIT(0x12A)'s answer (0xBB0).
+[[patches.hook]]
+func = "dll472_0290"
+before_vram = 0x901ED7DC
+text = '{ void dino_krazoa_gp_won(uint8_t*, recomp_context*); dino_krazoa_gp_won(rdram, ctx); }'
