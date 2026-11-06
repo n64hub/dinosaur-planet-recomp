@@ -42,12 +42,14 @@ Fixed:
 
 - Crashes in the game's own code: the Lunaimars of Moon Mountain Pass and Cape Claw's sand worm with no Kyte beside
   Krystal, and the Swap Store's item beams as the player walks in.
+- SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
+  there it vanished without counting, so only nine of the ten for the Queen Earthwalker could be brought to her.
 
 Under way:
 
 - The early game, from a new game to the first SpellStone: SwapStone Hollow's river that isn't drained, the river log
-  that doesn't come after Dragon Rock's SpellStone, Tricky's first sequence crashing, the white mushrooms' softlock
-  and the well.
+  that doesn't come after Dragon Rock's SpellStone, Tricky's first sequence crashing, what the Queen Earthwalker does
+  with the white mushrooms she is given, and the well.
 - The Krazoa shrines: all eight finished, a way into the five that have none, and their spirits taken to Warlock
   Mountain.
 - Crashes in the game's own code still to find: the Magic Plant, being sent out of the shop, the skeletons' hits,
