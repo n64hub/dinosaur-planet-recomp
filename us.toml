@@ -150,6 +150,15 @@ func = "dll772_0088"
 before_vram = 0x902C5888
 text = "{ if (ctx->r4 == 0) goto L_902C58D8; }"
 
+# An object that fails to be made: func_800213EC makes one through func_8001275C into 0x2C($sp) and hands it to
+# func_80021A84 with no test, which reads its +0x30 at once, and with none there that is a read of address 0x30. It
+# came after Golden Plains' shrine was won, from its fly baddie's spawn (dll475 0x8C0). func_80021A84 with no object
+# returns at once, and func_800213EC returns the 0 it got, which the fly baddie tests (0x8D4).
+[[patches.hook]]
+func = "func_80021A84"
+before_vram = 0x80021A84
+text = "{ if (ctx->r4 == 0) return; }"
+
 # RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
 # write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
 # list's pointer's address in $a0. func_800026C8 loads a camera, with the list's at 0x800028AC ($a1 its address, $s0 the
