@@ -7,6 +7,11 @@
 // go(point, map) starts the story point (with ",<warp>" for another entry of the warp table: docs/story-points.md) with
 // --report, whose line a second ("story: <s> s map <n> at <x> <y> <z> menu <m>, health <h>/<max>") the survey reads from
 // the console, and waits for the player to be in that map. map() is the map of the last report, where() the report.
+//
+// clock() is the game's own clock, the word at 0x800AE674: 60 a second in its menus and in play, standing still while
+// the game is paused (found by reading RDRAM as the game played; the VI count at 0x800918F0 runs on through a pause).
+// The plans' clock steps read it, so a hold is so many 60ths of the game's time in every browser. A menu moves its
+// cursor a step a game frame while the stick is held, so a plan's menu taps are holds of 33 ms on that clock.
 (() => {
   if (window.dino) return;
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -31,8 +36,18 @@
       _dino_web_options();
       return true;
     },
+    clock: () => n64r(0x800AE674),
     where: () => report || 'no report yet',
     map: () => { const m = / map (-?\d+) /.exec(report); return m ? Number(m[1]) : null; },
+    // Waits up to ms for a report with the player in a map (play, not a menu or a cutscene without one), true once one
+    // comes. The reports start with options('--report').
+    playing: async (ms = 60000) => {
+      for (const t0 = Date.now(); Date.now() - t0 < ms; await sleep(200)) {
+        if (reportAt > t0 && dino.map() !== null) return true;
+      }
+      console.log(`[survey] no player after ${ms} ms: ${dino.where()}`);
+      return false;
+    },
     // Starts a story point, and waits up to ms for a report from that map, true once one comes.
     go: async (point, map, ms = 60000) => {
       const t0 = Date.now();
