@@ -74,6 +74,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(RT64_STATIC TRUE)
 set(RT64_SDL_WINDOW_VULKAN TRUE)
+# The world's origin steps a cell at a time as the player walks: the camera's eye on the line between its two places
+# takes the step away exactly (src/game/interpolation.cpp). A game frame takes 2 VIs or 3, and without the second
+# RT64 stops interpolating while they are uneven. Both are always on with Emscripten.
+set(RT64_INTERPOLATE_CAMERA_EYE ON CACHE BOOL "" FORCE)
+set(RT64_UNEVEN_FRAME_RATES ON CACHE BOOL "" FORCE)
 add_compile_definitions(HLSL_CPU)
 
 if (WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")

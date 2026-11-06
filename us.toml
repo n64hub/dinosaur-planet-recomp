@@ -106,6 +106,31 @@ func = "func_80011C70"
 before_vram = 0x80011CC4
 text = "{ void osAiGetLength_recomp(uint8_t*, recomp_context*); uint64_t v0 = ctx->r2; osAiGetLength_recomp(rdram, ctx); ctx->r25 = ctx->r2; ctx->r2 = v0; }"
 
+# RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
+# write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
+# list's pointer's address in $a0. func_800026C8 loads a camera, with the list's at 0x800028AC ($a1 its address, $s0 the
+# camera) the first thing it writes. func_80035000 draws an object, with a model from 0x8003507C and done with it at
+# 0x80035774, which both of the ways through it reach with the list's pointer in $t2.
+[[patches.hook]]
+func = "func_8004225C"
+before_vram = 0x8004225C
+text = '{ void dino_interp_frame(uint8_t*, recomp_context*); dino_interp_frame(rdram, ctx); }'
+
+[[patches.hook]]
+func = "func_800026C8"
+before_vram = 0x800028AC
+text = '{ void dino_interp_camera(uint8_t*, recomp_context*); dino_interp_camera(rdram, ctx); }'
+
+[[patches.hook]]
+func = "func_80035000"
+before_vram = 0x8003507C
+text = '{ void dino_interp_object_begin(uint8_t*, recomp_context*); dino_interp_object_begin(rdram, ctx); }'
+
+[[patches.hook]]
+func = "func_80035000"
+before_vram = 0x80035774
+text = '{ void dino_interp_object_end(uint8_t*, recomp_context*); dino_interp_object_end(rdram, ctx); }'
+
 # The game's hand-written math (its matrix, vector and spline routines, the conversion of a float matrix into the
 # fixed-point one the RSP reads, and the skinning of its models) uses the odd float registers as registers of their
 # own, as the CPU does with Status.FR set: libultra's C code is built for FR clear, where an odd register is the high
@@ -308,28 +333,3 @@ text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
 func = "func_800145AC"
 before_vram = 0x800145AC
 text = '{ int dino_warp_due(void); int w = dino_warp_due(); if (w >= 0) { recomp_context saved = *ctx; ctx->r4 = w; ctx->r5 = 0; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
-
-[[patches.hook]]
-func = "func_8004225C"
-before_vram = 0x8004225C
-text = '{ void dino_interp_frame(uint8_t*, recomp_context*); dino_interp_frame(rdram, ctx); }'
-
-[[patches.hook]]
-func = "func_80037780"
-before_vram = 0x80037780
-text = '{ void dino_interp_list_end(uint8_t*, recomp_context*); dino_interp_list_end(rdram, ctx); }'
-
-[[patches.hook]]
-func = "func_800026C8"
-before_vram = 0x800028AC
-text = '{ void dino_interp_camera(uint8_t*, recomp_context*); dino_interp_camera(rdram, ctx); }'
-
-[[patches.hook]]
-func = "func_80035000"
-before_vram = 0x8003507C
-text = '{ void dino_interp_object_begin(uint8_t*, recomp_context*); dino_interp_object_begin(rdram, ctx); }'
-
-[[patches.hook]]
-func = "func_80035000"
-before_vram = 0x80035774
-text = '{ void dino_interp_object_end(uint8_t*, recomp_context*); dino_interp_object_end(rdram, ctx); }'
