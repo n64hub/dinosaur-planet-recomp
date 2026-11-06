@@ -47,6 +47,8 @@ Fixed:
   Krystal, the Swap Store's item beams as the player walks in, a crash after a long while in Cape Claw, where more
   sounds at once than an audio frame's command list holds wrote past its end, and a small basket or crate carried out
   of the place it was found, which the game freed in the player's hands.
+- Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
+  started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
   there it vanished without counting, so only nine of the ten for the Queen Earthwalker could be brought to her.
 - The Krazoa shrines (Krazoa Shrines on Finished): all eight finished, a way into the five that have none, and their
