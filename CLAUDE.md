@@ -94,9 +94,11 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
   timed button states (`main.cpp` says the format), and on Windows `--stacks <seconds>` prints every thread's stack
-  that long after start, for unattended runs and hangs. `--warp <index>@<seconds>` warps the player by the game's own
-  warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, and `DINO_LOG_CUTS=1` each camera cut and
-  object jump `src/game/interpolation.cpp` finds, with each origin step.
+  that long after start, for unattended runs and hangs, and `--watch <address>,...` stops on each write to those
+  words (four at most) of the game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says
+  the form: `**8008C994+4` follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps
+  the player by the game's own warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, and
+  `DINO_LOG_CUTS=1` each camera cut and object jump `src/game/interpolation.cpp` finds, with each origin step.
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the
   game's bits, the character and the place set as the save would have them, in memory and with nothing written to
   Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>]`
