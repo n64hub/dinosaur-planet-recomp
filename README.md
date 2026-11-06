@@ -50,6 +50,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Mouse Sensitivity** (General): how far the mouse turns the camera, with left click B and right click Z. 0% is no
   mouse, as on a console, and leaves the pointer free.
 - **Invert Camera Y** (General): moving the mouse or the right stick up looks down.
+- **Krazoa Shrines** (General): Finished makes all eight Krazoa shrines reachable and playable, and gives each spirit
+  its release at Warlock Mountain, from what the prototype's own maps and code hold. Original is the prototype as it
+  was left: three shrines are reached from the world, and three spirits have nowhere to go.
 
 Controls are rebound in Controls. A cutscene's camera and the first person view are the game's own in either mode.
 

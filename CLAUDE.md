@@ -21,7 +21,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   (`src/main/register_overlays.cpp`), the DLLs' loading (`src/game/dlls.cpp`), the natives the patches call
   (`src/game/recomp_api.cpp`), the libultra functions the runtime lacks (`src/game/libultra.cpp`), the HUD's and the
   clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
-  settings, and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
+  Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the settings, and on Windows a stack trace on a crash
+  (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
@@ -87,13 +88,19 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   puts the world in a group of its own, and each object's model is a group by the object. The world's origin steps by
   640 units as the player walks, which isn't a cut: `RT64_INTERPOLATE_CAMERA_EYE` and `RT64_UNEVEN_FRAME_RATES`, on in
   `CMakeLists.txt`, cancel that step and keep blending through frames of 3 VIs.
+- **Krazoa shrines.** Eight tests, each giving a spirit the player carries as a mask of its own to Warlock Mountain
+  (map 11), whose act (bit 0xE4) each win moves on. The prototype reaches three from the world and has no step at
+  Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Finished by default, finishes them out
+  of what the ROM holds, and Original leaves them as the console plays them (`src/game/krazoa.cpp`'s header has the
+  order, the bits and the evidence).
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
   timed button states (`main.cpp` says the format), and on Windows `--stacks <seconds>` prints every thread's stack
   that long after start, for unattended runs and hangs. `--warp <index>@<seconds>` warps the player by the game's own
-  warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, and `DINO_LOG_CUTS=1` each camera cut and
-  object jump `src/game/interpolation.cpp` finds.
+  warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and
+  object jump `src/game/interpolation.cpp` finds, and `DINO_LOG_KRAZOA=1` each object `src/game/krazoa.cpp` places
+  and each spirit it gives and has taken back.
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the
   game's bits, the character and the place set as the save would have them, in memory and with nothing written to
   Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>]`
