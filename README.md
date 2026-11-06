@@ -41,7 +41,8 @@ and none has been played by a human, so report one that falls short.
 Fixed:
 
 - Crashes in the game's own code: the Lunaimars of Moon Mountain Pass and Cape Claw's sand worm with no Kyte beside
-  Krystal, and the Swap Store's item beams as the player walks in.
+  Krystal, the Swap Store's item beams as the player walks in, and a crash after a long while in Cape Claw, where more
+  sounds at once than an audio frame's command list holds wrote past its end.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
   there it vanished without counting, so only nine of the ten for the Queen Earthwalker could be brought to her.
 
@@ -52,8 +53,7 @@ Under way:
   with the white mushrooms she is given, and the well.
 - The Krazoa shrines: all eight finished, a way into the five that have none, and their spirits taken to Warlock
   Mountain.
-- Crashes in the game's own code still to find: the skeletons' hits, small baskets carried away, and a crash after a
-  long while in Cape Claw.
+- Crashes in the game's own code still to find: the skeletons' hits and small baskets carried away.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
 
 ## The ROM
