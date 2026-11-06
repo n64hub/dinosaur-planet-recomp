@@ -7,8 +7,8 @@
 // list. The rest (each bus's mixing, the effects, the interleave and the save) came to 7664 bytes a frame at most, with
 // all 32 of the sound player's states in use.
 //
-// With 32 voices of one sound (Cape Claw's SandEels can start their sound 0xB20 every frame and fill every state
-// with it) a frame grows past 16384 bytes, and what follows the second list in the heap is DLL 1:
+// With 32 voices of one sound (as Cape Claw's SandEels made, starting their sound 0xB20 every frame, without
+// us.toml's hook on dll216_02C0) a frame grows past 16384 bytes, and what follows the second list in the heap is DLL 1:
 // the frame writes over its export table, and the next call through it (dll19's) finds no function there. So a
 // source is pulled only while the list still has room for its pull and for the rest of the frame that isn't pulls;
 // past that a frame leaves its last voices out, which go quiet for that part of the frame.
