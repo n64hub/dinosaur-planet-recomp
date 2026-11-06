@@ -206,6 +206,14 @@ func = "func_80022F94"
 before_vram = 0x80022F94
 text = "{ void dino_object_freed(uint8_t*, uint32_t); dino_object_freed(rdram, (uint32_t)ctx->r4); }"
 
+# The player's weapon read before it is made: a new player's first update runs its state machine before it makes its
+# staff or sword, and the swing's state reads it as it starts with no test, so a swing pressed on the frame the player
+# comes back after a death crashed (src/game/objects.cpp). The update makes it before its state machine runs.
+[[patches.hook]]
+func = "dll210_0934"
+before_vram = 0x900E8A70
+text = "{ void dino_player_weapon(uint8_t*, recomp_context*); dino_player_weapon(rdram, ctx); }"
+
 # The Swap Store's item beams (SPitembeam, dll772) the same: a beam's constructor keeps the nearest object of list 0xA,
 # the item under it, at +0xDC, and its update asks that item's interface +0x28 at 0x902C5888 with no test. With no item
 # it goes on as for an item that is gone, at 0x902C58D8, which hides the beam.
