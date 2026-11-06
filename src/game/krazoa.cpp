@@ -441,8 +441,7 @@ extern "C" void dino_krazoa_ec_answer(uint8_t* rdram, recomp_context* ctx) {
         return;
     }
     if (logging) {
-        fprintf(stderr, "krazoa: Walled City's answer time ran out in state %d
-", (int)MEM_BU(0x1B, ctx->r16));
+        fprintf(stderr, "krazoa: Walled City's answer time ran out in state %d\n", (int)MEM_BU(0x1B, ctx->r16));
     }
     ctx->r3 = 0;
 }
