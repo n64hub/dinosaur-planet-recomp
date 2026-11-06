@@ -74,8 +74,10 @@ whose header byte +4 has 0x10 only while its group (byte +6) is on, a bit each i
 0x452 for SwapStone Hollow's maps 7 and 8), and TriggerPlanes turn groups on and off as the player crosses them:
 action 0x13 turns one on, 0x14 off and 0x22 toggles it (dll325's actions, through dll29's exports 18 and 19). In map 7
 group 0 holds the SwapStone and the vine doors, 1 the Queen Earthwalker, 5 the flowers, 6 Tricky's sequence, 7 and 8
-the white mushrooms by the river and in the grove, so `--story swapstone-hollow --place ... --bits 452=483` has those
-on. All of them at once (`452=65535`) crashes at the start in MagicPlant (dll290) under `func_80021A84`.
+the white mushrooms by the river and in the grove, so `--story swapstone-hollow --place ... --bits 452=450` has 1, 6,
+7 and 8 on, enough for the Queen, Tricky and the mushrooms. Groups 0 and 5 with those (`452=483`), or all of them at
+once (`452=65535`), crash as the map loads: a MagicPlant (dll290) or SHBirchTree (dll520) child that fails to spawn is
+passed on unchecked to `func_80021A84`.
 
 ## The bits
 
