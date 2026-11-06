@@ -5,8 +5,9 @@
 // 55 turns into a place in one of the save's four banks. Which spirits Krystal has brought back and which SpellStones
 // are placed are bits, and so are what a level has opened and each pickup taken. dll29 holds the save: its export 1
 // clears the save to a new game's (slot -1 is no slot, so nothing touches the Flash), 29 sets the character, 6 stores
-// where play starts and 7 starts the world there. That is what func_800142F0 does for the game's own new game;
-// story_start does the same with the bits set before export 6, since export 7 keeps a copy that a retry restores.
+// where play starts and 7 starts the world there. The game's own New Game is dll64's name screen calling export 1, then
+// dll63 calling the two play flags and export 7; story_start does the same with the bits set and the place stored
+// before export 7, since export 7 keeps a copy that a retry restores. (func_800142F0 is the rolling demo, not a new game.)
 
 #include <cstdint>
 #include <cstdio>
@@ -59,9 +60,10 @@ namespace {
     // A warp of no_place keeps where dll29's new game puts the player, the start of the game's opening.
     constexpr int no_place = -2;
 
-    // Cape Claw's sand worm has no entry in the warp table. Its object is at (2155, -276, -206) in map 29, whose origin
-    // is grid cell (2, 26) of 640 units: this is beside it on the same floor.
-    constexpr Place sand_worm_place = { 3435.0f, -260.0f, 16734.0f, 0 };
+    // Cape Claw's sand worm has no entry in the warp table. Map 29's record in ROM file 21 is at grid cell (2, 26) of 640
+    // units, so the worm's object at (2155, -276, -206) is at (3435, -276, 16434), and this is the setuppoint object the
+    // map has beside it at (2340, -265, -435).
+    constexpr Place sand_worm_place = { 3620.0f, -265.0f, 16205.0f, 0 };
 
     using Bits = std::vector<StoryBit>;
 
@@ -99,6 +101,8 @@ namespace {
     const StoryPoint* chosen = &points[0];
     std::vector<StoryBit> extra_bits;
     int chosen_warp = -1;
+    bool place_given = false;
+    Place given_place{};
 
     int32_t word(uint8_t* rdram, int32_t address) {
         return MEM_W(0, (gpr)address);
@@ -175,6 +179,10 @@ void dino::story_set_warp(int index) {
     chosen_warp = index;
 }
 
+void dino::story_set_place(const char* list) {
+    place_given = sscanf(list, "%f,%f,%f,%d", &given_place.x, &given_place.y, &given_place.z, &given_place.layer) >= 3;
+}
+
 void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     const StoryPoint& point = *chosen;
     ctx->r4 = 0;
@@ -190,7 +198,10 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     for (const StoryBit& b : extra_bits) {
         set_game_bit(rdram, ctx, b);
     }
-    if (chosen_warp != no_place) {
+    if (place_given) {
+        store_place(rdram, ctx, given_place);
+    }
+    else if (chosen_warp != no_place) {
         store_place(rdram, ctx, chosen_warp >= 0 ? warp_entry(chosen_warp) : point.place);
     }
     ctx->r4 = 1;
