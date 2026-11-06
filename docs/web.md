@@ -33,6 +33,12 @@ host). The script's header says each step. Two things differ from the desktop bu
 - RT64 builds its pipelines from `src/rt64_shaders.txt` (`RT64_PREBUILT_SHADER_LIST`), in sections: the boot's before
   the game starts, and an area's the first time it draws.
 
+The game's scheduler takes the RSP for hung when a task has run 11 retraces, and restarts it, which the runtime can't
+do: it runs each task whole, so a task only runs that long while the renderer is behind, and the restart stopped the
+game. Firefox's page holds the game for seconds while it builds a section of the shader list, so it stopped there at
+the opening every time. A hook in `us.toml` keeps the scheduler from counting those retraces (its comment says how),
+on the desktop build too, where the restart can't help either.
+
 Serve `build/web` over HTTP from localhost (any static server; the page brings its own `coi_serviceworker.js` for the
 headers threads need) and open `DinosaurPlanet.html` in Chrome or Firefox with WebGPU, then Load ROM. The page
 interpolates to the display's rate and draws at the canvas's size, as the desktop build's defaults do (Framerate
@@ -60,7 +66,9 @@ the Swap Store's, and Cape Claw's sand worm and SandEels, at the worm's fight.
 
 Their waits and holds are on the game's own clock (`survey.js`'s `clock()`, 60 a second), so every browser gives the
 game the same input for the same game time. The name screen moves its cursor a letter a game frame while the stick is
-held, so a plan's menu taps are holds of one frame on that clock.
+held, so a plan's menu taps are holds of one frame on that clock, and A on END and on the new file is pressed again
+until the game leaves that screen, since a busy host can drop a tap. The clock stops while the game is paused, so the
+pause menu's waits are in the page's own time.
 
 Play them with N64Recomp-browser's `tools/play_page.mjs` (its `docs/playing.md`).
 
