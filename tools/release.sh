@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the desktop program's release, for Windows and for Linux, and publishes both as one GitHub release. CI has no
 # ROM (none is ever uploaded), so it can't recompile the game; a release is built where the ROM is, from
-# roms/ddgq.us.z64, and holds nothing from it: the player picks theirs with Load ROM.
+# roms/dinoplanet.z64, and holds nothing from it: the player picks theirs with Load ROM.
 #
 #     tools/release.sh windows   # Git Bash on Windows, with the README's toolchain: out/<name>-windows-x64.zip
 #     tools/release.sh linux     # Linux with Docker: out/<name>-linux-x64.tar.gz
@@ -47,7 +47,7 @@ export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.longpaths GIT_CONFIG_VALUE_0=tru
 version=$(sed -n 's/^const std::string version_string = "\(.*\)";$/\1/p' src/main/main.cpp)
 [ -n "$version" ] || { echo "no version_string in src/main/main.cpp" >&2; exit 1; }
 tag="v$version"
-name="GoinQuackersRecompiled-$tag"
+name="DinosaurPlanet-$tag"
 commit=$(git rev-parse HEAD)
 mkdir -p out
 
@@ -70,7 +70,7 @@ unpatch() {
 }
 
 setup() {
-    [ -f roms/ddgq.us.z64 ] || { echo "no roms/ddgq.us.z64 (README, Building)" >&2; exit 1; }
+    [ -f roms/dinoplanet.z64 ] || { echo "no roms/dinoplanet.z64 (README, Building)" >&2; exit 1; }
     unpatch
     git submodule sync -q --recursive
     git submodule update --init --recursive
@@ -85,12 +85,12 @@ windows)
     build=build/release-windows
     cmake -S . -B "$build" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl \
         -DPATCHES_C_COMPILER="$MIPS_CC" -DPATCHES_LD="$MIPS_LD" > "$build.log" 2>&1 || { tail -20 "$build.log"; exit 1; }
-    ninja -C "$build" GoinQuackersRecompiled > "$build/build.log" 2>&1 ||
+    ninja -C "$build" DinosaurPlanet > "$build/build.log" 2>&1 ||
         { grep -E " error|FAILED|undefined" "$build/build.log" | head -20; exit 1; }
     stage="out/$name-windows-x64"
     rm -rf "$stage" "$stage.zip"
     mkdir -p "$stage"
-    cp "$build"/{GoinQuackersRecompiled.exe,SDL2.dll,dxil.dll,dxcompiler.dll} recompcontrollerdb.txt LICENSE "$stage"/
+    cp "$build"/{DinosaurPlanet.exe,SDL2.dll,dxil.dll,dxcompiler.dll} recompcontrollerdb.txt LICENSE "$stage"/
     cp -r assets "$stage"/
     # CMake's own zip, so packing needs nothing the build doesn't.
     (cd out && cmake -E tar cf "$name-windows-x64.zip" --format=zip "$name-windows-x64")
@@ -99,7 +99,7 @@ windows)
     ;;
 linux)
     setup
-    image=ddgq-linux:$(sha256sum tools/docker/Dockerfile.linux | cut -c1-12)
+    image=dinoplanet-linux:$(sha256sum tools/docker/Dockerfile.linux | cut -c1-12)
     mkdir -p build/home build/ccache
     docker image inspect "$image" > /dev/null 2>&1 || docker build -t "$image" -f tools/docker/Dockerfile.linux tools/docker
     docker run --rm -u "$(id -u):$(id -g)" -v "$ROOT:/src" -w /src -e CCACHE_DIR=/src/build/ccache -e HOME=/src/build/home \
@@ -111,14 +111,14 @@ linux)
         cmake -S . -B \$build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
             -DPATCHES_C_COMPILER=clang -DPATCHES_LD=ld.lld -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache > \$build.log 2>&1 || { tail -20 \$build.log; exit 1; }
-        ninja -C \$build GoinQuackersRecompiled > \$build/build.log 2>&1 ||
+        ninja -C \$build DinosaurPlanet > \$build/build.log 2>&1 ||
             { grep -E ' error|FAILED|undefined' \$build/build.log | head -20; exit 1; }
         stage=out/$name-linux-x64
         rm -rf \$stage \$stage.tar.gz
         mkdir -p \$stage
-        cp \$build/GoinQuackersRecompiled recompcontrollerdb.txt LICENSE \$stage/
+        cp \$build/DinosaurPlanet recompcontrollerdb.txt LICENSE \$stage/
         cp -L /usr/local/lib/libSDL2-2.0.so.0 /usr/lib/x86_64-linux-gnu/libatomic.so.1 \$stage/
-        patchelf --set-rpath '\$ORIGIN' \$stage/GoinQuackersRecompiled
+        patchelf --set-rpath '\$ORIGIN' \$stage/DinosaurPlanet
         cp -r assets \$stage/
         tar -C out -czf \$stage.tar.gz $name-linux-x64"
     echo "$commit" > "out/$name-linux-x64.tar.gz.commit"
@@ -133,7 +133,7 @@ boot)
     boot=${BOOT_RELEASE:-lib/N64Recomp-browser/tools/boot_release.sh}
     [ -f "$boot" ] ||
         { echo "no $boot: set BOOT_RELEASE to tools/boot_release.sh in a checkout of N64Recomp-browser's main" >&2; exit 1; }
-    bash "$boot" "$archive" roms/ddgq.us.z64 ddgq.n64.us.1.0 "out/boot-$2" "${@:3}"
+    bash "$boot" "$archive" roms/dinoplanet.z64 dinoplanet.n64.proto.2000-12 "out/boot-$2" "${@:3}"
     ;;
 publish)
     notes="releases/$tag.md"
@@ -150,7 +150,7 @@ publish)
         [ "$(cat "$f.booted" 2> /dev/null)" = "$(sha256sum "$f" | cut -d' ' -f1)" ] ||
             { echo "$f hasn't booted: run tools/release.sh boot windows and linux first" >&2; exit 1; }
     done
-    gh release create "$tag" "${files[@]}" --target "$commit" --title "Donald Duck: Goin' Quackers Recompiled $tag" --notes-file "$notes"
+    gh release create "$tag" "${files[@]}" --target "$commit" --title "Dinosaur Planet (prototype) $tag" --notes-file "$notes"
     ;;
 *)
     echo "usage: tools/release.sh windows|linux|boot <os>|publish" >&2

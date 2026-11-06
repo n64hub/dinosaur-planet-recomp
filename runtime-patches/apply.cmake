@@ -7,13 +7,13 @@
 # change them.
 #
 #   cmake -P runtime-patches/apply.cmake          from the repo's root (tools/build_n64recomp.sh)
-#   include(runtime-patches/apply.cmake)          and dq_apply_patches() (CMakeLists.txt)
+#   include(runtime-patches/apply.cmake)          and dino_apply_patches() (CMakeLists.txt)
 
-set(DQ_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
-include("${DQ_ROOT}/lib/N64Recomp-browser/patches/apply.cmake")
+set(DINO_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
+include("${DINO_ROOT}/lib/N64Recomp-browser/patches/apply.cmake")
 
 # Where a project's checkout is: lib/<project>, but N64Recomp is N64ModernRuntime's submodule.
-function(dq_patch_dir out root project)
+function(dino_patch_dir out root project)
     if (project STREQUAL "N64Recomp")
         set(${out} "${root}/lib/N64ModernRuntime/N64Recomp" PARENT_SCOPE)
     else()
@@ -21,15 +21,15 @@ function(dq_patch_dir out root project)
     endif()
 endfunction()
 
-function(dq_apply_patches)
-    get_filename_component(root "${DQ_ROOT}" ABSOLUTE)
+function(dino_apply_patches)
+    get_filename_component(root "${DINO_ROOT}" ABSOLUTE)
     file(GLOB patches "${root}/runtime-patches/*.patch")
     list(SORT patches)
     list(REVERSE patches)
     foreach (patch IN LISTS patches)
         get_filename_component(name "${patch}" NAME)
         string(REGEX REPLACE "-[0-9]+-.*" "" project "${name}")
-        dq_patch_dir(dir "${root}" "${project}")
+        dino_patch_dir(dir "${root}" "${project}")
         execute_process(COMMAND git apply --whitespace=nowarn --reverse "${patch}"
             WORKING_DIRECTORY "${dir}" RESULT_VARIABLE result OUTPUT_QUIET ERROR_QUIET)
     endforeach()
@@ -40,7 +40,7 @@ function(dq_apply_patches)
     foreach (patch IN LISTS patches)
         get_filename_component(name "${patch}" NAME)
         string(REGEX REPLACE "-[0-9]+-.*" "" project "${name}")
-        dq_patch_dir(dir "${root}" "${project}")
+        dino_patch_dir(dir "${root}" "${project}")
         execute_process(COMMAND git apply --whitespace=nowarn "${patch}"
             WORKING_DIRECTORY "${dir}" RESULT_VARIABLE result ERROR_VARIABLE error)
         if (NOT result EQUAL 0)
@@ -50,5 +50,5 @@ function(dq_apply_patches)
 endfunction()
 
 if (CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
-    dq_apply_patches()
+    dino_apply_patches()
 endif()

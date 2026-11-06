@@ -181,12 +181,12 @@ if (DINO_PATCHES)
     # The recompiler runs where the build does: for the page that is tools/recompile.sh's native N64Recomp, not the
     # runtime's target, which Emscripten would build for the browser.
     if (EMSCRIPTEN)
-        set(DQ_N64RECOMP ${CMAKE_SOURCE_DIR}/build/n64recomp/N64Recomp)
+        set(DINO_N64RECOMP ${CMAKE_SOURCE_DIR}/build/n64recomp/N64Recomp)
         # The patches call the game's functions: undeclared, a call links to a trap in WebAssembly.
         target_compile_options(PatchesLib PRIVATE -Werror=implicit-function-declaration
             "SHELL:-include ${CMAKE_SOURCE_DIR}/RecompiledFuncs/funcs.h")
     else()
-        set(DQ_N64RECOMP N64RecompCLI)
+        set(DINO_N64RECOMP N64RecompCLI)
     endif()
 
     add_custom_command(OUTPUT
@@ -195,7 +195,7 @@ if (DINO_PATCHES)
             ${CMAKE_SOURCE_DIR}/RecompiledPatches/recomp_overlays.inl
             ${CMAKE_SOURCE_DIR}/RecompiledPatches/funcs.h
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/RecompiledPatches
-        COMMAND ${DQ_N64RECOMP} patches.toml
+        COMMAND ${DINO_N64RECOMP} patches.toml
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.elf ${CMAKE_SOURCE_DIR}/patches.toml
     )

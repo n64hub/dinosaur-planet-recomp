@@ -95,7 +95,7 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl `
             -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-            -DDQ_PATCHES=OFF
+            -DDINO_PATCHES=OFF
       # A first configure writes backslashed paths into the compile commands and every later one forward slashes, so a
       # build cached straight after a first configure would rebuild everything on the next run.
       - name: Configure again before a build that gets cached
@@ -117,7 +117,7 @@ jobs:
         shell: bash
         run: |
           objs=$(ninja -C build -t targets all |
-            grep -oE '^CMakeFiles/GoinQuackersRecompiled\.dir/[^:]+\.obj' | grep -v register_overlays)
+            grep -oE '^CMakeFiles/DinosaurPlanet\.dir/[^:]+\.obj' | grep -v register_overlays)
           [ -n "$objs" ] || { echo "no object targets found"; exit 1; }
           echo "$objs"
           ninja -C build $objs
@@ -225,7 +225,7 @@ jobs:
       - name: Compile the game's own sources
         run: |
           objs=$(ninja -C build -t targets all |
-            grep -oE '^CMakeFiles/GoinQuackersRecompiled\.dir/[^:]+\.o' | grep -v register_overlays)
+            grep -oE '^CMakeFiles/DinosaurPlanet\.dir/[^:]+\.o' | grep -v register_overlays)
           [ -n "$objs" ] || { echo "no object targets found"; exit 1; }
           echo "$objs"
           ninja -C build $objs
