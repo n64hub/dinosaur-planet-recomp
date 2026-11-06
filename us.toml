@@ -106,6 +106,29 @@ func = "func_80011C70"
 before_vram = 0x80011CC4
 text = "{ void osAiGetLength_recomp(uint8_t*, recomp_context*); uint64_t v0 = ctx->r2; osAiGetLength_recomp(rdram, ctx); ctx->r25 = ctx->r2; ctx->r2 = v0; }"
 
+# The audio frame's command list kept inside its 0x4000 bytes (src/game/audio.cpp): func_800642F4 starts a frame in
+# the list at $a0, and func_80075F20 pulls each source with func_8006C840 ($a2 the list's end, returning the new one in
+# $v0), which leaves the source out once the rest of the frame would run past the list. Past it is DLL 1.
+[[patches.hook]]
+func = "func_800642F4"
+before_vram = 0x80064314
+text = "{ void dino_audio_frame(uint32_t); dino_audio_frame((uint32_t)ctx->r4); }"
+
+[[patches.hook]]
+func = "func_8006C840"
+before_vram = 0x8006C840
+text = "{ int dino_audio_pull_skipped(uint32_t); if (dino_audio_pull_skipped((uint32_t)ctx->r6)) { ctx->r2 = ctx->r6; return; } }"
+
+[[patches.hook]]
+func = "func_80075F20"
+before_vram = 0x80076030
+text = "{ void dino_audio_pulled(uint32_t); dino_audio_pulled((uint32_t)ctx->r2); }"
+
+[[patches.hook]]
+func = "func_80075F20"
+before_vram = 0x800763A0
+text = "{ void dino_audio_pulled(uint32_t); dino_audio_pulled((uint32_t)ctx->r2); }"
+
 # The prototype's own crashes, each fixed where the game reads what isn't there. The labels a hook jumps to are
 # N64Recomp's for a branch target the function already has (L_<its address>).
 
