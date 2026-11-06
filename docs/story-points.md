@@ -33,12 +33,16 @@ dll29 is the save (`0x8008C9F4` holds its handle; dll31 is only the Flash driver
 - Export 6 (position, yaw, flags, layer) stores where play starts, 16 bytes per character at save + 0x16D4.
 - Export 7 starts the world there and keeps a copy of the save that a retry restores, so the bits go in before it.
 
-The game's own New Game is dll64's name screen calling export 1, then dll63 calling `func_8005D410(1, ...)`,
-`func_80041D20(1)`, `func_80041C6C(1)` and export 7, and `story_start` makes the same calls:
+The game's own New Game is dll64's name screen calling export 1, then dll63 calling `func_8005D410(1, ...)`, its own
+`dll63_0E28(1)`, `func_80041D20(1)`, `func_80041C6C(1)` and export 7, and `story_start` makes the same calls:
 
 - `func_8005D410` drops from the 640x480 mode the game boots in, for its logos, to play's 320x240. In the boot's mode
   the Z buffer (`0x80093010`) is the first framebuffer, so a level played in it shows depth as colour in a third of its
   frames: bands of magenta and green, white where the depth is clear.
+- `dll63_0E28(1)` lets go of what the title holds for the menus after it: dll60's constructor takes texture groups 0,
+  4 and 5 (`func_8000CB00`; `func_8000CBC8` drops one) and loads DLLs 75 and 76 (`func_80014B1C`, kept at
+  `0x8008C9EC` and `0x8008CA04`; `func_80014B6C` unloads them). A story start comes from the title, not dll63, so
+  `story_start` makes those drops itself. Held through play, they crash NewIceMt1 as it loads (warps 2 and 26).
 - The other two set flags in the word at `0x80092A98`: without them no object is drawn and the opening's textures are
   wrong.
 
@@ -134,11 +138,9 @@ on a floor and no crash; it says nothing about what the level needs further in.
 - 0, 68: no map holds these places. A running game drops the player through nothing and restores them to the last
   safe place, and a run started there has none: `--story new-game,0` crashes on a null pointer in dll210 at about 9 s,
   and 68 the same. Not usable.
-- 2, 26: NewIceMt1, layer 2, the same room. A real New Game and `--warp 26` plays a story scene there, Krystal at a
-  campfire, and dll 408 (IMIceMountain) warps to 26 itself. Started there directly it crashes before the first
-  report: 26 in `bcopy` under `func_80018314`, 2 reading a null pointer in `func_80021A84` under dll416, with or
-  without the bits up to task 6 (0xD0, 0xB4, 0x2B2, 0x70). `--story new-game` then `--warp 26` crashes as well, at
-  12 s or 55 s, so it is the route: a story point can't reach this room yet, and a real New Game can.
+- 2, 26: NewIceMt1 (map 23), layer 2, the same room. Boots into the story scene a real New Game then `--warp 26`
+  plays, in the snow, and dll 408 (IMIceMountain) warps to 26 itself. `--story new-game,26`, `--story new-game,2` and
+  `--story new-game` then `--warp 26` each played 60 s alive. No named point starts here.
 - 5, 6, 25, 34, 35, 48-53, 56-59, 63, 76, 78: Warlock Mountain (map 11), its deck. Boots, all at one spot.
 - 12: CloudRunner - Dungeon (16). Boots, at a barred door.
 - 14, 85: SwapStone Circle (14). Boots. 80 too, by the fence.

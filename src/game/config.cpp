@@ -1,6 +1,7 @@
 // The settings: RecompFrontend's General, Controls, Graphics, Sound and Mods tabs, with its default bindings. Its own
 // Graphics options carry what a recomp needs: Resolution and MS Anti-Aliasing (high resolution), Framerate
-// (interpolation to the display's rate) and Aspect Ratio and HUD Placement (widescreen), with its stock bindings.
+// (interpolation to the display's rate) and Aspect Ratio and HUD Placement (widescreen), with its stock bindings. General
+// adds the free camera's options (src/game/camera.cpp), which also change the pad's default bindings.
 
 #include <filesystem>
 
@@ -17,8 +18,9 @@ void dino::init_config() {
     recompui::config::GeneralTabOptions general_options{};
     general_options.has_rumble_strength = true;
     general_options.has_gyro_sensitivity = true;
-    general_options.has_mouse_sensitivity = true;
-    recompui::config::create_general_tab(general_options);
+    general_options.has_mouse_sensitivity = false;
+    recomp::config::Config& general = recompui::config::create_general_tab(general_options);
+    dino::add_camera_options(general);
     recompui::config::create_controls_tab();
     recompui::config::create_graphics_tab();
     recompui::config::create_sound_tab();
