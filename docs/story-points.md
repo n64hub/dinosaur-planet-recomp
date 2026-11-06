@@ -114,19 +114,30 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
 - Dragon Rock - Top (map 2) and - Bottom (52), and BOSS Kamerian Dragon (53), placed in full. Their cells join Willow
   Grove's at layer 0, so they are reached on foot; no code warps there by number. DR_SupPortal (754) on the top warps
   to the bottom (warp 88). The Kamerian Dragon's room boots and fights: its acid takes the player's health.
-- BOSS Drakor (44): the fight is built and plays, Drakor beside the player on the asteroids, hitting. No warp entry
-  and no map of the story reaches it: its cells touch no other map's, and the only code that starts it is dll70, the
-  prototype's own development warp menu (`func_800141A4(44, ...)`). Its level (BossDrakorLevel, 692) sets 0x7AC,
-  0x7AE, 0x7C5 and 0x7C6 as the fight goes, each the trigger of one of the map's four BossDrakor_sequ (309), and
-  nothing outside the map reads them: no map, warp or credits follows, and Drakor's own DLL (697) sets no bit.
+- BOSS Drakor (44): the fight is built and plays, but it never ends. No warp entry and no map of the story reaches
+  it: its cells touch no other map's, and the only code that starts it is dll70, the prototype's own development warp
+  menu (`func_800141A4(44, ...)`). Drakor (697) starts with 24 health (+0x348, set by dll33's start-up, 0x20F4), and
+  nothing lowers it: a hit (697 0x0838) only sends him to his second state, which lets the Diamond go (BossDrakorLevel,
+  692 0x02F8: 0x7C6, and 0x7C5 as the state ends), and he has no death state. Walking to the Diamond while it is let
+  go sets 0x7AE (692 0x0FE0), which plays the map's sequence 1 once and sets 0x7AF. Nothing reads 0x7AF, and none of
+  the map's four BossDrakor_sequ (309) holds a warp entry: no map, warp or credits follows. Played two minutes with
+  the player attacking, the level went 0x7AC (its intro), 0x7C6, 0x7C5, 0x7C6 again, the player's health 12/12.
 - Cape Claw's Krazoa tablets: file 55 gives bits to tasks 133 to 136 (0x238, 0x239, 0x237, 0x3AC), which the task
-  list names only as placeholders. The three tablets (CCkrazoaTablet, 459) and their receptacles (CCkrazoaRecepta,
-  308) hold 0x238 to 0x23A, and the receptacles 0x23B and 0x23C, the bit that opens the door of Cape Claw's
-  settlement room (CCsettlementroo, 307, group 8). CCkrazoaBits (458) reads 0x237 and sets 0x23C, and 0x237 is
-  the bit BOSS Drakor's LevelName (284) holds.
+  list names only as placeholders. The three receptacles (CCkrazoaRecepta, 308) take tablets counted in 0x23B and
+  are done as 0x238 to 0x23A; CCkrazoaTablet (459) sets 0x3A9 once all three are placed. CCkrazoaBits (458) counts
+  a tablet into 0x23B and sets 0x23C for each of 0x234, 0x236 and 0x237 newly set: 0x234 by a TriggerPlane in
+  Discovery Falls, 0x236 by the tablet (CCKrazoaTabletP) in Cape Claw's settlement room, behind the door
+  (CCsettlementroo, 307) that 0x23C opens. Nothing sets 0x237: the third tablet is not in the ROM. CCkrazoabright
+  (457) runs the room's puzzle in states: the perch switches' lights, the two levers (0x41E, 0x604), then the three
+  beacons with the three tablets placed, then the lights again; it starts at its later states from 0x393, 0x4D6
+  and 0x3AC, and only 0x4D6 is set by code. (A LevelName's +0x1E, as Drakor's 0x237, is a text, not a bit.)
 - Krazoa Palace (3): its rooms are built and it boots and plays at its setuppoints, but of its 19 objects (KP_*, the
   four consoles, the red Krazoa, the doors) none is placed. It holds mushrooms, crates and two KP_Transporters, each
-  beside a setuppoint and each sending to the other's entry, 93 and 94, both zero. Its cells join Cape Claw's.
+  beside a setuppoint and each sending to the other's entry, 93 and 94, both zero. Its zone planes mark a hub and
+  four wings, and the unplaced objects are a wing's each: a console and a text block (KP_textblock, 654, the Desert
+  Force Point's DFP_Textblock: +0x19 its sequence, +0x1E its done bit, +0x20 the bit it needs) for fire, earth, water
+  and magic, the section doors and the last door (307), and the red Krazoa. Its cells join only Cape Claw's, whose
+  edge there is water: nothing in the ROM leads in.
 - CloudRunner - TrapRooms (17), Krazoa Shrine (20), krazchamber (22) and MikesLava (49) have no record in file 21:
   nothing reaches them.
 
