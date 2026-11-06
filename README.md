@@ -46,8 +46,9 @@ Fixed:
 - Crashes in the game's own code: the Lunaimars of Moon Mountain Pass and Cape Claw's sand worm with no Kyte beside
   Krystal, the Swap Store's item beams as the player walks in, a crash after a long while in Cape Claw, where more
   sounds at once than an audio frame's command list holds wrote past its end, a small basket or crate carried out
-  of the place it was found, which the game freed in the player's hands, and Dragon Rock's fight with the Skeetlas,
-  which after a minute or two drew more than the game had made room for and wrote over the models.
+  of the place it was found, which the game freed in the player's hands, Dragon Rock's fight with the Skeetlas,
+  which after a minute or two drew more than the game had made room for and wrote over the models, and a swing
+  pressed on the very frame the player comes back after a death, before the staff or sword was made.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
