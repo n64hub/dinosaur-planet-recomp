@@ -69,8 +69,8 @@ namespace {
     constexpr int no_place = -2;
 
     // Cape Claw's sand worm has no entry in the warp table. Map 29's record in ROM file 21 is at grid cell (2, 26) of
-    // 640 units, so the worm's object at (2155, -276, -206) is at (3435, -276, 16434), and this is the setuppoint object
-    // the map has beside it at (2340, -265, -435).
+    // 640 units, so the worm's object at (2155, -276, -206) is at (3435, -276, 16434), and this is the setuppoint
+    // object the map has beside it at (2340, -265, -435).
     constexpr Place sand_worm_place = { 3620.0f, -265.0f, 16205.0f, 0 };
 
     using Bits = std::vector<StoryBit>;
