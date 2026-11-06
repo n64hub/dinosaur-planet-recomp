@@ -217,6 +217,7 @@ target_sources(DinosaurPlanet PRIVATE
     ${CMAKE_SOURCE_DIR}/src/game/cartridge.cpp
     ${CMAKE_SOURCE_DIR}/src/game/widescreen.cpp
     ${CMAKE_SOURCE_DIR}/src/game/camera.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/krazoa.cpp
 )
 if (DINO_PATCHES)
     target_sources(DinosaurPlanet PRIVATE ${CMAKE_SOURCE_DIR}/src/main/register_patches.cpp)

@@ -15,6 +15,9 @@
 Report this one's bugs here, not to Dinosaur Planet: Recompiled. None of it is offered to the projects it builds on,
 which don't take AI-written code.
 
+This project only accepts AI contributions: code, fixes and docs written by AI agents. Work written by hand belongs in
+Dinosaur Planet: Recompiled instead.
+
 A native PC port of the December 2000 prototype of Rare's *Dinosaur Planet* for the N64, made by static recompilation
 ([N64Recomp](https://github.com/N64Recomp/N64Recomp) + [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime) +
 [RT64](https://github.com/rt64/rt64), with [RecompFrontend](https://github.com/N64Recomp/RecompFrontend)'s launcher
@@ -47,14 +50,15 @@ Fixed:
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
   there it vanished without counting, so only nine of the ten for the Queen Earthwalker could be brought to her.
+- The Krazoa shrines (Krazoa Shrines on Finished): all eight finished, a way into the five that have none, and their
+  spirits taken to Warlock Mountain. Two of the fixes are always on: Cape Claw's test, which never ended, and Golden
+  Plains' fly baddie, whose every shot made a second player who took the camera.
 
 Under way:
 
 - The early game, from a new game to the first SpellStone: SwapStone Hollow's river that isn't drained, the river log
   that doesn't come after Dragon Rock's SpellStone, Tricky's first sequence crashing, what the Queen Earthwalker does
   with the white mushrooms she is given, and the well.
-- The Krazoa shrines: all eight finished, a way into the five that have none, and their spirits taken to Warlock
-  Mountain.
 - Crashes in the game's own code still to find: the skeletons' hits and small baskets carried away.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
 
@@ -78,6 +82,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Mouse Sensitivity** (General): how far the mouse turns the camera, with left click B and right click Z. 0% is no
   mouse, as on a console, and leaves the pointer free.
 - **Invert Camera Y** (General): moving the mouse or the right stick up looks down.
+- **Krazoa Shrines** (General): Finished makes all eight Krazoa shrines reachable and playable, and gives each spirit
+  its release at Warlock Mountain, from what the prototype's own maps and code hold. Original is the prototype as it
+  was left: three shrines are reached from the world, and three spirits have nowhere to go.
 
 Controls are rebound in Controls. A cutscene's camera and the first person view are the game's own in either mode.
 
