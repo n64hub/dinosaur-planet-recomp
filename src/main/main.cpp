@@ -497,6 +497,21 @@ int main(int argc, char** argv) {
                 }
             }
         }
+        else if (strcmp(argv[i], "--story") == 0 && i + 1 < argc) {
+            char name[64] = {};
+            const char* arg = argv[++i];
+            sscanf(arg, "%63[^@,]", name);
+            story_due = dino::story_choose(name);
+            if (const char* at = strchr(arg, '@')) {
+                story_at = atof(at + 1);
+            }
+            if (const char* comma = strchr(arg, ',')) {
+                dino::story_set_warp(atoi(comma + 1));
+            }
+        }
+        else if (strcmp(argv[i], "--bits") == 0 && i + 1 < argc) {
+            dino::story_add_bits(argv[++i]);
+        }
         else if (strcmp(argv[i], "--stacks") == 0 && i + 1 < argc) {
             print_stacks_after(atof(argv[++i]));
         }
