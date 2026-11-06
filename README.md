@@ -60,13 +60,16 @@ Fixed:
 - SwapStone Hollow: Tricky's run to his mother, the Queen Earthwalker, never started, and with no Tricky beside Sabre
   it would have crashed. And the SwapStone could stop answering in its own corner of the hollow, and answer only
   outside it, after a trip through the Swap Store or the SwapStone's warp.
+- Cape Claw's Krazoa tablets (Krazoa Tablets on Restored): the third tablet, which the prototype never placed, is
+  found where the sand worm fell, and the tablet room's last puzzle, which led nowhere, opens a Transporter to Krazoa
+  Palace.
 
 Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
-- The ending the prototype never had: Cape Claw's missing third Krazoa tablet, a way into Krazoa Palace and its four
-  wings, and a Drakor who can be beaten, with what follows him.
+- The ending the prototype never had: Krazoa Palace's four wings, and a Drakor who can be beaten, with what follows
+  him.
 
 ## The ROM
 
@@ -91,6 +94,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Krazoa Shrines** (General): Finished makes all eight Krazoa shrines reachable and playable, and gives each spirit
   its release at Warlock Mountain, from what the prototype's own maps and code hold. Original is the prototype as it
   was left: three shrines are reached from the world, and three spirits have nowhere to go.
+- **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
+  tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
+  tablet is nowhere, and the puzzle's end leads nowhere.
 
 Controls are rebound in Controls. A cutscene's camera and the first person view are the game's own in either mode.
 

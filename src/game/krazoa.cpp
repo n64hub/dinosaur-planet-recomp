@@ -53,6 +53,31 @@
 //   0x21E and 0x220, which ROM file 55 has saved between the other released bits and nothing uses, and acts 8 and 9
 //   read them as released. Acts 6 and 7 read CC's and WG's released bits. The done bits of MM's, EC's, CC's
 //   and WG's seqpoints become their released bits.
+//
+// Cape Claw's Krazoa tablets: three are carried into the tablet room (map 29) and set in its receptacles, and its
+// puzzle then opens the way on. Krazoa Tablets is its own setting: on Restored (the default) the third tablet is found
+// and the puzzle's end leads on, and on Original both are as the console plays them. Read from the ROM:
+// - CCkrazoaBits (dll458, uid 34B04) counts a tablet into 0x23B and sets 0x23C for each of 0x234, 0x236 and 0x237,
+//   the bits of the three pickups. 0x234 is a Discovery Falls TriggerPlane, 0x236 a CCKrazoaTabletP (object 0x2ED,
+//   dll308: +0x1B 1 hides it once its bit +0x1C is set) in the settlement room. Nothing in the ROM places one with
+//   0x237, and nothing else sets it. The third is a CCKrazoaTabletP with 0x237, placed once the sand worm is dead
+//   (0x3FB, dll461 0xFD0) where the worm's arena has a sequence object that nothing triggers (CCnewseqobject uid
+//   42BDF, in the worm's object group, trigger bit 0x96). CCkrazoaBits keeps the three bits as it is created (0x18)
+//   and counts each that has turned set since (0xB4), but it is placed by distance in the tablet room, so a tablet
+//   picked up by the worm went uncounted (played): the pickup counts the third itself (dll308 0x288, once it set its
+//   bit), and CCkrazoaBits keeps 0x237 as set.
+// - CCkrazoabright (dll457, uid 34872) runs the room in states, its first update choosing one from bits (0xB4):
+//   0x3AC 4, 0x4D6 3, 0x393 2, else 1. State 1 (0x420): the four perch switches' six lights, solved by each switch
+//   once, plays sequence 0, whose data sets 0x393. State 2 (0x728): the two levers (0x41E, 0x604) set 0x4D6 and play
+//   sequence 1. State 3 (0x808): the three beacons and the three tablets set in (0x3DD-0x3DF, 0x238-0x23A) play
+//   sequence 3, whose data sets 0x3AC, task 136. State 4 (0xAAC): the lights again (0x4D7, 0x3F4 and 0x4D8 once
+//   each) play sequence 5 and go to state 5 (0xD78), which has no handler, and sequence 5 sets nothing: the puzzle's
+//   end led nowhere. Restored sets 0x52B there, a saved bit (ROM file 55, bank 1) that nothing in the code or the maps
+//   uses, and the first update goes to state 5 with it set (0x108), so the solved lights are not asked for again.
+// - Krazoa Palace (map 3) is placed in the world grid beside Cape Claw only, its east end at this room's local
+//   coordinates. Its two KP_Transporters (dll334) send to each other, east (@0644, own entry 94) to west (@0668, 93),
+//   both empty entries. A Transporter in the tablet room, shown by 0x52B, sends to 94 from its own entry 72 (empty),
+//   and 93 and 94 are filled where the palace's Transporters stand.
 
 #include <cstdint>
 #include <cstdio>
@@ -78,9 +103,36 @@ namespace {
         { KrazoaShrines::Finished, "Finished" },
     };
 
+    const std::string krazoa_tablets = "krazoa_tablets";
+
+    enum class KrazoaTablets {
+        Original,
+        Restored,
+        OptionCount
+    };
+    const std::vector<recomp::config::ConfigOptionEnumOption> krazoa_tablets_options = {
+        { KrazoaTablets::Original, "Original" },
+        { KrazoaTablets::Restored, "Restored" },
+    };
+
     bool finished() {
         return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(krazoa_shrines)) ==
             (uint32_t)KrazoaShrines::Finished;
+    }
+
+    bool tablets_restored() {
+        return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(krazoa_tablets)) ==
+            (uint32_t)KrazoaTablets::Restored;
+    }
+
+    // Which setting an entry of the tables below belongs to.
+    enum class Setting {
+        Shrines,
+        Tablets
+    };
+
+    bool on(Setting setting) {
+        return setting == Setting::Shrines ? finished() : tablets_restored();
     }
 
     constexpr int32_t set_bit = 0x80014670;
@@ -95,6 +147,13 @@ namespace {
 
     constexpr int transporter = 0xEC;
     constexpr int seqpoint = 0x25F;
+    constexpr int tablet_pickup = 0x2ED;
+
+    constexpr int increment_bit = 0x80014930; // (bit): adds one to its value
+    constexpr int third_tablet = 0x237;
+    constexpr int tablets_counted = 0x23B;    // the tablets counted, which the receptacles read (+0x1E)
+    constexpr int tablet_new = 0x23C;         // opens the settlement room (dll307)
+    constexpr int tablets_done = 0x52B;       // Cape Claw's tablet room solved, Restored
 
     int warlock_act = 0; // as WL_LevelControl last read it, for dll611's release
 
@@ -175,18 +234,24 @@ namespace {
     struct WarpEntry {
         int index;
         float x, y, z;
+        Setting setting;
     };
 
     // Each entry is a place the map it is in holds, in world units (a map's placement + 640 times its world grid cell,
     // ROM file 21). 70 is entry 31, GP's pad itself. 71 is the setuppoint by Cape Claw's receptacles (map 29 @22C8).
     // 68 is the setuppoint between Walled City's two stones (map 13 @0800). 67 is setuppoint 1 by Willow Grove's
     // sundial (map 37 @003C). 65 is the setuppoint in the snow where Northern Wastes is entered (map 10 @00B0).
+    // 72 is the tablet room's Transporter, east of the receptacles. 93 and 94 are Krazoa Palace's west and east
+    // KP_Transporters (map 3 @0668, @0644).
     const WarpEntry warp_entries[] = {
-        { 65, -3932.0f, -110.7f, -361.2f },
-        { 67, -4523.2f, -1316.0f, -4004.5f },
-        { 68, -7939.2f, -1123.0f, -7441.1f },
-        { 70, -833.3f, 208.0f, 13285.5f },
-        { 71, 4200.3f, -7.1f, 17613.1f },
+        { 65, -3932.0f, -110.7f, -361.2f, Setting::Shrines },
+        { 67, -4523.2f, -1316.0f, -4004.5f, Setting::Shrines },
+        { 68, -7939.2f, -1123.0f, -7441.1f, Setting::Shrines },
+        { 70, -833.3f, 208.0f, 13285.5f, Setting::Shrines },
+        { 71, 4200.3f, -7.1f, 17613.1f, Setting::Shrines },
+        { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets },
+        { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
+        { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
     };
 
     // A change to one placement in a map's object list, found by its map, object id and unique id (+0x14).
@@ -228,19 +293,34 @@ namespace {
         float x, y, z;
         uint8_t params[12]; // from +0x18
         int act;            // the Warlock Mountain act it is placed in, or 0 for any
+        Setting setting;
+        int needs;          // a bit it waits for while its map is loaded, or 0
         bool placed;
     };
 
     // Transporters: yaw 0, own entry, destination, then dll334's 0x1E radius and its show bit, as GP's pad.
     // Seqpoints: yaw, mode 3 (walked into with its trigger clear, which it then sets), radius, sequence, trigger, no
     // done bit, at the upper sites of CC (@1570) and WG (@1C0C) with their yaws and radii.
+    // Cape Claw's third tablet: the settlement room's CCKrazoaTabletP (map 29 @435C) with 0x237, at the worm arena's
+    // untriggered sequence object (uid 42BDF), once the worm is dead. The tablet room's Transporter: own entry 72, to
+    // the palace's east end (94), shown once the room is solved.
     Extra extras[] = {
-        { 13, transporter, -7939.2f, -1123.0f, -7441.1f, { 0, 68, 40, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x64, 0, 0 }, 0, false },
-        { 29, transporter, 4200.3f, -7.1f, 17613.1f, { 0, 71, 41, 0, 0, 0, 0x1E, 0xFF, 0x03, 0x18, 0, 0 }, 0, false },
-        { 37, transporter, -4523.2f, -1316.0f, -4004.5f, { 0, 67, 39, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x21, 0, 0 }, 0, false },
-        { 10, transporter, -3932.0f, -110.7f, -361.2f, { 0, 65, 37, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x1E, 0, 0 }, 0, false },
-        { 11, seqpoint, 13959.0f, 470.0f, 2123.0f, { 0x00, 3, 0, 0x46, 0, 0x0F, 0x02, 0x1E, 0xFF, 0xFF, 0, 0 }, 8, false },
-        { 11, seqpoint, 12932.0f, 456.0f, 1091.0f, { 0x7F, 3, 0, 0x48, 0, 0x11, 0x02, 0x20, 0xFF, 0xFF, 0, 0 }, 9, false },
+        { 13, transporter, -7939.2f, -1123.0f, -7441.1f, { 0, 68, 40, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x64, 0, 0 }, 0,
+            Setting::Shrines, 0, false },
+        { 29, transporter, 4200.3f, -7.1f, 17613.1f, { 0, 71, 41, 0, 0, 0, 0x1E, 0xFF, 0x03, 0x18, 0, 0 }, 0,
+            Setting::Shrines, 0, false },
+        { 37, transporter, -4523.2f, -1316.0f, -4004.5f, { 0, 67, 39, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x21, 0, 0 }, 0,
+            Setting::Shrines, 0, false },
+        { 10, transporter, -3932.0f, -110.7f, -361.2f, { 0, 65, 37, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x1E, 0, 0 }, 0,
+            Setting::Shrines, 0, false },
+        { 11, seqpoint, 13959.0f, 470.0f, 2123.0f, { 0x00, 3, 0, 0x46, 0, 0x0F, 0x02, 0x1E, 0xFF, 0xFF, 0, 0 }, 8,
+            Setting::Shrines, 0, false },
+        { 11, seqpoint, 12932.0f, 456.0f, 1091.0f, { 0x7F, 3, 0, 0x48, 0, 0x11, 0x02, 0x20, 0xFF, 0xFF, 0, 0 }, 9,
+            Setting::Shrines, 0, false },
+        { 29, tablet_pickup, 3574.0f, -257.0f, 16514.0f, { 0, 0, 0, 1, 0x02, 0x37, 0xFF, 0xFF, 0, 0, 0xFF, 0xFF }, 0,
+            Setting::Tablets, 0x3FB, false },
+        { 29, transporter, 4776.0f, -8.0f, 17606.0f, { 0, 72, 94, 0, 0, 0, 0x1E, 0xFF, 0x05, 0x2B, 0, 0 }, 0,
+            Setting::Tablets, 0, false },
     };
 
     void place(uint8_t* rdram, recomp_context* ctx, const Extra& e) {
@@ -277,18 +357,24 @@ void dino::add_krazoa_options(recomp::config::Config& general) {
         krazoa_shrines_options,
         KrazoaShrines::Finished
     );
+    general.add_enum_option(
+        krazoa_tablets,
+        "Krazoa Tablets",
+        "Cape Claw's third Krazoa tablet is found where the sand worm fell, and the tablet room's last puzzle opens a "
+        "Transporter to Krazoa Palace. <b>Original is the prototype as it was left</b>: the third tablet is nowhere, "
+        "and the last puzzle leads nowhere.",
+        krazoa_tablets_options,
+        KrazoaTablets::Restored
+    );
 }
 
 // us.toml's hook in WARP_ENTRY (func_8004D1D4) once it has read entry 0x20(sp) of ROM file 30 into the buffer at
 // 0x1C(sp): 16 bytes, x, y and z as floats and an s16 layer, all zero in an empty entry.
 extern "C" void dino_krazoa_warp_entry(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished()) {
-        return;
-    }
     int index = MEM_W(0x20, ctx->r29);
     gpr entry = (gpr)MEM_W(0x1C, ctx->r29);
     for (const WarpEntry& w : warp_entries) {
-        if (w.index == index) {
+        if (w.index == index && on(w.setting)) {
             memcpy(&MEM_W(0x0, entry), &w.x, 4);
             memcpy(&MEM_W(0x4, entry), &w.y, 4);
             memcpy(&MEM_W(0x8, entry), &w.z, 4);
@@ -331,9 +417,10 @@ extern "C" void dino_krazoa_map_loaded(uint8_t* rdram, recomp_context* ctx) {
     }
 }
 
-// us.toml's hook after func_80046BC8 places the loaded maps' objects (func_8004A800).
+// us.toml's hook after func_80046BC8 places the loaded maps' objects (func_8004A800), each frame from the main loop
+// (func_80013D80): an Extra that needs a bit is placed the frame it is set.
 extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished()) {
+    if (!finished() && !tablets_restored()) {
         return;
     }
     Calls calls(rdram, ctx);
@@ -341,7 +428,7 @@ extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
         if (word(rdram, map_structs + 4 * e.map) == 0) {
             e.placed = false;
         }
-        else if (!e.placed) {
+        else if (!e.placed && on(e.setting) && (e.needs == 0 || get(rdram, ctx, e.needs))) {
             e.placed = true;
             if (e.act == 0 || warlock_act_now(rdram, ctx) == e.act) {
                 place(rdram, ctx, e);
@@ -519,5 +606,56 @@ extern "C" void dino_krazoa_gp_event(uint8_t* rdram, recomp_context* ctx) {
         if (logging) {
             fprintf(stderr, "krazoa: Golden Plains' win keeps its reward\n");
         }
+    }
+}
+
+// us.toml's hook in CCkrazoabright's state 4 (dll457 0xD78), the last lights solved, as it stores state 5.
+extern "C" void dino_krazoa_tablets_solved(uint8_t* rdram, recomp_context* ctx) {
+    if (!tablets_restored()) {
+        return;
+    }
+    Calls calls(rdram, ctx);
+    set_if_clear(rdram, ctx, tablets_done);
+    if (logging) {
+        fprintf(stderr, "krazoa: Cape Claw's tablet room solved\n");
+    }
+}
+
+// us.toml's hook in CCkrazoabright's first update (dll457 0x108), which stores state 4 from $t7 with 0x3AC set.
+extern "C" void dino_krazoa_tablets_state(uint8_t* rdram, recomp_context* ctx) {
+    if (!tablets_restored()) {
+        return;
+    }
+    bool solved;
+    {
+        Calls calls(rdram, ctx);
+        solved = get(rdram, ctx, tablets_done) != 0;
+    }
+    if (solved) {
+        ctx->r15 = 5;
+    }
+}
+
+// us.toml's hook in the tablet pickup's update (dll308 0x288), just after it set its bit (+0x1C), which it does only
+// while that bit was clear. CCkrazoaBits counts a pickup only while it is loaded, by the tablet room, so the third
+// tablet, picked up by the worm, is counted here as dll458 0x1C0-0x1E8 would.
+extern "C" void dino_krazoa_tablet_picked(uint8_t* rdram, recomp_context* ctx) {
+    if (!tablets_restored() || MEM_H(0x1C, (gpr)word(rdram, (int32_t)ctx->r29 + 0x20)) != third_tablet) {
+        return;
+    }
+    Calls calls(rdram, ctx);
+    ctx->r4 = tablets_counted;
+    call(rdram, ctx, increment_bit);
+    set(rdram, ctx, tablet_new, 1);
+    if (logging) {
+        fprintf(stderr, "krazoa: the third tablet is counted\n");
+    }
+}
+
+// us.toml's hook in CCkrazoaBits' creation (dll458 0x98), as it keeps 0x237's value in $v0 to count it once set: the
+// third tablet is counted at its pickup instead.
+extern "C" void dino_krazoa_tablet_bits(uint8_t*, recomp_context* ctx) {
+    if (tablets_restored()) {
+        ctx->r2 = 1;
     }
 }

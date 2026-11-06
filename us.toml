@@ -639,6 +639,30 @@ func = "dll611_04B4"
 before_vram = 0x90246F40
 text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_release_mask(rdram, ctx); }'
 
+# Cape Claw's tablet room (CCkrazoabright, dll457; krazoa.cpp's header): its last lights solved, as state 4 stores
+# state 5 (0xD78), and its first update's store of state 4 from $t7 (0x108).
+[[patches.hook]]
+func = "dll457_0AAC"
+before_vram = 0x901E38B4
+text = '{ void dino_krazoa_tablets_solved(uint8_t*, recomp_context*); dino_krazoa_tablets_solved(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll457_00B4"
+before_vram = 0x901E2C44
+text = '{ void dino_krazoa_tablets_state(uint8_t*, recomp_context*); dino_krazoa_tablets_state(rdram, ctx); }'
+
+# The tablet pickup (dll308) once it has set its bit (0x288), and CCkrazoaBits' creation (dll458) as it keeps 0x237's
+# value (0x98): the third tablet is counted at its pickup.
+[[patches.hook]]
+func = "dll308_0110"
+before_vram = 0x9017A714
+text = '{ void dino_krazoa_tablet_picked(uint8_t*, recomp_context*); dino_krazoa_tablet_picked(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll458_0018"
+before_vram = 0x901E4334
+text = '{ void dino_krazoa_tablet_bits(uint8_t*, recomp_context*); dino_krazoa_tablet_bits(rdram, ctx); }'
+
 # Cape Claw's shrine (dll486): its test is one SabreBaddie, which CCSH_ObjCreator (dll487) spawns with kill bit 0x1E7,
 # as Discovery Falls' creator does. State 2 waited for 0x5B2 instead, a bit nothing in the ROM sets, so the test never
 # ended: it reads 0x1E7, and its reset clears 0x1E7 (addiu $a0, $zero, 0x5B2 -> 0x1E7 at 0x7C0 and 0x998). The shrine
