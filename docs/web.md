@@ -96,5 +96,5 @@ uncapped:
 - In a play the page's heap can climb about 9 MB a second, and then a malloc past its 1536 MB (`Aborted(OOM)`)
   stops the page about two and a half minutes in, so the extended plan doesn't reach its end. Some builds and runs
   hold flat; what holds the memory isn't found yet. The page stays unpublished until that is fixed.
-- At Cape Claw's sand worm fight the game prints `Sound state allocate failed - sndId 97` many times a second, on
-  the page as on the desktop build: its own message, from its sound code.
+- At Cape Claw's sand worm fight the game prints `Sound state allocate failed - sndId 97` many times a second: its
+  own message, from its sound code.
