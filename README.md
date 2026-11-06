@@ -49,8 +49,9 @@ Fixed:
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
   there it vanished without counting, so only nine of the ten for the Queen Earthwalker could be brought to her.
 - The Krazoa shrines (Krazoa Shrines on Finished): all eight finished, a way into the five that have none, and their
-  spirits taken to Warlock Mountain. Two of the fixes are always on: Cape Claw's test, which never ended, and Golden
-  Plains' fly baddie, whose every shot made a second player who took the camera.
+  spirits taken to Warlock Mountain, and Walled City's shell game, which a player who stood still won as its answer
+  time ran out. Two of the fixes are always on: Cape Claw's test, which never ended, and Golden Plains' fly baddie,
+  whose every shot made a second player who took the camera.
 
 Under way:
 
