@@ -1,10 +1,20 @@
-# Dinosaur Planet (prototype), recompiled
+# Dinosaur Planet: AI Slop Recomp
 
-> **Made with AI.** Almost all of the code, documentation and tests in this repo were written by AI agents
-> (Claude), directed and play-tested by a person. None of it is offered to the upstream projects it builds on, which
-> don't take AI-written code.
+> ⚠️ **This is AI slop.**
+> AI agents wrote every line of this project: the code, the fixes, the docs. No human has played or tested it, so
+> expect it to break.
+>
+> **You almost certainly want [Dinosaur Planet: Recompiled](https://github.com/DinosaurPlanetRecomp/dino-recomp)
+> instead.** People made it carefully, by hand. This project uses none of its code and isn't part of it. It also uses
+> nothing from [Dinomod Enhanced](https://github.com/EoinODoodles/dinomod-enhanced-recompiled) or the
+> [Dinosaur Planet decompilation](https://github.com/zestydevy/dinosaur-planet): every function, name and fix here was
+> found in the ROM's own code.
+>
+> Its developers ask that AI not be used on their work. So use this one only if you want to use AI on a Dinosaur
+> Planet recomp yourself, or you're simply thirsty for slop.
 
-This is not Dinosaur Planet: Recompiled and has none of its code or Dinomod's: report this one's bugs here, not there.
+Report this one's bugs here, not to Dinosaur Planet: Recompiled. None of it is offered to the projects it builds on,
+which don't take AI-written code.
 
 A native PC port of the December 2000 prototype of Rare's *Dinosaur Planet* for the N64, made by static recompilation
 ([N64Recomp](https://github.com/N64Recomp/N64Recomp) + [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime) +
