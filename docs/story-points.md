@@ -84,8 +84,10 @@ action 0x13 turns one on, 0x14 off and 0x22 toggles it (dll325's actions, throug
 group 0 holds the SwapStone and the vine doors, 1 the Queen Earthwalker, 5 the flowers, 6 Tricky's sequence, 7 and 8
 the white mushrooms by the river and in the grove, so `--story swapstone-hollow --place ... --bits 452=450` has 1, 6,
 7 and 8 on, enough for the Queen, Tricky and the mushrooms. Groups 0 and 5 with those (`452=483`), or all of them at
-once (`452=65535`), crash as the map loads: a MagicPlant (dll290) or SHBirchTree (dll520) child that fails to spawn is
-passed on unchecked to `func_80021A84`.
+once (`452=65535`), load and play too, at warp 15 and beside the Magic Plant (`--place -7750,-716,-1207`). The object
+create, `func_800213EC`, passes what it made to `func_80021A84` with no test, so a create that fails for want of
+memory crashes there, under the MagicPlant (dll290) or SHBirchTree (dll520) that asked for it, as all of them on did
+with what the title holds still held (src/game/story.cpp lets go of it).
 
 ## The bits
 

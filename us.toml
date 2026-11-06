@@ -158,6 +158,14 @@ func = "dll772_0088"
 before_vram = 0x902C5888
 text = "{ if (ctx->r4 == 0) goto L_902C58D8; }"
 
+# The Swap Store's send-out and the Magic Plant need no hook. Being sent out (dll769_0A1C) warps to entry 15 for a
+# player whose +0x46 is 0 and 14 otherwise, and played with the shopkeeper there (group 0 of bit 0x601) it walks the
+# player out to SwapStone Circle. MagicPlant (dll290_05F8) keeps its MagicDust (dll291) at +0 of its state and the dust
+# keeps the plant at +0xC4, which the dust only tests for 0 (dll291_03F0) before it calls DLL 27's export 7 on itself,
+# so a dust that outlives its plant reads nothing of it, and a plant hit from the west in SwapStone Hollow plays on. The
+# one way in, a dust create that fails (func_800213EC hands func_80021A84 what it made with no test, and dll290_05F8 writes its
+# +0xC4), takes an object heap that is full, which all of SwapStone Hollow's groups at once doesn't make.
+
 # An object that fails to be made: func_800213EC makes one through func_8001275C into 0x2C($sp) and hands it to
 # func_80021A84 with no test, which reads its +0x30 at once, and with none there that is a read of address 0x30. It
 # came after Golden Plains' shrine was won, from its fly baddie's spawn (dll475 0x8C0). func_80021A84 with no object
