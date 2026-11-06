@@ -7,8 +7,9 @@
 // are placed are bits, and so are what a level has opened and each pickup taken. dll29 holds the save: its export 1
 // clears the save to a new game's (slot -1 is no slot, so nothing touches the Flash), 29 sets the character, 6 stores
 // where play starts and 7 starts the world there. The game's own New Game is dll64's name screen calling export 1, then
-// dll63 dropping to play's video mode, calling the two play flags and export 7; story_start does the same with the bits
-// set and the place stored before export 7, since export 7 keeps a copy that a retry restores. func_800142F0 is the
+// dll63 dropping to play's video mode, letting go of what the title holds, calling the two play flags and export 7;
+// story_start does the same with the bits set and the place stored before export 7, since export 7 keeps a copy that a
+// retry restores. func_800142F0 is the
 // rolling demo, not a new game.
 
 #include <algorithm>
@@ -44,6 +45,14 @@ namespace {
     // and without them the objects aren't drawn and the opening's textures are wrong.
     constexpr int32_t play_flag_2000 = 0x80041D20;
     constexpr int32_t play_flag_10 = 0x80041C6C;
+    // What the title takes for the menus that follow it, which dll63 lets go of as it starts play (dll63_0E28 with 1,
+    // after the video mode): dll60's constructor holds texture groups 0, 4 and 5 (func_8000CB00, each a count that
+    // func_8000CBC8 drops) and loads DLLs 75 and 76 (func_80014B1C, kept at 0x8008C9EC and 0x8008CA04, unloaded by
+    // func_80014B6C). Both drops do nothing to what isn't held. Kept through play, they leave the opening's first room,
+    // NewIceMt1 (warps 2 and 26), crashing as it loads.
+    constexpr int32_t drop_texture_group = 0x8000CBC8;
+    constexpr int32_t unload_title_dlls = 0x80014B6C;
+    constexpr int title_texture_groups[] = { 4, 5, 0 };
     constexpr uint32_t warp_table_rom = 0x020E023A; // ROM file 30
 
     struct StoryBit {
@@ -257,6 +266,11 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     ctx->r4 = 1;
     ctx->r6 = 0;
     call(rdram, ctx, set_video_mode);
+    for (int group : title_texture_groups) {
+        ctx->r4 = group;
+        call(rdram, ctx, drop_texture_group);
+    }
+    call(rdram, ctx, unload_title_dlls);
     ctx->r4 = (uint32_t)-1;
     ctx->r5 = 0;
     call_dll29(rdram, ctx, 1);
