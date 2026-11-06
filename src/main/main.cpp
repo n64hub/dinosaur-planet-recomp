@@ -410,6 +410,28 @@ extern "C" int dino_warp_due() {
     return index;
 }
 
+// --story <point>[@<seconds>][,<warp>] (development, src/game/story.cpp): at that time on the --input clock, 2 s by
+// default, start a run from that point of the story, at that entry of the warp table if one is given. --place
+// <x>,<y>,<z>[,<layer>] starts it there instead, and --bits <hex>[=<value>],... sets more of the game's bits at that
+// start. From the start on, or from the first pass with --report, a line a second says where the player is. The same
+// hook as --warp's, so this runs on the game's main thread too.
+static bool story_due = false;
+static double story_at = 2.0;
+static double story_reported = -1.0;
+
+extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
+    double now = script_seconds();
+    if (story_due && now >= story_at) {
+        story_due = false;
+        story_reported = now;
+        dino::story_start(rdram, ctx);
+    }
+    else if (story_reported >= 0.0 && now >= story_reported + 1.0) {
+        story_reported = now;
+        dino::story_report(rdram, ctx, now);
+    }
+}
+
 static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out, float* y_out) {
     bool ret = recompinput::profiles::get_n64_input(player_index, buttons_out, x_out, y_out);
     if (player_index == 0) {
@@ -502,6 +524,27 @@ int main(int argc, char** argv) {
                     warps.push_back(w);
                 }
             }
+        }
+        else if (strcmp(argv[i], "--story") == 0 && i + 1 < argc) {
+            char name[64] = {};
+            const char* arg = argv[++i];
+            sscanf(arg, "%63[^@,]", name);
+            story_due = dino::story_choose(name);
+            if (const char* at = strchr(arg, '@')) {
+                story_at = atof(at + 1);
+            }
+            if (const char* comma = strchr(arg, ',')) {
+                dino::story_set_warp(atoi(comma + 1));
+            }
+        }
+        else if (strcmp(argv[i], "--place") == 0 && i + 1 < argc) {
+            dino::story_set_place(argv[++i]);
+        }
+        else if (strcmp(argv[i], "--report") == 0) {
+            story_reported = 0.0;
+        }
+        else if (strcmp(argv[i], "--bits") == 0 && i + 1 < argc) {
+            dino::story_add_bits(argv[++i]);
         }
         else if (strcmp(argv[i], "--stacks") == 0 && i + 1 < argc) {
             print_stacks_after(atof(argv[++i]));
