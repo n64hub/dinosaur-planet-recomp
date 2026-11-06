@@ -104,7 +104,7 @@ namespace {
         { 0x1D7, 1 },
     };
     const Bits first_spirit = { { 0x316, 1 }, { 0x21F, 1 } };
-    const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x877, 1 } };
+    const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x4E9, 1 }, { 0x877, 1 } };
     const Bits second_spirit = { { 0x277, 1 }, { 0x21B, 1 } };
     const Bits third_spirit = { { 0x317, 1 }, { 0x21C, 1 } };
     const Bits fourth_spirit = { { 0x318, 1 }, { 0x21D, 1 } };
