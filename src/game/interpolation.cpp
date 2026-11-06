@@ -14,7 +14,11 @@
 // by a cell as the player walks, a step back at a cell's edge too. The view and every matrix of the world step with it,
 // the two cancelling. So a step isn't a cut: RT64 pairs what the world draws by its place on the screen, which the step
 // doesn't change, and RT64_INTERPOLATE_CAMERA_EYE places the camera's eye on the line between its two places, where
-// the eye's step takes away the world's exactly.
+// the eye's step takes away the world's exactly. RT64 left to itself doesn't interpolate a translation that grows
+// tenfold in a frame (rt64_rigid_body.cpp), which the step's 640 units always does, so the world would draw where it
+// is while the eye is halfway: everything 320 units off, and above CloudRunner Fortress's clouds the eye outside its sky,
+// a frame of the background colour alone. A frame whose origin steps puts the world and each object's model in a group
+// that interpolates their translations.
 //
 // Camera 1, which draws an object's shadow into a texture, follows the origin with its raw position, so for it a step
 // is a cut: that texture isn't blended for a frame, which doesn't show.
@@ -24,7 +28,7 @@
 // frame, are interpolated with it. An object that jumps gets a new group too. What the world draws by itself (its map
 // blocks, sky, particles) has no group and RT64 pairs it, as it does for any game.
 //
-// What the commands cost: 24 bytes of the 36,000-byte list per object and 16 per camera. The fullest list measured in
+// What the commands cost: 24 bytes of the 36,000-byte list per object, 16 per camera and 16 for a step. The fullest list measured in
 // the levels of eight areas was 11,200 bytes and a title screen's, which draws no objects, 29,800.
 
 #include <algorithm>
@@ -53,6 +57,9 @@ namespace {
     constexpr uint32_t cameras_address = 0x800A6278;
     constexpr uint32_t camera_size = 0x60;
     constexpr uint32_t camera_count = 12;
+
+    constexpr uint32_t origin_address = 0x80092A70;
+    constexpr uint32_t id_auto = 0xFFFFFFFF;                          // G_EX_ID_AUTO: paired by RT64, as with no group.
 
     // Measured over eight areas and the opening: the camera steps 0-9 units and 0-340 of 65,536 of a turn a game frame,
     // and a cut 33 units or more, with 2,000 of a turn or more whenever it is under 100 units.
@@ -132,6 +139,8 @@ namespace {
     std::unordered_map<uint32_t, Object> objects;
     uint32_t frame_number = 0;
     uint32_t world_cuts = 0;
+    uint32_t origin_x = 0, origin_z = 0;
+    bool origin_stepped = false;
     bool logging = getenv("DINO_LOG_CUTS") != nullptr;            // Prints each cut and jump, to tune the limits above.
 
     uint32_t object_id(uint32_t object, uint32_t model, uint32_t jumps) {
@@ -147,6 +156,18 @@ namespace {
 extern "C" void dino_interp_frame(uint8_t* rdram, recomp_context* ctx) {
     gpr gfx = (gpr)(int32_t)MEM_W(0, ctx->r4);
     write(rdram, &gfx, (hook_opcode << 24) | hook_magic, (hook_enable << 28) | extended_opcode);
+    gpr origin = (gpr)(int32_t)origin_address;
+    uint32_t x = (uint32_t)MEM_W(0, origin), z = (uint32_t)MEM_W(4, origin);
+    origin_stepped = (x != origin_x) || (z != origin_z);
+    origin_x = x;
+    origin_z = z;
+    if (origin_stepped) {
+        write_group(rdram, &gfx, id_auto, mode_decompose, false, false, component_interpolate, component_skip, order_auto);
+        if (logging) {
+            fprintf(stderr, "step: frame %u\n", frame_number);
+        }
+    }
+
     MEM_W(0, ctx->r4) = (int32_t)gfx;
     frame_number++;
 }
@@ -206,7 +227,8 @@ extern "C" void dino_interp_object_begin(uint8_t* rdram, recomp_context* ctx) {
     }
 
     gpr gfx = (gpr)(int32_t)MEM_W(0x68, ctx->r29);
-    write_group(rdram, &gfx, object_id((uint32_t)address, (uint32_t)ctx->r17, object.jumps), mode_decompose, true, false, component_auto, component_interpolate, order_linear);
+    write_group(rdram, &gfx, object_id((uint32_t)address, (uint32_t)ctx->r17, object.jumps), mode_decompose, true, false,
+        origin_stepped ? component_interpolate : component_auto, component_interpolate, order_linear);
     MEM_W(0x68, ctx->r29) = (int32_t)gfx;
 }
 
