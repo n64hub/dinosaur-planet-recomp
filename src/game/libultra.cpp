@@ -16,7 +16,9 @@ extern "C" void __osSpSetStatus_recomp(uint8_t* rdram, recomp_context* ctx) {
 // The rest are called only from code that never runs here: the debugger (rmon, which the game never starts), the VI
 // manager's thread and its timer interrupt (the runtime has its own VI manager), the Controller Pak's file system and
 // CRCs (under osMotorInit and osPfs*, which the runtime replaces or the game never calls, its saves being on Flash),
-// and a raw SI read (func_800112F0) whose only caller nothing calls. One that runs anyway stops the game, saying which.
+// a raw SI read (func_800112F0) whose only caller nothing calls, and osEPiWriteIo, which only the main segment's copy
+// of libultra's Flash functions calls (the game's is dll31's, tools/gen_syms.py's DLL_MANUAL_NAMES). One that runs
+// anyway stops the game, saying which.
 static void unreachable(const char* name) {
     std::string message = std::string{"The game called libultra's "} + name + ", which this build doesn't have.";
     fprintf(stderr, "%s\n", message.c_str());
@@ -38,6 +40,7 @@ UNREACHABLE(__osPfsSelectBank)
 UNREACHABLE(__osContRamRead)
 UNREACHABLE(__osCheckPackId)
 UNREACHABLE(__osRepairPackId)
+UNREACHABLE(osEPiWriteIo)
 UNREACHABLE(__osSiGetAccess)
 UNREACHABLE(__osSiRawStartDma)
 UNREACHABLE(__osSiRelAccess)

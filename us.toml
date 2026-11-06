@@ -11,6 +11,10 @@ output_func_path = "RecompiledFuncs"
 use_absolute_symbols = true
 
 [patches]
+# func_80014598, the first thing the game's main thread calls, writes 0x4040 to 0xBC000C02, a register of the
+# development hardware the prototype ran on: a console has nothing there, and neither does the runtime.
+stubs = ["func_80014598"]
+
 # The DLLs (tools/gen_syms.py's header says what one is). func_8000C3CC loads one: it allocates its memory, reads it
 # from ROM file 70 (offset 0x30($sp), size 0x2C($sp)) into it ($s0), clears its bss, relocates it and flushes the
 # caches. Once it has, the runtime maps the DLL's section there (src/game/dlls.cpp), so that the game's calls through
@@ -36,3 +40,68 @@ text = "{ void dino_dll_unloading(uint8_t*, recomp_context*); dino_dll_unloading
 func = "func_8001B4F0"
 vram = 0x8001C8B0
 value = 0x0800722E
+
+# func_80001220 checks the cartridge at boot: it waits for the PI to be idle (PI_STATUS, 0xA4600010) and reads the word
+# at ROM offset 0x578 straight from the cartridge's address (0xB0000578), and sets the byte at 0x8008C520 when its low
+# half isn't 0x8965. The runtime maps neither, so the wait reads idle (lw $v0, 0($v1) -> or $v0, $zero, $zero) and the
+# word comes from the ROM the runtime holds (lw $t1, 0x578($t9) -> nop, then the hook; src/game/cartridge.cpp).
+[[patches.instruction]]
+func = "func_80001220"
+vram = 0x800012D8
+value = 0x00001025
+
+[[patches.instruction]]
+func = "func_80001220"
+vram = 0x80001300
+value = 0x00000000
+
+[[patches.hook]]
+func = "func_80001220"
+before_vram = 0x80001304
+text = "{ uint32_t dino_rom_word(uint32_t); ctx->r9 = (int32_t)dino_rom_word(0x578); }"
+
+# The development hardware's signature, "LSFS" or "MPFS" in the halfwords at 0xBC000000 and 0xBC000002, which the
+# game reads in three places: func_800145AC, each pass of the main thread's loop, zeroes memory from 0x80000000 to
+# 0x80400000 without it, and dll3 and dll210 each call a function of theirs with 0x100000. The runtime maps nothing
+# there, so each pair of reads gives "LSFS", as on that hardware (lh -> addiu of 0x4C53 and 0x4653).
+[[patches.instruction]]
+func = "func_800145AC"
+vram = 0x800145B0
+value = 0x24024C53
+
+[[patches.instruction]]
+func = "func_800145AC"
+vram = 0x800145B8
+value = 0x24194653
+
+[[patches.instruction]]
+func = "dll3_60AC"
+vram = 0x90011074
+value = 0x24024C53
+
+[[patches.instruction]]
+func = "dll3_60AC"
+vram = 0x9001107C
+value = 0x24084653
+
+[[patches.instruction]]
+func = "dll210_A3FC"
+vram = 0x900F2474
+value = 0x24024C53
+
+[[patches.instruction]]
+func = "dll210_A3FC"
+vram = 0x900F247C
+value = 0x240D4653
+
+# func_80011C70, which makes each audio frame, reads the AI's remaining length straight from AI_LEN (0xA4500004),
+# where libultra has osAiGetLength: the runtime's gives it (lw $t9, 4($t8) -> nop, then the hook).
+[[patches.instruction]]
+func = "func_80011C70"
+vram = 0x80011CC0
+value = 0x00000000
+
+[[patches.hook]]
+func = "func_80011C70"
+before_vram = 0x80011CC4
+text = "{ void osAiGetLength_recomp(uint8_t*, recomp_context*); uint64_t v0 = ctx->r2; osAiGetLength_recomp(rdram, ctx); ctx->r25 = ctx->r2; ctx->r2 = v0; }"

@@ -98,24 +98,30 @@ MANUAL_NAMES = {
     # between __osDisableInt and __osRestoreInt.
     0x8005E200: "osCreateViManager",
     0x8007F080: "osViGetNextFramebuffer",
-    # Flash, the game's save: nothing in the main segment calls these, the DLL that saves does (its imports). The first
-    # links a PI handle at 0xA8000000, Flash's address, and reads its ID; the rest follow it in libultra's order, and
-    # each that erases or writes clears the status first.
-    0x8005EAE8: "osFlashInit",
-    0x8005EC3C: "osFlashReadStatus",
-    0x8005ED08: "osFlashReadId",
-    0x8005EE20: "osFlashClearStatus",
-    0x8005EE8C: "osFlashAllErase",
-    0x8005EFA8: "osFlashSectorErase",
-    0x8005F0D4: "osFlashWriteBuffer",
-    0x8005F1A0: "osFlashWriteArray",
-    0x8005F2A4: "osFlashReadArray",
     # The exception handler: it reads every RCP interrupt's register (MI, VI, AI, PI, SI), wakes threads with
     # __osEnqueueThread and calls kdebugserver. The runtime has none, and N64Recomp leaves it out by its name.
     0x80080090: "__osException",
     # Its message sending after it (and handle_CpU, which spimdisasm keeps in the same function), which branch back
     # into it: left out with it.
     0x80080A34: "send_mesg",
+}
+
+# Functions in a DLL named by hand, by DLL number and offset in its text. dll31 is the game's save, on Flash, and holds
+# its own copy of libultra's Flash functions, which drive the chip through osEPiWriteIo, osEPiReadIo and osEPiStartDma:
+# named, N64Recomp has the runtime's Flash in their place. Each is told by the commands it writes to the chip's command
+# register (the PI handle at 0xA8000000, plus 0x10000): osFlashInit links that handle and checks the chip's ID against
+# the Macronix ones (0x00C2001E, 0x00C20001), the status reads write 0xD2 and the ID read 0xE1, a sector erase 0x4B then
+# 0x78, the page buffer's write 0xB4 before its DMA, the program 0xA5, and the read array 0xF0 before its DMA. The main
+# segment has the same functions from 0x8005EAE8 on, which nothing calls or imports.
+DLL_MANUAL_NAMES = {
+    (31, 0x04DC): "osFlashInit",
+    (31, 0x0640): "osFlashReadStatus",
+    (31, 0x070C): "osFlashReadId",
+    (31, 0x0820): "osFlashClearStatus",
+    (31, 0x088C): "osFlashSectorErase",
+    (31, 0x09A4): "osFlashWriteBuffer",
+    (31, 0x0A50): "osFlashWriteArray",
+    (31, 0x0B48): "osFlashReadArray",
 }
 
 # Function starts the analysis misses: where the entry point jumps once bss is clear (jr $t2).
@@ -458,7 +464,7 @@ def main():
     by_data = data_pointers(rom, found, jump_table_words(rom, found))
     by_import = {a: ["the DLLs' imports"] for a in imports if in_main_text(a)}
     candidates = set(by_code) | set(by_data) | set(by_import)
-    pointed = {a for a in candidates if a in found or looks_like_start(rom, a)}
+    pointed = {a for a in candidates if a in found or a in by_import or looks_like_start(rom, a)}
     rejected = sorted(a for a in candidates if a not in pointed and in_main_text(a))
     pointed |= EXTRA_FUNCTION_STARTS
 
@@ -510,7 +516,8 @@ def main():
             out.append(f"got_address = 0x{d.got_vram():08X}")
         out += ["", "functions = ["]
         out += function_lines(starts, dv + dt,
-                              lambda a: registry.get((name, a)) or f"dll{d.number}_{a - dv:04X}", used)
+                              lambda a: registry.get((name, a)) or DLL_MANUAL_NAMES.get((d.number, a - dv))
+                              or f"dll{d.number}_{a - dv:04X}", used)
         out += ["]", ""]
         if d.gp_sets:
             out.append("relocs = [")

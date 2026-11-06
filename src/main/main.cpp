@@ -93,10 +93,8 @@ ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
     return {};
 }
 
-// The game is one player's: port 1 has a controller, any pad or the keyboard, with a pak in it. The game reads the
-// controllers' status for a pak before it opens its Controller Pak save (src/game/controller_pak.cpp), and with none
-// it waits on the save slots' screen for good. ultramodern reports a pak for any Pak but None, and RumblePak is the
-// only other it has.
+// The game is one player's: port 1 has a controller, any pad or the keyboard, with a Rumble Pak in it, which the game
+// looks for (func_80014558 queries the controllers, then osMotorInit). Its saves are on Flash, not a Controller Pak.
 ultramodern::input::connected_device_info_t get_connected_device_info(int controller_num) {
     if (recompinput::players::is_single_player_mode() || recompinput::players::get_player_is_assigned(controller_num)) {
         if (controller_num == 0) {
