@@ -729,3 +729,10 @@ text = '{ void dino_krazoa_gp_timeout(uint8_t*, recomp_context*); dino_krazoa_gp
 func = "dll472_1024"
 before_vram = 0x901EDD60
 text = '{ void dino_krazoa_gp_event(uint8_t*, recomp_context*); dino_krazoa_gp_event(rdram, ctx); }'
+
+# BOSS Drakor and the game's end (src/game/drakor.cpp, whose header has the evidence): a BossDrakor_sequ's update
+# (dll309 0x0124), which tells when sequence 1, Drakor's fall, has ended.
+[[patches.hook]]
+func = "dll309_0124"
+before_vram = 0x9017AC20
+text = '{ void dino_drakor_sequence(uint8_t*, recomp_context*); dino_drakor_sequence(rdram, ctx); }'

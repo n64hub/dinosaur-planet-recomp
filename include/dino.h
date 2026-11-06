@@ -37,6 +37,8 @@ namespace dino {
     void add_mouse_buttons(uint16_t* buttons);
     // The Krazoa shrines' and Cape Claw's Krazoa tablets' settings (krazoa.cpp).
     void add_krazoa_options(recomp::config::Config& general);
+    // Drakor's fight's end setting (drakor.cpp).
+    void add_drakor_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }
