@@ -94,6 +94,26 @@ func = "dll210_A3FC"
 vram = 0x900F247C
 value = 0x240D4653
 
+# Picking up an item (a key, a crystal, a tooth, a SpellStone: a collectable, dll272) plays the player's pickup and
+# then the item's scene, sequence 0 of the player, whose actor list has a placeholder (object 0x443) for the item shown.
+# The pickup names that item to dll3 (gDLL_97c->0x7C, dll3 0x9E58) from its definition (def +0x18, then +6), and
+# dll3_8900 swaps the placeholder for it unless it is -1 (0x8DA0-0x8DC0, the name at data +0xA67C). Most items' is 0,
+# so the scene made object 0, the player (Sabre's definition, dll210): a second player that took the camera, and the
+# scene never ended. An item named 0 keeps the placeholder, as -1 does.
+[[patches.hook]]
+func = "dll3_8900"
+before_vram = 0x900139D4
+text = "{ if (ctx->r3 == 0) goto L_900139D8; }"
+
+# The player's pickup state (dll210_16220, state 42, the player in $s1) starts the item's scene once its animation is
+# done (0x16408-0x16424) and stays in the state with its time at 0, so it starts the scene again each frame until the
+# scene takes the player over, and the repeated starts crashed in dll3_8900 (an actor whose state, +0xB8, was 0). A
+# player already in a sequence (+0xB4 not -1) returns 0 there, as the branch at 0x16400 does, so the scene starts once.
+[[patches.hook]]
+func = "dll210_16220"
+before_vram = 0x900FE208
+text = "{ if (MEM_H(0xB4, ctx->r17) != -1) { ctx->r2 = 0; goto L_900FE2C8; } }"
+
 # func_80011C70, which makes each audio frame, reads the AI's remaining length straight from AI_LEN (0xA4500004),
 # where libultra has osAiGetLength: the runtime's gives it (lw $t9, 4($t8) -> nop, then the hook).
 [[patches.instruction]]
@@ -517,6 +537,38 @@ func = "dll216_02C0"
 before_vram = 0x9011CBBC
 text = "{ int32_t bit = (int16_t)MEM_H(0x39C, ctx->r17); if (ctx->r2 != 0 && bit != -1) { gpr v0 = ctx->r2; ctx->r4 = bit; func_800147EC(rdram, ctx); if (ctx->r2 != 0) goto L_9011CDC0; ctx->r2 = v0; } }"
 
+# Walled City (patches/walled_city.c says what each fixes). A pressure switch's add (dll781_05DC, the switch in $a0,
+# what stands on it in $a1) is done by dino_wc_switch_add in its place.
+[[patches.hook]]
+func = "dll781_05DC"
+before_vram = 0x902CA418
+text = '{ void dino_wc_switch_add(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_switch_add(rdram, &c); if (c.r2) return; }'
+
+# A beacon's update (dll780_011C, the beacon in $a0) has dino_wc_beacon give it a hit volume a player can reach first.
+[[patches.hook]]
+func = "dll780_011C"
+before_vram = 0x902C9938
+text = '{ void dino_wc_beacon(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_beacon(rdram, &c); }'
+
+# BOSS TRex's arena (patches/boss_trex.c says what each fixes). A laser wall's update (dll704_0090, the wall in $a0)
+# asks dino_trex_wall whether its corridor is charged.
+[[patches.hook]]
+func = "dll704_0090"
+before_vram = 0x9028A518
+text = '{ void dino_trex_wall(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_wall(rdram, &c); }'
+
+# The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
+# and dino_trex_beaten gives the SpellStone and the way back in its place.
+[[patches.instruction]]
+func = "dll702_2D98"
+vram = 0x9028874C
+value = 0x00000000
+
+[[patches.hook]]
+func = "dll702_2D98"
+before_vram = 0x90288754
+text = '{ void dino_trex_beaten(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_beaten(rdram, &c); }'
+
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),
 # but func_80037A14's fills stop a pixel short of the frame's width and its later scissor doesn't, so they'd stay in the
@@ -729,3 +781,4 @@ text = '{ void dino_krazoa_gp_timeout(uint8_t*, recomp_context*); dino_krazoa_gp
 func = "dll472_1024"
 before_vram = 0x901EDD60
 text = '{ void dino_krazoa_gp_event(uint8_t*, recomp_context*); dino_krazoa_gp_event(rdram, ctx); }'
+

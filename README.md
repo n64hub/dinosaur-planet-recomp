@@ -63,6 +63,12 @@ Fixed:
 - Cape Claw's Krazoa tablets (Krazoa Tablets on Restored): the third tablet, which the prototype never placed, is
   found where the sand worm fell, and the tablet room's last puzzle, which led nowhere, opens a Transporter to Krazoa
   Palace.
+- Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
+  ended, and could crash.
+- Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
+  so the city's slab door never opened.
+- BOSS TRex: its laser walls never fired, so it couldn't be hurt, and beating it went back to the title with no
+  SpellStone. Now the stone is carried out, through the arena's own way back to Walled City.
 
 Under way:
 

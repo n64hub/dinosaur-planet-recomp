@@ -256,6 +256,39 @@ never has: the eels load hidden beside the fight. `--bits 3b7=1024,1eb,1eb@30` p
 first eel: the constructor clears 0x1EB and sets 0x22A, and 0x1EB set again at 30 s, the first eel beaten again, has
 the worm turn group 11 on with that eel hidden.
 
+## Walled City and BOSS TRex
+
+`--story before-walled-city` starts Sabre in Walled City's corridor (warp 91). From there to the third SpellStone, as
+played:
+
+- The beacons. Each of the two pressure switches (WCPressureSwitc, 781) arms its beacon (WCBeacon, 780) for about a
+  minute (0x7EF, 0x7F0), and any hit lights an armed one (0x7F9, 0x7FA). With both lit, WCLevelControl (779) plays
+  its sequence 0, which sets the slab door's locks 0x7F7 and 0x802 (779 0x12F8). The door leads down to the chamber
+  under the city (group 4). A switch that was stood on crashed the game, and no attack reached a beacon
+  (`patches/walled_city.c`).
+- The teeth. The two RedEye teeth (WCTrexTooth, a collectable, 272) lie in that chamber, at local (856,-1112,-4932)
+  and (1011,-1114,-4933), and A picks one up: 0x81E the sun's, 0x81D the moon's. Picking up any item hung the game
+  (us.toml, beside dll3_8900). Bats fly there and take A's target, and a sword swing steps the player out of a tooth's
+  pickup radius of 15, so the player stands on the tooth with no bat in front.
+- The statues. A WCInvUseObj (785) beside each statue takes its tooth: C-right, then A with the tooth chosen. It plays
+  the statue's sequence and sets 0x25A (sun) or 0x25B (moon).
+- The boss door (WCBossDoor, 307) opens a half on each of 0x25A and 0x25B. Sabre then walks down between the statues
+  to a plane, which sets 0x81B, and to the WarpPoint (275) it shows, which goes to warp 90, BOSS TRex (map 48). The
+  door's sequence would set 0x819 at its event 2 (307 0x5A4-0x5E4), but nothing on the way needs it.
+- BOSS TRex. The arena is a ring of laser walls (704) and floor switches (703), and the TRex has 4 health. A wall that
+  fires as the TRex passes it stuns it, which leaves it open for 600 frames, and a hit of type 2 or 3 then costs
+  it one health. No wall ever fired. Once beaten, it loaded the front end and gave no stone. It now gives 0x83B and
+  opens the player's door and the WarpPoint (0x81C) back to warp 91 (`patches/boss_trex.c`).
+
+The task list has more here than the ROM:
+
+- Tasks 76 and 77, the Queen and Tricky's mother: the Queen (WCQueenEarthWal, 773) has code, but no map places
+  her, and she reads and sets no bit.
+- Task 78, ten RedEye teeth: the chases (WCTrexChase, 777, and WCSabreChase, 778) are empty DLLs, placed nowhere.
+  The two RedEyes (WCTrex, 775) give no tooth, and the two teeth above are all the ROM holds.
+- Task 83, the King activating the stone: the King (WCKingEarthWalk, 774) talks once a load (0x7FB, sequence 2 of
+  seqobject 411bc) and sets nothing else, and nothing in Walled City or the arena sets 0x83B.
+
 ## The warp table
 
 ROM file 30 has 96 entries of 16 bytes, x, y, z and a layer, read by `func_8004D1D4`. 54 hold a place and 42 are all
