@@ -1,0 +1,310 @@
+# N64Recomp's configuration for Dinosaur Planet's December 2000 prototype, MD5 49f7bb346ade39d1915c22e090ffd748: it reads
+# the game's code by the symbols in syms/ (tools/gen_syms.py, from the ROM alone) and writes RecompiledFuncs/
+# (tools/recompile.sh). The code is stored raw in the ROM, so there is nothing to decompress first.
+[input]
+# The ROM header's entrypoint, the start of the main segment.
+entrypoint = 0x80000400
+# Paths are relative to this file.
+symbols_file_path = "syms/dinoplanet.syms.toml"
+rom_file_path = "roms/dinoplanet.z64"
+output_func_path = "RecompiledFuncs"
+use_absolute_symbols = true
+
+[patches]
+# func_80014598, the first thing the game's main thread calls, writes 0x4040 to 0xBC000C02, a register of the
+# development hardware the prototype ran on: a console has nothing there, and neither does the runtime.
+stubs = ["func_80014598"]
+
+# The DLLs (tools/gen_syms.py's header says what one is). func_8000C3CC loads one: it allocates its memory, reads it
+# from ROM file 70 (offset 0x30($sp), size 0x2C($sp)) into it ($s0), clears its bss, relocates it and flushes the
+# caches. Once it has, the runtime maps the DLL's section there (src/game/dlls.cpp), so that the game's calls through
+# its exports, its GOT and the pointers it hands out reach its functions, and its $gp is its GOT's address.
+[[patches.hook]]
+func = "func_8000C3CC"
+before_vram = 0x8000C484
+text = "{ void dino_dll_loaded(uint8_t*, recomp_context*); dino_dll_loaded(rdram, ctx); }"
+
+# func_8000C258 unloads one when nothing holds it any more (its count in the table at 0x800A7D10 reaches 0): it calls its
+# destructor, fills its text with break instructions and
+# frees its memory ($a0 at the free): the runtime takes its section back out first, so that memory reused for another
+# DLL or anything else is not called as this one.
+[[patches.hook]]
+func = "func_8000C258"
+before_vram = 0x8000C340
+text = "{ void dino_dll_unloading(uint8_t*, recomp_context*); dino_dll_unloading(rdram, ctx); }"
+
+# func_8001B4F0 (tools/gen_syms.py, ONE_FUNCTION) jumps through a table of words at 0x80090444, indexed by a byte of the
+# model's that it has checked is not 0. The table's only entry but the first is at index 1, 0x8001C8B8, and the rest
+# are 0, which no console could jump to: so the jump goes there, as N64Recomp can follow. (jr $s1 -> j 0x8001C8B8)
+[[patches.instruction]]
+func = "func_8001B4F0"
+vram = 0x8001C8B0
+value = 0x0800722E
+
+# func_80001220 checks the cartridge at boot: it waits for the PI to be idle (PI_STATUS, 0xA4600010) and reads the word
+# at ROM offset 0x578 straight from the cartridge's address (0xB0000578), and sets the byte at 0x8008C520 when its low
+# half isn't 0x8965. The runtime maps neither, so the wait reads idle (lw $v0, 0($v1) -> or $v0, $zero, $zero) and the
+# word comes from the ROM the runtime holds (lw $t1, 0x578($t9) -> nop, then the hook; src/game/cartridge.cpp).
+[[patches.instruction]]
+func = "func_80001220"
+vram = 0x800012D8
+value = 0x00001025
+
+[[patches.instruction]]
+func = "func_80001220"
+vram = 0x80001300
+value = 0x00000000
+
+[[patches.hook]]
+func = "func_80001220"
+before_vram = 0x80001304
+text = "{ uint32_t dino_rom_word(uint32_t); ctx->r9 = (int32_t)dino_rom_word(0x578); }"
+
+# The development hardware's signature, "LSFS" or "MPFS" in the halfwords at 0xBC000000 and 0xBC000002, which the
+# game reads in three places: func_800145AC, each pass of the main thread's loop, zeroes memory from 0x80000000 to
+# 0x80400000 without it, and dll3 and dll210 each call a function of theirs with 0x100000. The runtime maps nothing
+# there, so each pair of reads gives "LSFS", as on that hardware (lh -> addiu of 0x4C53 and 0x4653).
+[[patches.instruction]]
+func = "func_800145AC"
+vram = 0x800145B0
+value = 0x24024C53
+
+[[patches.instruction]]
+func = "func_800145AC"
+vram = 0x800145B8
+value = 0x24194653
+
+[[patches.instruction]]
+func = "dll3_60AC"
+vram = 0x90011074
+value = 0x24024C53
+
+[[patches.instruction]]
+func = "dll3_60AC"
+vram = 0x9001107C
+value = 0x24084653
+
+[[patches.instruction]]
+func = "dll210_A3FC"
+vram = 0x900F2474
+value = 0x24024C53
+
+[[patches.instruction]]
+func = "dll210_A3FC"
+vram = 0x900F247C
+value = 0x240D4653
+
+# func_80011C70, which makes each audio frame, reads the AI's remaining length straight from AI_LEN (0xA4500004),
+# where libultra has osAiGetLength: the runtime's gives it (lw $t9, 4($t8) -> nop, then the hook).
+[[patches.instruction]]
+func = "func_80011C70"
+vram = 0x80011CC0
+value = 0x00000000
+
+[[patches.hook]]
+func = "func_80011C70"
+before_vram = 0x80011CC4
+text = "{ void osAiGetLength_recomp(uint8_t*, recomp_context*); uint64_t v0 = ctx->r2; osAiGetLength_recomp(rdram, ctx); ctx->r25 = ctx->r2; ctx->r2 = v0; }"
+
+# The game's hand-written math (its matrix, vector and spline routines, the conversion of a float matrix into the
+# fixed-point one the RSP reads, and the skinning of its models) uses the odd float registers as registers of their
+# own, as the CPU does with Status.FR set: libultra's C code is built for FR clear, where an odd register is the high
+# half of the even one before it, and N64Recomp's moves to and from an odd register follow the mode the runtime is in
+# while its arithmetic always reads the separate one. In the runtime's default mode (FR clear) a constant moved into
+# $f13 and multiplied by it reads 0, so every matrix these make is 0 and nothing in the world is drawn. Each of them
+# runs in FR set from its first instruction and goes back to FR clear before each of its returns. None of them calls
+# another or uses a double, and their float arguments come in even registers. func_8001B4F0's subroutines return
+# within it ($ra inside it), so only a return to its caller goes back.
+
+[[patches.hook]]
+func = "func_80014FEC"
+before_vram = 0x80014FEC
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80014FEC"
+before_vram = 0x800150DC
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_800150E4"
+before_vram = 0x800150E4
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_800150E4"
+before_vram = 0x800151FC
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80015204"
+before_vram = 0x80015204
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80015204"
+before_vram = 0x80015290
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80015330"
+before_vram = 0x80015330
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80015330"
+before_vram = 0x800154CC
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_800154D4"
+before_vram = 0x800154D4
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_800154D4"
+before_vram = 0x8001557C
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80015BB8"
+before_vram = 0x80015BB8
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80015BB8"
+before_vram = 0x80015C68
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001621C"
+before_vram = 0x8001621C
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001621C"
+before_vram = 0x80016254
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001625C"
+before_vram = 0x8001625C
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001625C"
+before_vram = 0x80016290
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80016298"
+before_vram = 0x80016298
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80016298"
+before_vram = 0x800162C0
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_800162C8"
+before_vram = 0x800162C8
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_800162C8"
+before_vram = 0x800162EC
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80016348"
+before_vram = 0x80016348
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80016348"
+before_vram = 0x800163F8
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80016348"
+before_vram = 0x8001643C
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_800164A0"
+before_vram = 0x800164A0
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_800164A0"
+before_vram = 0x80016574
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001B4F0
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001BCE8
+text = '{ if ((uint32_t)ctx->r31 - 0x8001B4F0u >= 0x13E4u) { ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; } }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001BE1C
+text = '{ if ((uint32_t)ctx->r31 - 0x8001B4F0u >= 0x13E4u) { ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; } }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001C07C
+text = '{ if ((uint32_t)ctx->r31 - 0x8001B4F0u >= 0x13E4u) { ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; } }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001C898
+text = '{ if ((uint32_t)ctx->r31 - 0x8001B4F0u >= 0x13E4u) { ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; } }'
+
+[[patches.hook]]
+func = "func_8001C8D4"
+before_vram = 0x8001C8D4
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001C8D4"
+before_vram = 0x8001CA9C
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001CAA4"
+before_vram = 0x8001CAA4
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001CAA4"
+before_vram = 0x8001CCF0
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001F890"
+before_vram = 0x8001F890
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001F890"
+before_vram = 0x8001FF18
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001F890"
+before_vram = 0x800202E0
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+# --warp (src/main/main.cpp, development): func_800145AC runs once a pass of the main thread's loop, and at its start
+# asks whether a warp is due; if one is, it calls the game's warp, func_8004D1D4 (the entry's index, then 0 for no
+# fade), as the game's own warps do, and goes on with the registers it had.
+[[patches.hook]]
+func = "func_800145AC"
+before_vram = 0x800145AC
+text = '{ int dino_warp_due(void); int w = dino_warp_due(); if (w >= 0) { recomp_context saved = *ctx; ctx->r4 = w; ctx->r5 = 0; func_8004D1D4(rdram, ctx); *ctx = saved; } }'

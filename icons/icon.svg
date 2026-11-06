@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14204a"/><stop offset="0.65" stop-color="#3a6b8c"/><stop offset="1" stop-color="#9fd0b4"/></linearGradient>
+<radialGradient id="planet" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#ffe9a8"/><stop offset="0.55" stop-color="#e98f3c"/><stop offset="1" stop-color="#8a3a1c"/></radialGradient>
+<clipPath id="front"><rect x="0" y="92" width="256" height="40"/></clipPath>
+<clipPath id="tile"><rect x="8" y="8" width="240" height="240" rx="44"/></clipPath>
+</defs>
+<g clip-path="url(#tile)">
+<rect width="256" height="256" fill="url(#sky)"/>
+<circle cx="56" cy="44" r="3" fill="#ffffff" opacity="0.8"/><circle cx="210" cy="30" r="2" fill="#ffffff" opacity="0.7"/><circle cx="34" cy="96" r="2" fill="#ffffff" opacity="0.6"/><circle cx="226" cy="104" r="2.5" fill="#ffffff" opacity="0.6"/>
+<ellipse cx="136" cy="92" rx="92" ry="20" fill="none" stroke="#f6d7a0" stroke-width="7" opacity="0.55" transform="rotate(-16 136 92)"/>
+<circle cx="136" cy="92" r="52" fill="url(#planet)"/>
+<g transform="rotate(-16 136 92)"><ellipse cx="136" cy="92" rx="92" ry="20" fill="none" stroke="#f6d7a0" stroke-width="7" clip-path="url(#front)"/></g>
+<circle cx="60" cy="58" r="10" fill="#cfe3f0"/>
+<path d="M 0 256 L 0 196 Q 64 168 128 186 Q 192 204 256 180 L 256 256 Z" fill="#1d4a3a"/>
+<path d="M 52 206 C 52 196 60 190 72 190 L 116 190 C 128 190 136 182 142 168 C 148 152 152 136 162 128 C 170 122 180 124 182 130 C 176 130 170 134 166 142 C 160 156 156 174 154 190 C 166 194 190 198 214 214 C 196 210 176 208 158 208 L 154 228 L 144 228 L 144 210 L 98 210 L 96 228 L 86 228 L 84 210 L 70 210 C 62 210 52 210 52 206 Z" fill="#0f2a22"/>
+<path d="M 18 256 C 22 228 30 212 40 204 M 40 204 C 30 210 22 212 14 210 M 40 204 C 34 196 28 192 20 190 M 236 256 C 232 230 226 216 216 208 M 216 208 C 226 212 234 214 242 212 M 216 208 C 222 200 230 196 238 194" stroke="#0f2a22" stroke-width="6" fill="none" stroke-linecap="round"/>
+</g>
+<rect x="8" y="8" width="240" height="240" rx="44" fill="none" stroke="#0b1530" stroke-width="4"/>
+</svg>
