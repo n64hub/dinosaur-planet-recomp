@@ -191,8 +191,8 @@ text = "{ if (ctx->r4 == 0) goto L_902C58D8; }"
 
 # An object that fails to be made: func_800213EC makes one through func_8001275C into 0x2C($sp) and hands it to
 # func_80021A84 with no test, which reads its +0x30 at once, and with none there that is a read of address 0x30. It
-# came after Golden Plains' shrine was won, from its fly baddie's spawn (dll475 0x8C0). func_80021A84 with no object
-# returns at once, and func_800213EC returns the 0 it got, which the fly baddie tests (0x8D4).
+# came in Golden Plains' shrine from its fly baddie's shot (dll475 0x8C0), which asked for a second player (below).
+# func_80021A84 with no object returns at once, and func_800213EC returns the 0 it got, which its callers test.
 [[patches.hook]]
 func = "func_80021A84"
 before_vram = 0x80021A84
@@ -551,6 +551,30 @@ text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_
 func = "dll611_04B4"
 before_vram = 0x90246F40
 text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_release_mask(rdram, ctx); }'
+
+# Cape Claw's shrine (dll486): its test is one SabreBaddie, which CCSH_ObjCreator (dll487) spawns with kill bit 0x1E7,
+# as Discovery Falls' creator does. State 2 waited for 0x5B2 instead, a bit nothing in the ROM sets, so the test never
+# ended: it reads 0x1E7, and its reset clears 0x1E7 (addiu $a0, $zero, 0x5B2 -> 0x1E7 at 0x7C0 and 0x998). The shrine
+# isn't reached without the Krazoa shrines' ways in.
+[[patches.instruction]]
+func = "dll486_01EC"
+vram = 0x901F5E1C
+value = 0x240401E7
+
+[[patches.instruction]]
+func = "dll486_01EC"
+vram = 0x901F5FF4
+value = 0x240401E7
+
+# Golden Plains' fly baddie (dll475) shoots by making an object from a placement record it zeroes and never gives an
+# id, so each shot asked for object 0, the player (Sabre's definition, dll210): a second player where the fly baddie
+# flew, which took the camera and the game with it, or, with the object heap full, nothing (the guard above). What it
+# writes into the shot (a velocity at +0x24, a lifetime at +0xDC, +0xE0) is a projball's (object 0x14B, dll255), which
+# the record now asks for, before func_800213EC makes it (0x8C0).
+[[patches.hook]]
+func = "dll475_07F8"
+before_vram = 0x901EF4FC
+text = "{ if (MEM_H(0, ctx->r4) == 0) MEM_H(0, ctx->r4) = 0x14B; }"
 
 # Willow Grove's shrine (dll488): state 3 on GET_BIT(0x1D1)'s answer (0x8FC), and state 4, its win (0xA18).
 [[patches.hook]]
