@@ -115,14 +115,18 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
 - Dragon Rock - Top (map 2) and - Bottom (52), and BOSS Kamerian Dragon (53), placed in full. Their cells join Willow
   Grove's at layer 0, so they are reached on foot; no code warps there by number. DR_SupPortal (754) on the top warps
   to the bottom (warp 88). The Kamerian Dragon's room boots and fights: its acid takes the player's health.
-- BOSS Drakor (44): the fight is built and plays, but it never ends. No warp entry and no map of the story reaches
-  it: its cells touch no other map's, and the only code that starts it is dll70, the prototype's own development warp
-  menu (`func_800141A4(44, ...)`). Drakor (697) starts with 24 health (+0x348, set by dll33's start-up, 0x20F4), and
-  nothing lowers it: a hit (697 0x0838) only sends him to his second state, which lets the Diamond go (BossDrakorLevel,
-  692 0x02F8: 0x7C6, and 0x7C5 as the state ends), and he has no death state. Walking to the Diamond while it is let
-  go sets 0x7AE (692 0x0FE0), which plays the map's sequence 1 once and sets 0x7AF. Nothing reads 0x7AF, and none of
-  the map's four BossDrakor_sequ (309) holds a warp entry: no map, warp or credits follows. Played two minutes with
-  the player attacking, the level went 0x7AC (its intro), 0x7C6, 0x7C5, 0x7C6 again, the player's health 12/12.
+- BOSS Drakor (44): the fight is built and is won, but nothing followed the win. No warp entry and no map of the story
+  reaches it: its cells touch no other map's, and the only code that starts it is dll70, the prototype's own
+  development warp menu (`func_800141A4(44, ...)`). Drakor (697) starts with 24 health (+0x348, set by dll33's
+  start-up, 0x20F4), and nothing lowers it, nor needs to: a hit (697 0x0838) sends him to his second state, which lets
+  the Diamond go (BossDrakorLevel, 692 0x02F8: 0x7C6, sequence 2), and the player, Drakor and the Diamond drop into the
+  room under the fight. Walking to the Diamond there sets 0x7AE (692 0x0FE0), which plays sequence 1, Drakor's fall
+  (and sets 0x7AF, which nothing reads). His second state gives the player 43 s from the hit; then the Diamond goes
+  back (0x7C5, sequence 3) and the fight goes on. Sequence 1 sends no event and none of the map's four
+  BossDrakor_sequ (309) holds a warp entry, so on the console the fight starts again after his fall. The Ending
+  setting, Restored, goes back to the title there (`src/game/drakor.cpp`). Played from `before-drakor` with
+  `--input`: A every half second from 12 s to 25.6 s hits him (0x7C6 at 25 s), the stick held up from 27 s walks the
+  player to the Diamond (0x7AE at 47-49 s), and the title follows at 82 s.
 - Cape Claw's Krazoa tablets: file 55 gives bits to tasks 133 to 136 (0x238, 0x239, 0x237, 0x3AC), which the task
   list names only as placeholders. The three receptacles (CCkrazoaRecepta, 308) take tablets counted in 0x23B and
   are done as 0x238 to 0x23A; CCkrazoaTablet (459) sets 0x3A9 once all three are placed. CCkrazoaBits (458) counts
