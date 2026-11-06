@@ -128,16 +128,22 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   a tablet into 0x23B and sets 0x23C for each of 0x234, 0x236 and 0x237 newly set: 0x234 by a TriggerPlane in
   Discovery Falls, 0x236 by the tablet (CCKrazoaTabletP) in Cape Claw's settlement room, behind the door
   (CCsettlementroo, 307) that 0x23C opens. Nothing sets 0x237: the third tablet is not in the ROM. CCkrazoabright
-  (457) runs the room's puzzle in states: the perch switches' lights, the two levers (0x41E, 0x604), then the three
-  beacons with the three tablets placed, then the lights again; it starts at its later states from 0x393, 0x4D6
-  and 0x3AC, and only 0x4D6 is set by code. (A LevelName's +0x1E, as Drakor's 0x237, is a text, not a bit.)
+  (457) runs the room's puzzle in states: the perch switches' lights (sequence 0, whose data sets 0x393), the two
+  levers (0x41E, 0x604; 0x4D6 and sequence 1), then the three beacons with the three tablets placed (sequence 3,
+  whose data sets 0x3AC), then the lights again (sequence 5); it starts at its later states from 0x393, 0x4D6 and
+  0x3AC. The last lights end in a state with no handler, and sequence 5 sets no bit and warps nowhere: played to it,
+  the room stays as it is. (A LevelName's +0x1E, as Drakor's 0x237, is a text, not a bit.) Krazoa Tablets on
+  Restored, the default, places the third tablet in the sand worm's arena once the worm is dead, and the last lights
+  set 0x52B, which shows a Transporter in the tablet room to Krazoa Palace's east end (warp entry 94; 72 is its own,
+  93 the palace's west Transporter). `src/game/krazoa.cpp`'s header has the evidence.
 - Krazoa Palace (3): its rooms are built and it boots and plays at its setuppoints, but of its 19 objects (KP_*, the
   four consoles, the red Krazoa, the doors) none is placed. It holds mushrooms, crates and two KP_Transporters, each
   beside a setuppoint and each sending to the other's entry, 93 and 94, both zero. Its zone planes mark a hub and
   four wings, and the unplaced objects are a wing's each: a console and a text block (KP_textblock, 654, the Desert
   Force Point's DFP_Textblock: +0x19 its sequence, +0x1E its done bit, +0x20 the bit it needs) for fire, earth, water
   and magic, the section doors and the last door (307), and the red Krazoa. Its cells join only Cape Claw's, whose
-  edge there is water: nothing in the ROM leads in.
+  edge there is water: nothing in the ROM leads in. Its east end has the local coordinates of Cape Claw's tablet room,
+  and Krazoa Tablets on Restored leads in from there (above), filling entries 93 and 94.
 - CloudRunner - TrapRooms (17), Krazoa Shrine (20), krazchamber (22) and MikesLava (49) have no record in file 21:
   nothing reaches them.
 

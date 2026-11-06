@@ -95,7 +95,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   (map 11), whose act (bit 0xE4) each win moves on. The prototype reaches three from the world and has no step at
   Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Finished by default, finishes them out
   of what the ROM holds, and Original leaves them as the console plays them (`src/game/krazoa.cpp`'s header has the
-  order, the bits and the evidence).
+  order, the bits and the evidence). Its Krazoa Tablets setting, Restored by default, does the same for Cape Claw's
+  tablet room: the third tablet and the way on to Krazoa Palace.
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
