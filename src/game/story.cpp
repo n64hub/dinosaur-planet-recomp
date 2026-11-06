@@ -29,6 +29,11 @@ namespace {
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
     constexpr int32_t current_menu = 0x800A7D84;
+    // The game boots in a 640x480 mode for its logos, and dll63 and dll65 drop to play's 320x240 with this, mode 1 and the
+    // settings func_80014604 returns. A level played at 640x480 draws over its own Z buffer, sized for 320x240, and a
+    // third of the frames show depth as colour.
+    constexpr int32_t set_video_mode = 0x8005D410;
+    constexpr int32_t video_settings = 0x80014604;
     // What dll63, the front end, calls with 1 before it starts play: each changes a flag in the word at 0x80092A98,
     // and without them the objects aren't drawn and the opening's textures are wrong.
     constexpr int32_t play_flag_2000 = 0x80041D20;
@@ -188,6 +193,11 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     const StoryPoint& point = *chosen;
     ctx->r4 = 0;
     call(rdram, ctx, set_paused);
+    call(rdram, ctx, video_settings);
+    ctx->r5 = ctx->r2;
+    ctx->r4 = 1;
+    ctx->r6 = 0;
+    call(rdram, ctx, set_video_mode);
     ctx->r4 = (uint32_t)-1;
     ctx->r5 = 0;
     call_dll29(rdram, ctx, 1);
