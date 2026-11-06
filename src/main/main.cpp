@@ -389,6 +389,10 @@ static double script_seconds() {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - script_clock_start).count();
 }
 
+extern "C" double dino_script_seconds() {
+    return script_seconds();
+}
+
 // --warp <index>@<seconds>[,<index>@<seconds>...] (development): at each time on the --input clock, warp the player to
 // that entry of the game's warp table (ROM file 30, 16 bytes an entry: the position and its layer), as the game's own
 // warps do. The game's main loop asks once a pass (us.toml's hook on func_800145AC), so the warp runs on its thread.
@@ -412,7 +416,8 @@ extern "C" int dino_warp_due() {
 // default, start a run from that point of the story, at that entry of the warp table if one is given. --place
 // <x>,<y>,<z>[,<layer>] starts it there instead, and --bits <hex>[=<value>],... sets more of the game's bits at that
 // start. From the start on, or from the first pass with --report, a line a second says where the player is. The same
-// hook as --warp's, so this runs on the game's main thread too.
+// hook as --warp's, so this runs on the game's main thread too. --watch-bits <hex>,...|all prints a line each time the
+// game sets one of those bits, or with all each time a bit changes (story.cpp).
 static bool story_due = false;
 static double story_at = 2.0;
 static double story_reported = -1.0;
@@ -539,6 +544,9 @@ int main(int argc, char** argv) {
         }
         else if (strcmp(argv[i], "--bits") == 0 && i + 1 < argc) {
             dino::story_add_bits(argv[++i]);
+        }
+        else if (strcmp(argv[i], "--watch-bits") == 0 && i + 1 < argc) {
+            dino::story_watch_bits(argv[++i]);
         }
         else if (strcmp(argv[i], "--stacks") == 0 && i + 1 < argc) {
             print_stacks_after(atof(argv[++i]));

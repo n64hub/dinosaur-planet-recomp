@@ -1,5 +1,5 @@
 // --story, --place and --bits (development, src/main/main.cpp reads them): start a run from a chosen point of the
-// story, for what a warp can't set. docs/story-points.md lists the points and what each bit is, with its evidence from
+// story, for what a warp can't set. --watch-bits says each time the game sets a bit, for what a test changes. docs/story-points.md lists the points and what each bit is, with its evidence from
 // the ROM.
 //
 // The story is the game's bits: func_80014670 sets one and func_800147EC reads one, a number that the table in ROM file
@@ -11,6 +11,7 @@
 // set and the place stored before export 7, since export 7 keeps a copy that a retry restores. func_800142F0 is the
 // rolling demo, not a new game.
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -22,11 +23,13 @@
 #include "dino.h"
 
 extern "C" uint32_t dino_rom_word(uint32_t offset);
+extern "C" double dino_script_seconds();
 
 namespace {
     constexpr int32_t dll29_handle = 0x8008C9F4; // the pointer the game keeps to its loaded dll29
     constexpr int32_t save_pointer = 0x800AE2A0; // the save in dll29's bss, which func_80014670 writes to
     constexpr int32_t set_bit = 0x80014670;
+    constexpr int32_t get_bit = 0x800147EC;
     constexpr int32_t player_object = 0x80023914;
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
@@ -109,6 +112,8 @@ namespace {
     const StoryPoint* chosen = &points[0];
     std::vector<StoryBit> extra_bits;
     int chosen_warp = -1;
+    std::vector<int> watched_bits;
+    bool watch_all_bits = false;
     bool place_given = false;
     Place given_place{};
 
@@ -180,6 +185,32 @@ void dino::story_add_bits(const char* list) {
         if (sscanf(p, "%x=%d", &b.bit, &b.value) >= 1) {
             extra_bits.push_back(b);
         }
+    }
+}
+
+void dino::story_watch_bits(const char* list) {
+    watch_all_bits = strcmp(list, "all") == 0;
+    for (const char* p = list; !watch_all_bits && p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
+        int bit;
+        if (sscanf(p, "%x", &bit) == 1) {
+            watched_bits.push_back(bit);
+        }
+    }
+}
+
+// us.toml's hook at the start of func_80014670, which sets bit $a0 to $a1: a watched bit's line says the value it had,
+// and with "all" only a bit that changes has one.
+extern "C" void dino_bit_setting(uint8_t* rdram, recomp_context* ctx) {
+    int bit = (int32_t)ctx->r4, value = (int32_t)ctx->r5;
+    if (!watch_all_bits && std::find(watched_bits.begin(), watched_bits.end(), bit) == watched_bits.end()) {
+        return;
+    }
+    recomp_context saved = *ctx;
+    call(rdram, ctx, get_bit);
+    int old = (int32_t)ctx->r2;
+    *ctx = saved;
+    if (!watch_all_bits || old != value) {
+        fprintf(stderr, "bits: %.1f s 0x%X = %d, was %d\n", dino_script_seconds(), bit, value, old);
     }
 }
 

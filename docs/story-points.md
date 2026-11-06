@@ -16,6 +16,9 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
 - `--bits <hex>[=<value>],...` sets more of the game's bits at the start, after the point's own.
 - `--report` prints a line a second, from the start or from the game's first pass without `--story`: the clock, the map
   number, the position and the health. A run's `--story:` line says what started.
+- `--watch-bits <hex>,...` prints a `bits:` line each time the game sets one of those bits, with the clock, the value
+  and the one it had, and `--watch-bits all` one each time any bit changes: what a test or a cutscene sets, as it
+  happens. With or without `--story`.
 
 `src/game/story.cpp` holds the points, and `src/main/main.cpp` reads the options.
 

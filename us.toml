@@ -309,3 +309,10 @@ text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
 func = "func_800145AC"
 before_vram = 0x800145AC
 text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int w = dino_warp_due(); if (w >= 0) { ctx->r4 = w; ctx->r5 = 0; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
+
+# --watch-bits (src/game/story.cpp, development): func_80014670 sets the bit in $a0 to the value in $a1, and at its start
+# says so when the bit is watched.
+[[patches.hook]]
+func = "func_80014670"
+before_vram = 0x80014670
+text = '{ void dino_bit_setting(uint8_t*, recomp_context*); dino_bit_setting(rdram, ctx); }'

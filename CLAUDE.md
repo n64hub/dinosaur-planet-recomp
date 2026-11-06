@@ -86,5 +86,6 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   game's bits, the character and the place set as the save would have them, in memory and with nothing written to
   Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>]`
   starts it somewhere the warp table has no entry, `--bits <hex>[=<value>],...` sets more bits, and `--report` prints
-  a line a second with the map, the position and the health. `docs/story-points.md` has the points, each bit's
+  a line a second with the map, the position and the health; `--watch-bits <hex>,...|all` prints each bit the game
+  sets as it plays. `docs/story-points.md` has the points, each bit's
   evidence and the warp table's map: each index, its area and what it needs. None of it is in a player's menus.
