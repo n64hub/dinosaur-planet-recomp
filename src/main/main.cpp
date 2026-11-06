@@ -494,7 +494,10 @@ static void take_web_options() {
 }
 #endif
 
+void watch_writes_arm(uint8_t* rdram);
+
 extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
+    watch_writes_arm(rdram);
 #ifdef __EMSCRIPTEN__
     take_web_options();
 #endif
@@ -578,6 +581,7 @@ void reorder_texture_pack(recomp::mods::ModContext&) {
 
 void install_crash_trace();
 void print_stacks_after(double seconds);
+void watch_writes(const char* spec);
 
 int main(int argc, char** argv) {
     install_crash_trace();
@@ -600,6 +604,9 @@ int main(int argc, char** argv) {
         }
         else if (strcmp(argv[i], "--stacks") == 0 && i + 1 < argc) {
             print_stacks_after(atof(argv[++i]));
+        }
+        else if (strcmp(argv[i], "--watch") == 0 && i + 1 < argc) {
+            watch_writes(argv[++i]);
         }
     }
 
