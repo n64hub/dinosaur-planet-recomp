@@ -13,9 +13,13 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
 - `--story <point>[@<seconds>][,<warp>]` starts from that point, 2 s after the game's first controller read unless
   told, at the point's own place or at that entry of the warp table.
 - `--place <x>,<y>,<z>[,<layer>]` starts there instead, for a place the warp table has no entry for.
-- `--bits <hex>[=<value>],...` sets more of the game's bits at the start, after the point's own.
+- `--bits <hex>[=<value>][@<seconds>],...` sets more of the game's bits at the start, after the point's own, or one
+  given a time when the `--input` clock reaches it: what a test's own object sets, for a test a script can't play.
 - `--report` prints a line a second, from the start or from the game's first pass without `--story`: the clock, the map
   number, the position and the health. A run's `--story:` line says what started.
+- `--watch-bits <hex>,...` prints a `bits:` line each time the game sets one of those bits, with the clock, the value
+  and the one it had, and `--watch-bits all` one each time any bit changes: what a test or a cutscene sets, as it
+  happens. With or without `--story`.
 
 `src/game/story.cpp` holds the points, and `src/main/main.cpp` reads the options.
 

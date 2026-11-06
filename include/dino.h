@@ -15,13 +15,15 @@ namespace dino {
     void register_overlays();
     void register_patches();
 
-    // --story, --place, --bits and --report (story.cpp, development).
+    // --story, --place, --bits, --report and --watch-bits (story.cpp, development).
     bool story_choose(const char* name);
     void story_add_bits(const char* list);
+    void story_watch_bits(const char* list);
     void story_set_warp(int index);
     void story_set_place(const char* list);
     void story_start(uint8_t* rdram, recomp_context* ctx);
     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
+    void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
 
     // The settings (config.cpp): RecompFrontend's tabs.
     void init_config();
@@ -30,6 +32,8 @@ namespace dino {
     void init_camera();
     void add_camera_options(recomp::config::Config& general);
     void add_mouse_buttons(uint16_t* buttons);
+    // The Krazoa shrines' setting (krazoa.cpp).
+    void add_krazoa_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }
