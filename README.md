@@ -52,8 +52,8 @@ Under way:
   with the white mushrooms she is given, and the well.
 - The Krazoa shrines: all eight finished, a way into the five that have none, and their spirits taken to Warlock
   Mountain.
-- Crashes in the game's own code still to find: the Magic Plant, being sent out of the shop, the skeletons' hits,
-  small baskets carried away, and a crash after a long while in Cape Claw.
+- Crashes in the game's own code still to find: the skeletons' hits, small baskets carried away, and a crash after a
+  long while in Cape Claw.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
 
 ## The ROM
