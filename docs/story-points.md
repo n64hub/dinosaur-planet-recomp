@@ -220,6 +220,30 @@ them. SwapStone Circle's small baskets and crates are in its group 1, which the 
 to 2 (`--story new-game,88 --bits 5dc=7`): DR_Creator (738) sends Skeetlas (615), at most 20, at DR_EarthWarrior
 (713), in group 2 at (1576, -1831, -6066), the only object they go for there.
 
+## The maps' acts
+
+Besides its groups, each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets,
+numbered by the u16 at +0x1F90 + 2 × map in dll29's data: 0x4FE the Volcano Force Point (4), 0x3EE Diamond Bay (35),
+0xE6 Walled City (13). A new game puts every map in act 1 (dll29 0x300-0x334), and the object loader
+(`func_8004B4A0`) skips a placement whose byte +3 has bit act - 1 set (byte +5 for acts 9 to 16), so a map holds
+other objects in each act. A level's control object sets its act, or a sequence does (dll3's event 0x1D, the act of
+the map the playing object is in), and ROM file 13 holds one such event, which sets act 3.
+
+`src/game/acts.cpp` moves two maps' acts with the story, at each map load (the header has the evidence), and
+`DINO_LOG_ACTS=1` prints each act it moves:
+
+- The Volcano Force Point: act 2 while Walled City's SpellStone is carried (0x83B), 3 once it is placed (0x878). Its
+  second SpellPlace, the podium that takes the stone for the second path, the door switch and the round door load
+  in act 2 only, and VFP_LevelControl (619) set the map to act 1 in its constructor, whatever the story, so nothing
+  of act 2 or 3 ever played. Its act 3 sets 0x63C, which moves Diamond Bay on to act 3 (DBlevelControl, 663: 1 and
+  one each for 0x4E9, 0x63C and 0x63D).
+- Walled City: act 2 once Moon Mountain Pass's spirit is released (0x317), when the task list sends Sabre back for
+  the Sun and Moon Stones. The stones beside the boss door, the sockets on the TRex statues that take them, and
+  WCLevelControl's (779) bits that open the Sun and Moon temples are act 2's only; the RedEye teeth are act 1's.
+
+A map's act is kept in the save, so a death or retry restores the act the map had when the level started, and the
+map's next load moves it on again.
+
 ## The shrines
 
 Each shrine has its own DLL: DFSH 433, MMSH 466, ECSH 469, GPSH 472, DBSH 477, NWSH 481, CCSH 486, WGSH 488. Its

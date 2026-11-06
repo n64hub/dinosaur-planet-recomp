@@ -608,6 +608,13 @@ func = "dll619_0018"
 before_vram = 0x9024D34C
 text = '{ void dino_acts_volcano_level_control(uint8_t*, recomp_context*); dino_acts_volcano_level_control(rdram, ctx); }'
 
+# The moonseeds (src/game/moonseeds.cpp, whose header has the evidence): VFP_SpellPlace once it has set its placed bit
+# (dll637 0x388), which for the third SpellStone gives the moonseeds nothing else gives.
+[[patches.hook]]
+func = "dll637_02E0"
+before_vram = 0x90255D3C
+text = '{ void dino_moonseeds_stone_placed(uint8_t*, recomp_context*); dino_moonseeds_stone_placed(rdram, ctx); }'
+
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
