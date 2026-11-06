@@ -10,7 +10,7 @@
   "Recorded by code, not by playing: node lib/N64Recomp-browser/tools/record_shaders.mjs tools/shader_plan.json build/web",
   "roms/dinoplanet.z64 src/rt64_shaders.txt (its header says how), on tools/build_web.sh's page. Section 0 is the",
   "launcher, the logos and the title, the game select and a new game's name entry as a player goes through them (A,",
-  "and taps of the stick a game frame long on the game's clock, since the name screen moves a letter a frame). Then a",
+  "the stick held down to the bottom row and taps of it 100 ms long on the game's clock, as tools/play_plan.json's). Then a",
   "section an area: the opening (the story point new-game) and each area the warp table reaches (docs/story-points.md),",
   "each started by tools/survey.js's go() from a story point and walked about for 15 s, with the object groups",
   "docs/story-points.md names turned on (a story point leaves them off): SwapStone Hollow's, Moon Mountain Pass's, the",
@@ -1752,7 +1752,7 @@
      "Space",
      " ",
      32,
-     33
+     100
     ],
     [
      "wait",
@@ -1772,7 +1772,7 @@
      "Space",
      " ",
      32,
-     33
+     100
     ],
     [
      "wait",
@@ -1783,29 +1783,7 @@
      "KeyS",
      "s",
      83,
-     33
-    ],
-    [
-     "wait",
-     300
-    ],
-    [
-     "hold",
-     "KeyS",
-     "s",
-     83,
-     33
-    ],
-    [
-     "wait",
-     300
-    ],
-    [
-     "hold",
-     "KeyS",
-     "s",
-     83,
-     33
+     1500
     ],
     [
      "wait",
@@ -1816,7 +1794,7 @@
      "KeyD",
      "d",
      68,
-     33
+     100
     ],
     [
      "wait",
@@ -1827,7 +1805,7 @@
      "KeyD",
      "d",
      68,
-     33
+     100
     ],
     [
      "wait",
@@ -1838,7 +1816,7 @@
      "KeyD",
      "d",
      68,
-     33
+     100
     ],
     [
      "wait",

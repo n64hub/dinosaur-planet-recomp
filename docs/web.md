@@ -65,10 +65,12 @@ the Swap Store's, and Cape Claw's sand worm and SandEels, at the worm's fight.
   Fortress, the Walled City and the DF shrine.
 
 Their waits and holds are on the game's own clock (`survey.js`'s `clock()`, 60 a second), so every browser gives the
-game the same input for the same game time. The name screen moves its cursor a letter a game frame while the stick is
-held, so a plan's menu taps are holds of one frame on that clock, and A on END and on the new file is pressed again
-until the game leaves that screen, since a busy host can drop a tap. The clock stops while the game is paused, so the
-pause menu's waits are in the page's own time.
+game the same input for the same game time. The name screen moves its cursor a letter as the stick is pushed and
+again each 150 ms or so it stays held, stopping at the bottom row and wrapping along a row, so a plan holds the stick
+down to the bottom row and taps it right to END, each tap 100 ms on that clock: one letter, and longer than a game
+frame on a busy host, which a shorter tap can fall between. A on END and on the new file is pressed again until the
+game leaves that screen. The clock stops while the game is paused, so the pause menu's waits are in the page's own
+time.
 
 Play them with N64Recomp-browser's `tools/play_page.mjs` (its `docs/playing.md`).
 

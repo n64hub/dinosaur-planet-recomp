@@ -12,7 +12,8 @@
 // clock() is the game's own clock, the word at 0x800AE674: 60 a second in its menus and in play, standing still while
 // the game is paused (found by reading RDRAM as the game played; the VI count at 0x800918F0 runs on through a pause).
 // The plans' clock steps read it, so a hold is so many 60ths of the game's time in every browser. A menu moves its
-// cursor a step a game frame while the stick is held, so a plan's menu taps are holds of 33 ms on that clock.
+// cursor a step as the stick is pushed and again each 150 ms or so it stays held, so a plan's menu taps are holds of
+// 100 ms on that clock: one step, and longer than a game frame on a busy host, which a shorter hold can fall between.
 (() => {
   if (window.dino) return;
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
