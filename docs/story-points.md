@@ -137,6 +137,12 @@ shopkeeper in group 0 and its item beams in group 1 (`--story new-game,86 --bits
 sets the field, its value in decimal: `--bits 42e=-1` turns on every group of Moon Mountain Pass, more objects at once
 than play ever loads, and `--bits 42e=385` groups 0, 7 and 8, where the pass's Transporter lands.
 
+A TriggerPlane turns a group off as the player crosses it, and the group's objects are freed then, whatever holds
+them. SwapStone Circle's small baskets and crates are in its group 1, which the planes at about (-50, 377, 17013) and
+(220, 325, 17301) turn off, in world coordinates (the map lies at -1920, 15360). Dragon Rock's fight is in groups 0
+to 2 (`--story new-game,88 --bits 5dc=7`): DR_Creator (738) sends Skeetlas (615), at most 20, at DR_EarthWarrior
+(713), in group 2 at (1576, -1831, -6066), the only object they go for there.
+
 ## The shrines
 
 Each shrine has its own DLL: DFSH 433, MMSH 466, ECSH 469, GPSH 472, DBSH 477, NWSH 481, CCSH 486, WGSH 488. Its
