@@ -106,6 +106,18 @@ func = "func_80011C70"
 before_vram = 0x80011CC4
 text = "{ void osAiGetLength_recomp(uint8_t*, recomp_context*); uint64_t v0 = ctx->r2; osAiGetLength_recomp(rdram, ctx); ctx->r25 = ctx->r2; ctx->r2 = v0; }"
 
+# The scheduler's retrace (func_8003BE0C, message 0x29A) counts the retraces its graphics and audio tasks have been
+# running, in the words at 0x800918F4 and 0x800918F8 ($v1 and $v1 + 4), and at 11 takes the RSP for hung and restarts
+# it (func_8003BAD0: the events moved to a queue of its own, the task cut to a sync and an end and started again).
+# The runtime runs each RSP task whole, so a task only runs that long while the renderer is behind, and the restart
+# then waits for what never comes and stops the game: Firefox's page holds the game for seconds while it builds a
+# section of its shader list, and stopped there at the opening every time. So the counts go back to 0 each retrace,
+# the graphics task's already loaded ($t2) too, and the scheduler takes its normal way.
+[[patches.hook]]
+func = "func_8003BE0C"
+before_vram = 0x8003BE78
+text = "{ MEM_W(0, ctx->r3) = 0; MEM_W(4, ctx->r3) = 0; ctx->r10 = 0; }"
+
 # The audio frame's command list kept inside its 0x4000 bytes (src/game/audio.cpp): func_800642F4 starts a frame in
 # the list at $a0, and func_80075F20 pulls each source with func_8006C840 ($a2 the list's end, returning the new one in
 # $v0), which leaves the source out once the rest of the frame would run past the list. Past it is DLL 1.

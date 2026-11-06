@@ -285,6 +285,14 @@ void dino::story_set_place(const char* list) {
         &given_place.facing) >= 3;
 }
 
+// The bits and place a start was given, forgotten before the next is given: a page gives a run one start after another
+// (src/main/main.cpp, take_web_options), each with its own.
+void dino::story_forget() {
+    extra_bits.clear();
+    timed_bits.clear();
+    place_given = false;
+}
+
 void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     const StoryPoint& point = *chosen;
     ctx->r4 = 0;
