@@ -119,6 +119,37 @@ func = "dll243_0C44"
 before_vram = 0x9014CF34
 text = "{ if (ctx->r17 == 0) goto L_9014CFF8; }"
 
+# The Cape Claw sand worm (CCsandwormBoss, dll461) the same: dll461_0330 keeps the sidekick at 0x8 of its state
+# (0x8($s0) in dll461_05E0), 0 until one is out, and two of its states use it with no test. State 4, the player out
+# of reach, asks the sidekick's interface +0x64 at 0x901E56B4, the sidekick in $a0; a sidekick it can't use ends the
+# pass at 0x901E5F5C.
+[[patches.hook]]
+func = "dll461_05E0"
+before_vram = 0x901E56B4
+text = "{ if (ctx->r4 == 0) goto L_901E5F5C; }"
+
+# State 9, which follows each of the worm's attacks, first turns it to face the sidekick (dll461_12B0 reads 0xC of
+# it): with none it faces the player, at 0x4 of the state. With the player out of reach it then measures from the
+# sidekick, from 0x901E59B4, and with none goes on as for a sidekick out of reach, at 0x901E5A98: back to state 4 by
+# its hole, or state 10.
+[[patches.hook]]
+func = "dll461_05E0"
+before_vram = 0x901E5900
+text = "{ if (ctx->r5 == 0) ctx->r5 = MEM_W(0x4, ctx->r16); }"
+
+[[patches.hook]]
+func = "dll461_05E0"
+before_vram = 0x901E59B4
+text = "{ if (MEM_W(0x8, ctx->r16) == 0) goto L_901E5A98; }"
+
+# The Swap Store's item beams (SPitembeam, dll772) the same: a beam's constructor keeps the nearest object of list 0xA,
+# the item under it, at +0xDC, and its update asks that item's interface +0x28 at 0x902C5888 with no test. With no item
+# it goes on as for an item that is gone, at 0x902C58D8, which hides the beam.
+[[patches.hook]]
+func = "dll772_0088"
+before_vram = 0x902C5888
+text = "{ if (ctx->r4 == 0) goto L_902C58D8; }"
+
 # The game's hand-written math (its matrix, vector and spline routines, the conversion of a float matrix into the
 # fixed-point one the RSP reads, and the skinning of its models) uses the odd float registers as registers of their
 # own, as the CPU does with Status.FR set: libultra's C code is built for FR clear, where an odd register is the high
