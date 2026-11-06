@@ -326,6 +326,18 @@ func = "func_8001F890"
 before_vram = 0x800202E0
 text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
 
+# SwapStone Hollow's white mushrooms are SHbluemushroom (dll502) with model 1, and the Queen Earthwalker counts them
+# in bit 0x66D. A mushroom whose state (byte 0x136 of its state, $s0) reaches 8 adds one there when the player's
+# 0x7000B comes (dll502_03A8); a pickup sets its collected bit at once and goes to state 2, which ends in 8. Mushrooms
+# of type 4 that touch surface 0xD are stuck, flag 4 of byte 0x137, which nothing clears: dll502_0D74 puts each into
+# state 6 at the start of every frame, so one picked up there is back in 6 a frame later, never counts and never
+# comes back. Map 8's uid 30832 (bit 0x463) is the hollow's only type 4, so only nine of the ten could count. A
+# stuck mushroom being picked up stays in state 2 ($t0 is the state stored).
+[[patches.hook]]
+func = "dll502_0D74"
+before_vram = 0x901FFD58
+text = '{ if (MEM_BU(0x136, ctx->r16) == 2) ctx->r8 = 2; }'
+
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),
 # but func_80037A14's fills stop a pixel short of the frame's width and its later scissor doesn't, so they'd stay in the
