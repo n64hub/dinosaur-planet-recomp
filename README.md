@@ -17,7 +17,9 @@ The repo holds no ROM, no asset from the game and no data extracted from it: you
 git or CI is made from one except the function names, addresses and sizes in `syms/`.
 
 **Status:** not released. The desktop build plays from the title through a new game's name entry and the opening
-cutscene into the first level. The prototype's progression fixes are to come, written for this repo.
+cutscene into the first level, blended to your display's frame rate from the game's 30 frames a second (Graphics:
+Framerate Display by default, Original for the console's). The prototype's progression fixes are to come, written for
+this repo.
 
 ## The ROM
 
