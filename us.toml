@@ -105,3 +105,198 @@ value = 0x00000000
 func = "func_80011C70"
 before_vram = 0x80011CC4
 text = "{ void osAiGetLength_recomp(uint8_t*, recomp_context*); uint64_t v0 = ctx->r2; osAiGetLength_recomp(rdram, ctx); ctx->r25 = ctx->r2; ctx->r2 = v0; }"
+
+# The game's hand-written math (its matrix, vector and spline routines, the conversion of a float matrix into the
+# fixed-point one the RSP reads, and the skinning of its models) uses the odd float registers as registers of their
+# own, as the CPU does with Status.FR set: libultra's C code is built for FR clear, where an odd register is the high
+# half of the even one before it, and N64Recomp's moves to and from an odd register follow the mode the runtime is in
+# while its arithmetic always reads the separate one. In the runtime's default mode (FR clear) a constant moved into
+# $f13 and multiplied by it reads 0, so every matrix these make is 0 and nothing in the world is drawn. Each of them
+# runs in FR set from its first instruction and goes back to FR clear before each of its returns. None of them calls
+# another or uses a double, and their float arguments come in even registers. func_8001B4F0's subroutines return
+# within it ($ra inside it), so only a return to its caller goes back.
+
+[[patches.hook]]
+func = "func_80014FEC"
+before_vram = 0x80014FEC
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80014FEC"
+before_vram = 0x800150DC
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_800150E4"
+before_vram = 0x800150E4
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_800150E4"
+before_vram = 0x800151FC
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80015204"
+before_vram = 0x80015204
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80015204"
+before_vram = 0x80015290
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80015330"
+before_vram = 0x80015330
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80015330"
+before_vram = 0x800154CC
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_800154D4"
+before_vram = 0x800154D4
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_800154D4"
+before_vram = 0x8001557C
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80015BB8"
+before_vram = 0x80015BB8
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80015BB8"
+before_vram = 0x80015C68
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001621C"
+before_vram = 0x8001621C
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001621C"
+before_vram = 0x80016254
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001625C"
+before_vram = 0x8001625C
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001625C"
+before_vram = 0x80016290
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80016298"
+before_vram = 0x80016298
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80016298"
+before_vram = 0x800162C0
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_800162C8"
+before_vram = 0x800162C8
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_800162C8"
+before_vram = 0x800162EC
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80016348"
+before_vram = 0x80016348
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_80016348"
+before_vram = 0x800163F8
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_80016348"
+before_vram = 0x8001643C
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_800164A0"
+before_vram = 0x800164A0
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_800164A0"
+before_vram = 0x80016574
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001B4F0
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001BCE8
+text = '{ if ((uint32_t)ctx->r31 - 0x8001B4F0u >= 0x13E4u) { ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; } }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001BE1C
+text = '{ if ((uint32_t)ctx->r31 - 0x8001B4F0u >= 0x13E4u) { ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; } }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001C07C
+text = '{ if ((uint32_t)ctx->r31 - 0x8001B4F0u >= 0x13E4u) { ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; } }'
+
+[[patches.hook]]
+func = "func_8001B4F0"
+before_vram = 0x8001C898
+text = '{ if ((uint32_t)ctx->r31 - 0x8001B4F0u >= 0x13E4u) { ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; } }'
+
+[[patches.hook]]
+func = "func_8001C8D4"
+before_vram = 0x8001C8D4
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001C8D4"
+before_vram = 0x8001CA9C
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001CAA4"
+before_vram = 0x8001CAA4
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001CAA4"
+before_vram = 0x8001CCF0
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001F890"
+before_vram = 0x8001F890
+text = '{ ctx->f_odd = &ctx->f1.u32l; ctx->mips3_float_mode = 1; }'
+
+[[patches.hook]]
+func = "func_8001F890"
+before_vram = 0x8001FF18
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+[[patches.hook]]
+func = "func_8001F890"
+before_vram = 0x800202E0
+text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'

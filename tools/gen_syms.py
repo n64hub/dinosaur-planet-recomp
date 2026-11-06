@@ -12,7 +12,8 @@ There is no symbol map, and nothing here comes from any decompilation: every fun
   it (src/game/dlls.cpp).
 - spimdisasm finds the functions in each text (jal targets, the code after a function's last jr ra, hi/lo pairs that
   make a text address), and a function it splits at a label inside one, which only that function's own branches reach,
-  is joined again (merge_split_functions).
+  is joined again (merge_split_functions). The DLLs are read in parallel, and what spimdisasm finds is kept in
+  build/gen_syms/, so a run after the first takes seconds.
 - A function reached only through a pointer must be a function to N64Recomp too, or the runtime can't find it when
   the game calls the pointer. In the main segment code makes some of those pointers (a lui then an addiu to a text
   address) and the rest are words in its data, of which a run that all point inside one function is that function's
@@ -49,8 +50,12 @@ syms/names.toml ([[func]] section, vram, name), applied last, and keep their nam
 Usage: py -3 -I tools/gen_syms.py [--report]   (needs roms/dinoplanet.z64, ref/n64sym and spimdisasm)
 """
 import bisect
+import concurrent.futures
 import csv
+import functools
 import hashlib
+import importlib.metadata
+import os
 import struct
 import subprocess
 import sys
@@ -64,6 +69,7 @@ ROM_PATH = ROOT / "roms" / "dinoplanet.z64"
 SIG_PATH = ROOT / "ref" / "n64sym" / "src" / "builtin_signatures.sig"
 NAMES_PATH = ROOT / "syms" / "names.toml"
 OUT_PATH = ROOT / "syms" / "dinoplanet.syms.toml"
+CACHE_PATH = ROOT / "build" / "gen_syms"
 ROM_MD5 = "49f7bb346ade39d1915c22e090ffd748"
 
 # The main segment: ROM offset, VRAM, size of the text, size of the text and data.
@@ -287,14 +293,28 @@ def match_library(buf, vram, func_addrs, sigs):
 
 
 def spimdisasm_functions(buf, vram, tmp):
+    """The function starts spimdisasm finds in buf, kept in build/gen_syms/ by the hash of the code, its address and
+    spimdisasm's version: spimdisasm takes most of this script's time, and the code it reads never changes."""
+    key = hashlib.sha1(buf + vram.to_bytes(4, "big") + spimdisasm_version().encode()).hexdigest()
+    cached = CACHE_PATH / f"{key}.txt"
+    if cached.exists():
+        return [int(x, 16) for x in cached.read_text().split()]
     binpath = Path(tmp) / f"{vram:08X}.bin"
     binpath.write_bytes(buf)
     info = Path(tmp) / f"{vram:08X}.csv"
-    subprocess.run([sys.executable, "-m", "spimdisasm", "singleFileDisasm", str(binpath), str(Path(tmp) / "asm"),
-                    "--start", "0", "--end", hex(len(buf)), "--vram", hex(vram), "--function-info", str(info)],
+    subprocess.run([sys.executable, "-m", "spimdisasm", "singleFileDisasm", str(binpath),
+                    str(Path(tmp) / f"asm{vram:08X}"), "--start", "0", "--end", hex(len(buf)), "--vram", hex(vram), "--function-info", str(info)],
                    check=True, capture_output=True)
     with info.open() as f:
-        return sorted(int(r["address"], 16) for r in csv.DictReader(f))
+        found = sorted(int(r["address"], 16) for r in csv.DictReader(f))
+    CACHE_PATH.mkdir(parents=True, exist_ok=True)
+    cached.write_text(" ".join(f"{a:X}" for a in found))
+    return found
+
+
+@functools.cache
+def spimdisasm_version():
+    return importlib.metadata.version("spimdisasm")
 
 
 def branch_targets(buf, vram, start, end):
@@ -435,10 +455,33 @@ def load_registry():
     return {(f["section"], f["vram"]): f["name"] for f in tomllib.loads(NAMES_PATH.read_text()).get("func", [])}
 
 
-def function_lines(starts, end, names, used):
+def ends_flow(w):
+    """jr, j, b (beq $zero, $zero), eret or break: the code after it (and its delay slot) is not reached from it."""
+    return (w >> 26 == 0 and w & 0x3F in (8, 0xD)) or w >> 26 == 2 or w >> 16 == 0x1000 or w == 0x42000018
+
+
+def falls_through(buf, vram, addr, stop):
+    """Whether the function from addr runs on into the one at stop: its last instruction (before any padding of 0s,
+    which is also a nop in a delay slot) is neither a jump nor a jump's delay slot."""
+    a = stop - 4
+    while a > addr and word(buf, a - vram) == 0:
+        a -= 4
+    return not any(b >= addr and ends_flow(word(buf, b - vram)) for b in (a, a - 4))
+
+
+def function_lines(buf, vram, starts, end, names, used, fall=None):
+    """A function that falls through into the next (the game's cosine, which adds a quarter turn to its angle and goes on
+    into its sine) runs to the end of the one it falls into: N64Recomp ends a function at its size, so without it
+    the entry would return after its own instructions. The two overlap, and each is still a function of its own."""
     out, named = [], 0
     for i, addr in enumerate(starts):
-        stop = starts[i + 1] if i + 1 < len(starts) else end
+        j = i + 1
+        stop = starts[j] if j < len(starts) else end
+        while j < len(starts) and falls_through(buf, vram, addr if j == i + 1 else starts[j - 1], stop):
+            if fall is not None:
+                fall.append((addr, starts[j]))
+            j += 1
+            stop = starts[j] if j < len(starts) else end
         name = names(addr)
         if name in used:
             raise SystemExit(f"{name} named twice")
@@ -458,8 +501,9 @@ def main():
     imports = dll_imports(rom)
     with tempfile.TemporaryDirectory() as tmp:
         found = spimdisasm_functions(rom[r:r + t], v, tmp)
-        dll_found = {d.number: spimdisasm_functions(rom[d.text_rom:d.text_rom + d.text_size], d.vram, tmp)
-                     for d in all_dlls}
+        with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as pool:
+            dll_found = dict(zip((d.number for d in all_dlls), pool.map(
+                lambda d: spimdisasm_functions(rom[d.text_rom:d.text_rom + d.text_size], d.vram, tmp), all_dlls)))
     by_code = code_pointers(rom)
     by_data = data_pointers(rom, found, jump_table_words(rom, found))
     by_import = {a: ["the DLLs' imports"] for a in imports if in_main_text(a)}
@@ -490,7 +534,8 @@ def main():
         seen_lib.add(n)
         return n
 
-    out += function_lines(starts, v + t, main_name, used)
+    fall = []
+    out += function_lines(buf, v, starts, v + t, main_name, used, fall)
     out += ["]", ""]
     print(f"main: {len(starts)} functions ({len(found)} from spimdisasm, {new} more from pointers), "
           f"{len(seen_lib)} named, {len(rejected)} pointers into the middle of a function left alone")
@@ -500,6 +545,8 @@ def main():
                                                  for x in (by_code.get(a) or by_data.get(a) or by_import.get(a) or [])[:4]))
         for a in rejected:
             print(f"  left alone: {a:08X}")
+        for a, b in fall:
+            print(f"  falls through: {a:08X} into {b:08X}")
 
     total = 0
     for d in all_dlls:
@@ -515,7 +562,7 @@ def main():
         if d.rel != 0xFFFFFFFF:
             out.append(f"got_address = 0x{d.got_vram():08X}")
         out += ["", "functions = ["]
-        out += function_lines(starts, dv + dt,
+        out += function_lines(dbuf, dv, starts, dv + dt,
                               lambda a: registry.get((name, a)) or DLL_MANUAL_NAMES.get((d.number, a - dv))
                               or f"dll{d.number}_{a - dv:04X}", used)
         out += ["]", ""]
