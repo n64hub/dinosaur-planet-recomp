@@ -29,26 +29,70 @@ namespace {
     constexpr int32_t set_paused = 0x8001440C;
     constexpr uint32_t warp_table_rom = 0x020E023A; // ROM file 30
 
-    // A point of the story: the bits that are set at it, the character played and the entry of the warp table that it
-    // starts at, -1 for where a new game does.
     struct StoryBit {
         int bit;
         int value;
     };
 
+    struct Place {
+        float x, y, z;
+        int layer;
+    };
+
+    // A point of the story: the character played, where it starts (an entry of the warp table, or with -1 the place
+    // beside it) and the bits that are set at it.
     struct StoryPoint {
         const char* name;
+        int character;
         int warp;
+        Place place;
         std::vector<StoryBit> bits;
     };
 
+    constexpr int sabre = 0;
     constexpr int krystal = 1;
 
+    // Where dll63 and dll65, the front end, start a new game: the x and y in their data, the z in the call.
+    constexpr Place new_game_place = { 12457.1f, -1474.875f, -6690.398f, 0 };
+
+    // Cape Claw's sand worm has no entry in the warp table. Its object is at (2155, -276, -206) in map 29, whose origin
+    // is grid cell (2, 26) of 640 units: this is beside it on the same floor.
+    constexpr Place sand_worm_place = { 3435.0f, -260.0f, 16734.0f, 0 };
+
+    using Bits = std::vector<StoryBit>;
+
+    Bits operator+(Bits a, const Bits& b) {
+        a.insert(a.end(), b.begin(), b.end());
+        return a;
+    }
+
+    // What the game has set by each step of its task list (docs/story-points.md has each bit's evidence).
+    const Bits to_first_shrine = {
+        { 0xD0, 1 }, { 0xB4, 1 }, { 0x2B2, 1 }, { 0x70, 1 }, { 0x37A, 1 }, { 0x4D3, 1 }, { 0xAB, 1 }, { 0xBF, 1 },
+        { 0x15A, 1 }, { 0x3A0, 1 }, { 0x88, 1 }, { 0x3B0, 1 }, { 0x2C5, 1 }, { 0x615, 1 }, { 0x2D, 1 }, { 0x1D7, 1 },
+    };
+    const Bits first_spirit = { { 0x316, 1 }, { 0x21F, 1 } };
+    const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x877, 1 } };
+    const Bits second_spirit = { { 0x277, 1 }, { 0x21B, 1 } };
+    const Bits third_spirit = { { 0x317, 1 }, { 0x21C, 1 } };
+    const Bits fourth_spirit = { { 0x318, 1 }, { 0x21D, 1 } };
+    const Bits four_spirits = to_first_shrine + first_spirit + first_stone + second_spirit + third_spirit + fourth_spirit;
+
     const std::vector<StoryPoint> points = {
-        { "new-game", -1, {} },
+        { "new-game", krystal, -1, new_game_place, {} },
+        { "after-first-spellstone", sabre, 81, {}, to_first_shrine + first_spirit + first_stone },
+        { "before-sand-worm", krystal, -1, sand_worm_place, to_first_shrine },
+        { "before-df-shrine", krystal, 36, {}, to_first_shrine },
+        { "before-db-shrine", sabre, 38, {}, to_first_shrine + first_spirit + first_stone },
+        { "before-mm-shrine", krystal, 43, {}, to_first_shrine + first_spirit + first_stone + second_spirit },
+        { "before-ec-shrine", sabre, 40, {}, to_first_shrine + first_spirit + first_stone + second_spirit + third_spirit },
+        { "before-gp-shrine", krystal, 42, {}, four_spirits },
+        { "before-nw-shrine", krystal, 37, {}, four_spirits },
+        { "before-cc-shrine", krystal, 41, {}, four_spirits },
+        { "before-wg-shrine", krystal, 39, {}, four_spirits },
     };
 
-    const StoryPoint* chosen = nullptr;
+    const StoryPoint* chosen = &points[0];
     std::vector<StoryBit> extra_bits;
     int chosen_warp = -1;
 
@@ -103,14 +147,13 @@ void dino::story_set_warp(int index) {
 }
 
 void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
-    static const StoryPoint no_point{ "new-game", -1, {} };
-    const StoryPoint& point = chosen != nullptr ? *chosen : no_point;
+    const StoryPoint& point = *chosen;
     ctx->r4 = 0;
     call(rdram, ctx, set_paused);
     ctx->r4 = (uint32_t)-1;
     ctx->r5 = 0;
     call_dll29(rdram, ctx, 1);
-    ctx->r4 = krystal;
+    ctx->r4 = point.character;
     call_dll29(rdram, ctx, 29);
     for (const StoryBit& b : point.bits) {
         set_game_bit(rdram, ctx, b);
@@ -118,23 +161,26 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     for (const StoryBit& b : extra_bits) {
         set_game_bit(rdram, ctx, b);
     }
+    // Export 6 takes where (a vector in the game's memory, here under its stack), the facing, flags and the layer.
+    Place place = point.place;
     if (chosen_warp >= 0) {
-        // Export 6 takes where (a vector in the game's memory, here under its stack), the facing, flags and the layer.
-        gpr sp = ctx->r29;
-        ctx->r29 -= 0x40;
-        gpr position = ctx->r29 + 0x20;
         uint32_t entry = warp_table_rom + 16 * chosen_warp;
-        int32_t layer = (int32_t)dino_rom_word(entry + 12);
-        for (int i = 0; i < 3; i++) {
-            MEM_W(i * 4, position) = dino_rom_word(entry + i * 4);
-        }
-        ctx->r4 = position;
-        ctx->r5 = 0;
-        ctx->r6 = 0;
-        ctx->r7 = layer;
-        call_dll29(rdram, ctx, 6);
-        ctx->r29 = sp;
+        uint32_t words[3] = { dino_rom_word(entry), dino_rom_word(entry + 4), dino_rom_word(entry + 8) };
+        memcpy(&place, words, sizeof(words));
+        place.layer = (int32_t)dino_rom_word(entry + 12);
     }
+    gpr sp = ctx->r29;
+    ctx->r29 -= 0x40;
+    gpr position = ctx->r29 + 0x20;
+    memcpy(&MEM_W(0, position), &place.x, 4);
+    memcpy(&MEM_W(4, position), &place.y, 4);
+    memcpy(&MEM_W(8, position), &place.z, 4);
+    ctx->r4 = position;
+    ctx->r5 = 0;
+    ctx->r6 = 0;
+    ctx->r7 = place.layer;
+    call_dll29(rdram, ctx, 6);
+    ctx->r29 = sp;
     call_dll29(rdram, ctx, 7);
     fprintf(stderr, "--story: started %s, %d bits, at warp %d\n", point.name, (int)(point.bits.size() + extra_bits.size()), chosen_warp);
 }
