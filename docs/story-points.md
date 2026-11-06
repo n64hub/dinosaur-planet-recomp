@@ -155,9 +155,9 @@ fight. Its constructor rotates them each time the map loads: with 0x1EB set and 
 sets 0x22A, or 0x1EC once 0x22A is set, so the first eel is played again with one more of the other two beaten, and
 that one loads hidden when group 11 comes on. A hidden eel with its bit set stays hidden (us.toml's hook on
 dll216_02C0 says why it needs one). The command above has all three groups on with all three bits set, which play
-never has: the eels load hidden beside the fight. `--bits 3b7=3072,1eb` stands for the map loaded again after the
-first eel: the constructor clears 0x1EB and sets 0x22A, and group 11 is on, as once the first eel is beaten again,
-with that eel hidden.
+never has: the eels load hidden beside the fight. `--bits 3b7=1024,1eb,1eb@30` plays the map loaded again after the
+first eel: the constructor clears 0x1EB and sets 0x22A, and 0x1EB set again at 30 s, the first eel beaten again, has
+the worm turn group 11 on with that eel hidden.
 
 ## The warp table
 
