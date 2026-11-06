@@ -73,6 +73,54 @@ file 19, each task's name and clue), which says when the player swaps.
 - `before-gp-shrine` (42), `before-nw-shrine` (37), `before-cc-shrine` (41), `before-wg-shrine` (39): Krystal with all
   four of those spirits. The task list stops before these (from task 107 it holds placeholders), so their order and
   who plays them are not known from the ROM.
+- `before-cloudrunner`: Krystal at Moon Mountain Pass (warp 73), with two spirits and the first SpellStone placed.
+- `before-desert-force-point`: Krystal in Golden Plains (warp 31), carrying CloudRunner's SpellStone.
+- `before-walled-city`: Sabre in Walled City (warp 91), with the second SpellStone placed.
+- `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone.
+- `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits and three SpellStones
+  placed.
+- `before-drakor`: the same, at BOSS Drakor's setuppoint (map 44), which no warp entry reaches.
+
+The later SpellStones are told by the SpellPlace that takes each: a placement's +0x1E is its placed bit and +0x20 the
+bit of the stone carried, as VFP_SpellPlace (637) takes the first as 0x877 and 0x123. CloudRunner's, won in its race
+(CRSpellstone in map 43 holds 0x49F), is carried as 0x2E8 to the Desert Force Point (DFP_SpellPlace in map 21,
+placed 0x5F3). Walled City's is carried as 0x83B to the Volcano Force Point's second place (0x878). The fourth is
+carried as 0x7A8 to the Desert Force Point's other place (0x5F4), and SwapStone Hollow's river log (its curves in map
+7) waits on 0x7A8 too. A start in a cell no map fills loads nothing (the player falls and is put back, forever):
+Dragon Rock's own setuppoint 0 is in one, so `before-dragon-rock` starts at its setuppoint 2.
+
+## The story after the first SpellStone
+
+The task list (ROM file 19, task 50 the first SpellStone placed) goes on to the fourth spirit, and file 55 gives bits
+only to its tasks up to 39, so the rest is told by the levels' own objects. In its order, with who plays:
+
+- Sabre: Diamond Bay's shrine opened, the test of strength, the second spirit to Warlock Mountain (tasks 51-54; 55 is a placeholder).
+- Krystal: the Moon Mountain Pass key from the chief, Moon Mountain Pass, then CloudRunner Fortress: Kyte's mother,
+  the dungeon (map 16), the power, Kyte, five baby CloudRunners, the gold, the treasure caves (15) and the jetbike race
+  (43) for the second SpellStone, which Bonehead activates (tasks 56-68).
+- Krystal: Golden Plains (9), the portable hole spell, the Desert Force Point (maps 50 and 21), the second SpellStone
+  placed, the mirage, and the swap to Sabre (tasks 69-74).
+- Sabre: Walled City (13), the Queen and Tricky's mother, ten RedEye teeth, the King Earthwalker, the sun and moon
+  beacons, the boss door and BOSS TRex (48) for the third SpellStone, which the King activates (tasks 75-83).
+- Sabre: another log from the Thorntail, Diamond Bay's second Pointback egg, the volcano's second path and the third
+  SpellStone placed; moonseeds for Krystal (tasks 84-91).
+- Krystal: the seed planted in Moon Mountain Pass, the meteor moved, the test of fear and the third spirit (92-97).
+- Sabre: Walled City's sun and moon stones, the test of skill and the fourth spirit (98-105), and the swap to Krystal (106).
+
+Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
+
+- Dragon Rock - Top (map 2) and - Bottom (52), and BOSS Kamerian Dragon (53), placed in full. Their cells join Willow
+  Grove's at layer 0, so they are reached on foot; no code warps there by number. DR_SupPortal (754) on the top warps
+  to the bottom (warp 88).
+- BOSS Drakor (44): the fight is built and plays, Drakor beside the player on the asteroids, hitting. No warp entry
+  and no map of the story reaches it: its cells touch no other map's, and the only code that starts it is dll70, the
+  prototype's own development warp menu (`func_800141A4(44, ...)`). Its level (BossDrakorLevel, 692) sets 0x7AC,
+  0x7AE, 0x7C5 and 0x7C6 as the fight goes, and nothing reads them: no map, warp or credits follows.
+- Krazoa Palace (3): an empty shell. Of its 19 objects (KP_*, the four consoles, the red Krazoa, the doors) none is
+  placed; it holds its floor, mushrooms, crates and two KP_Transporters, which send to warp entries 93 and 94, both
+  zero. Its cells join Cape Claw's.
+- CloudRunner - TrapRooms (17), Krazoa Shrine (20), krazchamber (22) and MikesLava (49) have no record in file 21:
+  nothing reaches them.
 
 A shrine's warp lands at its Transporter, 1600 units from the shrine object. Its test starts when the player walks up
 to that object, which each shrine's DLL checks in its first state.

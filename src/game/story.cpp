@@ -108,6 +108,22 @@ namespace {
     const Bits third_spirit = { { 0x317, 1 }, { 0x21C, 1 } };
     const Bits fourth_spirit = { { 0x318, 1 }, { 0x21D, 1 } };
     const Bits four_spirits = to_first_shrine + first_spirit + first_stone + second_spirit + third_spirit + fourth_spirit;
+    // The SpellStones after the first, each by the SpellPlace that takes it: a placement's +0x1E is its placed bit and
+    // +0x20 the bit of the stone carried (VFP_SpellPlace 637 in map 4, DFP_SpellPlace in map 21). CloudRunner's, won in
+    // the race (CRSpellstone, map 43, 0x49F), is carried as 0x2E8 to the Desert Force Point (placed, 0x5F3); Walled
+    // City's is carried as 0x83B to the Volcano Force Point's second place (0x878).
+    const Bits to_second_stone = to_first_shrine + first_spirit + first_stone + second_spirit;
+    const Bits second_stone_carried = { { 0x49F, 1 }, { 0x2E8, 1 } };
+    const Bits second_stone = { { 0x49F, 1 }, { 0x5F3, 1 } };
+    const Bits third_stone_carried = { { 0x83B, 1 } };
+    const Bits third_stone = { { 0x878, 1 } };
+
+    // BOSS Drakor (map 44) is in no way of the story's (docs/story-points.md, The story after the first SpellStone):
+    // its setuppoint, at grid cell (7, 8).
+    constexpr Place drakor_place = { 4810.0f, 6.0f, 7109.0f, 0 };
+    // Dragon Rock - Top (map 2): its setuppoint 2. The map's setuppoint 0 is in a cell of the map's that holds no
+    // geometry, and a start in a cell no map fills loads nothing (func_80045DC0 finds no map there).
+    constexpr Place dragon_rock_place = { -3464.0f, -1502.0f, -4482.0f, 0 };
 
     const std::vector<StoryPoint> points = {
         { "new-game", krystal, no_place, {}, {} },
@@ -122,6 +138,12 @@ namespace {
         { "before-nw-shrine", krystal, 37, {}, four_spirits },
         { "before-cc-shrine", krystal, 41, {}, four_spirits },
         { "before-wg-shrine", krystal, 39, {}, four_spirits },
+        { "before-cloudrunner", krystal, 73, {}, to_second_stone },
+        { "before-desert-force-point", krystal, 31, {}, to_second_stone + second_stone_carried },
+        { "before-walled-city", sabre, 91, {}, to_second_stone + second_stone },
+        { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + third_stone_carried },
+        { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + third_stone },
+        { "before-drakor", krystal, -1, drakor_place, four_spirits + second_stone + third_stone },
     };
 
     const StoryPoint* chosen = &points[0];
