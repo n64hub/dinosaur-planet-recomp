@@ -1,10 +1,19 @@
-# Dinosaur Planet (prototype), recompiled
+# Dinosaur Planet: AI Slop Recomp
 
-> **Made with AI.** Almost all of the code, documentation and tests in this repo were written by AI agents
-> (Claude), directed and play-tested by a person. None of it is offered to the upstream projects it builds on, which
-> don't take AI-written code.
+> ⚠️ **This is AI slop.**
+> AI agents wrote every line of this project: the code, the fixes, the docs. It aims to be the whole prototype,
+> playable to its end, but no human has played or tested it, so a fix may fall short where nobody has looked.
+>
+> **You almost certainly want [Dinosaur Planet: Recompiled](https://github.com/DinosaurPlanetRecomp/dino-recomp)
+> instead.** People made it carefully, by hand. This project uses none of its code and isn't part of it. It also uses
+> no code, assets or data from [Dinomod Enhanced](https://github.com/EoinODoodles/dinomod-enhanced-recompiled) or the
+> [Dinosaur Planet decompilation](https://github.com/zestydevy/dinosaur-planet).
+>
+> Its developers ask that AI not be used on their work. So use this one only if you want to use AI on a Dinosaur
+> Planet recomp yourself, or you're simply thirsty for slop.
 
-This is not Dinosaur Planet: Recompiled and has none of its code or Dinomod's: report this one's bugs here, not there.
+Report this one's bugs here, not to Dinosaur Planet: Recompiled. None of it is offered to the projects it builds on,
+which don't take AI-written code.
 
 A native PC port of the December 2000 prototype of Rare's *Dinosaur Planet* for the N64, made by static recompilation
 ([N64Recomp](https://github.com/N64Recomp/N64Recomp) + [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime) +
@@ -18,8 +27,27 @@ git or CI is made from one except the function names, addresses and sizes in `sy
 
 **Status:** not released. The desktop build plays from the title through a new game's name entry and the opening
 cutscene into the first level, blended to your display's frame rate from the game's 30 frames a second (Graphics:
-Framerate Display by default, Original for the console's). The prototype's progression fixes are to come, written for
-this repo.
+Framerate Display by default, Original for the console's). The prototype's progression fixes are under way
+(Progression fixes).
+
+## Progression fixes
+
+The December 2000 prototype is unfinished: as it is on the ROM, places in it crash, softlock or have no way on, so it
+can't be played to its end. This recomp aims to make it completely playable and restored: every place that stops a
+player fixed, and the story's unfinished parts finished from what the game's own code and data already hold. Each fix
+is an attempt, written by AI agents from the game's own code (the patches in `patches/` and the hooks in `us.toml`),
+and none has been played by a human, so report one that falls short.
+
+None has landed yet. Under way:
+
+- The early game, from a new game to the first SpellStone: SwapStone Hollow's river that isn't drained, the river log
+  that doesn't come after Dragon Rock's SpellStone, Tricky's first sequence crashing, the white mushrooms' softlock
+  and the well.
+- The Krazoa shrines: all eight finished, a way into the five that have none, and their spirits taken to Warlock
+  Mountain.
+- Crashes in the game's own code: Lunaimar's, Cape Claw's sand worm's, the shop's item beam on arrival and the others
+  found on the way.
+- The rest of the story, played from a new game to its ending, and whatever stops a player there.
 
 ## The ROM
 
