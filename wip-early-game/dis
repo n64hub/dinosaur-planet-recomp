@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# dis <func>...: MIPS comments of main-segment functions
+D=/c/Users/Benla/source/bot-worktrees/dinoplanet-early-17939592916570000/RecompiledFuncs
+I=/c/Users/Benla/AppData/Local/Temp/hs-scratch/17939592916570000/funcs.idx
+[ -f $I ] || (cd $D; grep -n '^RECOMP_FUNC void' funcs_*.c | sed -E 's/^([^:]+):([0-9]+):RECOMP_FUNC void ([^(]+)\(.*/\3 \1 \2/' > $I)
+for f in "$@"; do
+  read -r n file line < <(grep -m1 "^$f " $I)
+  [ -z "$n" ] && { echo "no $f"; continue; }
+  echo "== $f ($file:$line)"
+  tail -n +$((line+1)) $D/$file | awk '/^RECOMP_FUNC/{exit} /^ *\/\/ 0x/{a=$2; if(!s[a]++){sub(/^ *\/\/ 0x..../,""); gsub(/ +/," "); print}} /^L_/{print}'
+done
