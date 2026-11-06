@@ -41,6 +41,7 @@
 #include "util/file.h"
 #ifdef __EMSCRIPTEN__
 #include "audio_output.h"
+#include <emscripten.h>
 #endif
 #include "recompinput/input_events.h"
 #include "recompinput/recompinput.h"
@@ -419,17 +420,104 @@ extern "C" int dino_warp_due() {
 // <x>,<y>,<z>[,<layer>[,<facing>]] starts it there instead, and --bits <hex>[=<value>],... sets more of the game's bits
 // at that start. From the start on, or from the first pass with --report, a line a second says where the player is. The same
 // hook as --warp's, so this runs on the game's main thread too. --watch-bits <hex>,...|all prints a line each time the
-// game sets one of those bits, or with all each time a bit changes (story.cpp).
+// game sets one of those bits, or with all each time a bit changes (story.cpp). With DINO_CHECK_HEAP set, each pass
+// checks the game's heaps for a block written past its end (heap.cpp).
 static bool story_due = false;
 static double story_at = 2.0;
 static double story_reported = -1.0;
+
+// The development options a run can also be given after it starts (--warp, --story, --place, --report, --bits,
+// --watch-bits): true with the one at argv[i] taken, i moved past its value.
+static bool dev_option(int argc, char** argv, int& i) {
+    if (strcmp(argv[i], "--warp") == 0 && i + 1 < argc) {
+        for (const char* p = argv[++i]; p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
+            ScriptedWarp w{};
+            if (sscanf(p, "%d@%lf", &w.index, &w.at) == 2) {
+                warps.push_back(w);
+            }
+        }
+    }
+    else if (strcmp(argv[i], "--story") == 0 && i + 1 < argc) {
+        char name[64] = {};
+        const char* arg = argv[++i];
+        sscanf(arg, "%63[^@,]", name);
+        story_due = dino::story_choose(name);
+        if (const char* at = strchr(arg, '@')) {
+            story_at = atof(at + 1);
+        }
+        if (const char* comma = strchr(arg, ',')) {
+            dino::story_set_warp(atoi(comma + 1));
+        }
+    }
+    else if (strcmp(argv[i], "--place") == 0 && i + 1 < argc) {
+        dino::story_set_place(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--report") == 0) {
+        story_reported = 0.0;
+    }
+    else if (strcmp(argv[i], "--bits") == 0 && i + 1 < argc) {
+        dino::story_add_bits(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--watch-bits") == 0 && i + 1 < argc) {
+        dino::story_watch_bits(argv[++i]);
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
+#ifdef __EMSCRIPTEN__
+// A page has no command line, so its plans (N64Recomp-browser's tools/play_page.mjs, docs/web.md) give the same
+// options as one line from the page's thread: they write it, ended by a 0, into the buffer _dino_web_options_line()
+// gives, then call _dino_web_options() (tools/survey.js's options()). The game's main thread takes the line at its
+// next pass (dino_story_pass, below), so the times in it are on the --input clock as it is by then: a --warp's @0 and
+// a --story's default 2 s are at once. Each line is a start of its own: the --bits and --place of the line before are
+// forgotten. Until it is taken there is no buffer for another (null).
+static char web_line[1024];
+static std::atomic<bool> web_line_ready = false;
+
+extern "C" EMSCRIPTEN_KEEPALIVE char* dino_web_options_line() {
+    return web_line_ready ? nullptr : web_line;
+}
+
+extern "C" EMSCRIPTEN_KEEPALIVE void dino_web_options() {
+    web_line[sizeof(web_line) - 1] = 0;
+    web_line_ready = true;
+}
+
+static void take_web_options() {
+    if (!web_line_ready) {
+        return;
+    }
+    fprintf(stderr, "dino_web_options: %s\n", web_line);
+    dino::story_forget();
+    std::vector<char*> args{ nullptr };
+    for (char* word = strtok(web_line, " "); word != nullptr; word = strtok(nullptr, " ")) {
+        args.push_back(word);
+    }
+    for (int i = 1; i < (int)args.size(); i++) {
+        if (!dev_option((int)args.size(), args.data(), i)) {
+            fprintf(stderr, "dino_web_options: no option %s\n", args[i]);
+        }
+    }
+    web_line_ready = false;
+}
+#endif
 
 void watch_writes_arm(uint8_t* rdram);
 
 extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     watch_writes_arm(rdram);
+#ifdef __EMSCRIPTEN__
+    take_web_options();
+#endif
     double now = script_seconds();
     dino::story_timed_bits(rdram, ctx, now);
+    static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;
+    if (check_heap) {
+        dino::heap_check(rdram, now);
+    }
     if (story_due && now >= story_at) {
         story_due = false;
         story_reported = now;
@@ -514,6 +602,9 @@ void watch_writes(const char* spec);
 int main(int argc, char** argv) {
     install_crash_trace();
     for (int i = 1; i < argc; i++) {
+        if (dev_option(argc, argv, i)) {
+            continue;
+        }
         if (strcmp(argv[i], "--boot") == 0) {
             autoboot = true;
         }
@@ -526,38 +617,6 @@ int main(int argc, char** argv) {
         }
         else if (strcmp(argv[i], "--window") == 0 && i + 1 < argc) {
             sscanf(argv[++i], "%dx%d", &window_width, &window_height);
-        }
-        else if (strcmp(argv[i], "--warp") == 0 && i + 1 < argc) {
-            for (const char* p = argv[++i]; p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
-                ScriptedWarp w{};
-                if (sscanf(p, "%d@%lf", &w.index, &w.at) == 2) {
-                    warps.push_back(w);
-                }
-            }
-        }
-        else if (strcmp(argv[i], "--story") == 0 && i + 1 < argc) {
-            char name[64] = {};
-            const char* arg = argv[++i];
-            sscanf(arg, "%63[^@,]", name);
-            story_due = dino::story_choose(name);
-            if (const char* at = strchr(arg, '@')) {
-                story_at = atof(at + 1);
-            }
-            if (const char* comma = strchr(arg, ',')) {
-                dino::story_set_warp(atoi(comma + 1));
-            }
-        }
-        else if (strcmp(argv[i], "--place") == 0 && i + 1 < argc) {
-            dino::story_set_place(argv[++i]);
-        }
-        else if (strcmp(argv[i], "--report") == 0) {
-            story_reported = 0.0;
-        }
-        else if (strcmp(argv[i], "--bits") == 0 && i + 1 < argc) {
-            dino::story_add_bits(argv[++i]);
-        }
-        else if (strcmp(argv[i], "--watch-bits") == 0 && i + 1 < argc) {
-            dino::story_watch_bits(argv[++i]);
         }
         else if (strcmp(argv[i], "--stacks") == 0 && i + 1 < argc) {
             print_stacks_after(atof(argv[++i]));
