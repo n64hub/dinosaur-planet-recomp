@@ -62,6 +62,8 @@ Played from a boot with `--report` and looked at. Which character plays what com
 file 19, each task's name and clue), which says when the player swaps.
 
 - `new-game`: Krystal, no bits, the real opening on the pterodactyl.
+- `swapstone-hollow`: Sabre in SwapStone Hollow (warp 15), through task 9, the tunnel out of Ice Mountain: the
+  Queen not met yet and no white mushroom collected.
 - `after-first-spellstone`: Sabre at the Volcano Force Point (warp 81), the first spirit won and the first SpellStone
   placed.
 - `before-sand-worm`: Krystal in Cape Claw, on the sand at the map's setuppoint beside the worm. The warp table has no
@@ -74,6 +76,16 @@ file 19, each task's name and clue), which says when the player swaps.
 
 A shrine's warp lands at its Transporter, 1600 units from the shrine object. Its test starts when the player walks up
 to that object, which each shrine's DLL checks in its first state.
+
+A place that `--place` jumps to has none of the map's groups a player would have walked through. A map loads an object
+whose header byte +4 has 0x10 only while its group (byte +6) is on, a bit each in a word the save keeps per map (bit
+0x452 for SwapStone Hollow's maps 7 and 8), and TriggerPlanes turn groups on and off as the player crosses them:
+action 0x13 turns one on, 0x14 off and 0x22 toggles it (dll325's actions, through dll29's exports 18 and 19). In map 7
+group 0 holds the SwapStone and the vine doors, 1 the Queen Earthwalker, 5 the flowers, 6 Tricky's sequence, 7 and 8
+the white mushrooms by the river and in the grove, so `--story swapstone-hollow --place ... --bits 452=450` has 1, 6,
+7 and 8 on, enough for the Queen, Tricky and the mushrooms. Groups 0 and 5 with those (`452=483`), or all of them at
+once (`452=65535`), crash as the map loads: a MagicPlant (dll290) or SHBirchTree (dll520) child that fails to spawn is
+passed on unchecked to `func_80021A84`.
 
 ## The bits
 
