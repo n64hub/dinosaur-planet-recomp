@@ -27,7 +27,10 @@ namespace {
     constexpr int32_t player_object = 0x80023914;
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
-    constexpr int32_t set_menu = 0x8000F404;
+    // What dll63, the front end, calls with 1 before it starts play: each changes a flag in the word at 0x80092A98,
+    // and without them the objects aren't drawn and the opening's textures are wrong.
+    constexpr int32_t play_flag_2000 = 0x80041D20;
+    constexpr int32_t play_flag_10 = 0x80041C6C;
     constexpr uint32_t warp_table_rom = 0x020E023A; // ROM file 30
 
     struct StoryBit {
@@ -53,9 +56,8 @@ namespace {
     constexpr int sabre = 0;
     constexpr int krystal = 1;
 
-    // A warp of no_place starts as dll64, the name screen, does once a name is done: the new game, then its menu 5.
+    // A warp of no_place keeps where dll29's new game puts the player, the start of the game's opening.
     constexpr int no_place = -2;
-    constexpr int new_game_menu = 5;
 
     // Cape Claw's sand worm has no entry in the warp table. Its object is at (2155, -276, -206) in map 29, whose origin
     // is grid cell (2, 26) of 640 units: this is beside it on the same floor.
@@ -112,6 +114,31 @@ namespace {
         call(rdram, ctx, word(rdram, table + 4 + 4 * export_index));
     }
 
+    Place warp_entry(int index) {
+        uint32_t entry = warp_table_rom + 16 * index;
+        uint32_t words[3] = { dino_rom_word(entry), dino_rom_word(entry + 4), dino_rom_word(entry + 8) };
+        Place place;
+        memcpy(&place, words, sizeof(words));
+        place.layer = (int32_t)dino_rom_word(entry + 12);
+        return place;
+    }
+
+    // Export 6 takes where (a vector in the game's memory, here under its stack), the facing, flags and the layer.
+    void store_place(uint8_t* rdram, recomp_context* ctx, const Place& place) {
+        gpr sp = ctx->r29;
+        ctx->r29 -= 0x40;
+        gpr position = ctx->r29 + 0x20;
+        memcpy(&MEM_W(0, position), &place.x, 4);
+        memcpy(&MEM_W(4, position), &place.y, 4);
+        memcpy(&MEM_W(8, position), &place.z, 4);
+        ctx->r4 = position;
+        ctx->r5 = 0;
+        ctx->r6 = 0;
+        ctx->r7 = place.layer;
+        call_dll29(rdram, ctx, 6);
+        ctx->r29 = sp;
+    }
+
     void set_game_bit(uint8_t* rdram, recomp_context* ctx, const StoryBit& b) {
         ctx->r4 = b.bit;
         ctx->r5 = b.value;
@@ -163,32 +190,13 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     for (const StoryBit& b : extra_bits) {
         set_game_bit(rdram, ctx, b);
     }
-    if (chosen_warp == no_place) {
-        ctx->r4 = new_game_menu;
-        call(rdram, ctx, set_menu);
-        fprintf(stderr, "--story: started %s, %d bits, at the game's own start\n", point.name, (int)(point.bits.size() + extra_bits.size()));
-        return;
+    if (chosen_warp != no_place) {
+        store_place(rdram, ctx, chosen_warp >= 0 ? warp_entry(chosen_warp) : point.place);
     }
-    // Export 6 takes where (a vector in the game's memory, here under its stack), the facing, flags and the layer.
-    Place place = point.place;
-    if (chosen_warp >= 0) {
-        uint32_t entry = warp_table_rom + 16 * chosen_warp;
-        uint32_t words[3] = { dino_rom_word(entry), dino_rom_word(entry + 4), dino_rom_word(entry + 8) };
-        memcpy(&place, words, sizeof(words));
-        place.layer = (int32_t)dino_rom_word(entry + 12);
-    }
-    gpr sp = ctx->r29;
-    ctx->r29 -= 0x40;
-    gpr position = ctx->r29 + 0x20;
-    memcpy(&MEM_W(0, position), &place.x, 4);
-    memcpy(&MEM_W(4, position), &place.y, 4);
-    memcpy(&MEM_W(8, position), &place.z, 4);
-    ctx->r4 = position;
-    ctx->r5 = 0;
-    ctx->r6 = 0;
-    ctx->r7 = place.layer;
-    call_dll29(rdram, ctx, 6);
-    ctx->r29 = sp;
+    ctx->r4 = 1;
+    call(rdram, ctx, play_flag_2000);
+    ctx->r4 = 1;
+    call(rdram, ctx, play_flag_10);
     call_dll29(rdram, ctx, 7);
     fprintf(stderr, "--story: started %s, %d bits, at warp %d\n", point.name, (int)(point.bits.size() + extra_bits.size()), chosen_warp);
 }
