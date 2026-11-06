@@ -106,6 +106,50 @@ func = "func_80011C70"
 before_vram = 0x80011CC4
 text = "{ void osAiGetLength_recomp(uint8_t*, recomp_context*); uint64_t v0 = ctx->r2; osAiGetLength_recomp(rdram, ctx); ctx->r25 = ctx->r2; ctx->r2 = v0; }"
 
+# The prototype's own crashes, each fixed where the game reads what isn't there. The labels a hook jumps to are
+# N64Recomp's for a branch target the function already has (L_<its address>).
+
+# Lunaimar (dll243, object 22, Moon Mountain Pass) once it has seen the player: dll243_0C44 takes the sidekick from
+# func_8002394C, the first object of list 1, which is 0 while Kyte isn't out (Krystal before Cape Claw frees it), and
+# reads its position at 0x18($s1) with no test. The game's own way past a sidekick it can't use is the branch at
+# 0x9014CFAC (the sidekick's interface +0x64 returns 0), to 0x9014CFF8, which clears flag 4 at 0x3B2($s2) and takes the
+# player as the target: a missing sidekick goes there too.
+[[patches.hook]]
+func = "dll243_0C44"
+before_vram = 0x9014CF34
+text = "{ if (ctx->r17 == 0) goto L_9014CFF8; }"
+
+# The Cape Claw sand worm (CCsandwormBoss, dll461) the same: dll461_0330 keeps the sidekick at 0x8 of its state
+# (0x8($s0) in dll461_05E0), 0 until one is out, and two of its states use it with no test. State 4, the player out
+# of reach, asks the sidekick's interface +0x64 at 0x901E56B4, the sidekick in $a0; a sidekick it can't use ends the
+# pass at 0x901E5F5C.
+[[patches.hook]]
+func = "dll461_05E0"
+before_vram = 0x901E56B4
+text = "{ if (ctx->r4 == 0) goto L_901E5F5C; }"
+
+# State 9, which follows each of the worm's attacks, first turns it to face the sidekick (dll461_12B0 reads 0xC of
+# it): with none it faces the player, at 0x4 of the state. With the player out of reach it then measures from the
+# sidekick, from 0x901E59B4, and with none goes on as for a sidekick out of reach, at 0x901E5A98: back to state 4 by
+# its hole, or state 10.
+[[patches.hook]]
+func = "dll461_05E0"
+before_vram = 0x901E5900
+text = "{ if (ctx->r5 == 0) ctx->r5 = MEM_W(0x4, ctx->r16); }"
+
+[[patches.hook]]
+func = "dll461_05E0"
+before_vram = 0x901E59B4
+text = "{ if (MEM_W(0x8, ctx->r16) == 0) goto L_901E5A98; }"
+
+# The Swap Store's item beams (SPitembeam, dll772) the same: a beam's constructor keeps the nearest object of list 0xA,
+# the item under it, at +0xDC, and its update asks that item's interface +0x28 at 0x902C5888 with no test. With no item
+# it goes on as for an item that is gone, at 0x902C58D8, which hides the beam.
+[[patches.hook]]
+func = "dll772_0088"
+before_vram = 0x902C5888
+text = "{ if (ctx->r4 == 0) goto L_902C58D8; }"
+
 # RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
 # write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
 # list's pointer's address in $a0. func_800026C8 loads a camera, with the list's at 0x800028AC ($a1 its address, $s0 the
@@ -325,6 +369,18 @@ text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
 func = "func_8001F890"
 before_vram = 0x800202E0
 text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+
+# SwapStone Hollow's white mushrooms are SHbluemushroom (dll502) with model 1, and the Queen Earthwalker counts them
+# in bit 0x66D. A mushroom whose state (byte 0x136 of its state, $s0) reaches 8 adds one there when the player's
+# 0x7000B comes (dll502_03A8); a pickup sets its collected bit at once and goes to state 2, which ends in 8. Mushrooms
+# of type 4 that touch surface 0xD are stuck, flag 4 of byte 0x137, which nothing clears: dll502_0D74 puts each into
+# state 6 at the start of every frame, so one picked up there is back in 6 a frame later, never counts and never
+# comes back. Map 8's uid 30832 (bit 0x463) is the hollow's only type 4, so only nine of the ten could count. A
+# stuck mushroom being picked up stays in state 2 ($t0 is the state stored).
+[[patches.hook]]
+func = "dll502_0D74"
+before_vram = 0x901FFD58
+text = '{ if (MEM_BU(0x136, ctx->r16) == 2) ctx->r8 = 2; }'
 
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),

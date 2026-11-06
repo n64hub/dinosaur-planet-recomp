@@ -90,9 +90,12 @@ namespace {
     }
 
     // What the game has set by each step of its task list (docs/story-points.md has each bit's evidence).
-    const Bits to_first_shrine = {
-        { 0xD0, 1 }, { 0xB4, 1 }, { 0x2B2, 1 }, { 0x70, 1 }, { 0x37A, 1 }, { 0x4D3, 1 }, { 0xAB, 1 }, { 0xBF, 1 },
-        { 0x15A, 1 }, { 0x3A0, 1 }, { 0x88, 1 }, { 0x3B0, 1 }, { 0x2C5, 1 }, { 0x615, 1 }, { 0x2D, 1 }, { 0x1D7, 1 },
+    const Bits to_swapstone_hollow = {
+        { 0xD0, 1 }, { 0xB4, 1 }, { 0x2B2, 1 }, { 0x70, 1 }, { 0x37A, 1 }, { 0x4D3, 1 }, { 0xAB, 1 },
+    };
+    const Bits to_first_shrine = to_swapstone_hollow + Bits {
+        { 0xBF, 1 }, { 0x15A, 1 }, { 0x3A0, 1 }, { 0x88, 1 }, { 0x3B0, 1 }, { 0x2C5, 1 }, { 0x615, 1 }, { 0x2D, 1 },
+        { 0x1D7, 1 },
     };
     const Bits first_spirit = { { 0x316, 1 }, { 0x21F, 1 } };
     const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x877, 1 } };
@@ -103,6 +106,7 @@ namespace {
 
     const std::vector<StoryPoint> points = {
         { "new-game", krystal, no_place, {}, {} },
+        { "swapstone-hollow", sabre, 15, {}, to_swapstone_hollow },
         { "after-first-spellstone", sabre, 81, {}, to_first_shrine + first_spirit + first_stone },
         { "before-sand-worm", krystal, -1, sand_worm_place, to_first_shrine },
         { "before-df-shrine", krystal, 36, {}, to_first_shrine },

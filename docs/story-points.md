@@ -58,6 +58,8 @@ Played from a boot with `--report` and looked at. Which character plays what com
 file 19, each task's name and clue), which says when the player swaps.
 
 - `new-game`: Krystal, no bits, the real opening on the pterodactyl.
+- `swapstone-hollow`: Sabre in SwapStone Hollow (warp 15), through task 9, the tunnel out of Ice Mountain: the
+  Queen not met yet and no white mushroom collected.
 - `after-first-spellstone`: Sabre at the Volcano Force Point (warp 81), the first spirit won and the first SpellStone
   placed.
 - `before-sand-worm`: Krystal in Cape Claw, on the sand at the map's setuppoint beside the worm. The warp table has no
@@ -70,6 +72,16 @@ file 19, each task's name and clue), which says when the player swaps.
 
 A shrine's warp lands at its Transporter, 1600 units from the shrine object. Its test starts when the player walks up
 to that object, which each shrine's DLL checks in its first state.
+
+A place that `--place` jumps to has none of the map's groups a player would have walked through. A map loads an object
+whose header byte +4 has 0x10 only while its group (byte +6) is on, a bit each in a word the save keeps per map (bit
+0x452 for SwapStone Hollow's maps 7 and 8), and TriggerPlanes turn groups on and off as the player crosses them:
+action 0x13 turns one on, 0x14 off and 0x22 toggles it (dll325's actions, through dll29's exports 18 and 19). In map 7
+group 0 holds the SwapStone and the vine doors, 1 the Queen Earthwalker, 5 the flowers, 6 Tricky's sequence, 7 and 8
+the white mushrooms by the river and in the grove, so `--story swapstone-hollow --place ... --bits 452=450` has 1, 6,
+7 and 8 on, enough for the Queen, Tricky and the mushrooms. Groups 0 and 5 with those (`452=483`), or all of them at
+once (`452=65535`), crash as the map loads: a MagicPlant (dll290) or SHBirchTree (dll520) child that fails to spawn is
+passed on unchecked to `func_80021A84`.
 
 ## The bits
 
@@ -96,6 +108,21 @@ The spirits, set in this order by WL_seqpoint (611) and read by WL_LevelControl 
 Volcano Force Point takes it as its placed bit, with 0x123 as the stone carried. Carrying is 0x123 or 0x2E8, which
 SHswapstone refuses a swap on ("You cannot swap when holding a SpellStone"), so a point leaves both clear.
 
+## Object groups
+
+A map's objects come in groups, and most of a level's enemies and props load only while their group is on. Each
+object's setup in ROM file 31 has a flags byte at +4 and its group at +6: with flag 0x10 the object loads only while
+bit `group` of its map's group field is set. A map's field is a story value of 32 bits, numbered by the u16 at
++0xF0 + 2 × map in dll29's data, and dll29's export 18 reads it. Some maps' fields: 0x480 Discovery Falls (6), 0x4A6
+SwapStone Circle (14), 0x42E Moon Mountain Pass (18), 0x3B7 Cape Claw (29), 0x601 Swap Store (51), 0x5DC Dragon
+Rock - Bottom (52).
+
+A story point turns no group on, so a level started from one has only its ungrouped objects: Moon Mountain Pass's
+Lunaimars are in groups 3 to 7, Cape Claw's worm in group 10 and its SandEels in 11 and 12, and the Swap Store's
+shopkeeper in group 0 and its item beams in group 1 (`--story new-game,86 --bits 601=2`). `--bits <field>=<value>`
+sets the field, its value in decimal: `--bits 42e=-1` turns on every group of Moon Mountain Pass, more objects at once
+than play ever loads, and `--bits 42e=385` groups 0, 7 and 8, where the pass's Transporter lands.
+
 ## The shrines
 
 Each shrine has its own DLL: DFSH 433, MMSH 466, ECSH 469, GPSH 472, DBSH 477, NWSH 481, CCSH 486, WGSH 488. Its
@@ -107,8 +134,13 @@ constructor sets 0x129, clears the shrine's own bit (0x125 DF, 0x12B MM and GP, 
 CCsandwormBoss (461) is in map 29 at (2155, -276, -206). Map 29's record in ROM file 21 is at grid cell (2, 26) of 640
 units, so that is (3435, -276, 16434). Bit 0x3FB says it is dead, and then 0x3D4 picks how far it has gone. Three
 SandEels beside it hold the bits its constructor reads: 0x1EB at (1661, -263, -296), 0x1EC at (2040, -270, -189) and
-0x22A at (2051, -268, -341). Its first state waits for 0x1EB. `--bits 1eb` showed no worm in 40 s of standing at the
-point's place, about 300 units from the nearest of them. What wakes it in play has not been played yet.
+0x22A at (2051, -268, -341). The worm is in Cape Claw's group 10 and the SandEels in 11 and 12, which a story point
+leaves off (Object groups), so `--bits 1eb` alone loads none of them. With all three bits set its constructor starts
+it at state 2, and its first pass moves it to state 4, the fight:
+
+```
+DinosaurPlanet --boot --story before-sand-worm --bits 3b7=7168,1eb,1ec,22a --place 3620,-265,16205,0 --report
+```
 
 ## The warp table
 
