@@ -113,7 +113,12 @@ namespace {
     // +0x20 the bit of the stone carried (VFP_SpellPlace 637 in map 4, DFP_SpellPlace in map 21). CloudRunner's, won in
     // the race (CRSpellstone, map 43, 0x49F), is carried as 0x2E8 to the Desert Force Point (placed, 0x5F3); Walled
     // City's is carried as 0x83B to the Volcano Force Point's second place (0x878).
-    const Bits to_second_stone = to_first_shrine + first_spirit + first_stone + second_spirit;
+    // SwapStone Circle's act, the 4-bit field 0xE7, moves a step each time the player enters map 14 (SC_levelcontrol,
+    // dll519): to 3 with 0x2C5, to 8 carrying the first spirit, to 9 once it is released (0x316). Its chief
+    // (SC_chieflightfoot, dll518) gives the Moon Mountain Pass key only at act 9: talked to, he sets 0x60E, which
+    // starts the sequence that sets the key, 0x611, the bit Moon Mountain Pass's padlock needs.
+    const Bits circle_act_9 = { { 0xE7, 9 } };
+    const Bits to_second_stone = to_first_shrine + first_spirit + first_stone + second_spirit + circle_act_9;
     const Bits second_stone_carried = { { 0x49F, 1 }, { 0x2E8, 1 } };
     const Bits second_stone = { { 0x49F, 1 }, { 0x5F3, 1 } };
     const Bits third_stone_carried = { { 0x83B, 1 } };
