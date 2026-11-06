@@ -1,0 +1,96 @@
+diff --git a/src/analysis.h b/src/analysis.h
+index 9e0562e..082affb 100644
+--- a/src/analysis.h
++++ b/src/analysis.h
+@@ -16,6 +16,8 @@ namespace N64Recomp {
+ 
+     struct FunctionStats {
+         std::vector<JumpTable> jump_tables;
++        // Where each jal to a label inside the function returns to (the jal's address + 8): see process_instruction.
++        std::vector<uint32_t> local_returns;
+     };
+ 
+     bool analyze_function(const Context& context, const Function& function, const std::vector<rabbitizer::InstructionCpu>& instructions, FunctionStats& stats);
+diff --git a/src/recompilation.cpp b/src/recompilation.cpp
+index 529ed30..a574b44 100644
+--- a/src/recompilation.cpp
++++ b/src/recompilation.cpp
+@@ -479,6 +479,14 @@ bool process_instruction(GeneratorType& generator, const N64Recomp::Context& con
+         break;
+     // Branches
+     case InstrId::cpu_jal:
++        // A jal to a label inside this function, as hand-written assembly calls a part of itself as a subroutine: it
++        // sets $ra and goes there, and the jr that returns (any register holding that $ra) goes back by its value.
++        if (uint32_t target = instr.getBranchVramGeneric(); target > func.vram && target < func_vram_end) {
++            print_indent();
++            fmt::print(output_file, "ctx->r31 = (int32_t)0x{:08X};\n", instr_vram + 8);
++            print_goto_with_delay_slot(fmt::format("L_{:08X}", target));
++            break;
++        }
+         if (!print_func_call_by_address(instr.getBranchVramGeneric())) {
+             return false;
+         }
+@@ -531,6 +539,29 @@ bool process_instruction(GeneratorType& generator, const N64Recomp::Context& con
+         }
+         break;
+     case InstrId::cpu_jr:
++        if (!stats.local_returns.empty() && std::none_of(stats.jump_tables.begin(), stats.jump_tables.end(),
++                [instr_vram](const N64Recomp::JumpTable& jtbl) { return jtbl.jr_vram == instr_vram; })) {
++            if (!process_delay_slot(false)) {
++                return false;
++            }
++            print_indent();
++            fmt::print(output_file, "switch ((int32_t)ctx->r{}) {{\n", rs);
++            for (uint32_t ret : stats.local_returns) {
++                print_indent();
++                fmt::print(output_file, "    case (int32_t)0x{:08X}: goto L_{:08X};\n", ret, ret);
++            }
++            print_indent();
++            fmt::print(output_file, "}}\n");
++            print_indent();
++            if (rs != (int)rabbitizer::Registers::Cpu::GprO32::GPR_O32_ra) {
++                fmt::print("[Info] Indirect tail call in {}\n", func.name);
++                generator.emit_tail_call_start(context);
++                generator.emit_function_call_by_register(rs);
++                print_indent();
++            }
++            generator.emit_return(context, func_index);
++            break;
++        }
+         if (rs == (int)rabbitizer::Registers::Cpu::GprO32::GPR_O32_ra) {
+             print_return_with_delay_slot();
+         } else {
+@@ -797,6 +828,8 @@ bool recompile_function_impl(GeneratorType& generator, const N64Recomp::Context&
+ 
+         // First pass, disassemble each instruction and collect branch labels
+         uint32_t vram = func.vram;
++        uint32_t func_vram_end = func.vram + func.words.size() * sizeof(func.words[0]);
++        std::vector<uint32_t> local_returns;
+         for (uint32_t word : func.words) {
+             const auto& instr = instructions.emplace_back(byteswap(word), vram);
+ 
+@@ -804,6 +837,15 @@ bool recompile_function_impl(GeneratorType& generator, const N64Recomp::Context&
+             if (instr.isBranch() || instr.getUniqueId() == rabbitizer::InstrId::UniqueId::cpu_j) {
+                 branch_labels.insert((uint32_t)instr.getBranchVramGeneric());
+             }
++            // A jal to a label inside the function, and where it returns to (process_instruction).
++            if (instr.getUniqueId() == rabbitizer::InstrId::UniqueId::cpu_jal) {
++                uint32_t target = (uint32_t)instr.getBranchVramGeneric();
++                if (target > func.vram && target < func_vram_end) {
++                    branch_labels.insert(target);
++                    branch_labels.insert(vram + 8);
++                    local_returns.push_back(vram + 8);
++                }
++            }
+ 
+             // Advance the vram address by the size of one instruction
+             vram += 4;
+@@ -817,6 +859,8 @@ bool recompile_function_impl(GeneratorType& generator, const N64Recomp::Context&
+             return false;
+         }
+ 
++        stats.local_returns = std::move(local_returns);
++
+         std::unordered_set<uint32_t> jtbl_lw_instructions{};
+ 
+         // Add jump table labels into function

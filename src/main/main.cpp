@@ -339,8 +339,8 @@ std::vector<recomp::GameEntry> supported_games = {
         .display_name = "Dinosaur Planet (prototype)",
         .game_id = u8"dinoplanet.n64.proto.2000-12",
         .mod_game_id = "dinoplanet",
-        // The game saves to a Controller Pak (libultra's osPfs calls), which is no save type of the cartridge's.
-        .save_type = recomp::SaveType::None,
+        // The game saves to the cartridge's Flash (libultra's osFlash calls, from the DLL that saves: tools/gen_syms.py).
+        .save_type = recomp::SaveType::Flashram,
         .thumbnail_bytes = std::span<const char>(icon_bytes),
         .is_enabled = true,
         .entrypoint_address = get_entrypoint_address(),

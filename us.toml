@@ -28,3 +28,11 @@ text = "{ void dino_dll_loaded(uint8_t*, recomp_context*); dino_dll_loaded(rdram
 func = "func_8000C258"
 before_vram = 0x8000C340
 text = "{ void dino_dll_unloading(uint8_t*, recomp_context*); dino_dll_unloading(rdram, ctx); }"
+
+# func_8001B4F0 (tools/gen_syms.py, ONE_FUNCTION) jumps through a table of words at 0x80090444, indexed by a byte of the
+# model's that it has checked is not 0. The table's only entry but the first is at index 1, 0x8001C8B8, and the rest
+# are 0, which no console could jump to: so the jump goes there, as N64Recomp can follow. (jr $s1 -> j 0x8001C8B8)
+[[patches.instruction]]
+func = "func_8001B4F0"
+vram = 0x8001C8B0
+value = 0x0800722E

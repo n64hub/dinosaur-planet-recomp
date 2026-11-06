@@ -18,7 +18,8 @@ There is no symbol map, and nothing here comes from any decompilation: every fun
   address) and the rest are words in its data, of which a run that all point inside one function is that function's
   jump table and left alone (data_pointers). The DLLs' imports (the table in ROM file 72, DLL_IMPORTS) are main
   segment addresses the DLLs call, so each one in its text starts a function. In a DLL, the starts are its exports,
-  its constructor and destructor, its GOT's words that point into its text, and each $gp setup (below).
+  its constructor and destructor, each $gp setup (below), and the code addresses its GOT gives: a word the code uses
+  as it is, and a page plus a low half (Dll.got_uses).
 - libultra and libc are named by n64sym's signatures (ref/n64sym, MIT: git clone https://github.com/shygoo/n64sym
   ref/n64sym): a function matches when the CRC32 of its first 8 bytes and of its whole body agree once relocated
   fields are masked out. N64Recomp has the runtime replace libultra functions by name, so those it reimplements must
@@ -80,10 +81,51 @@ DLL_VRAM = 0x90000000
 # libultra functions the signatures can't name, by hand from what they do. N64Recomp drops or reimplements libultra
 # functions by name.
 MANUAL_NAMES = {
+    # Controllers: the only caller of __osContGetInitData besides osContGetQuery, which also makes the SI access queue;
+    # and the copy out of __osContPifRam right after it, which the game's pad code calls after each read.
+    0x8007D530: "osContInit",
+    0x8007D8F4: "osContGetReadData",
+    # Audio: the one caller of __osAiDeviceBusy, which writes the AI's DMA registers; and the function before it that
+    # divides osViClock by the rate and writes the AI's DAC rate and bit rate.
+    0x8007DF00: "osAiSetNextBuffer",
+    0x8007DC70: "osAiSetFrequency",
+    # PI: the two that send a request to the PI manager, osJamMesg for a high priority one, osSendMesg otherwise; and the
+    # read of a word through a PI handle (__osPiGetAccess, then __osEPiRawReadIo).
+    0x8007DFE0: "osPiStartDma",
+    0x80080F70: "osEPiStartDma",
+    0x80080EA0: "osEPiReadIo",
+    # VI: the one caller of __osViInit, which starts the VI manager's thread; and the read of the next framebuffer
+    # between __osDisableInt and __osRestoreInt.
+    0x8005E200: "osCreateViManager",
+    0x8007F080: "osViGetNextFramebuffer",
+    # Flash, the game's save: nothing in the main segment calls these, the DLL that saves does (its imports). The first
+    # links a PI handle at 0xA8000000, Flash's address, and reads its ID; the rest follow it in libultra's order, and
+    # each that erases or writes clears the status first.
+    0x8005EAE8: "osFlashInit",
+    0x8005EC3C: "osFlashReadStatus",
+    0x8005ED08: "osFlashReadId",
+    0x8005EE20: "osFlashClearStatus",
+    0x8005EE8C: "osFlashAllErase",
+    0x8005EFA8: "osFlashSectorErase",
+    0x8005F0D4: "osFlashWriteBuffer",
+    0x8005F1A0: "osFlashWriteArray",
+    0x8005F2A4: "osFlashReadArray",
+    # The exception handler: it reads every RCP interrupt's register (MI, VI, AI, PI, SI), wakes threads with
+    # __osEnqueueThread and calls kdebugserver. The runtime has none, and N64Recomp leaves it out by its name.
+    0x80080090: "__osException",
+    # Its message sending after it (and handle_CpU, which spimdisasm keeps in the same function), which branch back
+    # into it: left out with it.
+    0x80080A34: "send_mesg",
 }
 
 # Function starts the analysis misses: where the entry point jumps once bss is clear (jr $t2).
 EXTRA_FUNCTION_STARTS = {0x80000450}
+
+# Hand-written assembly that calls parts of itself as subroutines (a jal to a label inside it, which returns by the $ra
+# it saved in another register) and jumps from one part into another's: one function to N64Recomp, which recompiles
+# those calls (runtime-patches/N64Recomp-2-local-calls.patch). The model code's skinning routine, from its entry to the
+# next function.
+ONE_FUNCTION = [(0x8001B4F0, 0x8001C8D4)]
 
 # Signature names n64sym gives unrelated tiny functions.
 UNTRUSTED_NAMES = {"n_alSynRemovePlayer", "osProfileFlush", "n_alSeqpDelete", "alSynFreeFX", "ptstart", "__dummy",
@@ -124,14 +166,44 @@ class Dll:
         self.text_size = end - self.text
         self.vram = DLL_VRAM + (rom_addr - rom_file(rom, DLL_FILE)[0]) + self.text
         self.text_rom = rom_addr + self.text
+        self.text_bytes = rom[self.text_rom:self.text_rom + self.text_size]
 
     def got_vram(self):
         return self.vram + self.rel - self.text
 
+    def got_uses(self):
+        """The GOT's words its code uses as pages, and the addresses it makes from them. The code reaches its own
+        functions and data as position-independent code does: a lw from $gp loads a GOT word, which is the address
+        itself, or, for a local one, a page (its address rounded to 0x10000) that an addiu then adds the low half to.
+        So a word an addiu adds to is no function of its own, where the page plus the low half may be."""
+        pages, made = set(), set()
+        n = len(self.text_bytes) // 4
+        for i in range(n):
+            w = word(self.text_bytes, i * 4)
+            if w >> 26 != 0x23 or (w >> 21) & 31 != 28 or w & 0x8000 or (w & 0xFFFF) // 4 >= len(self.got):
+                continue
+            reg, index = (w >> 16) & 31, (w & 0xFFFF) // 4
+            if self.got[index] & 0x80000000:
+                continue
+            for j in range(i + 1, min(i + 8, n)):
+                x = word(self.text_bytes, j * 4)
+                op, rs, rt, rd = x >> 26, (x >> 21) & 31, (x >> 16) & 31, (x >> 11) & 31
+                if op == 0x09 and rs == reg:
+                    pages.add(index)
+                    made.add(self.got[index] + ((x & 0xFFFF) ^ 0x8000) - 0x8000)
+                    break
+                # Anything else that writes the register ends the search (stores and branches write none).
+                if (op == 0 and rd == reg) or (op not in (0, 1, 2, 4, 5, 6, 7, 0x14, 0x15, 0x16, 0x17)
+                                               and op < 0x28 and rt == reg):
+                    break
+        return pages, made
+
     def pointed(self):
         """The offsets in its text that something outside its code points at."""
         out = set(self.exports) | set(self.ctors) | set(self.gp_sets)
-        out |= {w for w in self.got if not w & 0x80000000 and w < self.text_size}
+        pages, made = self.got_uses()
+        out |= {w for i, w in enumerate(self.got) if i not in pages and not w & 0x80000000}
+        out |= made
         return {o for o in out if o < self.text_size and o % 4 == 0}
 
 
@@ -396,6 +468,7 @@ def main():
     starts = sorted(set(found) | {a for a in pointed if v <= a < v + t})
     new = len(starts) - len(found)
     starts = merge_split_functions(buf, v, t, starts, pointed)
+    starts = [s for s in starts if not any(a < s < b for a, b in ONE_FUNCTION)]
     lib = {a: n for a, n in match_library(buf, v, starts, load_sigs()).items() if n not in UNTRUSTED_NAMES}
     manual = set(MANUAL_NAMES.values())
     lib = {a: n for a, n in lib.items() if n not in manual}
