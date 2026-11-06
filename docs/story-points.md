@@ -144,6 +144,17 @@ it at state 2, and its first pass moves it to state 4, the fight:
 DinosaurPlanet --boot --story before-sand-worm --bits 3b7=7168,1eb,1ec,22a --place 3620,-265,16205,0 --report
 ```
 
+Each SandEel's bit (+0x18 of its setup) is set by the eel itself once it is beaten (dll216's state at 0x34A0), and
+the worm moves the eels' groups by them: in state 0 it waits for 0x1EB with group 12 on (that eel), then turns group
+12 off and group 11 on (the other two) for state 1, and turns group 11 off once 0x1EC and 0x22A are both set, for the
+fight. Its constructor rotates them each time the map loads: with 0x1EB set and not all three, it clears 0x1EB and
+sets 0x22A, or 0x1EC once 0x22A is set, so the first eel is played again with one more of the other two beaten, and
+that one loads hidden when group 11 comes on. A hidden eel with its bit set stays hidden (us.toml's hook on
+dll216_02C0 says why it needs one). The command above has all three groups on with all three bits set, which play
+never has: the eels load hidden beside the fight. `--bits 3b7=3072,1eb` stands for the map loaded again after the
+first eel: the constructor clears 0x1EB and sets 0x22A, and group 11 is on, as once the first eel is beaten again,
+with that eel hidden.
+
 ## The warp table
 
 ROM file 30 has 96 entries of 16 bytes, x, y, z and a layer, read by `func_8004D1D4`. 54 hold a place and 42 are all
