@@ -38,15 +38,20 @@ player fixed, and the story's unfinished parts finished from what the game's own
 is an attempt, written by AI agents from the game's own code (the patches in `patches/` and the hooks in `us.toml`),
 and none has been played by a human, so report one that falls short.
 
-None has landed yet. Under way:
+Fixed:
+
+- Crashes in the game's own code: the Lunaimars of Moon Mountain Pass and Cape Claw's sand worm with no Kyte beside
+  Krystal, and the Swap Store's item beams as the player walks in.
+
+Under way:
 
 - The early game, from a new game to the first SpellStone: SwapStone Hollow's river that isn't drained, the river log
   that doesn't come after Dragon Rock's SpellStone, Tricky's first sequence crashing, the white mushrooms' softlock
   and the well.
 - The Krazoa shrines: all eight finished, a way into the five that have none, and their spirits taken to Warlock
   Mountain.
-- Crashes in the game's own code: Lunaimar's, Cape Claw's sand worm's, the shop's item beam on arrival and the others
-  found on the way.
+- Crashes in the game's own code still to find: the Magic Plant, being sent out of the shop, the skeletons' hits,
+  small baskets carried away, and a crash after a long while in Cape Claw.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
 
 ## The ROM
