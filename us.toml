@@ -314,44 +314,44 @@ text = "ctx->r7 = ADD32(ctx->r7, 1);"
 [[patches.hook]]
 func = "dll59_0148"
 before_vram = 0x90096C6C
-text = "{ void dino_hud_side(uint8_t*, gpr, int); dino_hud_side(rdram, ctx->r4, 1); }"
+text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, ctx->r4, 1); }"
 
 [[patches.hook]]
 func = "dll59_0148"
 before_vram = 0x90097480
-text = "{ void dino_hud_side(uint8_t*, gpr, int); dino_hud_side(rdram, (gpr)MEM_W(0x68, ctx->r29), 0); }"
+text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, (gpr)MEM_W(0x68, ctx->r29), 0); }"
 
 # dll1_0BB8 draws the rest of the HUD, its display list pointer in $s0: dll1_3D28 and dll1_27D8 on the right.
 [[patches.hook]]
 func = "dll1_0BB8"
 before_vram = 0x90000D9C
-text = "{ void dino_hud_side(uint8_t*, gpr, int); dino_hud_side(rdram, ctx->r16, 2); }"
+text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, ctx->r16, 2); }"
 
 [[patches.hook]]
 func = "dll1_0BB8"
 before_vram = 0x90000DB4
-text = "{ void dino_hud_side(uint8_t*, gpr, int); dino_hud_side(rdram, ctx->r16, 0); }"
+text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, ctx->r16, 0); }"
 
 [[patches.hook]]
 func = "dll1_0BB8"
 before_vram = 0x90000DF4
-text = "{ void dino_hud_side(uint8_t*, gpr, int); dino_hud_side(rdram, ctx->r16, 2); }"
+text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, ctx->r16, 2); }"
 
 [[patches.hook]]
 func = "dll1_0BB8"
 before_vram = 0x90000E14
-text = "{ void dino_hud_side(uint8_t*, gpr, int); dino_hud_side(rdram, ctx->r16, 0); }"
+text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, ctx->r16, 0); }"
 
 # dll1_27D8's dll1_6B74 is on the left of what's around it: $a0, then 0x38($sp).
 [[patches.hook]]
 func = "dll1_6B74"
 before_vram = 0x90006C00
-text = "{ void dino_hud_side(uint8_t*, gpr, int); dino_hud_side(rdram, ctx->r4, 1); }"
+text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, ctx->r4, 1); }"
 
 [[patches.hook]]
 func = "dll1_6B74"
 before_vram = 0x90007110
-text = "{ void dino_hud_side(uint8_t*, gpr, int); dino_hud_side(rdram, (gpr)MEM_W(0x38, ctx->r29), 2); }"
+text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, (gpr)MEM_W(0x38, ctx->r29), 2); }"
 # The free camera (src/game/camera.cpp): dll2_1770's $a0 is the camera mode's state, and its $gp is set.
 [[patches.hook]]
 func = "dll2_1770"
