@@ -53,12 +53,14 @@ Fixed:
 - The Krazoa shrines (Krazoa Shrines on Finished): all eight finished, a way into the five that have none, and their
   spirits taken to Warlock Mountain. Two of the fixes are always on: Cape Claw's test, which never ended, and Golden
   Plains' fly baddie, whose every shot made a second player who took the camera.
+- SwapStone Hollow: Tricky's run to his mother, the Queen Earthwalker, never started, and with no Tricky beside Sabre
+  it would have crashed. And the SwapStone could stop answering in its own corner of the hollow, and answer only
+  outside it, after a trip through the Swap Store or the SwapStone's warp.
 
 Under way:
 
-- The early game, from a new game to the first SpellStone: SwapStone Hollow's river that isn't drained, the river log
-  that doesn't come after Dragon Rock's SpellStone, Tricky's first sequence crashing, what the Queen Earthwalker does
-  with the white mushrooms she is given, and the well.
+- The early game, from a new game to the first SpellStone: SwapStone Hollow's river that isn't drained, and the log
+  to ride down it to Diamond Bay once the first SpellStone is placed.
 - Crashes in the game's own code still to find: the skeletons' hits and small baskets carried away.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
 

@@ -165,18 +165,19 @@ func = "dll461_05E0"
 before_vram = 0x901E59B4
 text = "{ if (MEM_W(0x8, ctx->r16) == 0) goto L_901E5A98; }"
 
-# Cape Claw's SandEels (dll216, setups 0x41BFA/B/C beside the worm) each hold a bit at +0x18 of their setup, 0x1EB,
-# 0x1EC and 0x22A, which an eel sets once it is beaten (its state at dll216_34A0) and the worm's constructor rotates
-# each time the map loads (it clears 0x1EB and sets 0x1EC or 0x22A). The baddies' shared init (dll33_2000, kept at
-# 0x39C of the eel's state) makes the eel hidden (obj +0xDC) while that bit is set. dll216_02C0 restarts a hidden eel
-# whose uid isn't on dll29's respawn list (dll29_109C, $v0 1), through that same init: its burst, sound 0xB20 and
-# alpha 0xFF. With its bit set the init only hides it again, so it restarts every frame, about 90 sounds a second
-# across three eels, until all 32 sound states are held. The game reaches that in play, wherever the worm has the
-# eels' group 11 on with one of its eels beaten: a hidden eel with its bit set stays hidden, at 0x9011CDC0.
+# SHtricky (dll501), beside the Queen Earthwalker in SwapStone Hollow, plays Tricky's run to her on the sidekick: in state
+# 0 it waits for bit 0xC3 and starts its sequence 3 on func_8002394C's object ($a3), and in state 2 it calls that
+# object's interface +0x5C, both with no test. With no sidekick out, state 0 waits on and state 2 goes to state 3 as it
+# would after the call.
 [[patches.hook]]
-func = "dll216_02C0"
-before_vram = 0x9011CBBC
-text = "{ int32_t bit = (int16_t)MEM_H(0x39C, ctx->r17); if (ctx->r2 != 0 && bit != -1) { gpr v0 = ctx->r2; ctx->r4 = bit; func_800147EC(rdram, ctx); if (ctx->r2 != 0) goto L_9011CDC0; ctx->r2 = v0; } }"
+func = "dll501_00A8"
+before_vram = 0x901FEE4C
+text = "{ if (ctx->r7 == 0) goto L_901FEEB0; }"
+
+[[patches.hook]]
+func = "dll501_00A8"
+before_vram = 0x901FEE88
+text = "{ if (ctx->r7 == 0) { MEM_B(0, ctx->r16) = 3; goto L_901FEEB0; } }"
 
 # The other DLLs that use func_8002394C's sidekick with no test reach that use only while one is out, so they have no
 # hook. The perches' query 1 (PerchObject dll718_03A0, RestPerch dll726_0410) is asked by Kyte (dll212) about herself.
@@ -442,6 +443,40 @@ text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
 func = "dll502_0D74"
 before_vram = 0x901FFD58
 text = '{ if (MEM_BU(0x136, ctx->r16) == 2) ctx->r8 = 2; }'
+
+# Tricky's run to his mother (patches/swapstone_hollow.c says what starts it): SHseqobject's update (dll309_0124), for an
+# object whose setup waits on bit 0xC3 (its setup, +0x4C of $a0, holds the bit at +0x1A), asks dino_tricky_run whether
+# the player has come.
+[[patches.hook]]
+func = "dll309_0124"
+before_vram = 0x9017AC40
+text = '{ if ((int16_t)MEM_H(0x1A, MEM_W(0x4C, ctx->r4)) == 0xC3) { void dino_tricky_run(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_tricky_run(rdram, &c); } }'
+
+# The SwapStone (SHswapstone, dll515) answers only while bit 0x887 says the player is in its zone, and TriggerPlane
+# 40b79 (map 7, local 2388,-633,1592) keeps that bit with action 0x12 mode 2, arg 0x8887: it flips it on each crossing.
+# A flip stays right only while every way in and out crosses the plane, and the SwapStone's own warp and the Swap
+# Store's send-out both put the player at warp 15, inside the zone, with the bit as it was: once it is the wrong way
+# round, every crossing keeps it so, and the SwapStone answers only outside its zone. dll325_09B4 runs a plane's
+# actions with the crossing's direction in $s3, +1 front to back, and played across the plane +1 is the way in (east,
+# toward the SwapStone). So for that arg, before the call to the bit action (dll325_1764, the arg in $t3), the bit is
+# set to whether the crossing goes in, and the call is skipped.
+[[patches.hook]]
+func = "dll325_09B4"
+before_vram = 0x90185540
+text = '{ if ((ctx->r11 & 0xFFFF) == 0x8887) { recomp_context c = *ctx; c.r4 = 0x887; c.r5 = (int32_t)ctx->r19 > 0; func_80014670(rdram, &c); goto L_90185A34; } }'
+
+# Cape Claw's SandEels (dll216, setups 0x41BFA/B/C beside the worm) each hold a bit at +0x18 of their setup, 0x1EB,
+# 0x1EC and 0x22A, which an eel sets once it is beaten (its state at dll216_34A0) and the worm's constructor rotates
+# each time the map loads (it clears 0x1EB and sets 0x1EC or 0x22A). The baddies' shared init (dll33_2000, kept at
+# 0x39C of the eel's state) makes the eel hidden (obj +0xDC) while that bit is set. dll216_02C0 restarts a hidden eel
+# whose uid isn't on dll29's respawn list (dll29_109C, $v0 1), through that same init: its burst, sound 0xB20 and
+# alpha 0xFF. With its bit set the init only hides it again, so it restarts every frame, about 90 sounds a second
+# across three eels, until all 32 sound states are held. The game reaches that in play, wherever the worm has the
+# eels' group 11 on with one of its eels beaten: a hidden eel with its bit set stays hidden, at 0x9011CDC0.
+[[patches.hook]]
+func = "dll216_02C0"
+before_vram = 0x9011CBBC
+text = "{ int32_t bit = (int16_t)MEM_H(0x39C, ctx->r17); if (ctx->r2 != 0 && bit != -1) { gpr v0 = ctx->r2; ctx->r4 = bit; func_800147EC(rdram, ctx); if (ctx->r2 != 0) goto L_9011CDC0; ctx->r2 = v0; } }"
 
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),

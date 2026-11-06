@@ -12,7 +12,8 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
 
 - `--story <point>[@<seconds>][,<warp>]` starts from that point, 2 s after the game's first controller read unless
   told, at the point's own place or at that entry of the warp table.
-- `--place <x>,<y>,<z>[,<layer>]` starts there instead, for a place the warp table has no entry for.
+- `--place <x>,<y>,<z>[,<layer>[,<facing>]]` starts there instead, for a place the warp table has no entry for, facing
+  a 16-bit angle (0, the default, faces -z).
 - `--bits <hex>[=<value>][@<seconds>],...` sets more of the game's bits at the start, after the point's own, or one
   given a time when the `--input` clock reaches it: what a test's own object sets, for a test a script can't play.
 - `--report` prints a line a second, from the start or from the game's first pass without `--story`: the clock, the map
@@ -113,6 +114,13 @@ The spirits, set in this order by WL_seqpoint (611) and read by WL_LevelControl 
 `first_stone`: 0x104 (task 29) and 0x22E (task 39) on the way there, and 0x877, placed: VFP_SpellPlace (637) in the
 Volcano Force Point takes it as its placed bit, with 0x123 as the stone carried. Carrying is 0x123 or 0x2E8, which
 SHswapstone refuses a swap on ("You cannot swap when holding a SpellStone"), so a point leaves both clear.
+
+SwapStone Hollow's own, as played: 0xC2 counts the white mushrooms given to the Queen Earthwalker and 0xB0 is her
+quest's step. Given them at step 4, five or ten, she plays her sequence, sets 0x486 and step 5, and the game warps to
+the Volcano Force Point (map 4) for its cutscene; 0x487 and step 6 come with a second visit there, and step 7 back in
+the hollow. 0xC3 starts Tricky's run to her (SHtricky, 501, and an SHseqobject, 309, wait on it), and nothing in the
+game sets it: `patches/swapstone_hollow.c` does. 0x887 is the SwapStone's zone (SHswapstone answers only while it is
+set), kept by TriggerPlane 40b79 (`us.toml` says how).
 
 ## Object groups
 
