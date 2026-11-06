@@ -84,4 +84,17 @@ was missed in, or, for a screen any area shows (the pause menu), to section 0.
 
 ## How it plays
 
-PLAYS_TBD
+Every run is in N64Recomp-browser's `plays.jsonl` (game `dino`); what they show, on a desktop GPU on a busy host,
+uncapped:
+
+- Chrome builds the whole list behind the launcher, and the regular plan plays with no shader misses and no WebGPU
+  errors, its frame gaps 2.8 ms at the median and 4.5-4.8 ms at the 99th percentile: the page presents at the
+  display's rate (about 358 a second on a 360 Hz one) while the game runs at its own 30.
+- Firefox builds each section as its area first draws, with the game waiting: about 3 s at the opening and at
+  SwapStone Hollow, a fraction of a second for the others. Then it plays as Chrome does, with no misses or errors.
+- The extended plan missed 7 shaders in DarkIce Mines and the Walled City, which are in the list.
+- In a play the page's heap can climb about 9 MB a second, and then a malloc past its 1536 MB (`Aborted(OOM)`)
+  stops the page about two and a half minutes in, so the extended plan doesn't reach its end. Some builds and runs
+  hold flat; what holds the memory isn't found yet. The page stays unpublished until that is fixed.
+- At Cape Claw's sand worm fight the game prints `Sound state allocate failed - sndId 97` many times a second, on
+  the page as on the desktop build: its own message, from its sound code.
