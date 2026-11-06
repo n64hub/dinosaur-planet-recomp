@@ -142,6 +142,14 @@ func = "dll461_05E0"
 before_vram = 0x901E59B4
 text = "{ if (MEM_W(0x8, ctx->r16) == 0) goto L_901E5A98; }"
 
+# The other DLLs that use func_8002394C's sidekick with no test reach that use only while one is out, so they have no
+# hook. The perches' query 1 (PerchObject dll718_03A0, RestPerch dll726_0410) is asked by Kyte (dll212) about herself.
+# CCvines (dll719) reads it in the state Kyte's own call to its export 7 starts. SC_lightfoot (dll516_1B8C) commands it
+# in a countdown its setup's bit at +0x1C starts, and SwapStone Circle's two have no bit (-1). NWtricky's (dll497)
+# cutscene callback runs only in the sequences its update starts on the sidekick, an update that does nothing with
+# none. Played with no sidekick beside them in CloudRunner Fortress, Northern Wastes and SwapStone Circle, none of those
+# uses ran.
+
 # The Swap Store's item beams (SPitembeam, dll772) the same: a beam's constructor keeps the nearest object of list 0xA,
 # the item under it, at +0xDC, and its update asks that item's interface +0x28 at 0x902C5888 with no test. With no item
 # it goes on as for an item that is gone, at 0x902C58D8, which hides the beam.

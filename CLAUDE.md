@@ -89,7 +89,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   into the list the game is building: its header says how. Each camera has a group that a cut changes, a frame cut in
   puts the world in a group of its own, and each object's model is a group by the object. The world's origin steps by
   640 units as the player walks, which isn't a cut: `RT64_INTERPOLATE_CAMERA_EYE` and `RT64_UNEVEN_FRAME_RATES`, on in
-  `CMakeLists.txt`, cancel that step and keep blending through frames of 3 VIs.
+  `CMakeLists.txt`, cancel that step and keep blending through frames of 3 VIs, and a frame whose origin steps has the
+  world and each model interpolate their translations, which RT64 by itself drops for a step that size.
 - **Krazoa shrines.** Eight tests, each giving a spirit the player carries as a mask of its own to Warlock Mountain
   (map 11), whose act (bit 0xE4) each win moves on. The prototype reaches three from the world and has no step at
   Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Finished by default, finishes them out
@@ -101,8 +102,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   timed button states (`main.cpp` says the format), and on Windows `--stacks <seconds>` prints every thread's stack
   that long after start, for unattended runs and hangs. `--warp <index>@<seconds>` warps the player by the game's own
   warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and
-  object jump `src/game/interpolation.cpp` finds, and `DINO_LOG_KRAZOA=1` each object `src/game/krazoa.cpp` places
-  and each spirit it gives and has taken back.
+  object jump `src/game/interpolation.cpp` finds, with each origin step, and `DINO_LOG_KRAZOA=1` each object
+  `src/game/krazoa.cpp` places and each spirit it gives and has taken back.
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the
   game's bits, the character and the place set as the save would have them, in memory and with nothing written to
   Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>]`
