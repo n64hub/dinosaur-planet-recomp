@@ -102,10 +102,12 @@ A map's objects come in groups, and most of a level's enemies and props load onl
 object's setup in ROM file 31 has a flags byte at +4 and its group at +6: with flag 0x10 the object loads only while
 bit `group` of its map's group field is set. A map's field is a story value of 32 bits, numbered by the u16 at
 +0xF0 + 2 × map in dll29's data, and dll29's export 18 reads it. Some maps' fields: 0x480 Discovery Falls (6), 0x4A6
-SwapStone Circle (14), 0x42E Moon Mountain Pass (18), 0x3B7 Cape Claw (29), 0x5DC Dragon Rock - Bottom (52).
+SwapStone Circle (14), 0x42E Moon Mountain Pass (18), 0x3B7 Cape Claw (29), 0x601 Swap Store (51), 0x5DC Dragon
+Rock - Bottom (52).
 
 A story point turns no group on, so a level started from one has only its ungrouped objects: Moon Mountain Pass's
-Lunaimars are in groups 3 to 7, and Cape Claw's worm in group 10, its SandEels in 11 and 12. `--bits <field>=<value>`
+Lunaimars are in groups 3 to 7, Cape Claw's worm in group 10 and its SandEels in 11 and 12, and the Swap Store's
+shopkeeper in group 0 and its item beams in group 1 (`--story new-game,86 --bits 601=2`). `--bits <field>=<value>`
 sets the field, its value in decimal: `--bits 42e=-1` turns on every group of Moon Mountain Pass, more objects at once
 than play ever loads, and `--bits 42e=385` groups 0, 7 and 8, where the pass's Transporter lands.
 
