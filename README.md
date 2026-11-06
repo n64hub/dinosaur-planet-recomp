@@ -64,6 +64,8 @@ Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
+- The ending the prototype never had: Cape Claw's missing third Krazoa tablet, a way into Krazoa Palace and its four
+  wings, and a Drakor who can be beaten, with what follows him.
 
 ## The ROM
 
