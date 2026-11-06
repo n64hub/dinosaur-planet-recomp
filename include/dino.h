@@ -14,7 +14,7 @@ namespace dino {
     void register_overlays();
     void register_patches();
 
-    // --story and --bits (story.cpp, development).
+    // --story, --place, --bits and --report (story.cpp, development).
     bool story_choose(const char* name);
     void story_add_bits(const char* list);
     void story_set_warp(int index);

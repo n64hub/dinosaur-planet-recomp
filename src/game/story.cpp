@@ -1,13 +1,15 @@
-// --story and --bits (development, src/main/main.cpp reads them): start a run from a chosen point of the story, for what
-// a warp can't set. docs/story-points.md lists the points and what each bit is, with its evidence from the ROM.
+// --story, --place and --bits (development, src/main/main.cpp reads them): start a run from a chosen point of the
+// story, for what a warp can't set. docs/story-points.md lists the points and what each bit is, with its evidence from
+// the ROM.
 //
 // The story is the game's bits: func_80014670 sets one and func_800147EC reads one, a number that the table in ROM file
 // 55 turns into a place in one of the save's four banks. Which spirits Krystal has brought back and which SpellStones
 // are placed are bits, and so are what a level has opened and each pickup taken. dll29 holds the save: its export 1
 // clears the save to a new game's (slot -1 is no slot, so nothing touches the Flash), 29 sets the character, 6 stores
 // where play starts and 7 starts the world there. The game's own New Game is dll64's name screen calling export 1, then
-// dll63 calling the two play flags and export 7; story_start does the same with the bits set and the place stored
-// before export 7, since export 7 keeps a copy that a retry restores. (func_800142F0 is the rolling demo, not a new game.)
+// dll63 dropping to play's video mode, calling the two play flags and export 7; story_start does the same with the bits
+// set and the place stored before export 7, since export 7 keeps a copy that a retry restores. func_800142F0 is the
+// rolling demo, not a new game.
 
 #include <cstdint>
 #include <cstdio>
@@ -29,9 +31,9 @@ namespace {
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
     constexpr int32_t current_menu = 0x800A7D84;
-    // The game boots in a 640x480 mode for its logos, and dll63 and dll65 drop to play's 320x240 with this, mode 1 and the
-    // settings func_80014604 returns. A level played at 640x480 draws over its own Z buffer, sized for 320x240, and a
-    // third of the frames show depth as colour.
+    // The game boots in a 640x480 mode for its logos, and dll63 and dll65 drop to play's 320x240 with this, mode 1 and
+    // the settings func_80014604 returns. In the boot's mode the Z buffer (0x80093010) is the first framebuffer, so a
+    // level played in it shows depth as colour in a third of its frames.
     constexpr int32_t set_video_mode = 0x8005D410;
     constexpr int32_t video_settings = 0x80014604;
     // What dll63, the front end, calls with 1 before it starts play: each changes a flag in the word at 0x80092A98,
@@ -66,9 +68,9 @@ namespace {
     // A warp of no_place keeps where dll29's new game puts the player, the start of the game's opening.
     constexpr int no_place = -2;
 
-    // Cape Claw's sand worm has no entry in the warp table. Map 29's record in ROM file 21 is at grid cell (2, 26) of 640
-    // units, so the worm's object at (2155, -276, -206) is at (3435, -276, 16434), and this is the setuppoint object the
-    // map has beside it at (2340, -265, -435).
+    // Cape Claw's sand worm has no entry in the warp table. Map 29's record in ROM file 21 is at grid cell (2, 26) of
+    // 640 units, so the worm's object at (2155, -276, -206) is at (3435, -276, 16434), and this is the setuppoint object
+    // the map has beside it at (2340, -265, -435).
     constexpr Place sand_worm_place = { 3620.0f, -265.0f, 16205.0f, 0 };
 
     using Bits = std::vector<StoryBit>;
