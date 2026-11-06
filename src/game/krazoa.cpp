@@ -37,6 +37,12 @@
 // - Willow Grove: its state 3 (dll488 0x8FC) gave the spirit only while 0x1D1, the torch puzzle's bit, was clear, and
 //   the torches light themselves as a demonstration about 15 s after the map loads (dll492 0x3F4), which sets it; it
 //   now asks whether WG's spirit is already won (act 7 or later). Its win sets act 7.
+// - Walled City's shell game (dll469, states 3 to 5 its rounds): a round's answer wait (substep 5) counts 1000 ticks
+//   down (+0x14, 0xF98) while the pick (+0x18) is -1, and on running out wrote what the last round's right pick writes
+//   (state 6, 0x1B, with sounds 0x344 and 0x33E: 0xFC4-0x1038 against 0xF0C-0xF90), in any round, so a player who stood
+//   still won. Running out takes a wrong pick's way (0xCD8: sequence 2, then state 9 starts the test again). Its state 6
+//   asked whether the player already carries the spirit with mask 2, Diamond Bay's (0x1050), where its win gives 8
+//   (0x1184), so a player still carrying Diamond Bay's spirit was given none: it asks 8.
 // - Golden Plains' "already passed" check (dll472 0xBB0) read 0x12A, Moon Mountain Pass's bit, which MM's earlier win
 //   always set, so GP never paid out: it reads act 8 or later instead.
 // - Warlock Mountain, each visit: act 5 sets 0x142, the trigger of EC's release (@0FC0), which nothing set; act 7 sets
@@ -420,6 +426,31 @@ extern "C" void dino_krazoa_wg_win(uint8_t* rdram, recomp_context* ctx) {
     Calls calls(rdram, ctx);
     if (warlock_act_now(rdram, ctx) < 7) {
         set_warlock_act(rdram, ctx, 7);
+    }
+}
+
+// us.toml's hook in Walled City's shell game (dll469 0xCCC), each frame of a round's answer wait, with the pick in v1
+// (1 right, 0 wrong, -1 none yet): with none and the answer time running out this frame (+0x14 less the frame's ticks,
+// as 0xF98 counts it), the pick is wrong.
+extern "C" void dino_krazoa_ec_answer(uint8_t* rdram, recomp_context* ctx) {
+    if (!finished() || (int32_t)ctx->r3 != -1) {
+        return;
+    }
+    int32_t ticks = MEM_BU(0, (gpr)word(rdram, (int32_t)ctx->r28 + 0x2C));
+    if (MEM_H(0x14, ctx->r16) - ticks > 0) {
+        return;
+    }
+    if (logging) {
+        fprintf(stderr, "krazoa: Walled City's answer time ran out in state %d\n", (int)MEM_BU(0x1B, ctx->r16));
+    }
+    ctx->r3 = 0;
+}
+
+// us.toml's hook at Walled City's state 6 (dll469 0x1054), which asks the player's export 0x9C whether it already
+// carries the spirit, with Diamond Bay's mask in a1.
+extern "C" void dino_krazoa_ec_carried(uint8_t*, recomp_context* ctx) {
+    if (finished()) {
+        ctx->r5 = 8;
     }
 }
 

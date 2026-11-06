@@ -642,6 +642,18 @@ func = "dll488_0244"
 before_vram = 0x901F7864
 text = '{ void dino_krazoa_wg_win(uint8_t*, recomp_context*); dino_krazoa_wg_win(rdram, ctx); }'
 
+# Walled City's shell game (dll469): a round's answer wait with the pick in v1 (0xCCC), and state 6 asking whether the
+# player carries the spirit, with the mask in a1 (0x1054).
+[[patches.hook]]
+func = "dll469_0208"
+before_vram = 0x901EAE7C
+text = '{ void dino_krazoa_ec_answer(uint8_t*, recomp_context*); dino_krazoa_ec_answer(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll469_0208"
+before_vram = 0x901EB204
+text = '{ void dino_krazoa_ec_carried(uint8_t*, recomp_context*); dino_krazoa_ec_carried(rdram, ctx); }'
+
 # Golden Plains' shrine (dll472): state 4 on GET_BIT(0x12A)'s answer (0xBB0).
 [[patches.hook]]
 func = "dll472_0290"
