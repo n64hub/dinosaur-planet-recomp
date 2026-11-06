@@ -8,9 +8,11 @@
   "screen moves its cursor a letter a frame while the stick is held. The opening plays as a new game's does, the",
   "pterodactyl and the storm, until the report puts Krystal in a map (tools/survey.js's playing()), and she walks",
   "about there. Then the plan starts areas from story points as the desktop build's tests do (survey.js's go(), each a",
-  "need that fails the run unless the game puts the player in that map):",
-  "SwapStone Hollow (warp 15) for 30 s with the pause menu opened and closed, and Cape Claw (before-sand-worm) for",
-  "20 s. About 2.5 minutes. tools/play_plan_extended.json goes on to five more areas, for when a longer play is needed.",
+  "need that fails the run unless the game puts the player in that map), with the object groups docs/story-points.md",
+  "names where it names them, since a story point leaves a map's enemies and props off:",
+  "SwapStone Hollow (warp 15, its Queen, Tricky and mushrooms on) for 30 s with the pause menu opened and closed, and",
+  "Cape Claw at the sand worm's fight (before-sand-worm) for 20 s. About 2.5 minutes. tools/play_plan_extended.json",
+  "goes on to five more areas, for when a longer play is needed.",
   "Its waits and holds are on the game's own clock (survey.js's clock(), 60 a second)."
  ],
  "load": [
@@ -250,7 +252,7 @@
  "play": [
   [
    "need",
-   "dino.go(\"new-game,15\", 7)"
+   "dino.go(\"new-game,15\", 7, \"--bits 452=450\")"
   ],
   [
    "clock",
@@ -430,7 +432,7 @@
   ],
   [
    "need",
-   "dino.go(\"before-sand-worm\", 29)"
+   "dino.go(\"before-sand-worm\", 29, \"--bits 3b7=7168,1eb,1ec,22a --place 3620,-265,16205,0\")"
   ],
   [
    "clock",

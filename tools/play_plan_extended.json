@@ -8,7 +8,8 @@
   "screen moves its cursor a letter a frame while the stick is held. The opening plays as a new game's does, the",
   "pterodactyl and the storm, until the report puts Krystal in a map (tools/survey.js's playing()), and she walks",
   "about there. Then the plan starts areas from story points as the desktop build's tests do (survey.js's go(), each a",
-  "need that fails the run unless the game puts the player in that map):",
+  "need that fails the run unless the game puts the player in that map), with the object groups docs/story-points.md",
+  "names where it names them, since a story point leaves a map's enemies and props off:",
   "tools/play_plan.json's two (SwapStone Hollow with the pause menu, Cape Claw), then Warlock Mountain (warp 5),",
   "DarkIce Mines (55), CloudRunner Fortress (60), the Walled City (91) and the DF shrine on its Transporter",
   "(before-df-shrine), each walked about for about 20 s. About 5 minutes.",
@@ -251,7 +252,7 @@
  "play": [
   [
    "need",
-   "dino.go(\"new-game,15\", 7)"
+   "dino.go(\"new-game,15\", 7, \"--bits 452=450\")"
   ],
   [
    "clock",
@@ -431,7 +432,7 @@
   ],
   [
    "need",
-   "dino.go(\"before-sand-worm\", 29)"
+   "dino.go(\"before-sand-worm\", 29, \"--bits 3b7=7168,1eb,1ec,22a --place 3620,-265,16205,0\")"
   ],
   [
    "clock",
@@ -543,7 +544,7 @@
   ],
   [
    "need",
-   "dino.go(\"new-game,5\", 11)"
+   "dino.go(\"new-game,5\", 11, \"\")"
   ],
   [
    "clock",
@@ -655,7 +656,7 @@
   ],
   [
    "need",
-   "dino.go(\"new-game,55\", 19)"
+   "dino.go(\"new-game,55\", 19, \"\")"
   ],
   [
    "clock",
@@ -767,7 +768,7 @@
   ],
   [
    "need",
-   "dino.go(\"new-game,60\", 12)"
+   "dino.go(\"new-game,60\", 12, \"\")"
   ],
   [
    "clock",
@@ -879,7 +880,7 @@
   ],
   [
    "need",
-   "dino.go(\"new-game,91\", 13)"
+   "dino.go(\"new-game,91\", 13, \"\")"
   ],
   [
    "clock",
@@ -991,7 +992,7 @@
   ],
   [
    "need",
-   "dino.go(\"before-df-shrine\", 31)"
+   "dino.go(\"before-df-shrine\", 31, \"\")"
   ],
   [
    "clock",

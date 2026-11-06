@@ -4,8 +4,9 @@
 // src/main/main.cpp's dino_web_options takes on the game's main thread at its next pass. So a plan starts a level from a
 // story point or the warp table, as the desktop build's tests do, without playing the levels before it.
 //
-// go(point, map) starts the story point (with ",<warp>" for another entry of the warp table: docs/story-points.md) with
-// --report, whose line a second ("story: <s> s map <n> at <x> <y> <z> menu <m>, health <h>/<max>") the survey reads from
+// go(point, map, more) starts the story point (with ",<warp>" for another entry of the warp table: docs/story-points.md),
+// with the options in more (a --bits that turns on the map's object groups, which a story point leaves off, a --place)
+// and --report, whose line a second ("story: <s> s map <n> at <x> <y> <z> menu <m>, health <h>/<max>") the survey reads from
 // the console, and waits for the player to be in that map. map() is the map of the last report, where() the report.
 //
 // clock() is the game's own clock, the word at 0x800AE674: 60 a second in its menus and in play, standing still while
@@ -48,10 +49,10 @@
       console.log(`[survey] no player after ${ms} ms: ${dino.where()}`);
       return false;
     },
-    // Starts a story point, and waits up to ms for a report from that map, true once one comes.
-    go: async (point, map, ms = 60000) => {
+    // Starts a story point with more options, and waits up to ms for a report from that map, true once one comes.
+    go: async (point, map, more = '', ms = 60000) => {
       const t0 = Date.now();
-      while (!dino.options(`--story ${point}@0 --report`)) {
+      while (!dino.options(`--story ${point}@0 ${more} --report`)) {
         if (Date.now() - t0 > ms) return false;
         await sleep(100);
       }
