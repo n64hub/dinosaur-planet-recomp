@@ -122,6 +122,17 @@ the hollow. 0xC3 starts Tricky's run to her (SHtricky, 501, and an SHseqobject, 
 game sets it: `patches/swapstone_hollow.c` does. 0x887 is the SwapStone's zone (SHswapstone answers only while it is
 set), kept by TriggerPlane 40b79 (`us.toml` says how).
 
+The way on to the first SpellStone is down the hollow's river: the only warp into the Volcano Force Point is the
+Queen's (entry 81, dll507 0x4F8), and map 4 borders only Diamond Bay. The river is water at y -797 over a bed 3 to 38
+below it, and Sabre wades it: from its last bend (`--place -8160,-790,-2340,0,22665`) he is in Diamond Bay (map 35)
+in 5 s and drops into its pool by the dock 41f04, which spawns that map's own log. The task list puts a log between
+the Guardian's activating the SpellStone (0x22B, dll496 0x2254) and Diamond Bay ("BOUGHT LOG FROM A THORNTAIL",
+"RIDE THE LOG DOWNSTREAM"), but those tasks have no bit in file 55 and nothing completes them, no ThornTail (508)
+sells anything, and the hollow has no dock, flow or log: SHriver (uid 0x30934, local 2350,-713,606) is a placement
+with no code. A dock placed there with flows down the river gave a log that was boarded and never moved, on a bed
+a tenth of Diamond Bay's depth. A BWLog (793) moves only on DFriverflows' pushes: A while riding makes the rider hop
+(0x2B8), the stick turns it, and A twice with the stick to a side gets off (dll793 0x1600).
+
 ## Object groups
 
 A map's objects come in groups, and most of a level's enemies and props load only while their group is on. Each
