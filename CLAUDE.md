@@ -32,8 +32,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 ## Rules
 
 - No code from Dinosaur Planet: Recompiled (dino-recomp) or Dinomod: not its code, its asset diffs or its tables of
-  DLL edits. Nothing is offered to either or posted where they are. A fact this repo uses carries its own evidence from
-  the ROM, in the comment beside it.
+  DLL edits, and nothing looked up there, their docs, issues and Discord included. Nothing is offered to either or
+  posted where they are. A fact this repo uses carries its own evidence from the ROM, in the comment beside it.
 - Nothing from the Dinosaur Planet decompilation (zestydevy/dinosaur-planet) either: not its code, its symbols or
   names, its headers or its notes on the DLLs and objects, and nothing looked up there. Every function, name and fix
   is found in the ROM's own code, as the README's banner says.
