@@ -1,0 +1,238 @@
+diff --git a/include/dino.h b/include/dino.h
+index 7f8b35e..1cc7355 100644
+--- a/include/dino.h
++++ b/include/dino.h
+@@ -15,13 +15,15 @@ namespace dino {
+     void register_overlays();
+     void register_patches();
+ 
+-    // --story, --place, --bits and --report (story.cpp, development).
++    // --story, --place, --bits, --report and --watch-bits (story.cpp, development).
+     bool story_choose(const char* name);
+     void story_add_bits(const char* list);
++    void story_watch_bits(const char* list);
+     void story_set_warp(int index);
+     void story_set_place(const char* list);
+     void story_start(uint8_t* rdram, recomp_context* ctx);
+     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
++    void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
+ 
+     // The settings (config.cpp): RecompFrontend's tabs.
+     void init_config();
+diff --git a/lib/N64ModernRuntime b/lib/N64ModernRuntime
+--- a/lib/N64ModernRuntime
++++ b/lib/N64ModernRuntime
+@@ -1 +1 @@
+-Subproject commit cdf5abbd5026fef5c364c676e4667c45e42b6863
++Subproject commit cdf5abbd5026fef5c364c676e4667c45e42b6863-dirty
+diff --git a/lib/RecompFrontend b/lib/RecompFrontend
+--- a/lib/RecompFrontend
++++ b/lib/RecompFrontend
+@@ -1 +1 @@
+-Subproject commit b2c5c18d73054416c844486611fd2c2b9d8a4927
++Subproject commit b2c5c18d73054416c844486611fd2c2b9d8a4927-dirty
+diff --git a/lib/rt64 b/lib/rt64
+--- a/lib/rt64
++++ b/lib/rt64
+@@ -1 +1 @@
+-Subproject commit 5473732a822a4423b5696e7cb18fecc425a59875
++Subproject commit 5473732a822a4423b5696e7cb18fecc425a59875-dirty
+diff --git a/src/game/story.cpp b/src/game/story.cpp
+index bea7da8..a67bea0 100644
+--- a/src/game/story.cpp
++++ b/src/game/story.cpp
+@@ -1,5 +1,5 @@
+ // --story, --place and --bits (development, src/main/main.cpp reads them): start a run from a chosen point of the
+-// story, for what a warp can't set. docs/story-points.md lists the points and what each bit is, with its evidence from
++// story, for what a warp can't set. --watch-bits says each time the game sets a bit, for what a test changes. docs/story-points.md lists the points and what each bit is, with its evidence from
+ // the ROM.
+ //
+ // The story is the game's bits: func_80014670 sets one and func_800147EC reads one, a number that the table in ROM file
+@@ -12,8 +12,10 @@
+ // retry restores. func_800142F0 is the
+ // rolling demo, not a new game.
+ 
++#include <algorithm>
+ #include <cstdint>
+ #include <cstdio>
++#include <cstdlib>
+ #include <cstring>
+ #include <string>
+ #include <vector>
+@@ -23,11 +25,13 @@
+ #include "dino.h"
+ 
+ extern "C" uint32_t dino_rom_word(uint32_t offset);
++extern "C" double dino_script_seconds();
+ 
+ namespace {
+     constexpr int32_t dll29_handle = 0x8008C9F4; // the pointer the game keeps to its loaded dll29
+     constexpr int32_t save_pointer = 0x800AE2A0; // the save in dll29's bss, which func_80014670 writes to
+     constexpr int32_t set_bit = 0x80014670;
++    constexpr int32_t get_bit = 0x800147EC;
+     constexpr int32_t player_object = 0x80023914;
+     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
+     constexpr int32_t set_paused = 0x8001440C;
+@@ -54,6 +58,7 @@ namespace {
+     struct StoryBit {
+         int bit;
+         int value;
++        double at = -1.0; // with --bits <hex>@<seconds>, when on the --input clock; -1 is at the story's start
+     };
+ 
+     struct Place {
+@@ -121,7 +126,10 @@ namespace {
+ 
+     const StoryPoint* chosen = &points[0];
+     std::vector<StoryBit> extra_bits;
++    std::vector<StoryBit> timed_bits;
+     int chosen_warp = -1;
++    std::vector<int> watched_bits;
++    bool watch_all_bits = false;
+     bool place_given = false;
+     Place given_place{};
+ 
+@@ -191,7 +199,52 @@ void dino::story_add_bits(const char* list) {
+     for (const char* p = list; p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
+         StoryBit b{ 0, 1 };
+         if (sscanf(p, "%x=%d", &b.bit, &b.value) >= 1) {
+-            extra_bits.push_back(b);
++            const char* at = strchr(p, '@');
++            const char* next = strchr(p, ',');
++            if (at != nullptr && (next == nullptr || at < next)) {
++                b.at = atof(at + 1);
++                timed_bits.push_back(b);
++            }
++            else {
++                extra_bits.push_back(b);
++            }
++        }
++    }
++}
++
++void dino::story_watch_bits(const char* list) {
++    watch_all_bits = strcmp(list, "all") == 0;
++    for (const char* p = list; !watch_all_bits && p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
++        int bit;
++        if (sscanf(p, "%x", &bit) == 1) {
++            watched_bits.push_back(bit);
++        }
++    }
++}
++
++// us.toml's hook at the start of func_80014670, which sets bit $a0 to $a1: a watched bit's line says the value it had,
++// and with "all" only a bit that changes has one.
++extern "C" void dino_bit_setting(uint8_t* rdram, recomp_context* ctx) {
++    int bit = (int32_t)ctx->r4, value = (int32_t)ctx->r5;
++    if (!watch_all_bits && std::find(watched_bits.begin(), watched_bits.end(), bit) == watched_bits.end()) {
++        return;
++    }
++    recomp_context saved = *ctx;
++    call(rdram, ctx, get_bit);
++    int old = (int32_t)ctx->r2;
++    *ctx = saved;
++    if (!watch_all_bits || old != value) {
++        fprintf(stderr, "bits: %.1f s 0x%X = %d, was %d\n", dino_script_seconds(), bit, value, old);
++    }
++}
++
++// Each pass of the main loop: the --bits given a time, once it has come, as a test's own object would set them.
++void dino::story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds) {
++    for (StoryBit& b : timed_bits) {
++        if (b.at >= 0.0 && seconds >= b.at) {
++            b.at = -1.0;
++            set_game_bit(rdram, ctx, b);
++            fprintf(stderr, "--bits: 0x%X = %d at %.1f s\n", b.bit, b.value, seconds);
+         }
+     }
+ }
+@@ -266,4 +319,13 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
+     ctx->f14.fl = fz;
+     call(rdram, ctx, map_at);
+     fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats));
++    // TEST ONLY: dll2's export 15, the object the camera targets (what A talks to)
++    int32_t cam_table = word(rdram, word(rdram, 0x8008C978));
++    call(rdram, ctx, word(rdram, cam_table + 4 + 4 * 15));
++    int32_t target = (int32_t)ctx->r2;
++    fprintf(stderr, "target: %.1f s yaw %d target %08X", seconds, (int16_t)MEM_H(0, (gpr)object), (uint32_t)target);
++    if (target != 0) {
++        fprintf(stderr, " id %d/%d af %02X", (int16_t)MEM_H(0x44, (gpr)target), (int16_t)MEM_H(0x46, (gpr)target), MEM_BU(0xAF, (gpr)target));
++    }
++    fprintf(stderr, "\n");
+ }
+diff --git a/src/main/main.cpp b/src/main/main.cpp
+index 32f7f09..d494be8 100644
+--- a/src/main/main.cpp
++++ b/src/main/main.cpp
+@@ -391,6 +391,10 @@ static double script_seconds() {
+     return std::chrono::duration<double>(std::chrono::steady_clock::now() - script_clock_start).count();
+ }
+ 
++extern "C" double dino_script_seconds() {
++    return script_seconds();
++}
++
+ // --warp <index>@<seconds>[,<index>@<seconds>...] (development): at each time on the --input clock, warp the player to
+ // that entry of the game's warp table (ROM file 30, 16 bytes an entry: the position and its layer), as the game's own
+ // warps do. The game's main loop asks once a pass (us.toml's hook on func_800145AC), so the warp runs on its thread.
+@@ -414,13 +418,15 @@ extern "C" int dino_warp_due() {
+ // default, start a run from that point of the story, at that entry of the warp table if one is given. --place
+ // <x>,<y>,<z>[,<layer>] starts it there instead, and --bits <hex>[=<value>],... sets more of the game's bits at that
+ // start. From the start on, or from the first pass with --report, a line a second says where the player is. The same
+-// hook as --warp's, so this runs on the game's main thread too.
++// hook as --warp's, so this runs on the game's main thread too. --watch-bits <hex>,...|all prints a line each time the
++// game sets one of those bits, or with all each time a bit changes (story.cpp).
+ static bool story_due = false;
+ static double story_at = 2.0;
+ static double story_reported = -1.0;
+ 
+ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
+     double now = script_seconds();
++    dino::story_timed_bits(rdram, ctx, now);
+     if (story_due && now >= story_at) {
+         story_due = false;
+         story_reported = now;
+@@ -546,6 +552,9 @@ int main(int argc, char** argv) {
+         else if (strcmp(argv[i], "--bits") == 0 && i + 1 < argc) {
+             dino::story_add_bits(argv[++i]);
+         }
++        else if (strcmp(argv[i], "--watch-bits") == 0 && i + 1 < argc) {
++            dino::story_watch_bits(argv[++i]);
++        }
+         else if (strcmp(argv[i], "--stacks") == 0 && i + 1 < argc) {
+             print_stacks_after(atof(argv[++i]));
+         }
+diff --git a/us.toml b/us.toml
+index a509aba..15c6631 100644
+--- a/us.toml
++++ b/us.toml
+@@ -326,6 +326,18 @@ func = "func_8001F890"
+ before_vram = 0x800202E0
+ text = '{ ctx->f_odd = &ctx->f0.u32h; ctx->mips3_float_mode = 0; }'
+ 
++# SwapStone Hollow's white mushrooms are SHbluemushroom (dll502) with model 1, and the Queen Earthwalker counts them
++# in bit 0x66D. A mushroom whose state (byte 0x136 of its state, $s0) reaches 8 adds one there when the player's
++# 0x7000B comes (dll502_03A8); a pickup sets its collected bit at once and goes to state 2, which ends in 8. Mushrooms
++# of type 4 that touch surface 0xD are stuck, flag 4 of byte 0x137, which nothing clears: dll502_0D74 puts each into
++# state 6 at the start of every frame, so one picked up there is back in 6 a frame later, never counts and never
++# comes back. Map 8's uid 30832 (bit 0x463) is the hollow's only type 4, so only nine of the ten could count. A
++# stuck mushroom being picked up stays in state 2 ($t0 is the state stored).
++[[patches.hook]]
++func = "dll502_0D74"
++before_vram = 0x901FFD58
++text = '{ if (MEM_BU(0x136, ctx->r16) == 2) ctx->r8 = 2; }'
++
+ # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
+ # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),
+ # but func_80037A14's fills stop a pixel short of the frame's width and its later scissor doesn't, so they'd stay in the
+@@ -392,3 +404,10 @@ text = "{ void dino_camera_turn(uint8_t*, recomp_context*); dino_camera_turn(rdr
+ func = "func_800145AC"
+ before_vram = 0x800145AC
+ text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int w = dino_warp_due(); if (w >= 0) { ctx->r4 = w; ctx->r5 = 0; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
++
++# --watch-bits (src/game/story.cpp, development): func_80014670 sets the bit in $a0 to the value in $a1, and at its start
++# says so when the bit is watched.
++[[patches.hook]]
++func = "func_80014670"
++before_vram = 0x80014670
++text = '{ void dino_bit_setting(uint8_t*, recomp_context*); dino_bit_setting(rdram, ctx); }'
