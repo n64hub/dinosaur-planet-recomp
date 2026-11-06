@@ -64,6 +64,7 @@ namespace {
     struct Place {
         float x, y, z;
         int layer;
+        int facing = 0; // a 16-bit angle, of which the save keeps the top byte: 0 faces -z
     };
 
     // A point of the story: the character played, where it starts (an entry of the warp table, or with -1 the place
@@ -165,7 +166,7 @@ namespace {
         memcpy(&MEM_W(4, position), &place.y, 4);
         memcpy(&MEM_W(8, position), &place.z, 4);
         ctx->r4 = position;
-        ctx->r5 = 0;
+        ctx->r5 = place.facing;
         ctx->r6 = 0;
         ctx->r7 = place.layer;
         call_dll29(rdram, ctx, 6);
@@ -258,7 +259,8 @@ void dino::story_set_warp(int index) {
 }
 
 void dino::story_set_place(const char* list) {
-    place_given = sscanf(list, "%f,%f,%f,%d", &given_place.x, &given_place.y, &given_place.z, &given_place.layer) >= 3;
+    place_given = sscanf(list, "%f,%f,%f,%d,%d", &given_place.x, &given_place.y, &given_place.z, &given_place.layer,
+        &given_place.facing) >= 3;
 }
 
 void dino::story_start(uint8_t* rdram, recomp_context* ctx) {

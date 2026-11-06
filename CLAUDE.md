@@ -109,9 +109,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   event of Golden Plains' shrine.
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the game's
   bits, the character and the place set as the save would have them, in memory and with nothing written to Flash:
-  `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>]` starts it
-  somewhere the warp table has no entry, `--bits <hex>[=<value>][@<seconds>],...` sets more bits, at the start or later
-  (a shrine's own bits are cleared as its map starts, so they are set a while after it), and `--report` prints a line a
-  second with the map, the position and the health; `--watch-bits <hex>,...|all` prints each bit the game sets as it
-  plays. `docs/story-points.md` has the points, each bit's evidence and the warp table's map: each index, its area and
-  what it needs. None of it is in a player's menus.
+  `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>[,<facing>]]`
+  starts it somewhere the warp table has no entry, `--bits <hex>[=<value>][@<seconds>],...` sets more bits, at the start
+  or later (a shrine's own bits are cleared as its map starts, so they are set a while after it), and `--report` prints
+  a line a second with the map, the position and the health; `--watch-bits <hex>,...|all` prints each bit the game sets
+  as it plays. `docs/story-points.md` has the points, each bit's evidence and the warp table's map: each index, its area
+  and what it needs. None of it is in a player's menus.
