@@ -2,8 +2,9 @@
 // released there. The prototype has all eight shrines' maps and tests, but only Discovery Falls', Diamond Bay's and Moon
 // Mountain Pass's are reached from the world, and the spirits of three (Willow Grove's, Golden Plains' and Northern
 // Wastes') have no step at Warlock Mountain. With Krazoa Shrines on Finished (the default) this file finishes them out
-// of what the ROM already holds, and on Original it leaves them as the console plays them. One fix is always on: Moon
-// Mountain Pass's shrine Transporter sends the player to an empty warp entry.
+// of what the ROM already holds, and on Original it leaves them as the console plays them. Three fixes are always on:
+// Moon Mountain Pass's shrine Transporter sent the player to an empty warp entry (here), and in us.toml, Cape Claw's
+// test waited for a bit nothing sets (dll486) and Golden Plains' fly baddie shot second players (dll475).
 //
 // How a spirit goes, read from the ROM (offsets are a DLL's text, `@` a placement in its map's object list):
 // - A shrine's win sets Warlock Mountain's act with dll29's export 16 (map 0xB): DF 2 (dll433 0xBC4), DB 3 (dll477
@@ -42,8 +43,9 @@
 //   0x1D1, WG's (@1C0C), which the torches also clear; acts 8 and 9 give GP's and NW's spirits as acts 6 and 7 do
 //   theirs, raise the column to an upper site (WL_colrise @1358, @1AB0, shown in acts 8 and 9 too) and place a release
 //   seqpoint there: GP's at CC's site, playing CC's sequence, NW's at WG's, playing WG's, with the mask the sequence
-//   takes back made 0x10 or 0x80 and the released bits 0x21E and 0x220, which ROM file 55 has saved between the other
-//   released bits and nothing uses. Acts 6 and 7 read CC's and WG's released bits. The done bits of MM's, EC's, CC's
+//   takes back made 0x10 or 0x80. Their trigger bits, which a mode 3 seqpoint sets the frame its sequence starts, are
+//   0x21E and 0x220, which ROM file 55 has saved between the other released bits and nothing uses, and acts 8 and 9
+//   read them as released. Acts 6 and 7 read CC's and WG's released bits. The done bits of MM's, EC's, CC's
 //   and WG's seqpoints become their released bits.
 
 #include <cstdint>
