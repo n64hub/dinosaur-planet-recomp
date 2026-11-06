@@ -40,6 +40,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   is found in the ROM's own code.
 - The project is "Dinosaur Planet: AI Slop Recomp" (`dino::program_name`, the window and the launcher), and the README
   opens with its banner saying it is AI slop and pointing at Dinosaur Planet: Recompiled. Keep both true.
+- The README's Progression fixes lists the prototype's blockers being fixed and those fixed: a PR that lands a
+  progression fix moves its line there from under way to fixed, in words a player knows the place by.
 - No ROMs, ROM-derived assets or extracted game data in git, CI or PRs (`tools/ci/check_repo.py` checks). Nothing made
   from the ROM is committed but `syms/`'s names, addresses and sizes. The icon (`icons/icon.svg`, the launcher's
   thumbnail and the program's icon by `tools/icon.py`) is drawn for the project from plain shapes: no logo, character or
