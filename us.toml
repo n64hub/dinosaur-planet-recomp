@@ -199,6 +199,13 @@ text = "{ if (ctx->r7 == 0) { MEM_B(0, ctx->r16) = 3; goto L_901FEEB0; } }"
 # none. Played with no sidekick beside them in CloudRunner Fortress, Northern Wastes and SwapStone Circle, none of those
 # uses ran.
 
+# A carried object freed: a SmallBasket or SmallCrate (dll295) carried out of its group is freed in the player's hands,
+# and the player's draw calls into it the next frame (src/game/objects.cpp). The object free lets the player go of it.
+[[patches.hook]]
+func = "func_80022F94"
+before_vram = 0x80022F94
+text = "{ void dino_object_freed(uint8_t*, uint32_t); dino_object_freed(rdram, (uint32_t)ctx->r4); }"
+
 # The Swap Store's item beams (SPitembeam, dll772) the same: a beam's constructor keeps the nearest object of list 0xA,
 # the item under it, at +0xDC, and its update asks that item's interface +0x28 at 0x902C5888 with no test. With no item
 # it goes on as for an item that is gone, at 0x902C58D8, which hides the beam.
