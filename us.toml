@@ -352,6 +352,7 @@ text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side
 func = "dll1_6B74"
 before_vram = 0x90007110
 text = "{ void dino_hud_side(uint8_t*, recomp_context*, gpr, int); dino_hud_side(rdram, ctx, (gpr)MEM_W(0x38, ctx->r29), 2); }"
+
 # The free camera (src/game/camera.cpp): dll2_1770's $a0 is the camera mode's state, and its $gp is set.
 [[patches.hook]]
 func = "dll2_1770"

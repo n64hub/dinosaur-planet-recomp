@@ -31,7 +31,7 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Aspect Ratio** (Graphics): Expand widens the world to the window, and a cutscene's bars and the screen's clear
   reach its sides. Original is the console's 4:3.
 - **HUD Placement** (Graphics): the minimap and the panels at the picture's sides move out to 16:9's edges with
-  Clamp16x9 and the window's with Full. Original keeps them where the console puts them. Dialogue and subtitles stay
+  16:9 and the window's with Expand. Original keeps them where the console puts them. Dialogue and subtitles stay
   centred.
 - **Free Camera** (General): the right stick and the mouse turn the camera around the player, who walks by the turned
   view. A turned view keeps to the player's side of the walls, and the D-pad plays the C buttons in the stick's place.
