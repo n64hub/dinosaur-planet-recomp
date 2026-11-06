@@ -464,3 +464,10 @@ text = '{ void dino_krazoa_wg_win(uint8_t*, recomp_context*); dino_krazoa_wg_win
 func = "dll472_0290"
 before_vram = 0x901ED7DC
 text = '{ void dino_krazoa_gp_won(uint8_t*, recomp_context*); dino_krazoa_gp_won(rdram, ctx); }'
+
+# Golden Plains' shrine (dll472): its timeout frees every carryable (0xB3C-0xB68), the one in the player's hands too.
+# Before 0xB28, with the list in v0, the player lets go of it first.
+[[patches.hook]]
+func = "dll472_0290"
+before_vram = 0x901ED754
+text = '{ void dino_krazoa_gp_timeout(uint8_t*, recomp_context*); dino_krazoa_gp_timeout(rdram, ctx); }'

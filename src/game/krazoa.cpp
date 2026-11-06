@@ -429,3 +429,33 @@ extern "C" void dino_krazoa_gp_won(uint8_t* rdram, recomp_context* ctx) {
     }
     ctx->r2 = won;
 }
+
+// us.toml's hook at Golden Plains' timeout (dll472 0xB28), after func_800311E4 lists every carryable (group 0x12) and
+// before the loop frees each one. The player's render writes the position of the object in its hands (its state's
+// +0x868) every frame and calls that object's DLL, so freeing the one the player carries crashed the game. The barrel
+// (dll301 0x158) lets go first through the player's export 11 (its table's +0x30) with 0; this does the same for the
+// one carried, whatever the setting.
+extern "C" void dino_krazoa_gp_timeout(uint8_t* rdram, recomp_context* ctx) {
+    int32_t list = (int32_t)ctx->r2;
+    int32_t count = word(rdram, (int32_t)ctx->r29 + 0x34);
+    int32_t player = word(rdram, (int32_t)ctx->r29 + 0x50);
+    if (!player) {
+        return;
+    }
+    int32_t held = word(rdram, word(rdram, player + 0xB8) + 0x868);
+    if (!held) {
+        return;
+    }
+    for (int32_t i = 0; i < count; i++) {
+        if (word(rdram, list + 4 * i) == held) {
+            Calls calls(rdram, ctx);
+            ctx->r4 = player;
+            ctx->r5 = 0;
+            call(rdram, ctx, word(rdram, word(rdram, word(rdram, player + 0x68)) + 0x30));
+            if (logging) {
+                fprintf(stderr, "krazoa: Golden Plains' timeout drops the carried object 0x%X\n", (unsigned)held);
+            }
+            return;
+        }
+    }
+}
