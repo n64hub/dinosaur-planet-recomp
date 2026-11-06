@@ -410,8 +410,9 @@ extern "C" int dino_warp_due() {
 
 // --story <point>[@<seconds>][,<warp>] (development, src/game/story.cpp): at that time on the --input clock, 2 s by
 // default, start a run from that point of the story, at that entry of the warp table if one is given. --bits
-// <hex>[=<value>],... sets more of the game's bits at that start. From the start on, a line a second says where the
-// player is. The same hook as --warp's, so this runs on the game's main thread too.
+// <hex>[=<value>],... sets more of the game's bits at that start. From the start on, or from the first pass with
+// --report, a line a second says where the player is. The same hook as --warp's, so this runs on the game's main thread
+// too.
 static bool story_due = false;
 static double story_at = 2.0;
 static double story_reported = -1.0;
@@ -529,6 +530,9 @@ int main(int argc, char** argv) {
             if (const char* comma = strchr(arg, ',')) {
                 dino::story_set_warp(atoi(comma + 1));
             }
+        }
+        else if (strcmp(argv[i], "--report") == 0) {
+            story_reported = 0.0;
         }
         else if (strcmp(argv[i], "--bits") == 0 && i + 1 < argc) {
             dino::story_add_bits(argv[++i]);

@@ -27,6 +27,7 @@ namespace {
     constexpr int32_t player_object = 0x80023914;
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
+    constexpr int32_t set_menu = 0x8000F404;
     constexpr uint32_t warp_table_rom = 0x020E023A; // ROM file 30
 
     struct StoryBit {
@@ -52,8 +53,9 @@ namespace {
     constexpr int sabre = 0;
     constexpr int krystal = 1;
 
-    // Where dll63 and dll65, the front end, start a new game: the x and y in their data, the z in the call.
-    constexpr Place new_game_place = { 12457.1f, -1474.875f, -6690.398f, 0 };
+    // A warp of no_place starts as dll64, the name screen, does once a name is done: the new game, then its menu 5.
+    constexpr int no_place = -2;
+    constexpr int new_game_menu = 5;
 
     // Cape Claw's sand worm has no entry in the warp table. Its object is at (2155, -276, -206) in map 29, whose origin
     // is grid cell (2, 26) of 640 units: this is beside it on the same floor.
@@ -79,7 +81,7 @@ namespace {
     const Bits four_spirits = to_first_shrine + first_spirit + first_stone + second_spirit + third_spirit + fourth_spirit;
 
     const std::vector<StoryPoint> points = {
-        { "new-game", krystal, -1, new_game_place, {} },
+        { "new-game", krystal, no_place, {}, {} },
         { "after-first-spellstone", sabre, 81, {}, to_first_shrine + first_spirit + first_stone },
         { "before-sand-worm", krystal, -1, sand_worm_place, to_first_shrine },
         { "before-df-shrine", krystal, 36, {}, to_first_shrine },
@@ -160,6 +162,12 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     }
     for (const StoryBit& b : extra_bits) {
         set_game_bit(rdram, ctx, b);
+    }
+    if (chosen_warp == no_place) {
+        ctx->r4 = new_game_menu;
+        call(rdram, ctx, set_menu);
+        fprintf(stderr, "--story: started %s, %d bits, at the game's own start\n", point.name, (int)(point.bits.size() + extra_bits.size()));
+        return;
     }
     // Export 6 takes where (a vector in the game's memory, here under its stack), the facing, flags and the layer.
     Place place = point.place;
