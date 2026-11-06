@@ -6,10 +6,13 @@
 #
 # Recorded by code, not by playing: node lib/N64Recomp-browser/tools/record_shaders.mjs tools/shader_plan.json build/web
 # roms/dinoplanet.z64 src/rt64_shaders.txt (its header says how), on tools/build_web.sh's page. Section 0 is the
-# launcher, the logos and the title, the menus a new game goes through with A and the stick as a player does, and its
-# name entry. Then a section an area: the opening (the story point new-game) and each area the warp table reaches
-# (docs/story-points.md), each started by tools/survey.js's go() from a story point and walked about for 15 s. Not
-# recorded: the areas past their starts, the shrines' tests, the bosses' fights and the game's other cutscenes.
+# launcher, the logos and the title, the game select and a new game's name entry as a player goes through them (A,
+# and taps of the stick a game frame long on the game's clock, since the name screen moves a letter a frame). Then a
+# section an area: the opening (the story point new-game) and each area the warp table reaches (docs/story-points.md),
+# each started by tools/survey.js's go() from a story point and walked about for 15 s, with the object groups
+# docs/story-points.md names turned on (a story point leaves them off): SwapStone Hollow's, Moon Mountain Pass's, the
+# Swap Store's, and Cape Claw's at the sand worm's fight. Not recorded: the areas past their starts, the other
+# areas' groups, the shrines' tests, the other bosses' fights and the game's other cutscenes.
 # Flags follow settings (filtering, HDR, MSAA, upscaling), so a change to one of those defaults means recording again.
 00504240 00000cc0 fcff97ff ff2cfe7f 04cb540b
 00504240 00000c00 fc5616ac 112cfe7f 04cb540b
@@ -84,6 +87,12 @@ c8104dd8 00182c00 fc121603 fffffff8 0ccb540c
 fa504a50 00080c00 fcffffff ffff7dbe 08000008
 c81049d8 0018ac00 fc121603 fffffff8 099b1008
 00104b50 00182c80 fc12fe03 ff0ff3ff 088a0008
+c8104b50 00182c00 fcffffff ff0df23f 088a0004
+c8112078 00182c00 fc121603 fffffff8 088a000c
+c81049d8 00182c00 fc121603 fffffff8 088a0008
+c81049d8 00182c00 fc121603 fffffff8 0ccb540c
+c8104dd8 00182c00 fc121603 fffffff8 088a000c
+c81049d8 00182c00 fc121603 fffffff8 088a000c
 section swapstone-circle
 0f0a4000 00102c00 fc262a6a 100c923f 0ccf540b
 00504240 00182c80 fc12186a f017fe3f 0ccb5428
@@ -279,6 +288,16 @@ c8112078 00182c00 fc1216ac f0fffe38 088a000c
 03024000 00180c00 fc41ffff fffff638 0800000c
 c8104b50 00182c00 fcff95ff ff0dfe3f 0ccf5404
 00104b50 00182c80 fc127e03 ff0ff3ff 088a0008
+c8112038 00192c00 fc26a004 1f0c93ff 188e0008
+c8112038 0018ac00 fc121603 fffffff8 099b1008
+c8111038 00182c00 fc121603 fffffff8 099b1008
+c8104b50 00182c00 fcffffff ff0df23f 088a0004
+00104b50 00182c80 fc12fe03 ff0ff3ff 088a0008
+00504240 00000c00 fc119623 ff2fffff 008a000b
+00504240 00000c00 fc119623 ff2fffff 03ba440b
+00504240 00000c00 fc119623 ff2fffff 019b100b
+00504240 00000c00 fc119623 ff2fffff 04cb540b
+00504240 00000c00 fc5616ac 112cfe7f 008a010b
 section golden-plains
 0f0a4000 00102c00 fc262a6a 100c923f 0ccf540b
 00504240 00182c80 fc12186a f017fe3f 0ccb5428
@@ -483,6 +502,7 @@ fa504dd8 00080c00 fcffffff ffff7dbe 08000008
 00104b50 00182c00 fcff97ff ff10fe3f 0ccb5408
 00104b50 00182c00 fcff97ff ff10fe3f 099b1008
 00104b50 00182c80 fc12fe03 ff0ff3ff 088a0008
+00104b50 00182c80 fc127e03 ff0ff3ff 088a0008
 section inside-galleon
 0f0a4000 00102c00 fc262a6a 100c923f 0ccf540b
 00504240 00182c80 fc12186a f017fe3f 0ccb5428
@@ -561,6 +581,10 @@ c8104dd8 00182c00 fc121603 fffffff8 0ccb540c
 00104b50 00182c80 fc12fe03 ff0ff3ff 088a0008
 c8112048 00182c00 fc121603 fffffff8 088a000c
 c81041c8 00182c00 fc121603 fffffff8 088a000c
+c8112078 00182c00 fc121603 fffffff8 099b1008
+c8112078 00182c00 fc121603 fffffff8 0aaaaa08
+c81049d8 00182c00 fc121603 fffffff8 0bba440c
+c8111038 00182c00 fc121603 fffffff8 0ccb5408
 section magic-cave
 0f0a4000 00102c00 fc262a6a 100c923f 0ccf540b
 00504240 00182c80 fc12186a f017fe3f 0ccb5428

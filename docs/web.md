@@ -47,7 +47,20 @@ next pass. Its `go(point, map)` starts a story point (`docs/story-points.md`) wi
 report puts the player in that map. So a plan reaches an area from the game select, as the desktop build's tests do,
 without playing what comes before it.
 
-PLANS_TBD
+A story point turns on none of a map's object groups, so a level started from one has none of its grouped enemies and
+props (`docs/story-points.md`, Object groups). `go(point, map, more)` passes more options after the story point, and
+the plans turn on the groups that file names: SwapStone Hollow's Queen, Tricky and mushrooms, Moon Mountain Pass's,
+the Swap Store's, and Cape Claw's sand worm and SandEels, at the worm's fight.
+
+- `tools/play_plan.json`, the regular plan (about 2.5 minutes): the game select and a New Game as a player makes one,
+  the opening until Krystal is in a map, then SwapStone Hollow with the pause menu opened and closed, and Cape Claw
+  at the sand worm's fight.
+- `tools/play_plan_extended.json` (about 5 minutes): those, then Warlock Mountain, DarkIce Mines, CloudRunner
+  Fortress, the Walled City and the DF shrine.
+
+Their waits and holds are on the game's own clock (`survey.js`'s `clock()`, 60 a second), so every browser gives the
+game the same input for the same game time. The name screen moves its cursor a letter a game frame while the stick is
+held, so a plan's menu taps are holds of one frame on that clock.
 
 Play them with N64Recomp-browser's `tools/play_page.mjs` (its `docs/playing.md`).
 
