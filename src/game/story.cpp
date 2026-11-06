@@ -28,6 +28,7 @@ namespace {
     constexpr int32_t player_object = 0x80023914;
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
+    constexpr int32_t current_menu = 0x800A7D84;
     // What dll63, the front end, calls with 1 before it starts play: each changes a flag in the word at 0x80092A98,
     // and without them the objects aren't drawn and the opening's textures are wrong.
     constexpr int32_t play_flag_2000 = 0x80041D20;
@@ -223,7 +224,7 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     uint8_t character = MEM_BU(0x2F7, (gpr)save);
     gpr stats = (gpr)save + 12 * character;
     if (object == 0) {
-        fprintf(stderr, "story: %.1f s no player, health %d/%d\n", seconds, MEM_BU(1, stats), MEM_BU(2, stats));
+        fprintf(stderr, "story: %.1f s no player, menu %d, health %d/%d\n", seconds, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats));
         return;
     }
     uint32_t x = MEM_W(0x18, (gpr)object), y = MEM_W(0x1C, (gpr)object), z = MEM_W(0x20, (gpr)object);
@@ -234,5 +235,5 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     ctx->f12.fl = fx;
     ctx->f14.fl = fz;
     call(rdram, ctx, map_at);
-    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f health %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy, fz, MEM_BU(1, stats), MEM_BU(2, stats));
+    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats));
 }
