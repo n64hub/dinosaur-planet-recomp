@@ -61,8 +61,6 @@ Fixed:
 
 Under way:
 
-- The early game, from a new game to the first SpellStone: SwapStone Hollow's river that isn't drained, and the log
-  to ride down it to Diamond Bay once the first SpellStone is placed.
 - Crashes in the game's own code still to find: the skeletons' hits.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
 
