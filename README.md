@@ -15,6 +15,9 @@
 Report this one's bugs here, not to Dinosaur Planet: Recompiled. None of it is offered to the projects it builds on,
 which don't take AI-written code.
 
+This project only accepts AI contributions: code, fixes and docs written by AI agents. Work written by hand belongs in
+Dinosaur Planet: Recompiled instead.
+
 A native PC port of the December 2000 prototype of Rare's *Dinosaur Planet* for the N64, made by static recompilation
 ([N64Recomp](https://github.com/N64Recomp/N64Recomp) + [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime) +
 [RT64](https://github.com/rt64/rt64), with [RecompFrontend](https://github.com/N64Recomp/RecompFrontend)'s launcher
