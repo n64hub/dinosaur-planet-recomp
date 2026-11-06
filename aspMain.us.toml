@@ -6,7 +6,8 @@
 #   and this text, at 0x80089750 (ROM 0x8A350), as its microcode, with its data at 0x800A2E00. It fills IMEM from
 #   0x04001080 to the end, 0xF80 bytes; the graphics microcode's text starts right after it.
 # - The command handlers are reached through a table in the data segment, which RSPRecomp can't find by following the
-#   instructions, so they are listed below: the data's 17 halfwords from offset 0xE.
+#   instructions, so they are listed below: the data's 16 halfwords from offset 0x10, and before them at 0xE the
+#   address the second part of the microcode runs from (below).
 
 rom_file_path = "roms/dinoplanet.z64"
 text_offset = 0x8A350
@@ -20,4 +21,15 @@ output_function_name = "aspMain_run"
 extra_indirect_branch_targets = [
     0x1238, 0x1AE8, 0x143C, 0x1240, 0x1D84, 0x126C, 0x1B20, 0x12A8, 0x1214,
     0x141C, 0x1310, 0x13CC, 0x12E4, 0x1FB0, 0x1358, 0x16EC, 0x1408,
+]
+
+# The microcode is longer than IMEM: command 7 (at 0x1214) loads 0x9C0 more bytes, stored after the first 0xF80 (the
+# address and size in its data at 0x8 and 0xC), over IMEM from 0x1238 and runs them; they use the data's start as
+# their own buffers and end at 0x11C8, which loads the main text back over 0x1238 (offset 0x1B8 to the end, 0xDC8
+# bytes) and the data's first 0x2B0 bytes, then goes on with the next command. So 0x1238 is one slot holding either.
+[[overlay_slots]]
+text_address = 0x04001238
+overlays = [
+    { offset = 0x1B8, size = 0xDC8 },
+    { offset = 0xF80, size = 0x9C0 },
 ]
