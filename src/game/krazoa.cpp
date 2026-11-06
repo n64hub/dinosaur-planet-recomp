@@ -31,7 +31,8 @@
 //   shrine in the older layout of map 36, a map with no place in the world grid; CC's by Cape Claw's three Krazoa
 //   tablet receptacles; WG's by Willow Grove's sundial; NW's where Northern Wastes is entered. Each shows once the
 //   spirit before it in the act order is released, EC's once the Moon Stone is placed.
-// - Golden Plains' shrine exit (map 34 @06A0) went to DB's pad (66), a copy of DB's map: it goes to GP's (70).
+// - Golden Plains' shrine exit (map 34 @06A0) went to DB's pad (66), a copy of DB's map, and in its mode 0 it sent
+//   the player out on the way to the shrine: it goes to GP's pad (70), and only once the shrine is won.
 // - Willow Grove: its state 3 (dll488 0x8FC) gave the spirit only while 0x1D1, the torch puzzle's bit, was clear, and
 //   the torches light themselves as a demonstration about 15 s after the map loads (dll492 0x3F4), which sets it; it
 //   now asks whether WG's spirit is already won (act 7 or later). Its win sets act 7.
@@ -197,8 +198,11 @@ namespace {
         // GP's pad (map 9 @03F0) to GP's shrine, shown once WG's spirit is released.
         { 9, transporter, 0x350D8, 0x1A, 1, 42, false },
         { 9, transporter, 0x350D8, 0x20, 2, 0x222, false },
-        // GP's shrine exit (map 34 @06A0, a WM_WarpPoint, +0x1A where it sends) to GP's pad.
+        // GP's shrine exit (map 34 @06A0, a WM_WarpPoint, +0x1A where it sends) to GP's pad, and +0x1D's mode 0, which
+        // warps within 508 units (+0x1E's 0x7F x 4) of it, 21 from the shrine, before the test, to the other shrines'
+        // mode 2: only once +0x20's bit 0xFD, the win, is set (dll275 0x45C).
         { 34, 0x265, 0x2C8D, 0x1A, 1, 70, false },
+        { 34, 0x265, 0x2C8D, 0x1D, 1, 2, false },
         // Warlock Mountain: the seqpoints' done bits, and the columns to the upper sites in acts 8 and 9 (a placement
         // is hidden in act n of 1-8 by bit n-1 of +3, and in act 9 by bit 7 of +5, func_8004B4A0).
         { 11, seqpoint, 0x27AB, 0x20, 2, 0x317, false }, // MM's, @2BD4
