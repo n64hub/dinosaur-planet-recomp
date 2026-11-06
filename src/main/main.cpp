@@ -420,7 +420,8 @@ extern "C" int dino_warp_due() {
 // <x>,<y>,<z>[,<layer>[,<facing>]] starts it there instead, and --bits <hex>[=<value>],... sets more of the game's bits
 // at that start. From the start on, or from the first pass with --report, a line a second says where the player is. The same
 // hook as --warp's, so this runs on the game's main thread too. --watch-bits <hex>,...|all prints a line each time the
-// game sets one of those bits, or with all each time a bit changes (story.cpp).
+// game sets one of those bits, or with all each time a bit changes (story.cpp). With DINO_CHECK_HEAP set, each pass
+// checks the game's heaps for a block written past its end (heap.cpp).
 static bool story_due = false;
 static double story_at = 2.0;
 static double story_reported = -1.0;
@@ -513,6 +514,10 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
 #endif
     double now = script_seconds();
     dino::story_timed_bits(rdram, ctx, now);
+    static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;
+    if (check_heap) {
+        dino::heap_check(rdram, now);
+    }
     if (story_due && now >= story_at) {
         story_due = false;
         story_reported = now;

@@ -231,6 +231,18 @@ func = "func_80021A84"
 before_vram = 0x80021A84
 text = "{ if (ctx->r4 == 0) return; }"
 
+# A vertex block too small for its pools: func_8004D470 allocates 0x8020 bytes for three pools of vertices (16 bytes
+# each), each a pair of halves that the frames take in turn: 0x800B98A0 at +0 and +0xFA0, 0x800B98A8 at +0x1F40 and
+# +0x3E80, 0x800B98B0 at +0x5DC0 and +0x76C0. func_8004DBAC fills a half of the third with up to 400 vertices (0x18F
+# at 0x8004E298 and 0x8004E36C), so its second half runs to +0x8FC0, 0xFA0 past the block's end and over the heap
+# block after it. Dragon Rock - Bottom's Skeetla fight, whose objects grow in number as Skeetlas come, passes 150 there
+# after a minute or so and wrote vertices over models, crashing somewhere new each time. The block is the 0x8FC0 its
+# pools fill (ori $a0, $zero, 0x8020 -> 0x8FC0).
+[[patches.instruction]]
+func = "func_8004D470"
+vram = 0x8004D484
+value = 0x34048FC0
+
 # RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
 # write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
 # list's pointer's address in $a0. func_800026C8 loads a camera, with the list's at 0x800028AC ($a1 its address, $s0 the

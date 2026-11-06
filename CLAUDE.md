@@ -104,9 +104,10 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   words (four at most) of the game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says
   the form: `**8008C994+4` follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps
   the player by the game's own warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads,
-  `DINO_LOG_CUTS=1` each camera cut and object jump `src/game/interpolation.cpp` finds, with each origin step, and
+  `DINO_LOG_CUTS=1` each camera cut and object jump `src/game/interpolation.cpp` finds, with each origin step,
   `DINO_LOG_KRAZOA=1` each object `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each
-  event of Golden Plains' shrine.
+  event of Golden Plains' shrine, and `DINO_CHECK_HEAP=1` each block of the game's heaps written past its end, with
+  the tag of what asked for it (`src/game/heap.cpp`).
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the game's
   bits, the character and the place set as the save would have them, in memory and with nothing written to Flash:
   `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>[,<facing>]]`
