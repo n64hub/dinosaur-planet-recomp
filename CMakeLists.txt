@@ -205,6 +205,7 @@ target_sources(DinosaurPlanet PRIVATE
     ${CMAKE_SOURCE_DIR}/src/game/config.cpp
     ${CMAKE_SOURCE_DIR}/src/game/libultra.cpp
     ${CMAKE_SOURCE_DIR}/src/game/recomp_api.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/interpolation.cpp
     ${CMAKE_SOURCE_DIR}/src/game/dlls.cpp
     ${CMAKE_SOURCE_DIR}/src/game/cartridge.cpp
 )
