@@ -1845,15 +1845,14 @@
      300
     ],
     [
-     "hold",
+     "pressUntil",
      "Space",
      " ",
      32,
-     33
-    ],
-    [
-     "wait",
-     300
+     33,
+     2000,
+     "!/ menu 6,/.test(dino.where())",
+     15000
     ],
     [
      "wait",

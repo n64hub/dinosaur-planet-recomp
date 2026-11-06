@@ -5,8 +5,9 @@
   "list Chrome builds behind it is done (Firefox builds none there and says so), Start Game, the logos, then the game",
   "select and a New Game as a player makes one, with the keyboard's defaults (Space is A, Enter Start, WASD the stick):",
   "A on the first file (once the report says the game select, menu 5), A for an A in the name, the stick to END, each",
-  "a tap of one game frame, since the name screen moves its cursor a letter a frame while the stick is held, and A on the",
-  "new file until the game leaves the game select. The opening plays as a new game's does, the",
+  "a tap of one game frame, since the name screen moves its cursor a letter a frame while the stick is held, A on END",
+  "until the name screen closes and on the new file until the game leaves the game select (a tap a busy host drops is",
+  "pressed again). The opening plays as a new game's does, the",
   "pterodactyl and the storm, until the report puts Krystal in a map (tools/survey.js's playing()), and she walks",
   "about there. Then the plan starts areas from story points as the desktop build's tests do (survey.js's go(), each a",
   "need that fails the run unless the game puts the player in that map), with the object groups docs/story-points.md",
@@ -177,15 +178,14 @@
    "name.png"
   ],
   [
-   "hold",
+   "pressUntil",
    "Space",
    " ",
    32,
-   33
-  ],
-  [
-   "wait",
-   300
+   33,
+   2000,
+   "!/ menu 6,/.test(dino.where())",
+   15000
   ],
   [
    "wait",
