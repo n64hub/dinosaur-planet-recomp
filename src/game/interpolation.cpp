@@ -43,8 +43,8 @@ namespace {
 
     bool logging = getenv("DINO_INTERP_LOG") != nullptr;
     uint32_t camera_cut = 0;
-    float last_x = 0, last_y = 0, last_z = 0;
-    int last_yaw = 0, last_pitch = 0, last_roll = 0;
+    struct CameraState { float x, y, z; int yaw, pitch, roll; };
+    CameraState cameras[4] = {};
     int objects = 0;
 }
 
@@ -67,11 +67,9 @@ extern "C" void dino_interp_frame(uint8_t* rdram, recomp_context* ctx) {
 extern "C" void dino_interp_list_end(uint8_t* rdram, recomp_context* ctx) {
     if (logging) {
         gpr index = (uint8_t)MEM_BU(0, (gpr)(int32_t)0x800B09C1);
-        uint32_t start = (uint32_t)MEM_W(0, (gpr)(int32_t)(0x800AE678 + index * 4));
-        uint32_t end = (uint32_t)MEM_W(0, (gpr)(int32_t)0x800AE680);
         uint32_t mstart = (uint32_t)MEM_W(0, (gpr)(int32_t)(0x800AE688 + index * 4));
         uint32_t mend = (uint32_t)MEM_W(0, (gpr)(int32_t)0x800AE690);
-        fprintf(stderr, "list %u of 36000 mtx %u of 70400\n", end - start, mend - mstart);
+        fprintf(stderr, "list %u of 36000 mtx %u of 70400\n", (uint32_t)(ctx->r5 - ctx->r4), mend - mstart);
     }
 }
 
@@ -79,15 +77,17 @@ extern "C" void dino_interp_camera(uint8_t* rdram, recomp_context* ctx) {
     gpr camera = ctx->r16;
     float x = read_float(rdram, camera + 0x44), y = read_float(rdram, camera + 0x48), z = read_float(rdram, camera + 0x4C);
     int yaw = MEM_HU(0x50, camera), pitch = MEM_HU(0x52, camera), roll = MEM_HU(0x54, camera);
+    uint32_t index = (uint32_t)(((uint32_t)camera - 0x800A6278) / 0x60) & 3;
+    CameraState& last = cameras[index];
     if (logging) {
-        float dx = x - last_x, dy = y - last_y, dz = z - last_z;
-        fprintf(stderr, "camera %08X pos %.1f %.1f %.1f moved %.1f yaw %d (%d) pitch %d (%d) roll %d proj00 %.3f\n", (uint32_t)camera, x, y, z,
-            sqrtf(dx * dx + dy * dy + dz * dz), yaw, (int16_t)(yaw - last_yaw), pitch, (int16_t)(pitch - last_pitch), roll,
-            read_float(rdram, (gpr)(int32_t)0x800A6AE8));
+        float dx = x - last.x, dy = y - last.y, dz = z - last.z;
+        fprintf(stderr, "camera %u pos %.1f %.1f %.1f moved %.1f yaw %d (%d) pitch %d (%d) roll %d (%d) proj00 %.3f origin %d %d\n", index, x, y, z,
+            sqrtf(dx * dx + dy * dy + dz * dz), yaw, (int16_t)(yaw - last.yaw), pitch, (int16_t)(pitch - last.pitch), roll, (int16_t)(roll - last.roll),
+            read_float(rdram, (gpr)(int32_t)0x800A6AE8), (int)read_float(rdram, (gpr)(int32_t)0x80092A70), (int)read_float(rdram, (gpr)(int32_t)0x80092A74));
     }
-    last_x = x; last_y = y; last_z = z; last_yaw = yaw; last_pitch = pitch; last_roll = roll;
+    last = { x, y, z, yaw, pitch, roll };
     gpr gfx = (gpr)(int32_t)MEM_W(0, ctx->r5);
-    write_group(rdram, &gfx, 0x44500000 | camera_cut, mode_simple, false, true, component_interpolate, component_interpolate, component_interpolate,
+    write_group(rdram, &gfx, 0x44500000 | (index << 16) | camera_cut, mode_simple, false, true, component_interpolate, component_interpolate, component_interpolate,
         component_interpolate, component_interpolate, component_skip, component_auto, order_auto, component_skip, component_auto);
     MEM_W(0, ctx->r5) = (int32_t)gfx;
 }

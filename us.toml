@@ -315,8 +315,8 @@ before_vram = 0x8004225C
 text = '{ void dino_interp_frame(uint8_t*, recomp_context*); dino_interp_frame(rdram, ctx); }'
 
 [[patches.hook]]
-func = "func_80013B04"
-before_vram = 0x80013B04
+func = "func_80037780"
+before_vram = 0x80037780
 text = '{ void dino_interp_list_end(uint8_t*, recomp_context*); dino_interp_list_end(rdram, ctx); }'
 
 [[patches.hook]]
