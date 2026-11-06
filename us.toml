@@ -106,6 +106,19 @@ func = "func_80011C70"
 before_vram = 0x80011CC4
 text = "{ void osAiGetLength_recomp(uint8_t*, recomp_context*); uint64_t v0 = ctx->r2; osAiGetLength_recomp(rdram, ctx); ctx->r25 = ctx->r2; ctx->r2 = v0; }"
 
+# The prototype's own crashes, each fixed where the game reads what isn't there. The labels a hook jumps to are
+# N64Recomp's for a branch target the function already has (L_<its address>).
+
+# Lunaimar (dll243, object 22, Moon Mountain Pass) once it has seen the player: dll243_0C44 takes the sidekick from
+# func_8002394C, the first object of list 1, which is 0 while Kyte isn't out (Krystal before Cape Claw frees it), and
+# reads its position at 0x18($s1) with no test. The game's own way past a sidekick it can't use is the branch at
+# 0x9014CFAC (the sidekick's interface +0x64 returns 0), to 0x9014CFF8, which clears flag 4 at 0x3B2($s2) and takes the
+# player as the target: a missing sidekick goes there too.
+[[patches.hook]]
+func = "dll243_0C44"
+before_vram = 0x9014CF34
+text = "{ if (ctx->r17 == 0) goto L_9014CFF8; }"
+
 # The game's hand-written math (its matrix, vector and spline routines, the conversion of a float matrix into the
 # fixed-point one the RSP reads, and the skinning of its models) uses the odd float registers as registers of their
 # own, as the CPU does with Status.FR set: libultra's C code is built for FR clear, where an odd register is the high
