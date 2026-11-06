@@ -16,6 +16,9 @@
 // doesn't change, and RT64_INTERPOLATE_CAMERA_EYE places the camera's eye on the line between its two places, where
 // the eye's step takes away the world's exactly.
 //
+// Camera 1, which draws an object's shadow into a texture, follows the origin with its raw position, so for it a step
+// is a cut: that texture isn't blended for a frame, which doesn't show.
+//
 // Each object's model (func_80035000) is a group by the object, its model and the last cut, so each joint pairs in
 // order with its own and two alike objects can't swap. The model's vertices, which the skinning writes anew each
 // frame, are interpolated with it. An object that jumps gets a new group too. What the world draws by itself (its map
@@ -129,7 +132,7 @@ namespace {
     std::unordered_map<uint32_t, Object> objects;
     uint32_t frame_number = 0;
     uint32_t world_cuts = 0;
-    bool logging = getenv("DINO_LOG_CUTS") != nullptr;
+    bool logging = getenv("DINO_LOG_CUTS") != nullptr;            // Prints each cut and jump, to tune the limits above.
 
     uint32_t object_id(uint32_t object, uint32_t model, uint32_t jumps) {
         uint32_t id = object * 0x9E3779B1u;
