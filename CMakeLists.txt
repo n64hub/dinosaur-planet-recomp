@@ -214,6 +214,7 @@ target_sources(DinosaurPlanet PRIVATE
     ${CMAKE_SOURCE_DIR}/src/game/dlls.cpp
     ${CMAKE_SOURCE_DIR}/src/game/audio.cpp
     ${CMAKE_SOURCE_DIR}/src/game/objects.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/heap.cpp
     ${CMAKE_SOURCE_DIR}/src/game/story.cpp
     ${CMAKE_SOURCE_DIR}/src/game/cartridge.cpp
     ${CMAKE_SOURCE_DIR}/src/game/widescreen.cpp
