@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <unordered_map>
 
 #include "recomp.h"
@@ -19,6 +20,10 @@ extern "C" void unload_overlays(int32_t ram_addr, uint32_t size);
 namespace {
     // Where ROM file 70, the DLLs, starts: the file table's base (0xA4AA0) plus its offset there.
     constexpr uint32_t dll_file_rom = 0x038317CC;
+
+    // DINO_LOG_DLLS set (development): each load and unload is printed, a DLL by its offset in file 70 (tools/gen_syms.py
+    // gives its number).
+    const bool log_dlls = std::getenv("DINO_LOG_DLLS") != nullptr;
 
     // The size of each DLL loaded, by the address it was loaded to, for its unload.
     std::unordered_map<int32_t, uint32_t> loaded;
@@ -34,6 +39,9 @@ extern "C" void dino_dll_loaded(uint8_t* rdram, recomp_context* ctx) {
     if (auto it = loaded.find(ram); it != loaded.end()) {
         unload_overlays(ram, it->second);
     }
+    if (log_dlls) {
+        fprintf(stderr, "DLL load: file 70 offset 0x%X at 0x%08X\n", offset, (uint32_t)ram);
+    }
     load_overlays(dll_file_rom + offset, ram, size);
     loaded[ram] = size;
 }
@@ -45,6 +53,9 @@ extern "C" void dino_dll_unloading(uint8_t* rdram, recomp_context* ctx) {
     if (it == loaded.end()) {
         fprintf(stderr, "Dinosaur Planet: a DLL at 0x%08X freed that was never loaded\n", (uint32_t)ram);
         return;
+    }
+    if (log_dlls) {
+        fprintf(stderr, "DLL unload: at 0x%08X\n", (uint32_t)ram);
     }
     unload_overlays(ram, it->second);
     loaded.erase(it);
