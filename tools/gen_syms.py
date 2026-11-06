@@ -4,7 +4,8 @@ alone.
 There is no symbol map, and nothing here comes from any decompilation: every function is found in the ROM's code.
 
 - The main segment is stored raw at ROM 0x1000 and runs at 0x80000400, where the IPL3 copies the first MB of ROM: its
-  text ends at 0x8008C278, where the RSP's microcodes start, and its data runs on to the bss at 0x800A3D70.
+  CPU code ends at 0x80089750, where the RSP's microcodes start (the audio one there, aspMain.us.toml; rspboot at
+  0x8008B090 and the graphics one at 0x8008B160 after it), and its data runs on to the bss at 0x800A3D70.
 - The rest of the game's code is 796 DLLs, which the game loads and unloads as it plays (DLLS below). The game reads
   each one whole into memory it allocates (func_8000C3CC) and relocates it there itself (func_8000C4A8), so a DLL is a
   relocatable section of its own here, given a made-up address (DLL_VRAM) that the runtime moves to where the game put
@@ -37,9 +38,9 @@ A DLL, as the game's loader reads it (func_8000C3CC and func_8000C4A8):
 - Its jump tables are words in its rodata, each the distance from the GOT to a case, which N64Recomp reads through
   the section's got_address.
 
-The $gp setup is a lui and an ori: an ori takes the low half as it is, where the HI16/LO16 relocations N64Recomp emits
-round the high half up for an addiu. tools/recomp_rom.py writes the copy of the ROM N64Recomp reads with each of those
-ori turned into an addiu, which then gives the same address.
+The $gp setup is a lui and an ori: an ori takes the low half as it is, where the HI16 relocation N64Recomp emits for
+the lui rounds the high half up for an addiu. runtime-patches/N64Recomp-1-ori-lo16-adds-signed.patch has N64Recomp add
+an ori's LO16 signed, as an addiu, so the pair gives the GOT's address.
 
 Everything is func_<address>, a DLL's functions dll<number>_<offset in its text>. Names worked out since go into
 syms/names.toml ([[func]] section, vram, name), applied last, and keep their names for good (mods and hooks use them).
@@ -65,7 +66,7 @@ OUT_PATH = ROOT / "syms" / "dinoplanet.syms.toml"
 ROM_MD5 = "49f7bb346ade39d1915c22e090ffd748"
 
 # The main segment: ROM offset, VRAM, size of the text, size of the text and data.
-MAIN = ("main", 0x1000, 0x80000400, 0x8008C278 - 0x80000400, 0x800A3D70 - 0x80000400)
+MAIN = ("main", 0x1000, 0x80000400, 0x80089750 - 0x80000400, 0x800A3D70 - 0x80000400)
 
 # The ROM's file table (func_80037090): a count, then the files' offsets from FILES_BASE, each ended by the next.
 FILE_TABLE = 0xA4970

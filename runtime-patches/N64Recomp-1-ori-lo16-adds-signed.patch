@@ -1,0 +1,16 @@
+diff --git a/src/recompilation.cpp b/src/recompilation.cpp
+index b00d143..529ed30 100644
+--- a/src/recompilation.cpp
++++ b/src/recompilation.cpp
+@@ -671,6 +671,11 @@ bool process_instruction(GeneratorType& generator, const N64Recomp::Context& con
+     };
+ 
+     auto find_binary_it = binary_ops.find(instr_id);
++    // An ori with a LO16 relocation goes with a lui whose HI16 is rounded up for a signed low half (recomp.h), so it adds
++    // that half signed, as an addiu does: as an or, the address would be 0x10000 too high whenever its bit 15 is set.
++    if (instr_id == InstrId::cpu_ori && instruction_context.reloc_type == N64Recomp::RelocType::R_MIPS_LO16) {
++        find_binary_it = binary_ops.find(InstrId::cpu_addiu);
++    }
+     if (find_binary_it != binary_ops.end()) {
+         print_indent();
+         const BinaryOp& op = find_binary_it->second;

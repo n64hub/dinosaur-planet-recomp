@@ -1,13 +1,12 @@
 # N64Recomp's configuration for Dinosaur Planet's December 2000 prototype, MD5 49f7bb346ade39d1915c22e090ffd748: it reads
 # the game's code by the symbols in syms/ (tools/gen_syms.py, from the ROM alone) and writes RecompiledFuncs/
-# (tools/recompile.sh). The code is stored raw in the ROM, so there is nothing to decompress first; it is read from the
-# copy tools/recomp_rom.py writes, whose DLLs' $gp setups are lui/addiu pairs (its header says why).
+# (tools/recompile.sh). The code is stored raw in the ROM, so there is nothing to decompress first.
 [input]
 # The ROM header's entrypoint, the start of the main segment.
 entrypoint = 0x80000400
 # Paths are relative to this file.
 symbols_file_path = "syms/dinoplanet.syms.toml"
-rom_file_path = "roms/dinoplanet.recomp.z64"
+rom_file_path = "roms/dinoplanet.z64"
 output_func_path = "RecompiledFuncs"
 use_absolute_symbols = true
 
