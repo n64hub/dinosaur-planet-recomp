@@ -36,7 +36,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   posted where they are. A fact this repo uses carries its own evidence from the ROM, in the comment beside it.
 - Nothing from the Dinosaur Planet decompilation (zestydevy/dinosaur-planet) either: not its code, its symbols or
   names, its headers or its notes on the DLLs and objects, and nothing looked up there. Every function, name and fix
-  is found in the ROM's own code, as the README's banner says.
+  is found in the ROM's own code.
 - The project is "Dinosaur Planet: AI Slop Recomp" (`dino::program_name`, the window and the launcher), and the README
   opens with its banner saying it is AI slop and pointing at Dinosaur Planet: Recompiled. Keep both true.
 - No ROMs, ROM-derived assets or extracted game data in git, CI or PRs (`tools/ci/check_repo.py` checks). Nothing made

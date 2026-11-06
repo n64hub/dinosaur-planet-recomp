@@ -6,9 +6,8 @@
 >
 > **You almost certainly want [Dinosaur Planet: Recompiled](https://github.com/DinosaurPlanetRecomp/dino-recomp)
 > instead.** People made it carefully, by hand. This project uses none of its code and isn't part of it. It also uses
-> nothing from [Dinomod Enhanced](https://github.com/EoinODoodles/dinomod-enhanced-recompiled) or the
-> [Dinosaur Planet decompilation](https://github.com/zestydevy/dinosaur-planet): every function, name and fix here was
-> found in the ROM's own code.
+> no code, assets or data from [Dinomod Enhanced](https://github.com/EoinODoodles/dinomod-enhanced-recompiled) or the
+> [Dinosaur Planet decompilation](https://github.com/zestydevy/dinosaur-planet).
 >
 > Its developers ask that AI not be used on their work. So use this one only if you want to use AI on a Dinosaur
 > Planet recomp yourself, or you're simply thirsty for slop.
