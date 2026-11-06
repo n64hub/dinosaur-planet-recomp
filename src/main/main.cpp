@@ -416,8 +416,8 @@ extern "C" int dino_warp_due() {
 
 // --story <point>[@<seconds>][,<warp>] (development, src/game/story.cpp): at that time on the --input clock, 2 s by
 // default, start a run from that point of the story, at that entry of the warp table if one is given. --place
-// <x>,<y>,<z>[,<layer>] starts it there instead, and --bits <hex>[=<value>],... sets more of the game's bits at that
-// start. From the start on, or from the first pass with --report, a line a second says where the player is. The same
+// <x>,<y>,<z>[,<layer>[,<facing>]] starts it there instead, and --bits <hex>[=<value>],... sets more of the game's bits
+// at that start. From the start on, or from the first pass with --report, a line a second says where the player is. The same
 // hook as --warp's, so this runs on the game's main thread too. --watch-bits <hex>,...|all prints a line each time the
 // game sets one of those bits, or with all each time a bit changes (story.cpp).
 static bool story_due = false;
