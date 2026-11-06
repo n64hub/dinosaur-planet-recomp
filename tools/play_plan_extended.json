@@ -4,8 +4,9 @@
   "The page's plan for N64Recomp-browser's tools/play_page.mjs: the launcher, Load ROM on a new profile once the shader",
   "list Chrome builds behind it is done (Firefox builds none there and says so), Start Game, the logos, then the game",
   "select and a New Game as a player makes one, with the keyboard's defaults (Space is A, Enter Start, WASD the stick):",
-  "A on the first file, A for an A in the name, and the stick to END, each a tap of one game frame, since the name",
-  "screen moves its cursor a letter a frame while the stick is held. The opening plays as a new game's does, the",
+  "A on the first file (once the report says the game select, menu 5), A for an A in the name, the stick to END, each",
+  "a tap of one game frame, since the name screen moves its cursor a letter a frame while the stick is held, and A on the",
+  "new file until the game leaves the game select. The opening plays as a new game's does, the",
   "pterodactyl and the storm, until the report puts Krystal in a map (tools/survey.js's playing()), and she walks",
   "about there. Then the plan starts areas from story points as the desktop build's tests do (survey.js's go(), each a",
   "need that fails the run unless the game puts the player in that map), with the object groups docs/story-points.md",
@@ -13,7 +14,8 @@
   "tools/play_plan.json's two (SwapStone Hollow with the pause menu, Cape Claw), then Warlock Mountain (warp 5),",
   "DarkIce Mines (55), CloudRunner Fortress (60), the Walled City (91) and the DF shrine on its Transporter",
   "(before-df-shrine), each walked about for about 20 s. About 5 minutes.",
-  "Its waits and holds are on the game's own clock (survey.js's clock(), 60 a second)."
+  "Its waits and holds are on the game's own clock (survey.js's clock(), 60 a second), but for the pause menu's, since",
+  "that clock stands still while the game is paused."
  ],
  "load": [
   [
@@ -57,8 +59,8 @@
   ],
   [
    "until",
-   "story: .* menu 3,",
-   60000
+   "story: .* menu 5,",
+   90000
   ],
   [
    "clock",
@@ -67,7 +69,7 @@
   ],
   [
    "wait",
-   3000
+   2000
   ],
   [
    "shot",
@@ -83,6 +85,11 @@
   [
    "wait",
    300
+  ],
+  [
+   "until",
+   "story: .* menu 6,",
+   15000
   ],
   [
    "wait",
@@ -179,6 +186,24 @@
   [
    "wait",
    300
+  ],
+  [
+   "wait",
+   2000
+  ],
+  [
+   "shot",
+   "file.png"
+  ],
+  [
+   "pressUntil",
+   "Space",
+   " ",
+   32,
+   33,
+   3000,
+   "!/ menu 5,/.test(dino.where())",
+   30000
   ],
   [
    "need",
@@ -401,6 +426,9 @@
    1500
   ],
   [
+   "clock"
+  ],
+  [
    "hold",
    "Enter",
    "Enter",
@@ -425,6 +453,11 @@
   [
    "wait",
    1500
+  ],
+  [
+   "clock",
+   "dino.clock()",
+   60
   ],
   [
    "eval",
