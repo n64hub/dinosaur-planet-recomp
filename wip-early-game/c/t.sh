@@ -1,0 +1,1 @@
+cd /c/Users/Benla/AppData/Local/Temp/hs-scratch/17939592916570000; INPUT=/c/Users/Benla/AppData/Local/Temp/hs-scratch/17939592916570000/c/w2.txt FROM=9 EVERY=1 bash run.sh c-p2 26 --story new-game --place -6415,-620,-1889,0
