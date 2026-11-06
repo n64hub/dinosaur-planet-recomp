@@ -1,6 +1,0 @@
-exec(open('/mnt/c/Users/Benla/AppData/Local/Temp/hs-scratch/17939592916570000/c/blklib.py').read())
-g=grid(7)
-print(g)
-d=block(g[(3,2)])
-print(len(d))
-for i in range(0,0x60,4): print(hex(i),d[i:i+4].hex(), struct.unpack('>I',d[i:i+4])[0])

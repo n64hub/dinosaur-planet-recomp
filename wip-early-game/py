@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# py <script in scratch> args: runs it under WSL's python
-export MSYS_NO_PATHCONV=1
-q=(); for a in "${@:2}"; do q+=("$(printf %q "$a")"); done
-exec wsl -d Ubuntu-24.04 -- python3 "/mnt/c/Users/Benla/AppData/Local/Temp/hs-scratch/17939592916570000/$1" "${q[@]}"

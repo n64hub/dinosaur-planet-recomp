@@ -1,1 +1,0 @@
-cd /c/Users/Benla/AppData/Local/Temp/hs-scratch/17939592916570000; INPUT=/c/Users/Benla/AppData/Local/Temp/hs-scratch/17939592916570000/b/ina.txt FROM=12 EVERY=4 bash run.sh b1 44 --story before-db-shrine --place -8656,-835,-3100 --bits bf=0,15a=0,3a0=0,88=0,3b0=0,2c5=0,615=0,2d=0,1d7=0,316=0,21f=0,104=0,22e=0,877=0
