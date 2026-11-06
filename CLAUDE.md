@@ -71,8 +71,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **libultra.** Some is named by hand (`MANUAL_NAMES`) where the signatures miss it and the runtime replaces it. The
   internals N64Recomp drops are reached only from code that never runs here (the debugger, the VI manager's thread,
   the Controller Pak), and stop the game naming themselves if one is (`src/game/libultra.cpp`).
-- **Saves.** On Flash. dll31, the save, holds its own copy of libultra's Flash functions, which drive the chip
-  through the PI; named (`DLL_MANUAL_NAMES`), they are the runtime's Flash. The main segment's copy is never called.
+- **Saves.** On Flash. dll29 is the save. dll31 drives the chip through the PI with its own copy of libultra's Flash
+  functions; named (`DLL_MANUAL_NAMES`), they are the runtime's Flash. The main segment's copy is never called.
 - **Microcodes.** Audio: `n_aspMain`, recompiled by RSPRecomp from `aspMain.us.toml`, with the second part it
   loads over its own text as an overlay slot. librecomp's vector unit uses
   SSE4.1, so `RecompiledFuncs` builds with `-march=nehalem` on x86-64.
@@ -82,3 +82,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   timed button states (`main.cpp` says the format), and on Windows `--stacks <seconds>` prints every thread's stack
   that long after start, for unattended runs and hangs. `--warp <index>@<seconds>` warps the player by the game's own
   warp table, and `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads.
+- **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the
+  game's bits, the character and the place set as the save would have them, in memory and with nothing written to
+  Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>]`
+  starts it somewhere the warp table has no entry, `--bits <hex>[=<value>],...` sets more bits, and `--report` prints
+  a line a second with the map, the position and the health. `docs/story-points.md` has the points, each bit's
+  evidence and the warp table's map: each index, its area and what it needs. None of it is in a player's menus.
