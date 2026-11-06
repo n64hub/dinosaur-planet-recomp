@@ -80,4 +80,5 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
   timed button states (`main.cpp` says the format), and on Windows `--stacks <seconds>` prints every thread's stack
-  that long after start, for unattended runs and hangs. `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads.
+  that long after start, for unattended runs and hangs. `--warp <index>@<seconds>` warps the player by the game's own
+  warp table, and `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads.

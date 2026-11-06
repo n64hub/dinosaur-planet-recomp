@@ -11,6 +11,7 @@
 #include <cinttypes>
 #include <filesystem>
 #include <chrono>
+#include <atomic>
 
 #ifndef __EMSCRIPTEN__
 #include "nfd.h" // a browser has no native file dialogs; RecompFrontend asks the page instead
@@ -377,11 +378,43 @@ static void load_input_script(const char* path) {
     fclose(f);
 }
 
+// Seconds since the game's first input read, the clock --input and --warp count by.
+static std::atomic<bool> script_clock_started = false;
+static std::chrono::steady_clock::time_point script_clock_start;
+
+static double script_seconds() {
+    if (!script_clock_started) {
+        return -1.0;
+    }
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - script_clock_start).count();
+}
+
+// --warp <index>@<seconds>[,<index>@<seconds>...] (development): at each time on the --input clock, warp the player to
+// that entry of the game's warp table (ROM file 30, 16 bytes an entry: the position and its layer), as the game's own
+// warps do. The game's main loop asks once a pass (us.toml's hook on func_800145AC), so the warp runs on its thread.
+struct ScriptedWarp {
+    int index;
+    double at;
+};
+static std::vector<ScriptedWarp> warps;
+static size_t next_warp = 0;
+
+extern "C" int dino_warp_due() {
+    if (next_warp >= warps.size() || script_seconds() < warps[next_warp].at) {
+        return -1;
+    }
+    int index = warps[next_warp++].index;
+    fprintf(stderr, "--warp: warping to %d at %.1f s\n", index, script_seconds());
+    return index;
+}
+
 static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out, float* y_out) {
     bool ret = recompinput::profiles::get_n64_input(player_index, buttons_out, x_out, y_out);
+    if (!script_clock_started.exchange(true)) {
+        script_clock_start = std::chrono::steady_clock::now();
+    }
     if (!input_script.empty() && player_index == 0) {
-        static const auto start = std::chrono::steady_clock::now();
-        double now = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+        double now = script_seconds();
         for (const ScriptedInput& in : input_script) {
             if (in.at <= now) {
                 *buttons_out = (uint16_t)in.buttons;
@@ -455,6 +488,14 @@ int main(int argc, char** argv) {
         }
         else if (strcmp(argv[i], "--window") == 0 && i + 1 < argc) {
             sscanf(argv[++i], "%dx%d", &window_width, &window_height);
+        }
+        else if (strcmp(argv[i], "--warp") == 0 && i + 1 < argc) {
+            for (const char* p = argv[++i]; p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
+                ScriptedWarp w{};
+                if (sscanf(p, "%d@%lf", &w.index, &w.at) == 2) {
+                    warps.push_back(w);
+                }
+            }
         }
         else if (strcmp(argv[i], "--stacks") == 0 && i + 1 < argc) {
             print_stacks_after(atof(argv[++i]));
