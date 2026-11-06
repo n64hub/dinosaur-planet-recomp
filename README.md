@@ -16,8 +16,8 @@ and the DLLs are loaded and unloaded by the game's own loader (`src/game/dlls.cp
 The repo holds no ROM, no asset from the game and no data extracted from it: you supply your own ROM, and nothing in
 git or CI is made from one except the function names, addresses and sizes in `syms/`.
 
-**Status:** not released. The desktop build recompiles the whole game and boots into it as far as its save, on
-Flash. The prototype's progression fixes are to come, written for this repo.
+**Status:** not released. The desktop build plays from the title through a new game's name entry and the opening
+cutscene into the first level. The prototype's progression fixes are to come, written for this repo.
 
 ## The ROM
 

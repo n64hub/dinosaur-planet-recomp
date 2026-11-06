@@ -60,16 +60,24 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   function to N64Recomp, which recompiles those calls (`runtime-patches/`), and its one jump through a table goes to
   that table's only entry (`us.toml`).
 - **Development hardware.** The game's main thread first writes to a register at 0xBC000C02 of the hardware the
-  prototype was made on, which a console doesn't have: `us.toml` stubs that function.
+  prototype was made on, which a console doesn't have: `us.toml` stubs that function. It also reads that hardware's
+  signature at 0xBC000000 in three places and the cartridge straight from its address once at boot, and the audio reads
+  AI_LEN itself; `us.toml` gives each the value the hardware would.
+- **Floating point.** The hand-written math (matrices, vectors, splines, skinning) uses the odd float registers as
+  registers of their own, as with Status.FR set, where the compiled code expects FR clear; `us.toml` runs each of
+  those functions in FR set. Without it every matrix of the world is 0 and only the 2D screens draw.
+- **Fall-through entries.** A few functions start 4 bytes before another and run into it (the cosine into the sine):
+  `tools/gen_syms.py` gives each the size of both.
 - **libultra.** Some is named by hand (`MANUAL_NAMES`) where the signatures miss it and the runtime replaces it. The
   internals N64Recomp drops are reached only from code that never runs here (the debugger, the VI manager's thread,
   the Controller Pak), and stop the game naming themselves if one is (`src/game/libultra.cpp`).
 - **Saves.** On Flash. dll31, the save, holds its own copy of libultra's Flash functions, which drive the chip
   through the PI; named (`DLL_MANUAL_NAMES`), they are the runtime's Flash. The main segment's copy is never called.
-- **Microcodes.** Audio: `n_aspMain`, recompiled by RSPRecomp from `aspMain.us.toml`. librecomp's vector unit uses
+- **Microcodes.** Audio: `n_aspMain`, recompiled by RSPRecomp from `aspMain.us.toml`, with the second part it
+  loads over its own text as an overlay slot. librecomp's vector unit uses
   SSE4.1, so `RecompiledFuncs` builds with `-march=nehalem` on x86-64.
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
   timed button states (`main.cpp` says the format), and on Windows `--stacks <seconds>` prints every thread's stack
-  that long after start, for unattended runs and hangs.
+  that long after start, for unattended runs and hangs. `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads.
