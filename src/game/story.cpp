@@ -213,7 +213,11 @@ void dino::story_watch_bits(const char* list) {
 // and with "all" only a bit that changes has one.
 extern "C" void dino_bit_setting(uint8_t* rdram, recomp_context* ctx) {
     int bit = (int32_t)ctx->r4, value = (int32_t)ctx->r5;
-    if (!watch_all_bits && std::find(watched_bits.begin(), watched_bits.end(), bit) == watched_bits.end()) {
+    // func_80014670 returns at once for bit -1 (0x80014694), which objects with no bit of their own pass every frame.
+    if (bit == -1) {
+        return;
+    }
+    if (!watch_all_bits &&std::find(watched_bits.begin(), watched_bits.end(), bit) == watched_bits.end()) {
         return;
     }
     recomp_context saved = *ctx;
