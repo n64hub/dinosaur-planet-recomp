@@ -1,0 +1,31 @@
+# N64Recomp's configuration for Dinosaur Planet's December 2000 prototype, MD5 49f7bb346ade39d1915c22e090ffd748: it reads
+# the game's code by the symbols in syms/ (tools/gen_syms.py, from the ROM alone) and writes RecompiledFuncs/
+# (tools/recompile.sh). The code is stored raw in the ROM, so there is nothing to decompress first; it is read from the
+# copy tools/recomp_rom.py writes, whose DLLs' $gp setups are lui/addiu pairs (its header says why).
+[input]
+# The ROM header's entrypoint, the start of the main segment.
+entrypoint = 0x80000400
+# Paths are relative to this file.
+symbols_file_path = "syms/dinoplanet.syms.toml"
+rom_file_path = "roms/dinoplanet.recomp.z64"
+output_func_path = "RecompiledFuncs"
+use_absolute_symbols = true
+
+[patches]
+# The DLLs (tools/gen_syms.py's header says what one is). func_8000C3CC loads one: it allocates its memory, reads it
+# from ROM file 70 (offset 0x30($sp), size 0x2C($sp)) into it ($s0), clears its bss, relocates it and flushes the
+# caches. Once it has, the runtime maps the DLL's section there (src/game/dlls.cpp), so that the game's calls through
+# its exports, its GOT and the pointers it hands out reach its functions, and its $gp is its GOT's address.
+[[patches.hook]]
+func = "func_8000C3CC"
+before_vram = 0x8000C484
+text = "{ void dino_dll_loaded(uint8_t*, recomp_context*); dino_dll_loaded(rdram, ctx); }"
+
+# func_8000C258 unloads one when nothing holds it any more (its count in the table at 0x800A7D10 reaches 0): it calls its
+# destructor, fills its text with break instructions and
+# frees its memory ($a0 at the free): the runtime takes its section back out first, so that memory reused for another
+# DLL or anything else is not called as this one.
+[[patches.hook]]
+func = "func_8000C258"
+before_vram = 0x8000C340
+text = "{ void dino_dll_unloading(uint8_t*, recomp_context*); dino_dll_unloading(rdram, ctx); }"
