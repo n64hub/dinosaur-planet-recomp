@@ -201,6 +201,15 @@ text = "{ if (ctx->r4 == 0) goto L_902C58D8; }"
 # one way in, a dust create that fails (func_800213EC hands func_80021A84 what it made with no test, and dll290_05F8 writes its
 # +0xC4), takes an object heap that is full, which all of SwapStone Hollow's groups at once doesn't make.
 
+# An object that fails to be made: func_800213EC makes one through func_8001275C into 0x2C($sp) and hands it to
+# func_80021A84 with no test, which reads its +0x30 at once, and with none there that is a read of address 0x30. It
+# came in Golden Plains' shrine from its fly baddie's shot (dll475 0x8C0), which asked for a second player (below).
+# func_80021A84 with no object returns at once, and func_800213EC returns the 0 it got, which its callers test.
+[[patches.hook]]
+func = "func_80021A84"
+before_vram = 0x80021A84
+text = "{ if (ctx->r4 == 0) return; }"
+
 # RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
 # write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
 # list's pointer's address in $a0. func_800026C8 loads a camera, with the list's at 0x800028AC ($a1 its address, $s0 the
@@ -499,3 +508,113 @@ text = "{ void dino_camera_turn(uint8_t*, recomp_context*); dino_camera_turn(rdr
 func = "func_800145AC"
 before_vram = 0x800145AC
 text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int w = dino_warp_due(); if (w >= 0) { ctx->r4 = w; ctx->r5 = 0; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
+
+# --watch-bits (src/game/story.cpp, development): func_80014670 sets the bit in $a0 to the value in $a1, and at its start
+# says so when the bit is watched.
+[[patches.hook]]
+func = "func_80014670"
+before_vram = 0x80014670
+text = '{ void dino_bit_setting(uint8_t*, recomp_context*); dino_bit_setting(rdram, ctx); }'
+
+# The Krazoa shrines (src/game/krazoa.cpp, whose header has the evidence): WARP_ENTRY once it has read an entry of the
+# warp table into its buffer, the end of func_80045BF4 once a map is loaded, and func_80046BC8 once the loaded maps'
+# objects are placed.
+[[patches.hook]]
+func = "func_8004D1D4"
+before_vram = 0x8004D208
+text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); dino_krazoa_warp_entry(rdram, ctx); }'
+
+[[patches.hook]]
+func = "func_80045BF4"
+before_vram = 0x80045D38
+text = '{ void dino_krazoa_map_loaded(uint8_t*, recomp_context*); dino_krazoa_map_loaded(rdram, ctx); }'
+
+[[patches.hook]]
+func = "func_80046BC8"
+before_vram = 0x80047330
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); }'
+
+# WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
+# whether their spirit is released by 0x366, a bit nothing sets: they ask CC's (0x221) and WG's (0x222) released bits
+# (addiu $a0, $zero, 0x366 -> 0x221 at 0x1544, 0x222 at 0x17D4). Neither act is reached without the Krazoa shrines'
+# ways in.
+[[patches.hook]]
+func = "dll607_025C"
+before_vram = 0x90243044
+text = '{ void dino_krazoa_warlock(uint8_t*, recomp_context*); dino_krazoa_warlock(rdram, ctx); }'
+
+[[patches.instruction]]
+func = "dll607_14FC"
+vram = 0x902442F0
+value = 0x24040221
+
+[[patches.instruction]]
+func = "dll607_1788"
+vram = 0x90244580
+value = 0x24040222
+
+# WL_seqpoint's release events (dll611), before the player's export 0xA0 takes back WG's mask (0x778) and CC's (0x8D4).
+[[patches.hook]]
+func = "dll611_04B4"
+before_vram = 0x90246DE4
+text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_release_mask(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll611_04B4"
+before_vram = 0x90246F40
+text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_release_mask(rdram, ctx); }'
+
+# Cape Claw's shrine (dll486): its test is one SabreBaddie, which CCSH_ObjCreator (dll487) spawns with kill bit 0x1E7,
+# as Discovery Falls' creator does. State 2 waited for 0x5B2 instead, a bit nothing in the ROM sets, so the test never
+# ended: it reads 0x1E7, and its reset clears 0x1E7 (addiu $a0, $zero, 0x5B2 -> 0x1E7 at 0x7C0 and 0x998). The shrine
+# isn't reached without the Krazoa shrines' ways in.
+[[patches.instruction]]
+func = "dll486_01EC"
+vram = 0x901F5E1C
+value = 0x240401E7
+
+[[patches.instruction]]
+func = "dll486_01EC"
+vram = 0x901F5FF4
+value = 0x240401E7
+
+# Golden Plains' fly baddie (dll475) shoots by making an object from a placement record it zeroes and never gives an
+# id, so each shot asked for object 0, the player (Sabre's definition, dll210): a second player where the fly baddie
+# flew, which took the camera and the game with it, or, with the object heap full, nothing (the guard above). What it
+# writes into the shot (a velocity at +0x24, a lifetime at +0xDC, +0xE0) is a projball's (object 0x14B, dll255), which
+# the record now asks for, before func_800213EC makes it (0x8C0).
+[[patches.hook]]
+func = "dll475_07F8"
+before_vram = 0x901EF4FC
+text = "{ if (MEM_H(0, ctx->r4) == 0) MEM_H(0, ctx->r4) = 0x14B; }"
+
+# Willow Grove's shrine (dll488): state 3 on GET_BIT(0x1D1)'s answer (0x8FC), and state 4, its win (0xA18).
+[[patches.hook]]
+func = "dll488_0244"
+before_vram = 0x901F7748
+text = '{ void dino_krazoa_wg_won(uint8_t*, recomp_context*); dino_krazoa_wg_won(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll488_0244"
+before_vram = 0x901F7864
+text = '{ void dino_krazoa_wg_win(uint8_t*, recomp_context*); dino_krazoa_wg_win(rdram, ctx); }'
+
+# Golden Plains' shrine (dll472): state 4 on GET_BIT(0x12A)'s answer (0xBB0).
+[[patches.hook]]
+func = "dll472_0290"
+before_vram = 0x901ED7DC
+text = '{ void dino_krazoa_gp_won(uint8_t*, recomp_context*); dino_krazoa_gp_won(rdram, ctx); }'
+
+# Golden Plains' shrine (dll472): its timeout frees every carryable (0xB3C-0xB68), the one in the player's hands too.
+# Before 0xB28, with the list in v0, the player lets go of it first.
+[[patches.hook]]
+func = "dll472_0290"
+before_vram = 0x901ED754
+text = '{ void dino_krazoa_gp_timeout(uint8_t*, recomp_context*); dino_krazoa_gp_timeout(rdram, ctx); }'
+
+# Golden Plains' shrine (dll472): its win's sequence sends event 4 (back to state 4) after event 6 (state 5, the
+# reward), at the callback's dispatch (0x1134).
+[[patches.hook]]
+func = "dll472_1024"
+before_vram = 0x901EDD60
+text = '{ void dino_krazoa_gp_event(uint8_t*, recomp_context*); dino_krazoa_gp_event(rdram, ctx); }'
