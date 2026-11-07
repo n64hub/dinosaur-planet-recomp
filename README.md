@@ -74,12 +74,17 @@ Fixed:
   it loaded, so the stone stayed carried and SwapStone Circle refused the swap back to Sabre, and nothing led up from
   the force point's floor to the duct that reaches the place. Golden Plains now leaves the place to the player, and a
   second of the force point's own lifts stands in the corridor behind the round door, under the duct.
+- CloudRunner Fortress's treasure lift (Treasure Lift on Restored): past the blasted wall the wind lift only ever
+  blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below and
+  the way to the race couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
+  turn it back for the way up.
 - Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
   ended, and could crash.
 - Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
   so the city's slab door never opened.
-- BOSS TRex: its laser walls never fired, so it couldn't be hurt, and beating it went back to the title with no
-  SpellStone. Now the stone is carried out, through the arena's own way back to Walled City.
+- BOSS TRex (BOSS TRex on Restored): its laser walls never fired, so it couldn't be hurt, and beating it went back to
+  the title with no SpellStone. A wall now fires once its corridor is charged, and the third SpellStone is carried
+  out, through the arena's own way back to Walled City.
 
 Under way:
 
@@ -119,6 +124,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Desert Force Point** (General): Restored leaves the second SpellStone's place empty until the player places the
   stone, and adds a lift up to the duct that leads there, in the corridor behind the round door. Original is the
   prototype as it was left: Golden Plains fills the place, and nothing leads up to it.
+- **Treasure Lift** (General): Restored has CloudRunner Fortress's wind lift past the blasted wall lower a player who
+  steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
+  the wind only ever blows up, and the caves can't be reached.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 
