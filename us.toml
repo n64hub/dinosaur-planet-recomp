@@ -802,3 +802,10 @@ text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_poin
 func = "dll641_009C"
 before_vram = 0x902592E8
 text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_point_lift(rdram, ctx); }'
+
+# CloudRunner Fortress's treasure lift (src/game/cloudrunner.cpp, whose header has the evidence): CFTreasWindLift's
+# update as its wind starts (dll370 0x0484).
+[[patches.hook]]
+func = "dll370_00F8"
+before_vram = 0x901A3930
+text = '{ void dino_treasure_lift_starts(uint8_t*, recomp_context*); dino_treasure_lift_starts(rdram, ctx); }'
