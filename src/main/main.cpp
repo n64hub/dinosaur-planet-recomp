@@ -366,8 +366,9 @@ static std::string game_thread_name(const OSThread* t) {
 // act of its state machine (dll18's, state +0x26C: an enemy's attack or pause, which then runs as long as its
 // animation does). Between lines "choose", "or" and "end" are ways, each starting with a sync line: the way whose
 // first sync comes first plays, the others never start, and what follows "end" goes on from that way's last part (an
-// enemy that comes either way round). A choose holds no other. In place of x y,
-// "to <x> <z>" walks the player toward that place and "chase <object id hex> [reach]" toward the nearest object of that
+// enemy that comes either way round). A choose holds no other. In place of x y, "to <x> <z> [strength]" walks the
+// player toward that place, the stick that far over (1 by default: a walk slow enough to leap a gap, where a run goes
+// over its edge), and "chase <object id hex> [reach]" toward the nearest object of that
 // id (or with a number after the reach, toward that hit sphere of it: a boss hurt only in its head), each until
 // within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
@@ -380,6 +381,7 @@ struct ScriptedInput {
     bool steer;
     int oid, sphere;
     float to_x, to_z, reach;
+    float strength;
 };
 static std::vector<ScriptedInput> input_script;
 // The steering line being played (to or chase), and the stick the last pass worked out for it.
@@ -495,6 +497,9 @@ static void load_input_script(const char* path) {
         }
         else if (line[0] != '#' && sscanf(line, "%lf %x to %f %f", &in.at, &in.buttons, &in.to_x, &in.to_z) == 4) {
             in.steer = true;
+            if (sscanf(line, "%*f %*x to %*f %*f %f", &in.strength) != 1) {
+                in.strength = 1.0f;
+            }
             in.oid = -1;
             in.reach = 20.0f;
             in.part = input_parts - 1;
@@ -505,6 +510,7 @@ static void load_input_script(const char* path) {
             if (sscanf(line, "%*f %*x chase %*x %*f %d", &in.sphere) != 1) {
                 in.sphere = -1;
             }
+            in.strength = 1.0f;
             if (in.reach <= 0.0f) {
                 in.reach = 30.0f;
             }
@@ -572,13 +578,15 @@ extern "C" int dino_warp_due() {
 // --story <point>[@<seconds>][,<warp>] (development, src/game/story.cpp): at that time on the --input clock, 2 s by
 // default, start a run from that point of the story, at that entry of the warp table if one is given. --place
 // <x>,<y>,<z>[,<layer>[,<facing>]] starts it there instead, and --bits <hex>[=<value>],... sets more of the game's bits
-// at that start. From the start on, or from the first pass with --report, a line a second says where the player is. The same
+// at that start. From the start on, or from the first pass with --report, a line a second says where the player is
+// (every DINO_REPORT_EVERY seconds with it set, for a quick move such as a jump). The same
 // hook as --warp's, so this runs on the game's main thread too. --watch-bits <hex>,...|all prints a line each time the
 // game sets one of those bits, or with all each time a bit changes (story.cpp). With DINO_CHECK_HEAP set, each pass
 // checks the game's heaps for a block written past its end (heap.cpp).
 static bool story_due = false;
 static double story_at = 2.0;
 static double story_reported = -1.0;
+static const double story_report_every = std::getenv("DINO_REPORT_EVERY") ? std::atof(std::getenv("DINO_REPORT_EVERY")) : 1.0;
 
 // The development options a run can also be given after it starts (--warp, --story, --place, --report, --bits,
 // --watch-bits, --time): true with the one at argv[i] taken, i moved past its value.
@@ -673,8 +681,8 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     if (const ScriptedInput* in = steering) {
         float x, y;
         dino::story_steer(rdram, ctx, in->oid, in->sphere, in->to_x, in->to_z, in->reach, &x, &y);
-        steer_stick_x = x;
-        steer_stick_y = y;
+        steer_stick_x = x * in->strength;
+        steer_stick_y = y * in->strength;
     }
     for (int i = 1; i < input_parts; i++) {
         const InputPart& part = input_part[i];
@@ -695,7 +703,7 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
         story_reported = now;
         dino::story_start(rdram, ctx);
     }
-    else if (story_reported >= 0.0 && now >= story_reported + 1.0) {
+    else if (story_reported >= 0.0 && now >= story_reported + story_report_every) {
         story_reported = now;
         dino::story_report(rdram, ctx, now);
     }

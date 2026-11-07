@@ -760,18 +760,30 @@ func = "dll445_0628"
 before_vram = 0x901DDE00
 text = '{ void dino_moonseeds_meteor(uint8_t*, recomp_context*); dino_moonseeds_meteor(rdram, ctx); }'
 
-# The Pointback mother's second egg (src/game/diamond_bay.cpp, whose header has the evidence): DBPointMum reading
-# her current step's flags (dll658 0x800), which on Restored sets act 2's first step (0x3FF) as Sabre comes near her,
-# and DB_FlameSwitch's update (dll689_0130), which on Restored rises once that step has set its unread +0x20 bit.
-[[patches.hook]]
-func = "dll658_0720"
-before_vram = 0x9026507C
-text = '{ void dino_diamond_bay_mother_step(uint8_t*, recomp_context*); dino_diamond_bay_mother_step(rdram, ctx); }'
-
+# The Pointback mother's second egg (src/game/diamond_bay.cpp, whose header has the evidence), on Restored:
+# DB_FlameSwitch's update (dll689_0130), which rises once the mother's first act-2 step has set its unread +0x20 bit,
+# its test of what hit it (dll689 0x1C8), which takes Tricky's flame in the column it rose through as a hit, and
+# DBlgtbeam's test of whether Sabre stands on it (dll677_1164, its two multiplies by the cosine and sine of its yaw),
+# which takes them without their sign.
 [[patches.hook]]
 func = "dll689_0130"
 before_vram = 0x9027EC5C
 text = '{ void dino_diamond_bay_flame_switch(uint8_t*, recomp_context*); dino_diamond_bay_flame_switch(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll689_0130"
+before_vram = 0x9027ECF4
+text = '{ void dino_diamond_bay_flame_switch_hit(uint8_t*, recomp_context*); dino_diamond_bay_flame_switch_hit(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll677_1164"
+before_vram = 0x90275604
+text = '{ void dino_diamond_bay_beam_reach(uint8_t*, recomp_context*); dino_diamond_bay_beam_reach(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll677_1164"
+before_vram = 0x90275694
+text = '{ void dino_diamond_bay_beam_reach(uint8_t*, recomp_context*); dino_diamond_bay_beam_reach(rdram, ctx); }'
 
 [[patches.hook]]
 func = "func_80046BC8"

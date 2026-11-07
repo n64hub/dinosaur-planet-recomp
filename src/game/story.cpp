@@ -140,6 +140,9 @@ namespace {
     // Tricky's commands (his export 13, dll211 0x10D4, offers none without it): DarkIce Mines' boss (dll565) sets it as
     // Sabre rescues him, and Northern Wastes' Tricky (dll497) as he joins.
     const Bits tricky_commands = { { 0x4E4, 1 } };
+    // Tricky's flame, his command 4 (0x245), which Walled City's Queen gives on Restored (walled_city.cpp) and Diamond
+    // Bay's flame switch needs for the Pointback's second egg.
+    const Bits tricky_flame = { { 0x245, 1 } };
     const Bits third_stone = { { 0x878, 1 } };
     // The fourth, which the Kamerian Dragon leaves with Kamerian Dragon on Restored (dragon_rock.cpp), is carried as
     // 0x7A8 to the Desert Force Point's other place (0x5F4).
@@ -174,7 +177,8 @@ namespace {
         { "before-desert-force-point", krystal, -1, golden_plains_place, to_second_stone + second_stone_carried },
         { "before-walled-city", sabre, -1, walled_city_place,
             to_second_stone + second_stone + portal_spell + tricky_commands },
-        { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + portal_spell + third_stone_carried },
+        { "before-third-stone", sabre, 66, {},
+            to_second_stone + second_stone + portal_spell + tricky_commands + tricky_flame + third_stone_carried },
         { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
         { "after-dragon-rock", krystal, -1, golden_plains_place,
             four_spirits + second_stone + portal_spell + third_stone + fourth_stone_carried },
@@ -540,6 +544,10 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     ctx->f14.fl = fz;
     call(rdram, ctx, map_at);
     int32_t map = (int32_t)ctx->r2;
+    // The player's act in dll18's state machine (state +0x26C, as story_object_act reads an enemy's): a jump, a fall or
+    // a climb tells by it.
+    gpr player_state = (gpr)(int32_t)MEM_W(0xB8, (gpr)object);
+    int act = player_state != 0 ? (int16_t)MEM_H(0x26C, player_state) : -1;
     // The time of day, in hours (-1 with no sky loaded).
     float hours = -1.0f;
     int32_t sky = word(rdram, dll7_handle);
@@ -554,9 +562,9 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
         hours /= 3600.0f;
         ctx->r29 = sp;
     }
-    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d, %.2f h\n", seconds, map, fx,
-        fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats),
-        (int16_t)MEM_H(6, stats), hours);
+    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d, %.2f h, act %d\n", seconds, map,
+        fx, fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats),
+        (int16_t)MEM_H(6, stats), hours, act);
     // DINO_REPORT_OBJECT=<object id hex>: where each drawn object of that id is too, for an enemy a script times by.
     static const char* report_object = getenv("DINO_REPORT_OBJECT");
     if (report_object == nullptr) {
