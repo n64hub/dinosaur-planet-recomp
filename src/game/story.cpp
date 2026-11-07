@@ -283,8 +283,7 @@ extern "C" void dino_bit_setting(uint8_t* rdram, recomp_context* ctx) {
     int old = (int32_t)ctx->r2;
     *ctx = saved;
     if (!watch_all_bits || old != value) {
-        fprintf(stderr, "bits: %.1f s 0x%X = %d, was %d, from 0x%08X\n", dino_script_seconds(), bit, value, old,
-            (uint32_t)saved.r31);
+        fprintf(stderr, "bits: %.1f s 0x%X = %d, was %d\n", dino_script_seconds(), bit, value, old);
     }
 }
 
