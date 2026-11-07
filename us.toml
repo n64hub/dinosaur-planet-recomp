@@ -251,6 +251,27 @@ func = "func_8004D470"
 vram = 0x8004D484
 value = 0x34048FC0
 
+# Too few map block slots: func_80041E84 allocates the loaded blocks' table for 40 (pointers 0xA0 bytes at 0x800B96B4,
+# ids 0x50 at 0x800B96BC, use counts 0x28 at 0x800B96C4), and func_80049024 takes a free slot or else the next one past
+# the used count (the byte at 0x800B96B8) with no test against 40. Every other user counts to that byte. Dragon Rock -
+# Top's east end, on layer 0 beside the Kamerian Dragon's room, holds 43 blocks at once: the slots past 40 went over the
+# heap blocks after the table, and the next block freed there read a pointer of garbage (func_80048C24) and crashed. The
+# table is 80 slots (addiu $a0, $zero, 0xA0 -> 0x140, 0x50 -> 0xA0, 0x28 -> 0x50).
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EAC
+value = 0x24040140
+
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EC4
+value = 0x240400A0
+
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EDC
+value = 0x24040050
+
 # RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
 # write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
 # list's pointer's address in $a0. func_800026C8 loads a camera, with the list's at 0x800028AC ($a1 its address, $s0 the
