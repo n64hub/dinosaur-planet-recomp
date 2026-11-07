@@ -25,6 +25,7 @@ void dino::init_config() {
     dino::add_drakor_options(general);
     dino::add_dragon_rock_options(general);
     dino::add_force_point_options(general);
+    dino::add_boss_trex_options(general);
     recompui::config::create_controls_tab();
     recompui::config::create_graphics_tab();
     recompui::config::create_sound_tab();

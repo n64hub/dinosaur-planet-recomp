@@ -569,15 +569,15 @@ func = "dll780_011C"
 before_vram = 0x902C9938
 text = '{ void dino_wc_beacon(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_beacon(rdram, &c); }'
 
-# BOSS TRex's arena (patches/boss_trex.c says what each fixes). A laser wall's update (dll704_0090, the wall in $a0)
-# asks dino_trex_wall whether its corridor is charged.
+# BOSS TRex's arena (patches/boss_trex.c says what each fixes), with BOSS TRex on Restored (src/game/boss_trex.cpp).
+# A laser wall's update (dll704_0090, the wall in $a0) asks dino_trex_wall whether its corridor is charged.
 [[patches.hook]]
 func = "dll704_0090"
 before_vram = 0x9028A518
-text = '{ void dino_trex_wall(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_wall(rdram, &c); }'
+text = '{ int dino_trex_restored(void); void dino_trex_wall(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_wall(rdram, &c); } }'
 
 # The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
-# and dino_trex_beaten gives the SpellStone and the way back in its place.
+# and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call.
 [[patches.instruction]]
 func = "dll702_2D98"
 vram = 0x9028874C
@@ -586,7 +586,7 @@ value = 0x00000000
 [[patches.hook]]
 func = "dll702_2D98"
 before_vram = 0x90288754
-text = '{ void dino_trex_beaten(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_beaten(rdram, &c); }'
+text = '{ int dino_trex_restored(void); void dino_trex_beaten(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_beaten(rdram, &c); } else { func_80013FB4(rdram, ctx); } }'
 
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),

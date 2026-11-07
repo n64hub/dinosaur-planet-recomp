@@ -45,6 +45,8 @@ namespace dino {
     // The Kamerian Dragon's fight's end setting (dragon_rock.cpp).
     void add_dragon_rock_options(recomp::config::Config& general);
     void add_force_point_options(recomp::config::Config& general);
+    // BOSS TRex's fight's setting (boss_trex.cpp).
+    void add_boss_trex_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }
