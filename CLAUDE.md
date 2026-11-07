@@ -151,7 +151,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps the player by the game's own
   warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and object
   jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
-  `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each event of Golden Plains' shrine,
+  `src/game/krazoa.cpp` places and any of them freed while its map is loaded, each spirit it gives and has taken
+  back and each event of Golden Plains' shrine,
   `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves,
   `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
   `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on, `DINO_LOG_EFFECTS=1`
