@@ -75,6 +75,7 @@ namespace {
         int warp;
         Place place;
         std::vector<StoryBit> bits;
+        int magic = 0; // the player's magic and its most: a spell cast with none does nothing (dll210_6DD8)
     };
 
     constexpr int sabre = 0;
@@ -154,7 +155,7 @@ namespace {
         { "before-desert-force-point", krystal, 31, {}, to_second_stone + second_stone_carried },
         { "before-walled-city", sabre, 91, {}, to_second_stone + second_stone + portal_spell },
         { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + portal_spell + third_stone_carried },
-        { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
+        { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone, 100 },
         { "after-dragon-rock", krystal, 31, {},
             four_spirits + second_stone + portal_spell + third_stone + fourth_stone_carried },
         { "before-drakor", krystal, -1, drakor_place, four_spirits + second_stone + portal_spell + third_stone },
@@ -325,6 +326,11 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     call_dll29(rdram, ctx, 1);
     ctx->r4 = point.character;
     call_dll29(rdram, ctx, 29);
+    if (point.magic != 0) {
+        gpr stats = (gpr)word(rdram, save_pointer) + 12 * point.character;
+        MEM_H(4, stats) = point.magic;
+        MEM_H(6, stats) = point.magic;
+    }
     for (const StoryBit& b : point.bits) {
         set_game_bit(rdram, ctx, b);
     }
