@@ -47,7 +47,8 @@ Fixed:
   Krystal, the Swap Store's item beams as the player walks in, a crash after a long while in Cape Claw, where more
   sounds at once than an audio frame's command list holds wrote past its end, a small basket or crate carried out
   of the place it was found, which the game freed in the player's hands, Dragon Rock's fight with the Skeetlas,
-  which after a minute or two drew more than the game had made room for and wrote over the models, a swing
+  which after a minute or two drew more than the game had made room for and wrote over the models, Dragon Rock's
+  top at its east end, where more of the level is loaded at once than the game kept room for, a swing
   pressed on the very frame the player comes back after a death, before the staff or sword was made, and Golden
   Plains' portable hole spell, whose pickup made a new player every frame until the game ran out of memory.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
@@ -66,7 +67,9 @@ Fixed:
   Palace.
 - The Kamerian Dragon under Dragon Rock (Kamerian Dragon on Restored): its health ran out and the fight went on, and
   the fourth SpellStone, which the Desert Force Point's second place takes, was nowhere. It now dies once its health
-  runs out and leaves the fourth SpellStone in Krystal's hands, and stays gone.
+  runs out and leaves the fourth SpellStone in Krystal's hands, and stays gone. Nothing led to its room: the room is
+  the Skeetla arena at the bottom of Dragon Rock on the level's next layer, and the arena, once won, now leads into
+  it, and the SpellStone, once picked up, back out.
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
   the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
   was. The prototype started the fight again after his fall, so the game never ended.
@@ -85,12 +88,16 @@ Fixed:
 - BOSS TRex (BOSS TRex on Restored): its laser walls never fired, so it couldn't be hurt, and beating it went back to
   the title with no SpellStone. A wall now fires once its corridor is charged, and the third SpellStone is carried
   out, through the arena's own way back to Walled City.
+- Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
+  Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
+  earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
 
 Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
-- The way to the ending the prototype never had: Krazoa Palace's four wings.
+- Dragon Rock's bottom: the way from the portal's landing, or from the top's east end, to the Skeetla arena, and the
+  arena's win, which the way into the Kamerian Dragon's room waits for.
 
 ## The ROM
 
@@ -118,15 +125,19 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
   tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
   tablet is nowhere, and the puzzle's end leads nowhere.
-- **Kamerian Dragon** (General): Restored has the Kamerian Dragon under Dragon Rock die once its health runs out and
-  leave the fourth SpellStone for the Desert Force Point. Original is the prototype as it was left: the fight never
-  ends, and the fourth SpellStone is nowhere.
+- **Kamerian Dragon** (General): Restored has the Skeetla arena at the bottom of Dragon Rock, once won, lead into the
+  Kamerian Dragon's room, and the dragon die once its health runs out and leave the fourth SpellStone for the Desert
+  Force Point, which leads back out. Original is the prototype as it was left: nothing leads to the room, the fight
+  never ends, and the fourth SpellStone is nowhere.
 - **Desert Force Point** (General): Restored leaves the second SpellStone's place empty until the player places the
   stone, and adds a lift up to the duct that leads there, in the corridor behind the round door. Original is the
   prototype as it was left: Golden Plains fills the place, and nothing leads up to it.
 - **Treasure Lift** (General): Restored has CloudRunner Fortress's wind lift past the blasted wall lower a player who
   steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
   the wind only ever blows up, and the caves can't be reached.
+- **Krazoa Palace** (General): Restored places Krazoa Palace's doors, consoles, text blocks and red Krazoa, so its
+  four wings are played in turn and the red Krazoa sends the player on to Drakor. Original is the prototype as it was
+  left: the palace's rooms stand empty and lead nowhere.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 
