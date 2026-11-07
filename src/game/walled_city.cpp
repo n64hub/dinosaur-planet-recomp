@@ -25,13 +25,14 @@
 //   corridor's six zones are unlinked: the RedEye's place is in 184 (uid 0x41086, x -8295 to -7702, z -4885 to -4714).
 //   His flame, command 4 (dll211 0x8B0), is offered while an object calls his export 14 with 4 (the vines, dll265
 //   0x104) and 0x245 is set, aims at the object of list 0x33 nearest the player (dll211 0x8F18), and has him go to the
-//   curve of type 0x24, kind 4, nearest the player (dll211 0x3664, dll25 export 6) and breathe flameblasts there. Only
-//   DarkIce Mines' SnowHorn sets 0x245 (dll712 0x2470), behind 0x172, which nothing sets.
+//   curve of type 0x24, kind 4, nearest the player (dll211 0x3664, dll25 export 6) and breathe flameblasts there. He
+//   learns it in DarkIce Mines: its SnowHorn sets 0x245 (dll712 0x2470) once the SnowClaw by it is beaten (0x172).
 //
 // What Restored adds, with bits no code and no placement uses (the 4 bits at 0xD5 count the teeth):
 // - The Queen stands in the corridor. Sabre coming to her with Tricky near (or alone, if no sidekick is out) has met
-//   her (0x80A) and has Tricky's flame (0x245), and from then the RedEye by the gate can be angered. Tricky comes from
-//   a sideload (dll269) in zone 184, beside her.
+//   her (0x80A), and from then the RedEye by the gate can be angered, with the flame Tricky learned in DarkIce Mines
+//   (she gives nothing: the ROM's own giver is that SnowHorn). Tricky comes from a sideload (dll269) in zone 184,
+//   beside her.
 // - The RedEye (WCTrexChase) waits by the gate, in list 0x33, and offers the flame to Sabre within 300 of it. Tricky
 //   takes it as the vines (#194), a target he knows (us.toml's hook in dll211 0x8D4). A flame point (a curve record
 //   added to dll26's table with the map) stands between them, so Tricky's flame reaching it (a flameblast within 150)
@@ -100,7 +101,6 @@ namespace {
     constexpr int sideload_object = 0x75;
 
     constexpr int queen_met = 0x80A;
-    constexpr int flame_learned = 0x245;
     constexpr int flame_command = 4;
     constexpr int flame_targets = 0x33;
     constexpr int teeth = 0xD5;
@@ -497,7 +497,6 @@ namespace {
             return;
         }
         set(rdram, ctx, queen_met, 1);
-        set(rdram, ctx, flame_learned, 1);
         if (logging) {
             fprintf(stderr, "walled city: met the Queen (%s)\n", tricky != 0 ? "with Tricky" : "no sidekick out");
         }

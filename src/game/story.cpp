@@ -134,6 +134,9 @@ namespace {
     // Tricky's commands (his export 13, dll211 0x10D4, offers none without it): DarkIce Mines' boss (dll565) sets it as
     // Sabre rescues him, and Northern Wastes' Tricky (dll497) as he joins.
     const Bits tricky_commands = { { 0x4E4, 1 } };
+    // Tricky's flame (0x245, his command 4), which the same level gives: its SnowClaw (dll215, uid 1602) sets 0x172 as
+    // it is beaten, and the SnowHorn it guards (DIMSnowHorn1 1a5e, dll712 0x2470) then talks, setting 0x245 and 0x27.
+    const Bits darkice_flame = { { 0x172, 1 }, { 0x245, 1 }, { 0x27, 1 } };
     const Bits third_stone = { { 0x878, 1 } };
     // The fourth, which the Kamerian Dragon leaves with Kamerian Dragon on Restored (dragon_rock.cpp), is carried as
     // 0x7A8 to the Desert Force Point's other place (0x5F4).
@@ -167,7 +170,7 @@ namespace {
         { "before-cloudrunner", krystal, 73, {}, to_second_stone },
         { "before-desert-force-point", krystal, -1, golden_plains_place, to_second_stone + second_stone_carried },
         { "before-walled-city", sabre, -1, walled_city_place,
-            to_second_stone + second_stone + portal_spell + tricky_commands },
+            to_second_stone + second_stone + portal_spell + tricky_commands + darkice_flame },
         { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + portal_spell + third_stone_carried },
         { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
         { "after-dragon-rock", krystal, -1, golden_plains_place,
@@ -529,7 +532,10 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     call(rdram, ctx, map_at);
     fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy,
         fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats), (int16_t)MEM_H(6, stats));
-    // DINO_REPORT_OBJECT=<object id hex>: where each drawn object of that id is too, for an enemy a script times by.
+    // DINO_REPORT_OBJECT=<object id hex>: where each object of that id is too, for an enemy a script times by, with
+    // its act (dll18's, at state +0x26C, for a character that runs on it) and its use flags (obj+0xAF), and "unseen"
+    // while its byte +0x36 is 0: the game's targeting (dll2 0x1FA0) passes such an object over, so A never uses it.
+    // A line after it says where A does.
     static const char* report_object = getenv("DINO_REPORT_OBJECT");
     if (report_object == nullptr) {
         return;
@@ -538,12 +544,27 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     gpr all = (gpr)MEM_W(0, (gpr)objects);
     for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
         gpr other = MEM_W(i * 4, all);
-        if (other == 0 || (int16_t)MEM_H(0x46, other) != oid || MEM_BU(0x36, other) == 0) {
+        if (other == 0 || (int16_t)MEM_H(0x46, other) != oid) {
             continue;
         }
         uint32_t ox = MEM_W(0x18, other), oz = MEM_W(0x20, other);
         memcpy(&fx, &ox, 4);
         memcpy(&fz, &oz, 4);
-        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f\n", seconds, oid, fx, fz);
+        gpr state = (gpr)MEM_W(0xB8, other);
+        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f act %d use 0x%02X%s\n", seconds, oid, fx, fz,
+            state != 0 ? (int16_t)MEM_H(0x26C, state) : -1, MEM_BU(0xAF, other),
+            MEM_BU(0x36, other) == 0 ? " unseen" : "");
+        // Its focus point, where A uses it: the player within 4 x the reach byte of it, across the ground and 100 up or
+        // down (dll2 0xE58): obj+0x74's points, 24 bytes each with the world place at +0xC, obj+0x78's 5-byte records
+        // with that reach at +0, and obj+0xD4 the one in use.
+        gpr points = (gpr)MEM_W(0x74, other), records = (gpr)MEM_W(0x78, other);
+        if (points != 0 && records != 0) {
+            int k = MEM_BU(0xD4, other);
+            uint32_t px = MEM_W(k * 24 + 0xC, points), pz = MEM_W(k * 24 + 0x14, points);
+            memcpy(&fx, &px, 4);
+            memcpy(&fz, &pz, 4);
+            fprintf(stderr, "story: %.1f s object 0x%X focus at %.0f %.0f reach %d\n", seconds, oid, fx, fz,
+                MEM_BU(k * 5, records) * 4);
+        }
     }
 }

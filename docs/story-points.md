@@ -84,8 +84,9 @@ file 19, each task's name and clue), which says when the player swaps.
 - `before-desert-force-point`: Krystal in Golden Plains, at its setuppoint 0 where the way from SwapStone Circle comes
   in, carrying CloudRunner's SpellStone. Its warp, 31, stands under the sand: a start there falls and is put back.
 - `before-walled-city`: Sabre in Walled City at its setuppoint 0, where the way from SwapStone Hollow comes in,
-  outside the city's gate, with the second SpellStone placed and Tricky's commands (0x4E4). With a warp it
-  starts there instead: `before-walled-city,91` where BOSS TRex's way back comes out.
+  outside the city's gate, with the second SpellStone placed, Tricky's commands (0x4E4) and his flame (0x245,
+  with 0x172 and 0x27 as DarkIce Mines leaves them, DarkIce Mines' SnowHorn). With a warp it starts there instead:
+  `before-walled-city,91` where BOSS TRex's way back comes out.
 - `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone.
 - `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits, three SpellStones
   placed and Golden Plains' portal spell (0x5BD, its PortalSpell, dll272), which DR_SupPortal on the top opens to.
@@ -615,6 +616,31 @@ never has: the eels load hidden beside the fight. `--bits 3b7=1024,1eb,1eb@30` p
 first eel: the constructor clears 0x1EB and sets 0x22A, and 0x1EB set again at 30 s, the first eel beaten again, has
 the worm turn group 11 on with that eel hidden.
 
+## DarkIce Mines' SnowHorn and Tricky's flame
+
+Tricky's flame (0x245, command 4 of his scroll) is DarkIce Mines' to give, and the ROM gives it as it stands:
+
+- Map 19 places four DIMSnowHorn1 (dll712, object 0x18F). Each placement's byte +0x19 (its state +0x904) says which
+  it is, and its picker (act 0, 0x1D68) starts that one's acts: 0, uid 158c, is the shackled one, 1, uid 1a5e at
+  (-6602, -1269, 5259) in group 8, teaches the flame, 2 is uid 2596, and 3, uid 302e9, is the one Sabre rides (act 8,
+  where A sets 0x3E3 and 0x5BA).
+- 1a5e's act 5 (0x2470) takes it out of the targeting (obj+0xAF bit 8) until 0x172 is set. Then A by it plays its
+  sequence 0, which sets 0x245 and 0x27, and from 0x27 on its act 6 takes an Alpine Root (0x170, which DIMAlpineRoots
+  16a4 and 16aa count up) for sequence 2 and 0x28, and its act 7 the second for sequence 4 and 0x16F, after which it
+  is ridden.
+- 0x172 is the SnowClaw's beside it (dll215, uid 1602 at (-6699, -1269, 5277), group 6): its placement's +0x18, which
+  dll33.21 copies to its state at +0x39C and its death (dll215 0x49E4) sets. `tools/dino.py calls bit` lists only bits
+  given as constants, so it shows nothing setting 0x172.
+- Groups 6 and 8 are on with bits 6 and 8 of 0x493 (`--bits 493=320`), as a TriggerPlane (uid 30c55) at (-7467, 5088)
+  turns them on.
+- A uses the SnowHorn within 60 of its head at (-6664, 5263), west of its body: the targeting (dll2 0x1FA0) wants the
+  player within 4 times its focus record's reach of the focus point in use, and up to 100 above or below it (dll2
+  0xE58). After a fight Sabre holds his staff and A swings it, until Z puts it away. `DINO_REPORT_OBJECT=18F` with
+  `--report` prints each SnowHorn's act, use flags and focus point.
+- Played from `--story swapstone-hollow,55 --place -6640,-1269,5420,0,0 --bits 493=320` with
+  `tools/darkice_mines_input.txt`: the SnowClaw fell to A at 8.7 s, which set 0x172, and the SnowHorn's talk set 0x245
+  and 0x27 at 19.7 s. With `--bits 172` and no fight, A by its head set them at 10.0 s.
+
 ## Walled City and BOSS TRex
 
 `--story before-walled-city` starts Sabre outside Walled City's gate (its setuppoint 0), and `before-walled-city,91`
@@ -675,14 +701,16 @@ The task list has more here than the ROM:
   The two RedEyes (WCTrex, 775) give no tooth, and the two teeth above are all the ROM holds.
 - Task 83, the King activating the stone: the King (WCKingEarthWalk, 774) talks once a load (0x7FB, sequence 2 of
   seqobject 411bc) and sets nothing else, and nothing in Walled City or the arena sets 0x83B.
-- Tricky's flame, which task 77 needs: it is command 4 of his scroll, which 0x245 lets through, and only DarkIce
-  Mines' SnowHorn (DIMSnowHorn1, 712) sets 0x245, once 0x172 is set, which nothing sets.
+
+Tricky's flame, which task 77 needs, is the ROM's own: he learns it in DarkIce Mines (DarkIce Mines' SnowHorn and
+Tricky's flame).
 
 Fixed (Walled City on Restored, `src/game/walled_city.cpp`, whose header has the evidence):
 
 - The Queen stands in the corridor outside the gate, at (-8330, -733, -4720). Sabre coming to her with Tricky near
-  meets her (0x80A) and has Tricky's flame (0x245). Tricky comes from a sideload beside her: he walks only inside his
-  zones (type-0x26 curves), and the corridor's are unlinked, so he is made in the RedEye's, 184.
+  meets her (0x80A). She gives nothing: Tricky's flame is the one he learned in DarkIce Mines. Tricky comes from a
+  sideload beside her: he walks only inside his zones (type-0x26 curves), and the corridor's are unlinked, so he is
+  made in the RedEye's, 184.
 - A RedEye (WCTrexChase) waits by the arch, in Tricky's target list (0x33), and offers his flame within 300. Its flame
   point, a type-0x24 curve of kind 4 at (-7900, -735, -4800), is added to the curves' table with the map. Tricky's
   flame reaching it makes it mad: it runs at Sabre, roars as it catches him, and a tooth (WCTrexTooth) falls between
@@ -695,7 +723,8 @@ Fixed (Walled City on Restored, `src/game/walled_city.cpp`, whose header has the
   breathed, the RedEye mad, the tenth tooth dropped and picked up (its first pickup's scene waits for A), A by the
   bowl, and Sabre through the gate. With no teeth the gate held. From `--place -7987,-874,-6790,0,0 --bits
   82e,36a=32` the King's talk activated the stone. The fight giving 0x82E was not played to its end. On Original none
-  of it is placed and the arch is open.
+  of it is placed and the arch is open. With the flame from the story point and none from the Queen, the same start
+  met the Queen at 8.8 s, and the RedEye got mad at Tricky's flame, roared and dropped the tenth tooth.
 
 ## The warp table
 
@@ -735,3 +764,12 @@ on a floor and no crash; it says nothing about what the level needs further in.
 - 95: Northern Wastes (10). Boots.
 
 Cape Claw has no entry: `before-sand-worm` and `--place` go there.
+
+## Choices
+
+Where the task list asks for more than the ROM gives, and the ROM has its own source for a bit, that source is used
+and nothing of ours stands beside it. A stand-in is ours only where the ROM gives nothing.
+
+- Tricky's flame (0x245): DarkIce Mines' SnowHorn teaches it once the SnowClaw guarding it is beaten (DarkIce Mines'
+  SnowHorn and Tricky's flame). The Queen in Walled City gives nothing, on Restored and Original alike, and
+  `before-walled-city` carries 0x172, 0x245 and 0x27 as DarkIce Mines leaves them.
