@@ -358,7 +358,11 @@ static std::string game_thread_name(const OSThread* t) {
 // camera_y the right stick the free camera reads, and the last line whose time has passed is held. Lines starting with
 // # are comments. A line "sync <bit hex>" counts the lines after it from the moment the game first sets that bit to a
 // value other than 0 (us.toml's hook on func_80014670), and holds them until then: a script that plays on after a
-// sequence or a fight starts its next part when the game gets there, however long a busy host took. In place of x y,
+// sequence or a fight starts its next part when the game gets there, however long a busy host took. "sync next <bit
+// hex>" waits instead for the bit's next set to a value other than 0 once the part before it has started, for a bit the
+// game sets again and again (a fight's round, a counter), and "sync near <object id hex> <x> <z> <reach>" for the
+// nearest drawn object of that id to come within reach of that place once the part before has started (an enemy that
+// runs a path, for a press timed to where it is). In place of x y,
 // "to <x> <z>" walks the player toward that place and "chase <object id hex> [reach]" toward the nearest object of that
 // id, each until within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
@@ -377,11 +381,27 @@ static std::vector<ScriptedInput> input_script;
 static std::atomic<const ScriptedInput*> steering = nullptr;
 static std::atomic<float> steer_stick_x = 0.0f;
 static std::atomic<float> steer_stick_y = 0.0f;
-// Each sync line's bit, and the --input time it was first set (-1 until then). Part 0, before any, starts at 0.
-static constexpr int max_input_parts = 16;
-static int input_part_bit[max_input_parts];
+// Each sync line's bit (or object for a near), and the --input time it started (-1 until then). Part 0, before any,
+// starts at 0.
+enum class SyncKind { First, Next, Near };
+struct InputPart {
+    SyncKind kind;
+    int bit;
+    float x, z, reach;
+};
+static constexpr int max_input_parts = 64;
+static InputPart input_part[max_input_parts];
 static std::atomic<double> input_part_start[max_input_parts];
 static int input_parts = 1;
+
+static double script_seconds();
+
+static void start_input_part(int i) {
+    input_part_start[i] = script_seconds();
+    fprintf(stderr, "--input: part %d (sync %s0x%X) at %.1f s\n", i,
+        input_part[i].kind == SyncKind::Next ? "next " : input_part[i].kind == SyncKind::Near ? "near " : "",
+        input_part[i].bit, input_part_start[i].load());
+}
 
 static void load_input_script(const char* path) {
     FILE* f = fopen(path, "r");
@@ -393,9 +413,11 @@ static void load_input_script(const char* path) {
     input_part_start[0] = 0.0;
     while (fgets(line, sizeof(line), f) != nullptr) {
         ScriptedInput in{};
-        int bit;
-        if (sscanf(line, "sync %x", &bit) == 1 && input_parts < max_input_parts) {
-            input_part_bit[input_parts] = bit;
+        InputPart part{};
+        if (input_parts < max_input_parts && (sscanf(line, "sync next %x", &part.bit) == 1 ? (part.kind = SyncKind::Next, true) :
+            sscanf(line, "sync near %x %f %f %f", &part.bit, &part.x, &part.z, &part.reach) == 4 ? (part.kind = SyncKind::Near, true) :
+            sscanf(line, "sync %x", &part.bit) == 1)) {
+            input_part[input_parts] = part;
             input_part_start[input_parts] = -1.0;
             input_parts++;
         }
@@ -437,13 +459,18 @@ extern "C" double dino_script_seconds() {
     return script_seconds();
 }
 
-// story.cpp's hook on func_80014670, as the game sets a bit: a sync line waiting for it starts its part now.
+// story.cpp's hook on func_80014670, as the game sets a bit: a sync line waiting for it starts its part now, a sync
+// next only once the part before it has started.
 extern "C" void dino_input_bit_set(int bit, int value) {
     for (int i = 1; i < input_parts; i++) {
-        if (value != 0 && input_part_bit[i] == bit && input_part_start[i] < 0.0) {
-            input_part_start[i] = script_seconds();
-            fprintf(stderr, "--input: sync 0x%X at %.1f s\n", bit, input_part_start[i].load());
+        const InputPart& part = input_part[i];
+        if (value == 0 || part.bit != bit || part.kind == SyncKind::Near || input_part_start[i] >= 0.0) {
+            continue;
         }
+        if (part.kind == SyncKind::Next && input_part_start[i - 1] < 0.0) {
+            continue;
+        }
+        start_input_part(i);
     }
 }
 
@@ -569,6 +596,13 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
         dino::story_steer(rdram, ctx, in->oid, in->to_x, in->to_z, in->reach, &x, &y);
         steer_stick_x = x;
         steer_stick_y = y;
+    }
+    for (int i = 1; i < input_parts; i++) {
+        const InputPart& part = input_part[i];
+        if (part.kind == SyncKind::Near && input_part_start[i] < 0.0 && input_part_start[i - 1] >= 0.0 &&
+            dino::story_object_near(rdram, part.bit, part.x, part.z, part.reach)) {
+            start_input_part(i);
+        }
     }
     dino::story_timed_bits(rdram, ctx, now);
     static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;

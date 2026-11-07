@@ -421,6 +421,26 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x,
     return true;
 }
 
+// --input's sync near lines (src/main/main.cpp): whether a drawn object of that id (as story_steer chases) stands
+// within reach of (x, z) on the ground.
+bool dino::story_object_near(uint8_t* rdram, int oid, float x, float z, float reach) {
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr object = MEM_W(i * 4, all);
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+            continue;
+        }
+        uint32_t wx = MEM_W(0x18, object), wz = MEM_W(0x20, object);
+        float ox, oz;
+        memcpy(&ox, &wx, 4);
+        memcpy(&oz, &wz, 4);
+        if ((ox - x) * (ox - x) + (oz - z) * (oz - z) <= reach * reach) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Once a second, what an unattended run needs to tell where the player is and whether the player lives.
 void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     int32_t save = word(rdram, save_pointer);
