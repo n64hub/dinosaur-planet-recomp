@@ -838,6 +838,7 @@ namespace {
     constexpr int32_t ticks = 0x8008C958; // the frame's length in ticks, a float (dll654 0x284)
     constexpr float door_ticks = 90.0f;   // a door opens in 1.5 s
     constexpr float leaf_travel = 100.0f;
+    constexpr float door_sunk = 1000.0f;
 
     PalaceDoor palace_doors[] = {
         { 5757.0f, 95.0f, 21440.0f, tablets_done },
@@ -888,6 +889,9 @@ extern "C" void dino_krazoa_palace_door(uint8_t* rdram, recomp_context* ctx) {
             ctx->r6 = bits;
             ctx->r7 = 0;
             call(rdram, ctx, set_animation);
+            // Its collision stays where it stands whatever its pose, so an open one is put under the floor.
+            float dy = d.y - (d.shut == 0.0f ? door_sunk : 0.0f);
+            memcpy(&MEM_W(0x10, (gpr)door), &dy, 4);
         }
         else {
             float open = (1.0f - d.shut) * leaf_travel;
