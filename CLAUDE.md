@@ -104,20 +104,22 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
-  timed button states (`main.cpp` says the format), and on Windows `--stacks <seconds>` prints every thread's stack
-  that long after start, for unattended runs and hangs, and `--watch <address>,...` stops on each write to those
-  words (four at most) of the game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says
-  the form: `**8008C994+4` follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps
-  the player by the game's own warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads,
-  `DINO_LOG_CUTS=1` each camera cut and object jump `src/game/interpolation.cpp` finds, with each origin step,
-  `DINO_LOG_KRAZOA=1` each object `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each
-  event of Golden Plains' shrine, `DINO_LOG_DRAKOR=1` the end of Drakor's fall, and `DINO_CHECK_HEAP=1` each block of the game's heaps written past its end, with
-  the tag of what asked for it (`src/game/heap.cpp`).
-- **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the game's
-  bits, the character and the place set as the save would have them, in memory and with nothing written to Flash:
-  `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>[,<facing>]]`
-  starts it somewhere the warp table has no entry, `--bits <hex>[=<value>][@<seconds>],...` sets more bits, at the start
-  or later (a shrine's own bits are cleared as its map starts, so they are set a while after it), and `--report` prints
-  a line a second with the map, the position and the health; `--watch-bits <hex>,...|all` prints each bit the game sets
-  as it plays. `docs/story-points.md` has the points, each bit's evidence and the warp table's map: each index, its area
-  and what it needs. None of it is in a player's menus.
+  timed button states, which can wait for a bit the game sets and walk the player to a place or an object (`main.cpp`
+  says the format), and on Windows `--stacks <seconds>` prints every thread's stack that long after start, for
+  unattended runs and hangs, and `--watch <address>,...` stops on each write to those words (four at most) of the
+  game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says the form: `**8008C994+4`
+  follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps the player by the game's own
+  warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and object
+  jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
+  `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each event of Golden Plains' shrine,
+  `DINO_LOG_DRAKOR=1` the end of Drakor's fall, and `DINO_CHECK_HEAP=1` each block of the game's heaps written past
+  its end, with the tag of what asked for it (`src/game/heap.cpp`).
+- **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the
+  game's bits, the character and the place set as the save would have them, in memory and with nothing written to
+  Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place
+  <x>,<y>,<z>[,<layer>[,<facing>]]` starts it somewhere the warp table has no entry, `--bits
+  <hex>[=<value>][@<seconds>],...` sets more bits, at the start or later (a shrine's own bits are cleared as its map
+  starts, so they are set a while after it), and `--report` prints a line a second with the map, the position, the
+  health and the magic; `--watch-bits <hex>,...|all` prints each bit the game sets as it plays. `docs/story-points.md`
+  has the points, each bit's evidence and the warp table's map: each index, its area and what it needs. None of it is
+  in a player's menus.

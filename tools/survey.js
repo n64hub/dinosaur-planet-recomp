@@ -6,8 +6,9 @@
 //
 // go(point, map, more) starts the story point (with ",<warp>" for another entry of the warp table: docs/story-points.md),
 // with the options in more (a --bits that turns on the map's object groups, which a story point leaves off, a --place)
-// and --report, whose line a second ("story: <s> s map <n> at <x> <y> <z> menu <m>, health <h>/<max>") the survey reads from
-// the console, and waits for the player to be in that map. map() is the map of the last report, where() the report.
+// and --report, whose line a second ("story: <s> s map <n> at <x> <y> <z> menu <m>, health <h>/<max>, magic <m>/<max>")
+// the survey reads from the console, and waits for the player to be in that map. map() is the map of the last report,
+// where() the report.
 //
 // clock() is the game's own clock, the word at 0x800AE674: 60 a second in its menus and in play, standing still while
 // the game is paused (found by reading RDRAM as the game played; the VI count at 0x800918F0 runs on through a pause).

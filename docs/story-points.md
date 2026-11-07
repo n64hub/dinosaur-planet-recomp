@@ -17,7 +17,7 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
 - `--bits <hex>[=<value>][@<seconds>],...` sets more of the game's bits at the start, after the point's own, or one
   given a time when the `--input` clock reaches it: what a test's own object sets, for a test a script can't play.
 - `--report` prints a line a second, from the start or from the game's first pass without `--story`: the clock, the map
-  number, the position and the health. A run's `--story:` line says what started.
+  number, the position, the health and the magic. A run's `--story:` line says what started.
 - `--watch-bits <hex>,...` prints a `bits:` line each time the game sets one of those bits, with the clock, the value
   and the one it had, and `--watch-bits all` one each time any bit changes: what a test or a cutscene sets, as it
   happens. With or without `--story`.
@@ -76,7 +76,8 @@ file 19, each task's name and clue), which says when the player swaps.
   who plays them are not known from the ROM.
 - `before-cloudrunner`: Krystal at Moon Mountain Pass (warp 73), with two spirits and the first SpellStone placed,
   and SwapStone Circle at its act 9, where its chief gives the pass's key (CloudRunner Fortress).
-- `before-desert-force-point`: Krystal in Golden Plains (warp 31), carrying CloudRunner's SpellStone.
+- `before-desert-force-point`: Krystal in Golden Plains, at its setuppoint 0 where the way from SwapStone Circle comes
+  in, carrying CloudRunner's SpellStone. Its warp, 31, stands under the sand: a start there falls and is put back.
 - `before-walled-city`: Sabre in Walled City (warp 91), with the second SpellStone placed.
 - `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone.
 - `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits and three SpellStones
@@ -86,10 +87,10 @@ file 19, each task's name and clue), which says when the player swaps.
 The later SpellStones are told by the SpellPlace that takes each: a placement's +0x1E is its placed bit and +0x20 the
 bit of the stone carried, as VFP_SpellPlace (637) takes the first as 0x877 and 0x123. CloudRunner's, won in its race
 (CRSpellstone in map 43 holds 0x49F), is carried as 0x2E8 to the Desert Force Point (DFP_SpellPlace in map 21,
-placed 0x5F3). Walled City's is carried as 0x83B to the Volcano Force Point's second place (0x878). The fourth is
-carried as 0x7A8 to the Desert Force Point's other place (0x5F4): no code sets 0x7A8 by number, and in map 21 a
-DFP_seqpoint (dll642) holds it at +0x1E and DFP_TargetBlock (650) at +0x1E beside 0x7A7, the bit DFP_PitSwitch (308)
-holds. (Curves' params hold the low halves of other curves' uids, not bits.) A start in a cell no map fills loads nothing (the player falls and is put back, forever):
+placed 0x5F3). Walled City's is carried as 0x83B to the Volcano Force Point's second place (0x878). The Desert Force
+Point's other place (0x5F4) holds 0x7A8 at +0x20, but 0x7A8 is no stone: it is a target block's landing, and the
+place takes a stone used from the item menu by the force point's act (Golden Plains and the Desert Force Point).
+(Curves' params hold the low halves of other curves' uids, not bits.) A start in a cell no map fills loads nothing (the player falls and is put back, forever):
 Dragon Rock's own setuppoint 0 is in one, so `before-dragon-rock` starts at its setuppoint 2.
 
 ## The story after the first SpellStone
@@ -206,6 +207,55 @@ one asked for. In an `--input` script, standing at the object: A, C-right, A.
 Not played: the dungeon (map 16), the power, Kyte, the five baby CloudRunners (the fifth is in map 15, from the master
 chest, which needs 0x529 and 0x8CC), the gold, and the way from the treasure caves to the race. Nothing sets 0x4B8, the
 bit CFGuardian's sequence at 0x1D5C waits on.
+
+## Golden Plains and the Desert Force Point
+
+Tasks 69 to 74, played from `before-desert-force-point` on the desktop build a link at a time, each started with
+`--place` and the bits of the links before it. World coordinates: Golden Plains (map 9) lies at cell (-6, 19), the
+force point's top (50) at (1, 17) and its bottom (21) at (1, 16), both on layer -1 (a `--place` there gives layer
+-1: at layer 0 the bottom's floor never loads and the player falls), SwapStone Circle (14) at (-3, 24).
+
+- The portable hole spell. Its pickup crashed the game (us.toml's hook on dll3_9E58 says why); fixed, it is taken by
+  playing (0x5BD). Cast at PortalSpellDoor (map 9 uid 34d9c) it sets 0x796, and the hole leads into the top.
+- The top. Two torches (dll640) each want Krystal's fire bolt, the second within 0x7D0 ticks of the first, and set
+  0x5E2. The door switch (643, uid 33eda) then takes the stone used from the item menu, plays sequence 0x78C and sets
+  0x5E3, and DFPLift1 (641) rises to the player and carries them down to the bottom (about 48 s). Played.
+- The bottom's power. A door switch at (692, -1459, 9922) takes the stone again (0x5E7) and opens the round door
+  west. Walking west plays Kyte's cutscene (0x5F2, then 0x5EB). Four pads (fff, 639) each send a ScorpionRobot (0x427),
+  whose death sets the next pad's bit, 0x5EE, 0x5EF, 0x5F0 and 0x5F1. With 0x5F1 DFP_LevelControl (638) turns group 4
+  on and DFP_SmallDoor (uid 34662, north-west of the platform) opens into the room under it, whose force beams take a
+  health a few seconds. Its DFP_ForceSwitch (308, uid 346d5), pressed with A, sets 0x5ED: the power flow shut down.
+  Out again, the door switch south of the platform (uid 346bc) takes the stone, plays 0x78C and sets 0x5E8, and
+  DFP_RoundDoor (uid 3393d) opens on a corridor south to the rotating ring puzzle (647). Played, every link.
+- The place. The second SpellStone's place (DFP_SpellPlace, 652, uid 35111) stands on a platform at y -1255, 204 above
+  the floor, and is in group 7, which the TriggerPlanes at the target block room's door (955, -1435, 8973) and at
+  (1896, -1459, 8623) turn on as the player walks in (command 0x13; 0x14 turns a group off). In act 1 it takes the
+  stone (0x2E8) used from the item menu within 100 units, plays its sequence and sets 0x5F3; 0x2E8 goes some 27 s
+  later. Played from the platform's walkway (`--place -159,-1255,9769,-1`, its setuppoint 2, with 0x5D1's group 7 on):
+  0x5F3 on the last A. Not found: a way up from the floor. The walkway runs east from the platform at that height and
+  drops at its south end into the round door's corridor. The force field under the platform (DFP_ForceAway, 646 kind
+  3, uid 347f2) is a box 118 wide, 144 high and 122 deep that takes two health every 200 ticks, or with Krystal's
+  shield (0x1D7) up shakes the screen, and lifts nobody. The 0x766 sequence (below) shows Kyte flying up to a duct,
+  and the curves that would be her path run at y -1318 from the target block room to the platform; giving her that
+  command is not played. DFP_Textblock (654) and DFP_Platform1 (655), blocks and two platforms that move on 0x7C1 to
+  0x7C4, start only from 0x7BF, which DFP_LevelControl sets in act 3.
+- The acts. DFP_LevelControl keeps the force point at act 1, and nothing moves it to 2
+  or 3. The other place (uid 40323, east) takes a stone only with 0x7A8 set: in act 1 the stone carried as 0x2E8
+  (played with 0x7A8 set: 0x5F4 at 17.5 s), in act 2 the one carried as 0x123. 0x7A8 is DFP_TargetBlock 401bb's
+  landing, the end of a chain only half of which a player can reach: 0x7A0, which nothing in map 21 sets, lets a door
+  switch (uid 40143) take the stone for 0x7A1, the pit switch (401a8) then sets 0x7A7, and the block slides to 0x7A8,
+  which also plays DFP_seqpoint 4031e's sequence 1. Its twin in the west starts at 0x681 (group 6, and the pit switch
+  3461b's 0x69A) and ends at 0x766, Kyte's cutscene by the pit (DFP_seqpoint 35104) and the duct's lights.
+- The mirage. Golden Plains' level control (GP_LevelControl, 547) sets 0x5F3 each time the map loads (dll547_0018,
+  0xBC-0xC8), so a player who comes through Golden Plains finds the place holding a stone already. The two
+  TriggerPlanes at the force point's door (map 9 uids 4031d and 4032c) wait on 0x5F3: crossing 4031d at
+  (1141, 334, 12593) sets 0x651, and GPSeqObject 348b8 plays the mirage (a cloaked figure, Krystal, Kyte) and sets
+  0x652; 4032c, by the hole, sets 0x7B7 for GPSeqObject 4059e (0x7B3). Played, 4031d.
+- The swap to Sabre ("RETURN TO SWAPSTONE CIRCLE"). SHswapstone (515) in map 14 is in group 0 of 0x4A6 and answers
+  only while its zone (0x887, the TriggerPlane at (-1099, 333, 17331)) and 0x883 are set, and never while 0x2E8 or
+  0x123 is carried. Nothing in the maps' params sets 0x883, and SC_levelcontrol (519) moves the circle from act 9
+  only on 0x4B8, which nothing sets. With 0x887, 0x883 and 0x4B8 set and 0x2E8 clear, A at the stone only swings the
+  staff. Not played.
 
 ## The bits
 

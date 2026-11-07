@@ -47,8 +47,9 @@ Fixed:
   Krystal, the Swap Store's item beams as the player walks in, a crash after a long while in Cape Claw, where more
   sounds at once than an audio frame's command list holds wrote past its end, a small basket or crate carried out
   of the place it was found, which the game freed in the player's hands, Dragon Rock's fight with the Skeetlas,
-  which after a minute or two drew more than the game had made room for and wrote over the models, and a swing
-  pressed on the very frame the player comes back after a death, before the staff or sword was made.
+  which after a minute or two drew more than the game had made room for and wrote over the models, a swing
+  pressed on the very frame the player comes back after a death, before the staff or sword was made, and Golden
+  Plains' portable hole spell, whose pickup made a new player every frame until the game ran out of memory.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
@@ -70,7 +71,8 @@ Fixed:
 Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
-- The rest of the story, played from a new game to its ending, and whatever stops a player there.
+- The rest of the story, played from a new game to its ending, and whatever stops a player there: the Desert Force
+  Point's way up to the second SpellStone's place, and the swap back to Sabre at SwapStone Circle.
 - The way to the ending the prototype never had: Krazoa Palace's four wings.
 
 ## The ROM
