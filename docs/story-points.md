@@ -125,7 +125,9 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
 - Dragon Rock - Top (map 2) and - Bottom (52), and BOSS Kamerian Dragon (53), placed in full. Their cells join Willow
   Grove's at layer 0, so they are reached on foot; no code warps there by number. Bits 0x95 and 0x96 are constants:
   the getter answers 1 and 0 and nothing sets them, so a placement's 0x95 means always and 0x96 never. The top's
-  ProjectileSpell (dll272, at -3553, -1502, -4662) gives the projectile spell (0x5CE). Its DR_SupPortal (754, in
+  ProjectileSpell (object 0x4A, dll272, at -3553, -1502, -4662) gives the ice spell (0x5CE; the projectile spell is
+  the scroll's 0x2D). A takes it within 16 of it, its def's reach, but the player stops about 18 from it from any
+  side, so with Kamerian Dragon on Restored it reaches 24 (`src/game/dragon_rock.cpp`). Its DR_SupPortal (754, in
   group 8) is hidden once 0x776 is set (which only HitAnimator 353 beside it reads); with the player's spell the
   portal spell (0x5BD, from Golden Plains) it plays its sequence, and its trigger plane sets 0x783, on which it warps
   to the bottom (warp 88, at -1350, -1522, -6746 on layer -1). Group 8 is turned on by walking into TriggerPoint
@@ -144,18 +146,55 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   them, setuppoint 1 at (128, -1426, -6184) on the top's side. From there it goes east past a DR_Platform (0x5CD, its
   DR_Lever at 109, -6103) and setuppoint 4 (572, -1568, -6174) to the Skeetla arena's door at setuppoint 0 (1152,
   -1618, -6692), where TriggerPlane 0x33EAB sets 0x5F9 (DR_Seqobj sequence 0, 0x5FA), and down to the arena (y
-  -1831). Neither part is played through yet: from setuppoint 8 (-817, -1613, -5830) a walk east stops at x -721,
-  and from setuppoint 1 on layer 0 one stops at (154, -1470, -6221) a step past the layer change.
+  -1831). From the west part a walk east from setuppoint 8 (-817, -1613, -5830) stops at x -721, at a DR_WireFence
+  (0x662, 0x663) beside a ProjectileSwitch that sets 0x662; it is not played through.
+- The east part is played through from the top. The step down is fussy: the player walks back and forth over the
+  TriggerPlanes at (171, -6198) and (222, -6166) until she is on layer -1, then down the stairs east to (287, -6180)
+  and on by (540, -6020), (625, -6097) and (738, -6164) to the door. There a wall stands in the ROM's way: HitAnimator
+  (353) uid 0x412A9 at (646, -6111), bit 0x95 (always) and group 2, which the top's DR_EarthCallPad leaves open, made
+  its change to the block loaded before, and the bottom's block loads again as the player comes down the stairs, with
+  its lines as the ROM has them. A HitAnimator makes its change again only when its block is missing or its bit
+  changes, so every update now makes it again, always on as a plain bug fix (`src/game/hit_animator.cpp`).
 - The arena (groups 0 to 2, `--bits 5dc=7`): DR_Creators (738) send Skeetlas (615), at most 20, at DR_EarthWarrior
   (713), shackled there. It is won when 0x628 is set, by the Warrior's update once 0x789 is 3 and no Skeetla is left,
   which plays DR_Seqobj 0x339C6's sequence 7, and its end sets 0x609 (on the top it opens the CloudRunner's cage,
   DR_Cage, DR_CageControl and DR_CloudRunner). 0x789 counts the three DRLavaControls (737) put out: each loses a
-  point of health (3 or 15, its +0x1A) to a hit of kind 0x19 (export 2) and at 0 sets its bit (0x5D8, 0x5D9, 0x5DA)
-  and raises 0x789. Neither the staff (B) nor the projectile spell put one out in a run, so what hits as 0x19 is not
-  known yet. The Warrior is freed by 0x5FD (DR_NiceSharpy, 739, given item 0x380 or 0x381, which item not known yet:
-  sequence 2 sets 0x5FE, which frees the DR_Shackles, 0x654, sequence 0xC and 0x655); 0x5DE is his death. The
-  TriggerPlane 0x33F78 in the middle of the arena would set 0x5FD, but its only action's flags (0x04, repeat, without
-  0x01, forward) never run.
+  point of health (3 or 15, its +0x1A) to a hit of kind 0x19 (export 2) and at 0 sets its bit (0x5D8 at 2032,
+  -6666, 0x5D9 at 1618, -6347, 0x5DA at 2240, -6492) and raises 0x789. The staff (B) and the projectile spell don't
+  hit as 0x19; the ice spell (0x5CE) does, a blast a point of magic (dll277 0x0080), and a control of 15 takes about
+  20 blasts as it plays. With three of them, the most magic 25, none to be had on Dragon Rock and none coming back on
+  its own, the fight can't be won as the ROM has it. With Kamerian Dragon on Restored the arena fills the player's
+  magic while its fight is on, once it is below a fifth, as the dragon's fight a layer up fills it each update.
+- The ice spell is cast from the scroll as the projectile is aimed, with Kamerian Dragon on Restored: in the ROM the
+  scroll aims only the projectile (0x2D, dll210_1DDC), and the aim selects the projectile again before A casts, so the
+  ice blast (dll210_1DC48) is never reached. C-left opens the scroll and C-left again rolls it to the ice spell, A
+  aims, and A held casts the blast straight ahead; for the next cast B puts the staff away, and C-left opens the
+  scroll on the ice spell again. Stood about 100 north of a control and facing it, a held A puts it out in about 3 s.
+- The Warrior's health (+0xA56 of his state) starts at 1, and each Skeetla that reaches him bites it lower, one every
+  1-3 s once the arena is full; below -20 he dies (0x5DE, DR_Seqobj 0x33EAE's sequence 5, which puts the player out of
+  the arena at 1312, -6733). The arena's DR_Creators (kind 0) make a Skeetla every few seconds from the moment the
+  arena loads, as the player passes TriggerPlane 0x33E62 by the door (group 1), while their control burns and fewer
+  than 21 Skeetlas are about, and faster with each control out; the bites start about 35 s after it loads. The door's
+  two DR_Creators (kind 1, group 3, on from TriggerPlane 0x33E61 at 577, -6121 to the door) send Skeetlas at the
+  player, which follow her in and knock her about. Each ice blast that hits a Skeetla kills it, and the fight is won
+  only once none is left, the door's too. Item 0xC1 given him adds 12 (0x0974), as his export 20 does, but nothing
+  on Dragon Rock gives it and nothing calls the export, so the fight has about 45 s of bites, which in a run from the
+  top run out before the third control. With Kamerian Dragon on Restored he is fed 12 once his health is down to -10,
+  once in a fight and once more for each control put out, so a player who stops putting them out still loses him.
+  The controls nearest him go last: 0x5DA, then 0x5D8, then 0x5D9, then the blast on the Skeetlas left. The
+  Warrior is freed by 0x5FD (DR_NiceSharpy, 739, given item 0x380 or 0x381, which item not known yet: sequence 2 sets
+  0x5FE, which frees the DR_Shackles, 0x654, sequence 0xC and 0x655). The TriggerPlane 0x33F78 in the middle of the
+  arena would set 0x5FD, but its only action's flags (0x04, repeat, without 0x01, forward) never run.
+- Played from `before-dragon-rock` with `--place 750,-1620,-6440,-1 --bits 5ce`, past the door's DR_Creators' trigger,
+  and an `--input` that walks to the door, then to each control from its north and casts the ice: the door's
+  sequence at 14 s (0x5FA), the controls out at 54 s (0x5DA), 66 s (0x5D8) and 81 s (0x5D9), the fight won (0x628,
+  0x609) at 92 s with the Warrior one bite from death, and the warp into the dragon's room at once.
+- Played from `before-dragon-rock` in one run, with no `--place` or `--bits`: an `--input` takes the ice spell (8.5 s),
+  walks the top south and east to its east end, steps down to layer -1, walks to the door (0x5FA at 179 s), and,
+  each part waiting on the bit before it (`sync`), casts at each control from its north until it is out (0x5DA at
+  221 s, 0x5D8 at 246 s, 0x5D9 at 286 s), sweeps the ice over the Skeetlas at the Warrior and then walks at each one
+  left (`chase 43E`): the fight won (0x628, 0x609) at 308 s, the Warrior fed three times, and the warp into the
+  dragon's room at once. Without the feeding, eight such runs lost the Warrior.
 - The arena and the dragon's room share the world cell (2, -8) and their ground: the room is the arena on layer 0,
   its KamColumns' pits where the arena's DRLavaControls stand. Nothing in the ROM leads into the room: no warp entry
   lies in it, and its entrance, a TriggerPlane at its north (0x41AF3, which sets 0x4D7 for its KD_Sequences), faces

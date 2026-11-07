@@ -373,3 +373,64 @@ name = "babies_rescued"  # counted by CFCloudBaby (dll373)
 [[bit]]
 bit = 0x8D1
 name = "kyte_gold_perch"  # PerchObject (dll718)'s curve's +0x32 bit, set by Kyte's message 5
+# Dragon Rock (src/game/dragon_rock.cpp, src/game/hit_animator.cpp, docs/story-points.md).
+[[bit]]
+bit = 0x5CE
+name = "ice_spell"  # the top's ProjectileSpell (dll272); the ice blast (dll277) puts out a DRLavaControl
+[[bit]]
+bit = 0x5F9
+name = "dr_arena_door"  # TriggerPlane 0x33EAB; DR_Seqobj 0x339C3 plays and sets 0x5FA
+[[bit]]
+bit = 0x5D8
+name = "dr_lava_control_south"  # DRLavaControl (dll737) uid 0x33E68 put out
+[[bit]]
+bit = 0x5D9
+name = "dr_lava_control_west"  # uid 0x33E74
+[[bit]]
+bit = 0x5DA
+name = "dr_lava_control_east"  # uid 0x33E71
+[[bit]]
+bit = 0x789
+name = "dr_lava_controls_out"  # counted by dll737
+[[bit]]
+bit = 0x5DE
+name = "dr_warrior_dead"  # DR_EarthWarrior (dll713) below -20 health; DR_Seqobj 0x33EAE puts the player out
+[[bit]]
+bit = 0x628
+name = "dr_arena_fight_won"  # dll713 once 0x789 is 3 and no Skeetla is left; DR_Seqobj 0x339C6 sets 0x609
+[[bit]]
+bit = 0x609
+name = "dr_arena_won"
+[[export]]
+dll = 210
+index = 14
+name = "add_magic"  # (player, n): plays sound 0x5EB; the dragon's fight calls it each update (dll707 0x105C)
+[[field]]
+of = "state"
+dll = 210
+offset = 0x34C
+name = "stats"  # +4 magic, +6 the most magic
+[[field]]
+of = "state"
+dll = 713
+offset = 0xA56
+name = "warrior_health"  # starts at 1; below -20 sets 0x5DE
+[[field]]
+of = "setup"
+dll = 353
+offset = 0x18
+name = "hit_animator_bit"  # HitAnimator (dll353): the bit its group of hit lines follows
+[[field]]
+of = "setup"
+dll = 353
+offset = 0x1B
+name = "hit_animator_group"
+[[field]]
+of = "setup"
+dll = 353
+offset = 0x1C
+name = "hit_animator_flags"  # 1 the lines' state with the bit clear, 4 that it changes them
+[[export]]
+dll = 713
+index = 20
+name = "feed"  # (warrior, 1): adds 12 to his health, as item 0xC1 given him does; nothing calls it
