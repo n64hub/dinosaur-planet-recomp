@@ -25,6 +25,12 @@
 - Krazoa Shrines and Krazoa Tablets on Restored: the seqpoints that release Golden Plains' and Northern Wastes'
   spirits at Warlock Mountain, and Cape Claw's third tablet, no longer vanish while the player is still far from
   them, so each is there when the player arrives.
+- Walled City on Restored: the Queen EarthWalker waits outside the city and gives Tricky his flame, a RedEye angered
+  by it chases Sabre and drops a tooth when it catches him, ten teeth open the city's gate, and the King EarthWalker
+  activates the third SpellStone. The prototype never built any of it.
+- Wind Bridge on Restored: the wind over CloudRunner Fortress's treasure shaft holds Krystal while she carries a
+  barrel, so the barrels reach the courtyard and three blown under its roof free Kyte. In the prototype she fell to
+  the shaft's bottom with one.
 - Kamerian Dragon on Restored: the Skeetla arena at the bottom of Dragon Rock can be won. The ice spell on the top,
   the only spell that puts out the arena's lava controls, can be picked up and cast from the spell scroll, and the
   arena fills Krystal's magic and feeds the Earth Warrior while its fight is on.
