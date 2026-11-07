@@ -625,7 +625,8 @@ text = '{ void dino_trex_facing(uint8_t*, recomp_context*); recomp_context c = *
 
 # With BOSS TRex on Restored (src/game/boss_trex.cpp):
 # The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
-# and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call.
+# and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call. With
+# Walled City on Restored (src/game/walled_city.cpp) the stone is then won, for the King to activate.
 [[patches.instruction]]
 func = "dll702_2D98"
 vram = 0x9028874C
@@ -634,7 +635,7 @@ value = 0x00000000
 [[patches.hook]]
 func = "dll702_2D98"
 before_vram = 0x90288754
-text = '{ int dino_trex_restored(void); void dino_trex_beaten(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_beaten(rdram, &c); } else { func_80013FB4(rdram, ctx); } }'
+text = '{ int dino_trex_restored(void); void dino_trex_beaten(uint8_t*, recomp_context*); void dino_walled_city_trex_beaten(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_beaten(rdram, &c); dino_walled_city_trex_beaten(rdram, ctx); } else { func_80013FB4(rdram, ctx); } }'
 
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),
@@ -746,7 +747,7 @@ text = '{ void dino_moonseeds_stone_placed(uint8_t*, recomp_context*); dino_moon
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
-text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); }'
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); void dino_walled_city_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); dino_walled_city_frame(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
 # whether their spirit is released by 0x366, a bit nothing sets: they ask CC's (0x221) and WG's (0x222) released bits
