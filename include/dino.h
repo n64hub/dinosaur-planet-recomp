@@ -26,7 +26,7 @@ namespace dino {
     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
     void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
     bool story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
-        float* stick_x, float* stick_y);
+        bool ride, float* stick_x, float* stick_y);
     // --input's sync near: whether a drawn object of that id is within reach of (x, z).
     bool story_object_near(uint8_t* rdram, int oid, float x, float z, float reach);
     // --input's sync act: whether a drawn object of that id is in that act of its state machine.
@@ -54,8 +54,6 @@ namespace dino {
     void add_force_point_options(recomp::config::Config& general);
     // CloudRunner Fortress's treasure lift setting (cloudrunner.cpp).
     void add_cloudrunner_options(recomp::config::Config& general);
-    // CloudRunner Fortress's snow race setting (cloudrunner_race.cpp).
-    void add_cloud_race_options(recomp::config::Config& general);
     // BOSS TRex's fight's setting (boss_trex.cpp).
     void add_boss_trex_options(recomp::config::Config& general);
     // The third SpellStone's setting (acts.cpp), and whether it is on Restored (moonseeds.cpp).

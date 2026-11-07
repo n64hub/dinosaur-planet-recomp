@@ -35,6 +35,7 @@ namespace {
     constexpr int32_t set_bit = 0x80014670;
     constexpr int32_t get_bit = 0x800147EC;
     constexpr int32_t player_object = 0x80023914;
+    constexpr int32_t angle_to = 0x800160E0;
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
     constexpr int32_t current_menu = 0x800A7D84;
@@ -369,9 +370,13 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. With sphere other than -1,
 // toward that hit sphere of the object instead: its model instance's (+0x7C, the one at +0xAD) spheres at +0x24, 16
 // bytes each with x, y and z at +4, from the world's origin. 0 within reach. False with
-// no player, no camera or no such object.
+// no player, no camera or no such object. With ride (a ride line), the stick of a player on a vehicle that turns by
+// stick x and goes by stick y (CloudRunner's race's CRSnowBike, dll732): the turn its own riders' is (dll732 0x3DAC),
+// the angle from her facing (+0x0) to the target (func_800160E0's of her place less the target's), negated, full at
+// 65 * 32, and the throttle full, eased to 0.3 in a turn of more than 45 degrees, whose circle at full throttle is
+// wider than the bike bay's mouth.
 bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
-    float* stick_x, float* stick_y) {
+    bool ride, float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
     *stick_y = 0.0f;
     float fx, fz;
@@ -428,6 +433,22 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
     float dx = to_x - x, dz = to_z - z;
     float distance = std::sqrt(dx * dx + dz * dz);
     if (distance <= reach) {
+        return true;
+    }
+    if (ride) {
+        int32_t facing = MEM_HU(0x0, player);
+        ctx->f12.fl = -dx;
+        ctx->f14.fl = -dz;
+        call(rdram, ctx, angle_to);
+        int32_t turn = ((int32_t)ctx->r2 & 0xFFFF) - facing;
+        if (turn > 0x8000) {
+            turn -= 0x10000;
+        }
+        else if (turn < -0x8000) {
+            turn += 0x10000;
+        }
+        *stick_x = std::fmax(-1.0f, std::fmin(1.0f, -(float)turn / (65.0f * 32.0f)));
+        *stick_y = std::abs(turn) > 0x2000 ? 0.3f : 1.0f;
         return true;
     }
     dx /= distance;

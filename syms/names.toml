@@ -153,6 +153,27 @@ dll = 373
 offset = 0x22
 name = "rescued_bit"
 
+# CloudRunner Fortress's snow race, map 43 (src/game/cloudrunner_race.cpp, docs/story-points.md).
+[[export]]
+dll = 730
+index = 7
+name = "drop"  # CRSpellstone: (stone, 2) as CRSnowClaw falls at its fifth ram, within 500 of it
+[[field]]
+of = "state"
+dll = 729
+offset = 0x4
+name = "race_state"  # CRCloudRace: 2 waiting for the rider, 3 the race, 4 won, waiting for 0x49F
+[[field]]
+of = "state"
+dll = 728
+offset = 0x34
+name = "rams_left"  # CRSnowClaw: from 4 down, one a ram (at most every 20 frames); it falls below 0
+[[field]]
+of = "state"
+dll = 732
+offset = 0x3F0
+name = "ridden"  # CRSnowBike: 2 while the player rides it, when its hit box rams (type 0x14) faster than 2
+
 # Every object (src/game/objects.cpp, krazoa.cpp, dragon_rock.cpp).
 [[field]]
 of = "obj"
@@ -373,3 +394,18 @@ name = "babies_rescued"  # counted by CFCloudBaby (dll373)
 [[bit]]
 bit = 0x8D1
 name = "kyte_gold_perch"  # PerchObject (dll718)'s curve's +0x32 bit, set by Kyte's message 5
+[[bit]]
+bit = 0x49D
+name = "snow_bike_ridden"  # CRSnowBike mounted, with 0x497; CRCloudRace clears both as the race is won
+[[bit]]
+bit = 0x497
+name = "snow_race_running"
+[[bit]]
+bit = 0x499
+name = "snow_race_lost"  # the bike's fuel run out (dll732 0x0DB4)
+[[bit]]
+bit = 0x49A
+name = "snow_race_won"  # set by nothing in the ROM; CloudRunner Race on Restored sets it as the stone is taken
+[[bit]]
+bit = 0x49F
+name = "snow_race_scene_done"  # set by map 43's CFseqobject 30CCA as sequence 0x18 ends

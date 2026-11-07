@@ -27,7 +27,6 @@ void dino::init_config() {
     dino::add_dragon_rock_options(general);
     dino::add_force_point_options(general);
     dino::add_cloudrunner_options(general);
-    dino::add_cloud_race_options(general);
     dino::add_boss_trex_options(general);
     dino::add_third_stone_options(general);
     recompui::config::create_controls_tab();
