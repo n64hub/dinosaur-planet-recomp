@@ -25,7 +25,8 @@ namespace dino {
     void story_start(uint8_t* rdram, recomp_context* ctx);
     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
     void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
-    bool story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x, float to_z, float reach, float* stick_x, float* stick_y);
+    bool story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
+        float* stick_x, float* stick_y);
     // --input's sync near: whether a drawn object of that id is within reach of (x, z).
     bool story_object_near(uint8_t* rdram, int oid, float x, float z, float reach);
     // --input's sync act: whether a drawn object of that id is in that act of its state machine.

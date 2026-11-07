@@ -366,10 +366,12 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // --input's to and chase lines (src/main/main.cpp): the stick that walks the player toward (to_x, to_z), or with oid
 // other than -1 toward the nearest object of that id (its halfword at +0x46) that is drawn, as the player's code reads
 // the stick: up the way the camera looks at the player. An enemy beaten stays where it fell with its alpha (+0x36)
-// faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. 0 within reach. False with
+// faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. With sphere other than -1,
+// toward that hit sphere of the object instead: its model instance's (+0x7C, the one at +0xAD) spheres at +0x24, 16
+// bytes each with x, y and z at +4, from the world's origin. 0 within reach. False with
 // no player, no camera or no such object.
-bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x, float to_z, float reach, float* stick_x,
-    float* stick_y) {
+bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
+    float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
     *stick_y = 0.0f;
     float fx, fz;
@@ -403,6 +405,20 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x,
                 best = d;
                 to_x = ox;
                 to_z = oz;
+                gpr model = (gpr)MEM_W(0x7C, object);
+                gpr instance = model != 0 ? (gpr)MEM_W(4 * (int8_t)MEM_B(0xAD, object), model) : 0;
+                gpr spheres = instance != 0 ? (gpr)MEM_W(0x24, instance) : 0;
+                if (sphere >= 0 && spheres != 0) {
+                    uint32_t sx = MEM_W(16 * sphere + 4, spheres), sz = MEM_W(16 * sphere + 0xC, spheres);
+                    uint32_t ox_ = MEM_W(0, (gpr)(int32_t)0x80092A70), oz_ = MEM_W(0, (gpr)(int32_t)0x80092A74);
+                    float fsx, fsz, fox, foz;
+                    memcpy(&fsx, &sx, 4);
+                    memcpy(&fsz, &sz, 4);
+                    memcpy(&fox, &ox_, 4);
+                    memcpy(&foz, &oz_, 4);
+                    to_x = fsx + fox;
+                    to_z = fsz + foz;
+                }
             }
         }
         if (best < 0.0f) {
@@ -499,7 +515,5 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
         memcpy(&fx, &ox, 4);
         memcpy(&fz, &oz, 4);
         fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f\n", seconds, oid, fx, fz);
-        { gpr st = (gpr)MEM_W(0xB8, other); gpr path = st ? (gpr)MEM_W(0x3F4, st) : 0; // TEMP
-          if (path) fprintf(stderr, "TREX %.1f act %d flags %X spd %d fd %d hits %d health %d\n", seconds, (int16_t)MEM_H(0x26C, st), MEM_HU(0xFA, path), MEM_BU(0xFC, path), MEM_BU(0xFD, path), MEM_BU(0x101, path), MEM_BU(0x102, path)); }
     }
 }

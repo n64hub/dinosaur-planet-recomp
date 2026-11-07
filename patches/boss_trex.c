@@ -1,5 +1,7 @@
-// BOSS TRex's arena (map 48), the fight for the third SpellStone, reached from Walled City's warp (entry 90): its
-// progression fix, which us.toml's hook in the TRex's last state calls.
+// BOSS TRex's arena (map 48), the fight for the third SpellStone, reached from Walled City's warp (entry 90): the
+// fixes that let it be won, always on (the floor switches' pads and the TRex's corners and facing, below, and the
+// player's collision after the intro, us.toml beside dll210_0934), and its progression fix, which us.toml's hook in the
+// TRex's last state calls with BOSS TRex on Restored (src/game/boss_trex.cpp).
 
 #include "patches.h"
 
@@ -24,10 +26,11 @@ void dino_trex_beaten(void) {
     func_80014670(PLAYER_DOOR_BIT, 1);
 }
 
-// What a patch reads of an object: its position in its map and its hit data (obj+0x58), whose +0x10F counts what
-// touches it this frame.
+// What a patch reads of an object: its yaw, its position in its map and its hit data (obj+0x58), whose +0x10F counts
+// what touches it this frame.
 typedef struct {
-    u8 pad[0xC];
+    s16 yaw;
+    u8 pad[0xC - 0x2];
     f32 x, y, z;
     u8 pad2[0x58 - 0x18];
     u8* hits;
@@ -92,4 +95,24 @@ void dino_trex_path(Object* trex, TrexPath* path) {
     } else if (path->fraction > max) {
         path->fraction = max;
     }
+}
+
+// The TRex's run (act 1, dll702_2454, the state table's second entry) sets its place from the path (+0xE8, +0xF0) and
+// never its yaw: only a corner (act 2, dll702_2644) turns it, a quarter turn over the corner's animation, and a
+// turnaround (act 3, dll702_28BC) half a turn. A run that changes corridor with no corner played, as a charge that no
+// wall stopped does at the corridor's end, keeps the facing it had, so it runs on sideways or backwards and every
+// corner after turns from the wrong facing: a corner then swings it out of the ring, and a stun leaves its head, where
+// a hit counts (its hit spheres 2 and 3, dll702 0x2010), beyond the corridor's outer wall, out of the player's reach.
+// A corridor's facing is fixed: a quarter turn back for each corridor from the west one's 0 (south), and half a turn
+// the other way round, as every corner and turnaround that played whole leaves it. Here the run faces its corridor
+// (the hook at dll702_2454's start, the state in $a1 and its path data at +0x3F4).
+#define TREX_PATH 0x3F4
+
+void dino_trex_facing(Object* trex, u8* state) {
+    TrexPath* path = *(TrexPath**)(state + TREX_PATH);
+
+    if (path == 0) {
+        return;
+    }
+    trex->yaw = (s16)(-0x4000 * ((path->flags >> 1) & 3) + ((path->flags & 1) ? 0x8000 : 0));
 }

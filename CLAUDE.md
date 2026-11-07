@@ -28,7 +28,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
   Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the Kamerian Dragon's end
   (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), CloudRunner Fortress's treasure lift
-  (`src/game/cloudrunner.cpp`), BOSS TRex's setting (`src/game/boss_trex.cpp`), the settings, and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
+  (`src/game/cloudrunner.cpp`), BOSS TRex's setting (`src/game/boss_trex.cpp`), the settings, and on Windows a stack
+  trace on a crash (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
@@ -120,10 +121,11 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   and the way to the race, but its direction bit (0x8C8) is flipped only by two levers at the bottom, so from the top
   it only blows up. The General tab's Treasure Lift setting, Restored by default, lowers a player who steps in from
   the top, and Original leaves it as it was (`src/game/cloudrunner.cpp`'s header has the evidence).
-- **BOSS TRex.** Nothing in the ROM fires the arena's laser walls, so the TRex can't be hurt, and its defeat loads the
-  front end with no SpellStone. The General tab's BOSS TRex setting, Restored by default, fires a charged wall and
-  gives the third SpellStone (0x83B) and the way back to Walled City, and Original leaves the arena as it was
-  (`patches/boss_trex.c` has the evidence).
+- **BOSS TRex.** The TRex's defeat loads the front end with no SpellStone. The General tab's BOSS TRex setting,
+  Restored by default, gives the third SpellStone (0x83B) and the way back to Walled City in its place, and Original
+  goes to the title as the prototype did. The fixes that let the fight be won at all (the floor switches' pads, the
+  TRex's corners and facing, the door behind the player) are always on (`patches/boss_trex.c` and us.toml beside them
+  have the evidence, docs/story-points.md how the fight plays).
 - **Krazoa Palace.** Map 3's rooms are built, but of its objects only two Transporters are placed: the wings' doors,
   consoles and text blocks, the last door and the red Krazoa have defs and stand nowhere, and nothing leads on to
   Drakor (map 44). The General tab's Krazoa Palace setting, Restored by default, places them, chains the four wings
@@ -132,9 +134,10 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
-  timed button states, which can wait for a bit the game sets and walk the player to a place or an object (`main.cpp`
-  says the format), and on Windows `--stacks <seconds>` prints every thread's stack that long after start, for
-  unattended runs and hangs, and `--watch <address>,...` stops on each write to those words (four at most) of the
+  timed button states, which can wait for a bit the game sets, an enemy's place or act, and take whichever of two
+  ways an enemy comes, and walk the player to a place, an object or one of its hit spheres (`main.cpp` says the
+  format), and on Windows `--stacks <seconds>` prints every thread's stack that long after start, for unattended runs
+  and hangs, and `--watch <address>,...` stops on each write to those words (four at most) of the
   game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says the form: `**8008C994+4`
   follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps the player by the game's own
   warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and object
@@ -151,6 +154,6 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   <x>,<y>,<z>[,<layer>[,<facing>]]` starts it somewhere the warp table has no entry, `--bits
   <hex>[=<value>][@<seconds>],...` sets more bits, at the start or later (a shrine's own bits are cleared as its map
   starts, so they are set a while after it), and `--report` prints a line a second with the map, the position, the
-  health and the magic; `--watch-bits <hex>,...|all` prints each bit the game sets as it plays. `docs/story-points.md`
-  has the points, each bit's evidence and the warp table's map: each index, its area and what it needs. None of it is
-  in a player's menus.
+  health and the magic (and with `DINO_REPORT_OBJECT=<object id hex>` where each object of that id is);
+  `--watch-bits <hex>,...|all` prints each bit the game sets as it plays. `docs/story-points.md` has the points, each
+  bit's evidence and the warp table's map: each index, its area and what it needs. None of it is in a player's menus.

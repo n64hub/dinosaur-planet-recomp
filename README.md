@@ -85,9 +85,12 @@ Fixed:
   ended, and could crash.
 - Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
   so the city's slab door never opened.
-- BOSS TRex (BOSS TRex on Restored): its laser walls never fired, so it couldn't be hurt, and beating it went back to
-  the title with no SpellStone. A wall now fires once its corridor is charged, and the third SpellStone is carried
-  out, through the arena's own way back to Walled City.
+- BOSS TRex: the door behind Sabre shut the player out of the arena as its intro ended, standing on a floor switch never
+  charged it, so no laser wall fired and the TRex couldn't be hurt, after its first hit the TRex circled its corners in
+  place and never charged again, and a charge that ran on round a corner left it facing sideways, so its stunned head
+  could lie out of reach.
+- BOSS TRex's SpellStone (BOSS TRex on Restored): beating the TRex went back to the title with no SpellStone. The
+  third SpellStone is now carried out, through the arena's own way back to Walled City.
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.

@@ -360,13 +360,16 @@ static std::string game_thread_name(const OSThread* t) {
 // value other than 0 (us.toml's hook on func_80014670), and holds them until then: a script that plays on after a
 // sequence or a fight starts its next part when the game gets there, however long a busy host took. "sync next <bit
 // hex>" waits instead for the bit's next set to a value other than 0 once the part before it has started, for a bit the
-// game sets again and again (a fight's round, a counter), and "sync near <object id hex> <x> <z> <reach>" for the
-// nearest drawn object of that id to come within reach of that place once the part before has started (an enemy that
-// runs a path, for a press timed to where it is), and "sync act <object id hex> <act>" for the nearest drawn object of
-// that id to be in that act of its state machine (dll18's, state +0x26C: an enemy's attack or pause, which then runs as
-// long as its animation does). In place of x y,
+// game sets again and again (a fight's round, a counter), and "sync near <object id hex> <x> <z> <reach>" for a drawn
+// object of that id to come within reach of that place once the part before has started (an enemy that runs a path,
+// for a press timed to where it is), and "sync act <object id hex> <act>" for a drawn object of that id to be in that
+// act of its state machine (dll18's, state +0x26C: an enemy's attack or pause, which then runs as long as its
+// animation does). Between lines "choose", "or" and "end" are ways, each starting with a sync line: the way whose
+// first sync comes first plays, the others never start, and what follows "end" goes on from that way's last part (an
+// enemy that comes either way round). A choose holds no other. In place of x y,
 // "to <x> <z>" walks the player toward that place and "chase <object id hex> [reach]" toward the nearest object of that
-// id, each until within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
+// id (or with a number after the reach, toward that hit sphere of it: a boss hurt only in its head), each until
+// within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
 struct ScriptedInput {
     double at;
@@ -375,7 +378,7 @@ struct ScriptedInput {
     float camera_x, camera_y;
     int part;
     bool steer;
-    int oid;
+    int oid, sphere;
     float to_x, to_z, reach;
 };
 static std::vector<ScriptedInput> input_script;
@@ -384,20 +387,44 @@ static std::atomic<const ScriptedInput*> steering = nullptr;
 static std::atomic<float> steer_stick_x = 0.0f;
 static std::atomic<float> steer_stick_y = 0.0f;
 // Each sync line's bit (or object for a near), and the --input time it started (-1 until then). Part 0, before any,
-// starts at 0.
+// starts at 0. A part waits for one of its after parts to have started (the part before it, or each way's last part
+// after a choose's end); the first parts of a choose's ways share a choice, of which one only starts.
 enum class SyncKind { First, Next, Near, Act };
+static constexpr int max_input_ways = 4;
 struct InputPart {
     SyncKind kind;
     int bit;
     float x, z, reach;
     int act;
+    int after[max_input_ways];
+    int afters;
+    int choice;
 };
-static constexpr int max_input_parts = 64;
+static constexpr int max_input_parts = 96;
 static InputPart input_part[max_input_parts];
 static std::atomic<double> input_part_start[max_input_parts];
 static int input_parts = 1;
 
 static double script_seconds();
+
+// Whether part i may start now: it hasn't, no other way of its choice has, and one of its after parts has.
+static bool input_part_waits(int i) {
+    const InputPart& part = input_part[i];
+    if (input_part_start[i] >= 0.0) {
+        return false;
+    }
+    for (int j = 1; part.choice != 0 && j < input_parts; j++) {
+        if (input_part[j].choice == part.choice && input_part_start[j] >= 0.0) {
+            return false;
+        }
+    }
+    for (int k = 0; k < part.afters; k++) {
+        if (input_part_start[part.after[k]] >= 0.0) {
+            return true;
+        }
+    }
+    return false;
+}
 
 static void start_input_part(int i) {
     input_part_start[i] = script_seconds();
@@ -415,15 +442,55 @@ static void load_input_script(const char* path) {
     }
     char line[256];
     input_part_start[0] = 0.0;
+    // What the next sync line's part waits for, and an open choose: what its ways wait for, their last parts so far,
+    // and whether the next sync starts a way.
+    int after[max_input_ways] = { 0 };
+    int afters = 1;
+    int choose_after[max_input_ways];
+    int choose_afters = 0;
+    int way_ends[max_input_ways];
+    int ways = 0;
+    int choice = 0;
+    bool way_starts = false;
     while (fgets(line, sizeof(line), f) != nullptr) {
         ScriptedInput in{};
         InputPart part{};
-        if (input_parts < max_input_parts && (sscanf(line, "sync next %x", &part.bit) == 1 ? (part.kind = SyncKind::Next, true) :
+        if (strncmp(line, "choose", 6) == 0) {
+            memcpy(choose_after, after, sizeof(after));
+            choose_afters = afters;
+            ways = 0;
+            choice++;
+            way_starts = true;
+        }
+        else if ((strncmp(line, "or", 2) == 0 && (line[2] == '\n' || line[2] == '\r' || line[2] == '\0')) ||
+            strncmp(line, "end", 3) == 0) {
+            if (choose_afters != 0 && !way_starts && ways < max_input_ways) {
+                way_ends[ways++] = input_parts - 1;
+            }
+            if (line[0] == 'o') {
+                memcpy(after, choose_after, sizeof(after));
+                afters = choose_afters;
+                way_starts = true;
+            }
+            else {
+                memcpy(after, way_ends, sizeof(way_ends));
+                afters = ways;
+                choose_afters = 0;
+                way_starts = false;
+            }
+        }
+        else if (input_parts < max_input_parts && (sscanf(line, "sync next %x", &part.bit) == 1 ? (part.kind = SyncKind::Next, true) :
             sscanf(line, "sync near %x %f %f %f", &part.bit, &part.x, &part.z, &part.reach) == 4 ? (part.kind = SyncKind::Near, true) :
             sscanf(line, "sync act %x %d", &part.bit, &part.act) == 2 ? (part.kind = SyncKind::Act, true) :
             sscanf(line, "sync %x", &part.bit) == 1)) {
+            memcpy(part.after, after, sizeof(after));
+            part.afters = afters;
+            part.choice = way_starts ? choice : 0;
+            way_starts = false;
             input_part[input_parts] = part;
             input_part_start[input_parts] = -1.0;
+            after[0] = input_parts;
+            afters = 1;
             input_parts++;
         }
         else if (line[0] != '#' && sscanf(line, "%lf %x to %f %f", &in.at, &in.buttons, &in.to_x, &in.to_z) == 4) {
@@ -433,8 +500,11 @@ static void load_input_script(const char* path) {
             in.part = input_parts - 1;
             input_script.push_back(in);
         }
-        else if (line[0] != '#' && sscanf(line, "%lf %x chase %x %f", &in.at, &in.buttons, &in.oid, &in.reach) >= 3) {
+        else if (line[0] != '#' && sscanf(line, "%lf %x chase %x %f %d", &in.at, &in.buttons, &in.oid, &in.reach, &in.sphere) >= 3) {
             in.steer = true;
+            if (sscanf(line, "%*f %*x chase %*x %*f %d", &in.sphere) != 1) {
+                in.sphere = -1;
+            }
             if (in.reach <= 0.0f) {
                 in.reach = 30.0f;
             }
@@ -470,11 +540,10 @@ extern "C" void dino_input_bit_set(int bit, int value) {
     // Last part first, so a sync next after a part this same set starts waits for the set after it.
     for (int i = input_parts - 1; i >= 1; i--) {
         const InputPart& part = input_part[i];
-        if (value == 0 || part.bit != bit || part.kind == SyncKind::Near || part.kind == SyncKind::Act ||
-            input_part_start[i] >= 0.0) {
+        if (value == 0 || part.bit != bit || part.kind == SyncKind::Near || part.kind == SyncKind::Act) {
             continue;
         }
-        if (part.kind == SyncKind::Next && input_part_start[i - 1] < 0.0) {
+        if (part.kind == SyncKind::Next ? !input_part_waits(i) : input_part_start[i] >= 0.0) {
             continue;
         }
         start_input_part(i);
@@ -600,20 +669,19 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     double now = script_seconds();
     if (const ScriptedInput* in = steering) {
         float x, y;
-        dino::story_steer(rdram, ctx, in->oid, in->to_x, in->to_z, in->reach, &x, &y);
+        dino::story_steer(rdram, ctx, in->oid, in->sphere, in->to_x, in->to_z, in->reach, &x, &y);
         steer_stick_x = x;
         steer_stick_y = y;
     }
     for (int i = 1; i < input_parts; i++) {
         const InputPart& part = input_part[i];
-        if (input_part_start[i] < 0.0 && input_part_start[i - 1] >= 0.0 &&
+        if (input_part_waits(i) &&
             (part.kind == SyncKind::Near ? dino::story_object_near(rdram, part.bit, part.x, part.z, part.reach) :
              part.kind == SyncKind::Act && dino::story_object_act(rdram, part.bit, part.act))) {
             start_input_part(i);
         }
     }
     dino::story_timed_bits(rdram, ctx, now);
-    { static int last_act = -1; for (int a = 0; a < 12; a++) if (dino::story_object_act(rdram, 0x3D9, a)) { if (a != last_act) fprintf(stderr, "TREXACT %.2f %d\n", now, a); last_act = a; break; } } // TEMP
     static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;
     if (check_heap) {
         dino::heap_check(rdram, now);
