@@ -216,3 +216,35 @@ extern "C" void dino_cloud_baby_found(uint8_t* rdram, recomp_context* ctx) {
         ctx->r2 = 1;
     }
 }
+
+// us.toml's hook at CFPrisonGuard's update (dll375 0x00D0, $a0 the guard), with DINO_LOG_CLOUDRUNNER: the player's state
+// (dll210's export 50, her state's +0x87C) as it changes, with how far she is from the guard, who catches her within
+// 150 unless she holds the prison key (0x44) or that state is 0x40.
+extern "C" void dino_prison_guard_update(uint8_t* rdram, recomp_context* ctx) {
+    if (!logging) {
+        return;
+    }
+    gpr guard = ctx->r4, player;
+    static bool once = false;
+    if (!once) {
+        once = true;
+        fprintf(stderr, "cloudrunner: the guard is here\n");
+    }
+    {
+        Calls calls(ctx);
+        call(rdram, ctx, player_object);
+        player = ctx->r2;
+    }
+    if (player == 0) {
+        return;
+    }
+    static int32_t last = -0x10000;
+    int32_t state = (int16_t)MEM_H(0x87C, MEM_W(0xB8, player));
+    if (state == last) {
+        return;
+    }
+    last = state;
+    float dx = read_float(rdram, player + 0x18) - read_float(rdram, guard + 0x18);
+    float dz = read_float(rdram, player + 0x20) - read_float(rdram, guard + 0x20);
+    fprintf(stderr, "cloudrunner: player state 0x%X, %.0f from the guard\n", state, sqrtf(dx * dx + dz * dz));
+}

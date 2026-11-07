@@ -848,3 +848,8 @@ text = '{ void dino_cloud_baby_found(uint8_t*, recomp_context*); dino_cloud_baby
 func = "dll373_01A0"
 before_vram = 0x901A60D4
 text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_baby_update(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll375_00D0"
+before_vram = 0x901A902C
+text = '{ void dino_prison_guard_update(uint8_t*, recomp_context*); dino_prison_guard_update(rdram, ctx); }'
