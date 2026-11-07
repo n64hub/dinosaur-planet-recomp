@@ -191,12 +191,13 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   and an `--input` that walks to the door, then to each control from its north and casts the ice: the door's
   sequence at 14 s (0x5FA), the controls out at 54 s (0x5DA), 66 s (0x5D8) and 81 s (0x5D9), the fight won (0x628,
   0x609) at 92 s with the Warrior one bite from death, and the warp into the dragon's room at once.
-- Played from `before-dragon-rock` in one run, with no `--place` or `--bits`: an `--input` takes the ice spell (8.5 s),
-  walks the top south and east to its east end, steps down to layer -1, walks to the door (0x5FA at 179 s), and,
-  each part waiting on the bit before it (`sync`), casts at each control from its north until it is out (0x5DA at
-  221 s, 0x5D8 at 246 s, 0x5D9 at 286 s), sweeps the ice over the Skeetlas at the Warrior and then walks at each one
-  left (`chase 43E`): the fight won (0x628, 0x609) at 308 s, the Warrior fed three times, and the warp into the
-  dragon's room at once. Without the feeding, eight such runs lost the Warrior.
+- Played from `before-dragon-rock` in one run, with no `--place` or `--bits`: `tools/dragon_rock_input.txt` takes the
+  ice spell (8.5 s), walks the top south and east to its east end, steps down to layer -1, walks to the door (0x5FA
+  at 179 s), and, each part waiting on the bit before it (`sync`), casts at each control from its north until it is
+  out (0x5DA at 221 s, 0x5D8 at 246 s, 0x5D9 at 286 s), sweeps the ice over the Skeetlas at the Warrior and then
+  walks at each one left (`chase 43E`): the fight won (0x628, 0x609) at 308 s, the Warrior fed three times, and the
+  warp into the dragon's room at once, and the same again at 310 s in a second run. Without the feeding, eight such
+  runs lost the Warrior.
 - The arena and the dragon's room share the world cell (2, -8) and their ground: the room is the arena on layer 0,
   its KamColumns' pits where the arena's DRLavaControls stand. Nothing in the ROM leads into the room: no warp entry
   lies in it, and its entrance, a TriggerPlane at its north (0x41AF3, which sets 0x4D7 for its KD_Sequences), faces
