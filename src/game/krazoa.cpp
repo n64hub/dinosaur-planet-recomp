@@ -391,8 +391,6 @@ namespace {
         { 3, kp_textblock_fire + 3, 8643.0f, 26.0f, 21351.0f, { 0, 1, 0x01, 0xFC, 0, 0, 0x06, 0xAA, 0x06, 0xA9, 0, 0 }, 0,
             Setting::Palace, 0, false },
         { 3, kp_red_krazoa, 9140.0f, 0.0f, 23040.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, Setting::Palace, 0, false },
-        { 3, kp_red_krazoa, 9140.0f, 0.0f, 22990.0f, { 0x00, 0x01, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, Setting::Palace, 0, false },
-        { 3, kp_red_krazoa, 9140.0f, 0.0f, 23090.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0x01, 0 }, 0, Setting::Palace, 0, false },
         // The palace's doors: no bits and no sequence (+0x1C), so dll307 leaves them be; their yaw at +0x1F. The last
         // door's four leaves are at its centre, each with its roll at +0x1A, which dll307 doesn't read.
         { 3, kp_section_door, 5757.0f, 95.0f, 21440.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
@@ -414,11 +412,13 @@ namespace {
     };
 
     void place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
-        ctx->r4 = 0x24;
+        // dll214 reads +0x24 too (its create, 0x70), so its actors get the 0x28 bytes the ROM's have.
+        int size = object == kp_red_krazoa ? 0x28 : 0x24;
+        ctx->r4 = size;
         ctx->r5 = object;
         call(rdram, ctx, new_placement);
         gpr p = ctx->r2;
-        MEM_B(2, p) = 0x24 / 4;
+        MEM_B(2, p) = size / 4;
         memcpy(&MEM_W(0x8, p), &x, 4);
         memcpy(&MEM_W(0xC, p), &y, 4);
         memcpy(&MEM_W(0x10, p), &z, 4);
@@ -784,16 +784,17 @@ extern "C" void dino_krazoa_tablet_bits(uint8_t*, recomp_context* ctx) {
     }
 }
 
-// us.toml's hook in the text block's update (dll654 0x314), on the answer of the call at 0x30C (export 0x20 of the
-// DLL at 0x8008C994, with 0x7BF): whether the item it asks for was used. A text block asks that of any player who
-// stands at it (0x800348A0, 0x270) and plays its sequence (+0x19) on yes, then sets its done bit (+0x1E). 0x7BF is
-// Desert Force Point's own: its controller sets it (dll638 0xF58) and DFP's first block needs it (map 21 @uid 405DE
-// +0x20), so a player who comes to the palace another way may not have it, and a palace block also goes off with
-// the player standing at it.
+// us.toml's hook in the text block's update (dll654 0x314), on the answer of the call at 0x30C (dll1 export 7, with
+// 0x7BF). Once its needed bit (+0x20) is set and its done bit (+0x1E) isn't, a text block asks that every frame; on
+// yes it plays its sequence (+0x19) and marks it played (state+0xC), and on the first no after that it sets its done
+// bit (0x350). 0x7BF is Desert Force Point's own: its controller sets it (dll638 0xF58) and DFP's first block needs
+// it (map 21 @uid 405DE +0x20), so a palace block goes off instead with the player standing at it, once: only while
+// its sequence hasn't played ($s0 is its state here).
 extern "C" void dino_krazoa_palace_textblock(uint8_t* rdram, recomp_context* ctx) {
     int32_t block = word(rdram, (int32_t)ctx->r29 + 0x28);
     int object = MEM_H(0, (gpr)word(rdram, block + 0x4C));
-    if (object < kp_textblock_fire || object > kp_textblock_fire + 3 || !palace_restored()) {
+    if (object < kp_textblock_fire || object > kp_textblock_fire + 3 || !palace_restored() ||
+        MEM_BU(0xC, (gpr)ctx->r16) != 0) {
         return;
     }
     int32_t player;
