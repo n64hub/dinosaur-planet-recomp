@@ -372,7 +372,7 @@ static std::string game_thread_name(const OSThread* t) {
 // within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
 // "ride to <x> <z> [reach]" and "ride <object id hex> [reach]" do the same for a player on a vehicle that turns by
-// stick x (story_steer's ride), at full throttle, until within reach (0, never, by default).
+// stick x and goes by stick y (story_steer's ride), until within reach (0, never, by default).
 struct ScriptedInput {
     double at;
     uint32_t buttons;
