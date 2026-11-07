@@ -223,6 +223,7 @@ target_sources(DinosaurPlanet PRIVATE
     ${CMAKE_SOURCE_DIR}/src/game/drakor.cpp
     ${CMAKE_SOURCE_DIR}/src/game/dragon_rock.cpp
     ${CMAKE_SOURCE_DIR}/src/game/force_point.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/cloudrunner.cpp
 )
 if (DINO_PATCHES)
     target_sources(DinosaurPlanet PRIVATE ${CMAKE_SOURCE_DIR}/src/main/register_patches.cpp)

@@ -27,8 +27,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   (`src/game/recomp_api.cpp`), the libultra functions the runtime lacks (`src/game/libultra.cpp`), the HUD's and the
   clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
   Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the Kamerian Dragon's end
-  (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), the settings, and on Windows a stack trace on a
-  crash (`src/main/crash_trace.cpp`).
+  (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), CloudRunner Fortress's treasure lift
+  (`src/game/cloudrunner.cpp`), the settings, and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
@@ -116,6 +116,10 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   player who reaches it in the room below plays Drakor's fall, sequence 1 (0x7AE). Nothing followed it; the General
   tab's Ending setting, Restored by default, goes back to the title at its end as the game's own menus do, and Original
   starts the fight again (`src/game/drakor.cpp`'s header has the evidence).
+- **CloudRunner Fortress's treasure lift.** Past the blasted wall (map 12) a wind lift goes down to the treasure caves
+  and the way to the race, but its direction bit (0x8C8) is flipped only by two levers at the bottom, so from the top
+  it only blows up. The General tab's Treasure Lift setting, Restored by default, lowers a player who steps in from
+  the top, and Original leaves it as it was (`src/game/cloudrunner.cpp`'s header has the evidence).
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of

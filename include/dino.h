@@ -45,6 +45,8 @@ namespace dino {
     // The Kamerian Dragon's fight's end setting (dragon_rock.cpp).
     void add_dragon_rock_options(recomp::config::Config& general);
     void add_force_point_options(recomp::config::Config& general);
+    // CloudRunner Fortress's treasure lift setting (cloudrunner.cpp).
+    void add_cloudrunner_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }
