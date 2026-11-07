@@ -21,6 +21,9 @@ name = "drop_texture_group"
 vram = 0x8000F404
 name = "set_menu"
 [[addr]]
+vram = 0x80010D50
+name = "buttons_pressed"  # (controller): the buttons pressed this frame (src/game/walled_city.cpp)
+[[addr]]
 vram = 0x80013FB4
 name = "to_front_end"
 [[addr]]
@@ -39,6 +42,9 @@ name = "bit_get"  # (bit)
 vram = 0x80014930
 name = "bit_increment"  # (bit): adds one to its value
 [[addr]]
+vram = 0x80016AA8
+name = "allocate"  # (size, tag, name): a block of the game's heap
+[[addr]]
 vram = 0x80014B6C
 name = "unload_title_dlls"
 [[addr]]
@@ -53,6 +59,9 @@ name = "free_object"  # src/game/objects.cpp
 [[addr]]
 vram = 0x800233F4
 name = "new_placement"  # (size, object id): a zeroed placement record
+[[addr]]
+vram = 0x80030EF0
+name = "add_to_list"  # (object, list), as a constructor joins its object to a list
 [[addr]]
 vram = 0x80023914
 name = "player_object"
@@ -128,6 +137,24 @@ name = "set_map_act"  # (map, act)
 dll = 29
 index = 18
 name = "group_field"  # (map): its group field
+
+# Walled City (src/game/walled_city.cpp).
+[[export]]
+dll = 25
+index = 6
+name = "nearest_curve"  # (position, -1, kind): the curve of type 0x24 and that kind nearest it
+[[export]]
+dll = 26
+index = 1
+name = "add_curve"  # (record): as the map loader adds its curves (func_80045FC4)
+[[export]]
+dll = 26
+index = 2
+name = "remove_curve"  # (record)
+[[export]]
+dll = 211
+index = 14
+name = "offer_command"  # (n): Tricky's scroll offers command n for a frame (4 his flame, with 0x245)
 [[export]]
 dll = 29
 index = 29
@@ -170,6 +197,10 @@ name = "z"
 of = "obj"
 offset = 0x68
 name = "dll"
+[[field]]
+of = "obj"
+offset = 0xAF
+name = "use_flags"  # 1 used with A, 4 in reach (dll2 0xE58-0xF84), 0x10 not usable yet (dll308); cleared after update
 [[field]]
 of = "obj"
 offset = 0xB8
@@ -373,3 +404,24 @@ name = "babies_rescued"  # counted by CFCloudBaby (dll373)
 [[bit]]
 bit = 0x8D1
 name = "kyte_gold_perch"  # PerchObject (dll718)'s curve's +0x32 bit, set by Kyte's message 5
+[[bit]]
+bit = 0x245
+name = "tricky_flame"  # lets his scroll's command 4 through (dll211); DIMSnowHorn1 sets it behind 0x172, never set
+[[bit]]
+bit = 0x7FB
+name = "king_talked"  # A with the King (WCKingEarthWalk, dll774) plays his sequence
+[[bit]]
+bit = 0x80A
+name = "queen_met"  # Walled City on Restored, with 0xD5, 0x821, 0x82D and 0x82E
+[[bit]]
+bit = 0xD5
+name = "rex_teeth"  # 4 bits: the teeth counted
+[[bit]]
+bit = 0x821
+name = "ten_teeth"  # WCTeethBowl (dll308) waits for it
+[[bit]]
+bit = 0x82D
+name = "walled_city_gate"
+[[bit]]
+bit = 0x82E
+name = "third_spellstone_won"  # not yet active: the King turns it into 0x83B
