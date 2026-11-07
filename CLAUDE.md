@@ -107,6 +107,11 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   nothing reads it, and nothing gives the fourth SpellStone (0x7A8) that the Desert Force Point's other place takes.
   The General tab's Kamerian Dragon setting, Restored by default, has it die there and leave that stone, and Original
   leaves the fight endless (`src/game/dragon_rock.cpp`'s header has the evidence).
+- **The Desert Force Point.** Golden Plains' level control sets the second SpellStone's place (0x5F3) on every load,
+  and no surface joins the force point's floor (map 21) to the duct that reaches the place. The General tab's Desert
+  Force Point setting, Restored by default, leaves the place to the player and stands a second DFPLift1 in the
+  corridor behind the round door, under one of the duct's stubs, and Original leaves both as they were
+  (`src/game/force_point.cpp`'s header has the evidence).
 - **Drakor's end.** The last fight (map 44) is won in the ROM as it is: a hit lets the Kamerian Diamond go, and the
   player who reaches it in the room below plays Drakor's fall, sequence 1 (0x7AE). Nothing followed it; the General
   tab's Ending setting, Restored by default, goes back to the title at its end as the game's own menus do, and Original
@@ -123,6 +128,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
   `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each event of Golden Plains' shrine,
   `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
+  `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on, `DINO_LOG_EFFECTS=1`
+  each effect drawn after its object was freed,
   `DINO_DRAGON_HEALTH=<n>` starts its fight with n health, and `DINO_CHECK_HEAP=1` each block of the game's heaps
   written past its end, with the tag of what asked for it (`src/game/heap.cpp`).
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the

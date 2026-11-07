@@ -259,32 +259,42 @@ force point's top (50) at (1, 17) and its bottom (21) at (1, 16), both on layer 
 - The place. The second SpellStone's place (DFP_SpellPlace, 652, uid 35111) stands on a platform at y -1255, 204 above
   the floor, and is in group 7, which the TriggerPlanes at the target block room's door (955, -1435, 8973) and at
   (1896, -1459, 8623) turn on as the player walks in (command 0x13; 0x14 turns a group off). In act 1 it takes the
-  stone (0x2E8) used from the item menu within 100 units, plays its sequence and sets 0x5F3; 0x2E8 goes some 27 s
-  later. Played from the platform's walkway (`--place -159,-1255,9769,-1`, its setuppoint 2, with 0x5D1's group 7 on):
-  0x5F3 on the last A. Not found: a way up from the floor. The walkway runs east from the platform at that height and
-  drops at its south end into the round door's corridor. The force field under the platform (DFP_ForceAway, 646 kind
-  3, uid 347f2) is a box 118 wide, 144 high and 122 deep that takes two health every 200 ticks, or with Krystal's
-  shield (0x1D7) up shakes the screen, and lifts nobody. The 0x766 sequence (below) shows Kyte flying up to a duct,
-  and the curves that would be her path run at y -1318 from the target block room to the platform; giving her that
-  command is not played. DFP_Textblock (654) and DFP_Platform1 (655), blocks and two platforms that move on 0x7C1 to
-  0x7C4, start only from 0x7BF, which DFP_LevelControl sets in act 3.
+  stone (0x2E8) used from the item menu within 100 units, plays sequence 0x373 and sets 0x5F3, then 0x78C, and 0x2E8
+  goes at the sequence's end, some 34 s later. The platform's walkway is one surface with a closed duct at y -1249
+  that rings the rooms in two C shapes, with zone planes, setup points and lights along it. Eighteen stubs leave the
+  duct and open high in the corridors' walls, with no collision on their mouths: a lip is at -1286, the floor at -1459
+  and the slope under a lip stops at -1395, and no surface in the ROM joins the floor to a lip. The force field under
+  the platform (DFP_ForceAway, 646 kind 3, uid 347f2) takes two health every 200 ticks and lifts nobody, and
+  DFP_Textblock (654) and DFP_Platform1 (655) move only from 0x7BF, in act 3. Desert Force Point on Restored stands a
+  second DFPLift1 (641) under the stub at (-275, 9280), in the corridor behind the round door, with that corridor's
+  travel (`src/game/force_point.cpp`). Played on Restored from the corridor (`--place -324,-1459,9660,-1` with the
+  power's bits, 0x5E2 to 0x5E8): onto the lift, which rises once the player stands on it, off it into the stub, along
+  the duct and the walkway to the place, A, C-right, A: 0x5F3, 0x78C, and 0x2E8 cleared. The lift waits at the top
+  while the player is off it and takes them down again, as the force point's own lift does.
 - The acts. DFP_LevelControl keeps the force point at act 1, and nothing moves it to 2
   or 3. The other place (uid 40323, east) takes a stone only with 0x7A8 set: in act 1 the stone carried as 0x2E8
   (played with 0x7A8 set: 0x5F4 at 17.5 s), in act 2 the one carried as 0x123. 0x7A8 is DFP_TargetBlock 401bb's
   landing, the end of a chain only half of which a player can reach: 0x7A0, which nothing in map 21 sets, lets a door
   switch (uid 40143) take the stone for 0x7A1, the pit switch (401a8) then sets 0x7A7, and the block slides to 0x7A8,
   which also plays DFP_seqpoint 4031e's sequence 1. Its twin in the west starts at 0x681 (group 6, and the pit switch
-  3461b's 0x69A) and ends at 0x766, Kyte's cutscene by the pit (DFP_seqpoint 35104) and the duct's lights.
+  3461b's 0x69A) and ends at 0x766, Kyte's cutscene by the pit (DFP_seqpoint 35104) and the duct's lights. With
+  Kamerian Dragon on Restored the dragon under Dragon Rock sets 0x7A8 as it dies, so the place takes the stone
+  carried after Dragon Rock (`after-dragon-rock`).
 - The mirage. Golden Plains' level control (GP_LevelControl, 547) sets 0x5F3 each time the map loads (dll547_0018,
-  0xBC-0xC8), so a player who comes through Golden Plains finds the place holding a stone already. The two
+  0xBC-0xC8), so a player who comes through Golden Plains finds the place holding a stone already, and the stone stays
+  carried (0x2E8), which the swap to Sabre refuses. Desert Force Point on Restored keeps 0x5F3 as it is there. The two
   TriggerPlanes at the force point's door (map 9 uids 4031d and 4032c) wait on 0x5F3: crossing 4031d at
   (1141, 334, 12593) sets 0x651, and GPSeqObject 348b8 plays the mirage (a cloaked figure, Krystal, Kyte) and sets
   0x652; 4032c, by the hole, sets 0x7B7 for GPSeqObject 4059e (0x7B3). Played, 4031d.
-- The swap to Sabre ("RETURN TO SWAPSTONE CIRCLE"). SHswapstone (515) in map 14 is in group 0 of 0x4A6 and answers
-  only while its zone (0x887, the TriggerPlane at (-1099, 333, 17331)) and 0x883 are set, and never while 0x2E8 or
-  0x123 is carried. Nothing in the maps' params sets 0x883, and SC_levelcontrol (519) moves the circle from act 9
-  only on 0x4B8, which nothing sets. With 0x887, 0x883 and 0x4B8 set and 0x2E8 clear, A at the stone only swings the
-  staff. Not played.
+- The swap to Sabre ("RETURN TO SWAPSTONE CIRCLE"). The stone (SHswapstone, 515) and its pad (SHswaplift, 514, uid
+  42238, where warp 14 lands) are in group 0 of 0x4A6, which the circle's planes turn on as the player walks in. A with
+  the player on the pad (its hit list holds the player) sets 0x3EB, and SHseqobject 41fd9 plays sequence 0x107: the
+  pad lifts the player to the stone, which meets them the first time ("Hello there little fellow, I'm Rocky.", 0x883)
+  and opens SWAP, SHOP and WARP. Stick left, then A, swaps to Sabre (0x885, or 0x884) and warps to SwapStone Hollow;
+  it is refused while a spirit, 0x2E8 or 0x123 is carried. 0x883 only skips the meeting the next time, and 0x4B8 only
+  moves the circle's act (sequence 0x2AB, at CloudRunner's race). Played with 0x883 clear (`--story
+  before-desert-force-point,14 --bits 2e8=0,5f3=1,652=1,4a6=1`, A, then stick left and A): 0x3EB, 0x883, 0x885, and
+  Sabre in map 7.
 
 ## The bits
 

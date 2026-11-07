@@ -70,12 +70,15 @@ Fixed:
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
   the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
   was. The prototype started the fight again after his fall, so the game never ended.
+- The Desert Force Point's second SpellStone (Desert Force Point on Restored): Golden Plains filled its place each time
+  it loaded, so the stone stayed carried and SwapStone Circle refused the swap back to Sabre, and nothing led up from
+  the force point's floor to the duct that reaches the place. Golden Plains now leaves the place to the player, and a
+  second of the force point's own lifts stands in the corridor behind the round door, under the duct.
 
 Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
-- The rest of the story, played from a new game to its ending, and whatever stops a player there: the Desert Force
-  Point's way up to the second SpellStone's place, and the swap back to Sabre at SwapStone Circle.
+- The rest of the story, played from a new game to its ending, and whatever stops a player there.
 - The way to the ending the prototype never had: Krazoa Palace's four wings.
 
 ## The ROM
@@ -107,6 +110,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Kamerian Dragon** (General): Restored has the Kamerian Dragon under Dragon Rock die once its health runs out and
   leave the fourth SpellStone for the Desert Force Point. Original is the prototype as it was left: the fight never
   ends, and the fourth SpellStone is nowhere.
+- **Desert Force Point** (General): Restored leaves the second SpellStone's place empty until the player places the
+  stone, and adds a lift up to the duct that leads there, in the corridor behind the round door. Original is the
+  prototype as it was left: Golden Plains fills the place, and nothing leads up to it.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 
