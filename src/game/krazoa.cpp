@@ -193,7 +193,11 @@ namespace {
     constexpr int kp_last_door = 0x59E;
     constexpr int kp_console_fire = 0x58F;    // then earth, water and magic
     constexpr int kp_textblock_fire = 0x593;  // then earth, water and magic
-    constexpr int warp_point = 0x265;
+    constexpr int32_t warp_entry = 0x8004D1D4; // (index, 0), as --warp and WM_WarpPoint (dll275 0x584) call it
+    constexpr int palace = 3;
+    constexpr int drakor_entry = 44;
+    constexpr float red_krazoa_x = 9140.0f, red_krazoa_z = 23040.0f, red_krazoa_reach = 100.0f;
+    bool sent_to_drakor = false;
     constexpr float textblock_reach = 60.0f;
 
     int warlock_act = 0; // as WL_LevelControl last read it, for dll611's release
@@ -387,8 +391,8 @@ namespace {
         { 3, kp_textblock_fire + 3, 8643.0f, 26.0f, 21351.0f, { 0, 1, 0x01, 0xFC, 0, 0, 0x06, 0xAA, 0x06, 0xA9, 0, 0 }, 0,
             Setting::Palace, 0, false },
         { 3, kp_red_krazoa, 9140.0f, 0.0f, 23040.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, Setting::Palace, 0, false },
-        { 3, warp_point, 9140.0f, 0.0f, 23040.0f, { 0, 0xFF, 44, 0, 1, 2, 0x18, 0xFF, 0x06, 0xAA, 0, 0 }, 0,
-            Setting::Palace, 0, false },
+        { 3, kp_red_krazoa, 9140.0f, 0.0f, 22990.0f, { 0x00, 0x01, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, Setting::Palace, 0, false },
+        { 3, kp_red_krazoa, 9140.0f, 0.0f, 23090.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0x01, 0 }, 0, Setting::Palace, 0, false },
         // The palace's doors: no bits and no sequence (+0x1C), so dll307 leaves them be; their yaw at +0x1F. The last
         // door's four leaves are at its centre, each with its roll at +0x1A, which dll307 doesn't read.
         { 3, kp_section_door, 5757.0f, 95.0f, 21440.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
@@ -523,6 +527,27 @@ extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
         return;
     }
     Calls calls(rdram, ctx);
+    if (word(rdram, map_structs + 4 * palace) == 0) {
+        sent_to_drakor = false;
+    }
+    else if (!sent_to_drakor && palace_restored() && get(rdram, ctx, 0x6AA)) {
+        call(rdram, ctx, player_object);
+        int32_t player = (int32_t)ctx->r2;
+        float px, pz;
+        int32_t wx = word(rdram, player + 0xC), wz = word(rdram, player + 0x14);
+        memcpy(&px, &wx, 4);
+        memcpy(&pz, &wz, 4);
+        float dx = px - red_krazoa_x, dz = pz - red_krazoa_z;
+        if (player != 0 && dx * dx + dz * dz < red_krazoa_reach * red_krazoa_reach) {
+            sent_to_drakor = true;
+            ctx->r4 = drakor_entry;
+            ctx->r5 = 0;
+            call(rdram, ctx, warp_entry);
+            if (logging) {
+                fprintf(stderr, "krazoa: the red Krazoa sends the player to Drakor (entry %d)\n", drakor_entry);
+            }
+        }
+    }
     for (Extra& e : extras) {
         if (word(rdram, map_structs + 4 * e.map) == 0) {
             e.placed = false;
