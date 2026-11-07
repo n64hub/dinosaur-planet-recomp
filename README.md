@@ -81,6 +81,10 @@ Fixed:
   blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below and
   the way to the race couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
   turn it back for the way up.
+- CloudRunner Fortress's courtyard roof (Wind Bridge on Restored): its barrels stand west of the treasure shaft, and
+  the shaft's wind, which holds an empty-handed player at the corridor's height, dropped one carrying a barrel to the
+  bottom, so no barrel reached the courtyard and its roof, which three of them blow, kept Kyte shut in. The wind now
+  holds a player carrying a barrel too, and with Treasure Lift on Restored it lowers only an empty-handed one.
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
@@ -128,6 +132,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Treasure Lift** (General): Restored has CloudRunner Fortress's wind lift past the blasted wall lower a player who
   steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
   the wind only ever blows up, and the caves can't be reached.
+- **Wind Bridge** (General): Restored has the wind over CloudRunner Fortress's treasure shaft hold a player carrying a
+  barrel, as it holds one empty-handed, so the barrels reach the courtyard and blow its roof. Original is the
+  prototype as it was left: carrying one, she falls to the shaft's bottom, and the roof can't be blown.
 - **Krazoa Palace** (General): Restored places Krazoa Palace's doors, consoles, text blocks and red Krazoa, so its
   four wings are played in turn and the red Krazoa sends the player on to Drakor. Original is the prototype as it was
   left: the palace's rooms stand empty and lead nowhere.

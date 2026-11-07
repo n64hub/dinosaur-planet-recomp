@@ -19,7 +19,8 @@
 //
 // What Restored changes: when the wind starts with the player at the top (more than 150 above the lift's base), 0x8C8
 // is set, so the lift lowers her and lets her go at the bottom. Either lever there turns it back to up for the way
-// back, as the ROM has it, and a player who steps in at the bottom rides up to the top and steps off on either side.
+// back, as the ROM has it, and a player who steps in at the bottom rides up to the top and steps off on either side. A
+// player who carries something (a barrel, for the courtyard roof: cloudrunner_barrels.cpp) is left to the wind.
 
 #include <cstdint>
 #include <cstdio>
@@ -95,7 +96,8 @@ void dino::add_cloudrunner_options(recomp::config::Config& general) {
 // the direction bit), $s1 its placement (+0xC its y), $s0 the player.
 extern "C" void dino_treasure_lift_starts(uint8_t* rdram, recomp_context* ctx) {
     gpr state = ctx->r19, placement = ctx->r17, player = ctx->r16;
-    if (!restored() || player == 0 || (int32_t)MEM_W(0x4, state) != wind_on || (int32_t)MEM_W(0x8, state) != wind_down) {
+    if (!restored() || player == 0 || (int32_t)MEM_W(0x4, state) != wind_on || (int32_t)MEM_W(0x8, state) != wind_down ||
+        dino::player_carries(rdram, (int32_t)player)) {
         return;
     }
     float base = read_float(rdram, placement + 0xC);

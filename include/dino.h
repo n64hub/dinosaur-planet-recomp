@@ -47,6 +47,10 @@ namespace dino {
     void add_force_point_options(recomp::config::Config& general);
     // CloudRunner Fortress's treasure lift setting (cloudrunner.cpp).
     void add_cloudrunner_options(recomp::config::Config& general);
+    // CloudRunner Fortress's wind bridge setting (cloudrunner_barrels.cpp), and whether the player object carries
+    // something.
+    void add_cloudrunner_barrel_options(recomp::config::Config& general);
+    bool player_carries(uint8_t* rdram, int32_t player);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }
