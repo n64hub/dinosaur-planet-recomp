@@ -59,6 +59,9 @@ namespace {
     std::chrono::steady_clock::time_point last_take{};
     std::atomic<float> scripted_x = 0.0f;
     std::atomic<float> scripted_y = 0.0f;
+    // The camera's yaw at its last tick, and whether it has ticked.
+    std::atomic<int32_t> view_yaw = 0;
+    std::atomic<bool> view_known = false;
     bool turned = false;
 
     const std::string free_camera = "free_camera";
@@ -210,6 +213,15 @@ void dino::add_mouse_buttons(uint16_t* buttons) {
     }
 }
 
+bool dino::camera_forward(float* x, float* z) {
+    // The yaw is the camera's bearing from its focus turned half a turn (stop_at_walls), so it holds when a wall has
+    // pressed the camera up against the player and their positions no longer say which way it looks.
+    float yaw = (float)view_yaw / binary_angle;
+    *x = -std::sin(yaw);
+    *z = std::cos(yaw);
+    return view_known;
+}
+
 void dino::set_scripted_camera(float x, float y) {
     scripted_x = x;
     scripted_y = y;
@@ -311,6 +323,8 @@ extern "C" void dino_camera_turn(uint8_t* rdram, recomp_context* ctx) {
     gpr state = ctx->r4;
     gpr focus = (gpr)MEM_W(0xA0, state);
     gpr bss = (gpr)MEM_W(0xC, ctx->r28);
+    view_yaw = (int16_t)MEM_H(0, state);
+    view_known = true;
     float yaw_turn;
     float pitch_turn;
     take_turn(&yaw_turn, &pitch_turn);

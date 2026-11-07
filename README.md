@@ -47,8 +47,9 @@ Fixed:
   Krystal, the Swap Store's item beams as the player walks in, a crash after a long while in Cape Claw, where more
   sounds at once than an audio frame's command list holds wrote past its end, a small basket or crate carried out
   of the place it was found, which the game freed in the player's hands, Dragon Rock's fight with the Skeetlas,
-  which after a minute or two drew more than the game had made room for and wrote over the models, and a swing
-  pressed on the very frame the player comes back after a death, before the staff or sword was made.
+  which after a minute or two drew more than the game had made room for and wrote over the models, a swing
+  pressed on the very frame the player comes back after a death, before the staff or sword was made, and Golden
+  Plains' portable hole spell, whose pickup made a new player every frame until the game ran out of memory.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
@@ -63,6 +64,16 @@ Fixed:
 - Cape Claw's Krazoa tablets (Krazoa Tablets on Restored): the third tablet, which the prototype never placed, is
   found where the sand worm fell, and the tablet room's last puzzle, which led nowhere, opens a Transporter to Krazoa
   Palace.
+- The Kamerian Dragon under Dragon Rock (Kamerian Dragon on Restored): its health ran out and the fight went on, and
+  the fourth SpellStone, which the Desert Force Point's second place takes, was nowhere. It now dies once its health
+  runs out and leaves the fourth SpellStone in Krystal's hands, and stays gone.
+- Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
+  the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
+  was. The prototype started the fight again after his fall, so the game never ended.
+- The Desert Force Point's second SpellStone (Desert Force Point on Restored): Golden Plains filled its place each time
+  it loaded, so the stone stayed carried and SwapStone Circle refused the swap back to Sabre, and nothing led up from
+  the force point's floor to the duct that reaches the place. Golden Plains now leaves the place to the player, and a
+  second of the force point's own lifts stands in the corridor behind the round door, under the duct.
 - Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
   ended, and could crash.
 - Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
@@ -74,8 +85,7 @@ Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
-- The ending the prototype never had: Krazoa Palace's four wings, and a Drakor who can be beaten, with what follows
-  him.
+- The way to the ending the prototype never had: Krazoa Palace's four wings.
 
 ## The ROM
 
@@ -103,6 +113,14 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
   tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
   tablet is nowhere, and the puzzle's end leads nowhere.
+- **Kamerian Dragon** (General): Restored has the Kamerian Dragon under Dragon Rock die once its health runs out and
+  leave the fourth SpellStone for the Desert Force Point. Original is the prototype as it was left: the fight never
+  ends, and the fourth SpellStone is nowhere.
+- **Desert Force Point** (General): Restored leaves the second SpellStone's place empty until the player places the
+  stone, and adds a lift up to the duct that leads there, in the corridor behind the round door. Original is the
+  prototype as it was left: Golden Plains fills the place, and nothing leads up to it.
+- **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
+  own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 
 Controls are rebound in Controls. A cutscene's camera and the first person view are the game's own in either mode.
 
@@ -133,6 +151,11 @@ On Linux the same lines take `clang` and `clang++` in place of `clang-cl`, and t
 
 `syms/` is written from the ROM by `tools/gen_syms.py` (its header says how; it needs spimdisasm and n64sym's
 signatures). Only a change to how it finds functions needs it again.
+
+`tools/dino.py` reads the game's code from the ROM in names, for working out what it does: `dis` prints one function
+with its registers, GOT loads, DLL calls and bits named from `syms/names.toml`, `calls` every call to a function, an
+export or a bit with its arguments, `map` a map's placements, `def` an object def and `warp` the warp table. Its
+header says how; it needs the rabbitizer spimdisasm installs.
 
 ## License
 

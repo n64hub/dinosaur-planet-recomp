@@ -17,7 +17,7 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
 - `--bits <hex>[=<value>][@<seconds>],...` sets more of the game's bits at the start, after the point's own, or one
   given a time when the `--input` clock reaches it: what a test's own object sets, for a test a script can't play.
 - `--report` prints a line a second, from the start or from the game's first pass without `--story`: the clock, the map
-  number, the position and the health. A run's `--story:` line says what started.
+  number, the position, the health and the magic. A run's `--story:` line says what started.
 - `--watch-bits <hex>,...` prints a `bits:` line each time the game sets one of those bits, with the clock, the value
   and the one it had, and `--watch-bits all` one each time any bit changes: what a test or a cutscene sets, as it
   happens. With or without `--story`.
@@ -74,22 +74,28 @@ file 19, each task's name and clue), which says when the player swaps.
 - `before-gp-shrine` (42), `before-nw-shrine` (37), `before-cc-shrine` (41), `before-wg-shrine` (39): Krystal with all
   four of those spirits. The task list stops before these (from task 107 it holds placeholders), so their order and
   who plays them are not known from the ROM.
-- `before-cloudrunner`: Krystal at Moon Mountain Pass (warp 73), with two spirits and the first SpellStone placed.
-- `before-desert-force-point`: Krystal in Golden Plains (warp 31), carrying CloudRunner's SpellStone.
+- `before-cloudrunner`: Krystal at Moon Mountain Pass (warp 73), with two spirits and the first SpellStone placed,
+  and SwapStone Circle at its act 9, where its chief gives the pass's key (CloudRunner Fortress).
+- `before-desert-force-point`: Krystal in Golden Plains, at its setuppoint 0 where the way from SwapStone Circle comes
+  in, carrying CloudRunner's SpellStone. Its warp, 31, stands under the sand: a start there falls and is put back.
 - `before-walled-city`: Sabre in Walled City (warp 91), with the second SpellStone placed.
 - `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone.
-- `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits and three SpellStones
-  placed.
+- `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits, three SpellStones
+  placed and Golden Plains' portal spell (0x5BD, its PortalSpell, dll272), which DR_SupPortal on the top opens to.
+- `after-dragon-rock`: Krystal in Golden Plains (its setuppoint 0), carrying the fourth SpellStone (0x7A8) that the
+  Kamerian Dragon leaves with Kamerian Dragon on Restored, for the Desert Force Point's other place.
 - `before-drakor`: the same, at BOSS Drakor's setuppoint (map 44), which no warp entry reaches.
 
 The later SpellStones are told by the SpellPlace that takes each: a placement's +0x1E is its placed bit and +0x20 the
 bit of the stone carried, as VFP_SpellPlace (637) takes the first as 0x877 and 0x123. CloudRunner's, won in its race
-(CRSpellstone in map 43 holds 0x49F), is carried as 0x2E8 to the Desert Force Point (DFP_SpellPlace in map 21,
-placed 0x5F3). Walled City's is carried as 0x83B to the Volcano Force Point's second place (0x878). The fourth is
-carried as 0x7A8 to the Desert Force Point's other place (0x5F4): no code sets 0x7A8 by number, and in map 21 a
-DFP_seqpoint (dll642) holds it at +0x1E and DFP_TargetBlock (650) at +0x1E beside 0x7A7, the bit DFP_PitSwitch (308)
-holds. (Curves' params hold the low halves of other curves' uids, not bits.) A start in a cell no map fills loads nothing (the player falls and is put back, forever):
-Dragon Rock's own setuppoint 0 is in one, so `before-dragon-rock` starts at its setuppoint 2.
+(CRSpellstone in map 43 holds 0x49F), is carried as 0x2E8 to the Desert Force Point (DFP_SpellPlace in map 21, placed
+0x5F3). Walled City's is carried as 0x83B to the Volcano Force Point's second place (0x878). The Desert Force Point's
+other place (0x5F4) holds 0x7A8 at +0x20, but 0x7A8 is no stone: it is a target block's landing, and the place takes a
+stone used from the item menu by the force point's act (Golden Plains and the Desert Force Point). (Curves' params
+hold the low halves of other curves' uids, not bits.) With Kamerian Dragon on Restored the Kamerian Dragon leaves a
+stone that sets 0x7A8 (The story after the first SpellStone, below). A start in a cell no map fills loads nothing (the
+player falls and is put back, forever): Dragon Rock's own setuppoint 0 is in one, so `before-dragon-rock` starts at
+its setuppoint 2.
 
 ## The story after the first SpellStone
 
@@ -112,16 +118,37 @@ only to its tasks up to 39, so the rest is told by the levels' own objects. In i
 Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
 
 - Dragon Rock - Top (map 2) and - Bottom (52), and BOSS Kamerian Dragon (53), placed in full. Their cells join Willow
-  Grove's at layer 0, so they are reached on foot; no code warps there by number. DR_SupPortal (754) on the top warps
-  to the bottom (warp 88). The Kamerian Dragon's room boots and fights: its acid takes the player's health.
-- BOSS Drakor (44): the fight is built and plays, but it never ends. No warp entry and no map of the story reaches
-  it: its cells touch no other map's, and the only code that starts it is dll70, the prototype's own development warp
-  menu (`func_800141A4(44, ...)`). Drakor (697) starts with 24 health (+0x348, set by dll33's start-up, 0x20F4), and
-  nothing lowers it: a hit (697 0x0838) only sends him to his second state, which lets the Diamond go (BossDrakorLevel,
-  692 0x02F8: 0x7C6, and 0x7C5 as the state ends), and he has no death state. Walking to the Diamond while it is let
-  go sets 0x7AE (692 0x0FE0), which plays the map's sequence 1 once and sets 0x7AF. Nothing reads 0x7AF, and none of
-  the map's four BossDrakor_sequ (309) holds a warp entry: no map, warp or credits follows. Played two minutes with
-  the player attacking, the level went 0x7AC (its intro), 0x7C6, 0x7C5, 0x7C6 again, the player's health 12/12.
+  Grove's at layer 0, so they are reached on foot; no code warps there by number. The top's ProjectileSpell (dll272)
+  gives the projectile spell (0x5CE). Its DR_SupPortal (754) is hidden once 0x776 is set (which only HitAnimator 353
+  beside it reads); with the player's spell the portal spell (0x5BD, from Golden Plains) it plays its sequence, and
+  its trigger plane sets 0x783, on which it warps to the bottom (warp 88). In a run from `before-dragon-rock` the
+  portal loaded only once in four minutes, and 0x783 set by hand without it warps nowhere, so what loads it is not
+  known yet. The bottom and the dragon's room share a grid cell, and the room's floor (y -1805) is the bottom's east
+  end's.
+- BOSS Kamerian Dragon (53): KamerianBoss (dll707) and the Nurse (708). The fight is built and can't be won: each hit
+  in its last stage lowers its health (10 at the start), nothing reads it, and at 0 it wraps and the fight goes on.
+  Nothing anywhere gives the fourth SpellStone (0x7A8), which the Desert Force Point's other place takes. Dragon Rock
+  is the one place the task list's story doesn't reach that has a boss, and the fourth SpellStone the one thing the
+  story still lacks, so Kamerian Dragon on Restored, the default, has the dragon die at 0 and leave that SpellStone in
+  the player's hands (that it gives the fourth is read from the story's shape, not from the ROM); Original plays as
+  the console does (`src/game/dragon_rock.cpp` has the stages and the evidence). Played from `before-dragon-rock`
+  with `--place 1925,-1805,-5965 --bits 5ce` and an `--input` that every 10 s opens the spell scroll (C-left), takes
+  the projectile spell into aim view (A), pitches up a little more each time and fires (A): the stages set at 31 s
+  and 35 s and a hit lowered its health at 51 s. With `DINO_DRAGON_HEALTH=1` that hit killed it: 0x7A8 set at 51.9 s, and the dragon
+  and the Nurse were gone. The Nurse knocks the player about, into the pit beside the dragon too (y -1993), and a
+  KamSwitch (285) hit by the projectile raises a KamColumn (709) out of it.
+- BOSS Drakor (44): the fight is built and is won, but nothing followed the win. No warp entry and no map of the story
+  reaches it: its cells touch no other map's, and the only code that starts it is dll70, the prototype's own
+  development warp menu (`func_800141A4(44, ...)`). Drakor (697) starts with 24 health (+0x348, set by dll33's
+  start-up, 0x20F4), and nothing lowers it, nor needs to: a hit (697 0x0838) sends him to his second state, which lets
+  the Diamond go (BossDrakorLevel, 692 0x02F8: 0x7C6, sequence 2), and the player, Drakor and the Diamond drop into the
+  room under the fight. Walking to the Diamond there sets 0x7AE (692 0x0FE0), which plays sequence 1, Drakor's fall
+  (and sets 0x7AF, which nothing reads). His second state gives the player 43 s from the hit; then the Diamond goes
+  back (0x7C5, sequence 3) and the fight goes on. Sequence 1 sends no event and none of the map's four
+  BossDrakor_sequ (309) holds a warp entry, so on the console the fight starts again after his fall. The Ending
+  setting, Restored, goes back to the title there (`src/game/drakor.cpp`). Played from `before-drakor` with
+  `--input`: A every half second from 12 s to 25.6 s hits him (0x7C6 at 25 s), the stick held up from 27 s walks the
+  player to the Diamond (0x7AE at 47-49 s), and the title follows at 82 s.
 - Cape Claw's Krazoa tablets: file 55 gives bits to tasks 133 to 136 (0x238, 0x239, 0x237, 0x3AC), which the task
   list names only as placeholders. The three receptacles (CCkrazoaRecepta, 308) take tablets counted in 0x23B and
   are done as 0x238 to 0x23A; CCkrazoaTablet (459) sets 0x3A9 once all three are placed. CCkrazoaBits (458) counts
@@ -162,9 +189,120 @@ create, `func_800213EC`, passes what it made to `func_80021A84` with no test, so
 memory crashes there, under the MagicPlant (dll290) or SHBirchTree (dll520) that asked for it, as all of them on did
 with what the title holds still held (src/game/story.cpp lets go of it).
 
+A place in Cape Claw's walled part needs a bit too. A VisAnimator (354) hides the shapes of its groups in its block
+while its bit is clear, and TriggerPlanes toggle those bits as the player crosses them (action 0x12, with 0x8000 on
+the bit). In map 29, 0x2C0 shows the tablet room and the rooms around it, 0x2C1 the rooms north of them and 0x2B4 the
+sea and the east tunnel. The planes that toggle 0x2C0 are in the hall west of the room (uid 41FC0) and the tunnel east
+of it (352FB), so a player who walks in sees the room (played, both). `--place` crosses neither, and draws night sky
+over black with the objects floating, so a test there needs the bit: `--story before-cc-shrine --place 4400,-7,17600
+--bits 2c0`. Warp entries 71 and 72 land in the room and set it themselves (`src/game/krazoa.cpp`).
+
+## CloudRunner Fortress
+
+Tasks 56 to 68, played from `before-cloudrunner` on the desktop build a link at a time, each started with `--place`
+and the bits of the links before it. None of it needed a fix to the game; the story point did (SwapStone Circle's act).
+World coordinates: the fortress (map 12) lies at cell (-15, 29), its treasure caves (15) at (-20, 28) on layer -1 and
+the race (43) at (-20, 29) on layer -2.
+
+- The key. SwapStone Circle's chief (SC_chieflightfoot, 518) gives it only at the circle's act 9, the 4-bit field
+  0xE7, which SC_levelcontrol (519) moves on as the player enters map 14. Talked to, he sets 0x60E and 0x60F, and his
+  sequence sets 0x611, the bit Moon Mountain Pass's padlock needs. Played.
+- The courtyard. Its roof (CFBlastedRoof, 389) sets 0x2E1 after two explosions; with 0x2E1 the floor below
+  (CFExplodeFloor, 390) blows, its pieces set 0x43, and the force field fades (0x34F, 0x359). Played from 0x2E1 set:
+  what explodes on the roof is not played.
+- The explosive key. The courtyard's guard, beaten, sets 0x4DF, and CFExplosiveKey (272) appears, 0x8FC once picked
+  up. Its door, CCExplosiveDoor (308) in the corridor's east wall at (-13003, 2049, 18679), takes it from the item
+  menu: 0x8FC is taken and the door's sequence sets 0x8FF. Played, the key's pickup by bit.
+- The wall. Behind that door are four CFbarrels (388). A barrel explodes at its third hit, or at once to an explosion
+  or fire, but counts hits only after it has been picked up, and a script beside one pressing A, B, Z, L, R or a C
+  button never lifted it, so carrying one is not played. An explosion at CFBlastedWall (389), in the same wall at
+  z 18879, sets 0x8C9; CFExplodeWall (390) then blows (0x8CA), and walking east through it drops the player into the
+  treasure caves in two seconds. Played from 0x8C9 set.
+- The race. Its bikes are in map 43's group 1 (`--bits 4a3=7`). Beating the ClubSharpClaw sets 0x4BA. A beside
+  CRSnowBike mounts it (0x49D, 0x497) and the race runs; a lost race (0x499) puts the player back beside the bike. Five
+  rams on CRSnowClaw drop the SpellStone (CRSpellstone, 730), 0x2E8 once picked up, and 0x49A then runs the
+  sequence that sets 0x49F. Played to a lost race; the win is read from the code.
+- Bonehead, CFGuardian (369) in map 43, keeps its state in the field 0x4B and starts from it: 6 with the power on
+  (0x57), 9 with 0x43, 10 with 0x4BE (which needs 0x8D1 and 0x300), 12 with 0x4C1. At 12, 0x4B7 plays its sequence
+  11 and with 0x49A moves it to 13; at 13 the SpellStone used on it from the item menu sets 0x4AB, its sequence sets
+  0x4AA, and it goes to 14. Played from 13.
+
+An object that wants an item (a lock, dll308, its item at +0x1E; CFGuardian) takes it only as used from the item menu,
+never from the bit alone. C-right opens Krystal's items (dll1's menu 1), A uses the one shown and closes the menu, and
+the object takes it in the frame the player presses A with it targeted: dll2 sets the target's +0xAF bit 0 then, with
+the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
+one asked for. In an `--input` script, standing at the object: A, C-right, A.
+
+Not played: the dungeon (map 16), the power, Kyte, the five baby CloudRunners (the fifth is in map 15, from the master
+chest, which needs 0x529 and 0x8CC), the gold, and the way from the treasure caves to the race. Nothing sets 0x4B8, the
+bit CFGuardian's sequence at 0x1D5C waits on.
+
+## Golden Plains and the Desert Force Point
+
+Tasks 69 to 74, played from `before-desert-force-point` on the desktop build a link at a time, each started with
+`--place` and the bits of the links before it. World coordinates: Golden Plains (map 9) lies at cell (-6, 19), the
+force point's top (50) at (1, 17) and its bottom (21) at (1, 16), both on layer -1 (a `--place` there gives layer
+-1: at layer 0 the bottom's floor never loads and the player falls), SwapStone Circle (14) at (-3, 24).
+
+- The portable hole spell. Its pickup crashed the game (us.toml's hook on dll3_9E58 says why); fixed, it is taken by
+  playing (0x5BD). Cast at PortalSpellDoor (map 9 uid 34d9c) it sets 0x796, and the hole leads into the top.
+- The top. Two torches (dll640) each want Krystal's fire bolt, the second within 0x7D0 ticks of the first, and set
+  0x5E2. The door switch (643, uid 33eda) then takes the stone used from the item menu, plays sequence 0x78C and sets
+  0x5E3, and DFPLift1 (641) rises to the player and carries them down to the bottom (about 48 s). Played.
+- The bottom's power. A door switch at (692, -1459, 9922) takes the stone again (0x5E7) and opens the round door
+  west. Walking west plays Kyte's cutscene (0x5F2, then 0x5EB). Four pads (fff, 639) each send a ScorpionRobot (0x427),
+  whose death sets the next pad's bit, 0x5EE, 0x5EF, 0x5F0 and 0x5F1. With 0x5F1 DFP_LevelControl (638) turns group 4
+  on and DFP_SmallDoor (uid 34662, north-west of the platform) opens into the room under it, whose force beams take a
+  health a few seconds. Its DFP_ForceSwitch (308, uid 346d5), pressed with A, sets 0x5ED: the power flow shut down.
+  Out again, the door switch south of the platform (uid 346bc) takes the stone, plays 0x78C and sets 0x5E8, and
+  DFP_RoundDoor (uid 3393d) opens on a corridor south to the rotating ring puzzle (647). Played, every link.
+- The place. The second SpellStone's place (DFP_SpellPlace, 652, uid 35111) stands on a platform at y -1255, 204 above
+  the floor, and is in group 7, which the TriggerPlanes at the target block room's door (955, -1435, 8973) and at
+  (1896, -1459, 8623) turn on as the player walks in (command 0x13; 0x14 turns a group off). In act 1 it takes the
+  stone (0x2E8) used from the item menu within 100 units, plays sequence 0x373 and sets 0x5F3, then 0x78C, and 0x2E8
+  goes at the sequence's end, some 34 s later. The platform's walkway is one surface with a closed duct at y -1249
+  that rings the rooms in two C shapes, with zone planes, setup points and lights along it. Eighteen stubs leave the
+  duct and open high in the corridors' walls, with no collision on their mouths: a lip is at -1286, the floor at -1459
+  and the slope under a lip stops at -1395, and no surface in the ROM joins the floor to a lip. The force field under
+  the platform (DFP_ForceAway, 646 kind 3, uid 347f2) takes two health every 200 ticks and lifts nobody, and
+  DFP_Textblock (654) and DFP_Platform1 (655) move only from 0x7BF, in act 3. Desert Force Point on Restored stands a
+  second DFPLift1 (641) under the stub at (-275, 9280), in the corridor behind the round door, with that corridor's
+  travel (`src/game/force_point.cpp`). Played on Restored from the corridor (`--place -324,-1459,9660,-1` with the
+  power's bits, 0x5E2 to 0x5E8): onto the lift, which rises once the player stands on it, off it into the stub, along
+  the duct and the walkway to the place, A, C-right, A: 0x5F3, 0x78C, and 0x2E8 cleared; then back along the duct
+  and down the lift to the corridor. The lift waits at the top while the player is off it and takes them down again,
+  as the force point's own lift does. On some of those plays the game crashed a second into the sequence, drawing an
+  effect whose object was freed (`src/game/objects.cpp`, fixed). On Original no lift stands there.
+- The acts. DFP_LevelControl keeps the force point at act 1, and nothing moves it to 2
+  or 3. The other place (uid 40323, east) takes a stone only with 0x7A8 set: in act 1 the stone carried as 0x2E8
+  (played with 0x7A8 set: 0x5F4 at 17.5 s), in act 2 the one carried as 0x123. 0x7A8 is DFP_TargetBlock 401bb's
+  landing, the end of a chain only half of which a player can reach: 0x7A0, which nothing in map 21 sets, lets a door
+  switch (uid 40143) take the stone for 0x7A1, the pit switch (401a8) then sets 0x7A7, and the block slides to 0x7A8,
+  which also plays DFP_seqpoint 4031e's sequence 1. Its twin in the west starts at 0x681 (group 6, and the pit switch
+  3461b's 0x69A) and ends at 0x766, Kyte's cutscene by the pit (DFP_seqpoint 35104) and the duct's lights. With
+  Kamerian Dragon on Restored the dragon under Dragon Rock sets 0x7A8 as it dies, so the place takes the stone
+  carried after Dragon Rock (`after-dragon-rock`).
+- The mirage. Golden Plains' level control (GP_LevelControl, 547) sets 0x5F3 each time the map loads (dll547_0018,
+  0xBC-0xC8), so a player who comes through Golden Plains finds the place holding a stone already, and the stone stays
+  carried (0x2E8), which the swap to Sabre refuses. Desert Force Point on Restored keeps 0x5F3 as it is there. The two
+  TriggerPlanes at the force point's door (map 9 uids 4031d and 4032c) wait on 0x5F3: crossing 4031d at
+  (1141, 334, 12593) sets 0x651, and GPSeqObject 348b8 plays the mirage (a cloaked figure, Krystal, Kyte) and sets
+  0x652; 4032c, by the hole, sets 0x7B7 for GPSeqObject 4059e (0x7B3). Played, 4031d.
+- The swap to Sabre ("RETURN TO SWAPSTONE CIRCLE"). The stone (SHswapstone, 515) and its pad (SHswaplift, 514, uid
+  42238, where warp 14 lands) are in group 0 of 0x4A6, which the circle's planes turn on as the player walks in. A with
+  the player on the pad (its hit list holds the player) sets 0x3EB, and SHseqobject 41fd9 plays sequence 0x107: the
+  pad lifts the player to the stone, which meets them the first time ("Hello there little fellow, I'm Rocky.", 0x883)
+  and opens SWAP, SHOP and WARP. Stick left, then A, swaps to Sabre (0x885, or 0x884) and warps to SwapStone Hollow;
+  it is refused while a spirit, 0x2E8 or 0x123 is carried. 0x883 only skips the meeting the next time, and 0x4B8 only
+  moves the circle's act (sequence 0x2AB, at CloudRunner's race). Played with 0x883 clear (`--story
+  before-desert-force-point,14 --bits 2e8=0,5f3=1,652=1,4a6=1`, A, then stick left and A): 0x3EB, 0x883, 0x885, and
+  Sabre in map 7.
+
 ## The bits
 
 Each with what shows it, by the DLL that reads or sets it (`dll <n>`) or the task the table in file 55 gives it.
+`tools/dino.py calls bit <bit>` lists every call that sets or reads one with an immediate bit, and a name added to
+`syms/names.toml` shows wherever the tool prints it.
 
 `to_first_shrine`, what the game has set by the first shrine:
 
@@ -209,10 +347,11 @@ a tenth of Diamond Bay's depth. A BWLog (793) moves only on DFriverflows' pushes
 
 A map's objects come in groups, and most of a level's enemies and props load only while their group is on. Each
 object's setup in ROM file 31 has a flags byte at +4 and its group at +6: with flag 0x10 the object loads only while
-bit `group` of its map's group field is set. A map's field is a story value of 32 bits, numbered by the u16 at
+bit `group` of its map's group field is set (`tools/dino.py map <map>` prints the field and each placement's group).
+A map's field is a story value of 32 bits, numbered by the u16 at
 +0xF0 + 2 × map in dll29's data, and dll29's export 18 reads it. Some maps' fields: 0x480 Discovery Falls (6), 0x4A6
-SwapStone Circle (14), 0x42E Moon Mountain Pass (18), 0x3B7 Cape Claw (29), 0x601 Swap Store (51), 0x5DC Dragon
-Rock - Bottom (52).
+SwapStone Circle (14), 0x42E Moon Mountain Pass (18), 0x458 CloudRunner Fortress (12), 0x45A its treasure caves (15),
+0x4A3 its race (43), 0x3B7 Cape Claw (29), 0x601 Swap Store (51), 0x5DC Dragon Rock - Bottom (52).
 
 A story point turns no group on, so a level started from one has only its ungrouped objects: Moon Mountain Pass's
 Lunaimars are in groups 3 to 7, Cape Claw's worm in group 10 and its SandEels in 11 and 12, and the Swap Store's
@@ -291,8 +430,9 @@ The task list has more here than the ROM:
 
 ## The warp table
 
-ROM file 30 has 96 entries of 16 bytes, x, y, z and a layer, read by `func_8004D1D4`. 54 hold a place and 42 are all
-zero, and the game's own code warps to some of them (dll 408 to 26, SHswapstone to 86). Each entry below was booted by
+ROM file 30 has 96 entries of 16 bytes, x, y, z and a layer, read by `func_8004D1D4` (`tools/dino.py warp` prints
+each with the maps whose cells hold it and the code that warps there). 54 hold a place and 42 are all zero, and the
+game's own code warps to some of them (dll 408 to 26, SHswapstone to 86). Each entry below was booted by
 `--story new-game,<index>`, played 15 s with no story state and looked at. "Boots" is alive and drawn, with the player
 on a floor and no crash; it says nothing about what the level needs further in.
 

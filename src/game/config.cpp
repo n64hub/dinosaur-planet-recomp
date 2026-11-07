@@ -22,6 +22,9 @@ void dino::init_config() {
     recomp::config::Config& general = recompui::config::create_general_tab(general_options);
     dino::add_camera_options(general);
     dino::add_krazoa_options(general);
+    dino::add_drakor_options(general);
+    dino::add_dragon_rock_options(general);
+    dino::add_force_point_options(general);
     recompui::config::create_controls_tab();
     recompui::config::create_graphics_tab();
     recompui::config::create_sound_tab();

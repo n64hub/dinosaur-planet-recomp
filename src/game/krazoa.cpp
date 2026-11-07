@@ -78,6 +78,11 @@
 //   coordinates. Its two KP_Transporters (dll334) send to each other, east (@0644, own entry 94) to west (@0668, 93),
 //   both empty entries. A Transporter in the tablet room, shown by 0x52B, sends to 94 from its own entry 72 (empty),
 //   and 93 and 94 are filled where the palace's Transporters stand.
+// - The tablet room's model is in the ROM (map 29's blocks 932 and 933), and eight VisAnimators (dll354) hide it
+//   and the rooms around it, each the shapes of its groups, while 0x2C0 is clear. Two TriggerPlanes toggle 0x2C0 as
+//   the player crosses them (action 0x12 with 0x8000 on the bit): uid 41FC0 in the hall west of the room and 352FB in
+//   the tunnel east of it, so a player who walks in has it set (played, both) and it is saved. Warp entries 71 and 72
+//   land inside with no plane crossed, so they set it, which changes nothing for a player who walked in.
 
 #include <cstdint>
 #include <cstdio>
@@ -154,6 +159,7 @@ namespace {
     constexpr int tablets_counted = 0x23B;    // the tablets counted, which the receptacles read (+0x1E)
     constexpr int tablet_new = 0x23C;         // opens the settlement room (dll307)
     constexpr int tablets_done = 0x52B;       // Cape Claw's tablet room solved, Restored
+    constexpr int tablet_area = 0x2C0;        // the VisAnimators' bit that shows the tablet room's part of map 29
 
     int warlock_act = 0; // as WL_LevelControl last read it, for dll611's release
 
@@ -235,6 +241,7 @@ namespace {
         int index;
         float x, y, z;
         Setting setting;
+        int area; // a bit that shows the part of its map the entry is in, set on the way there, or 0
     };
 
     // Each entry is a place the map it is in holds, in world units (a map's placement + 640 times its world grid cell,
@@ -248,8 +255,8 @@ namespace {
         { 67, -4523.2f, -1316.0f, -4004.5f, Setting::Shrines },
         { 68, -7939.2f, -1123.0f, -7441.1f, Setting::Shrines },
         { 70, -833.3f, 208.0f, 13285.5f, Setting::Shrines },
-        { 71, 4200.3f, -7.1f, 17613.1f, Setting::Shrines },
-        { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets },
+        { 71, 4200.3f, -7.1f, 17613.1f, Setting::Shrines, tablet_area },
+        { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets, tablet_area },
         { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
     };
@@ -379,6 +386,10 @@ extern "C" void dino_krazoa_warp_entry(uint8_t* rdram, recomp_context* ctx) {
             memcpy(&MEM_W(0x4, entry), &w.y, 4);
             memcpy(&MEM_W(0x8, entry), &w.z, 4);
             MEM_W(0xC, entry) = 0;
+            if (w.area != 0) {
+                Calls calls(rdram, ctx);
+                set(rdram, ctx, w.area, 1);
+            }
         }
     }
 }
