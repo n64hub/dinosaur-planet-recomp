@@ -362,7 +362,9 @@ static std::string game_thread_name(const OSThread* t) {
 // hex>" waits instead for the bit's next set to a value other than 0 once the part before it has started, for a bit the
 // game sets again and again (a fight's round, a counter), and "sync near <object id hex> <x> <z> <reach>" for the
 // nearest drawn object of that id to come within reach of that place once the part before has started (an enemy that
-// runs a path, for a press timed to where it is). In place of x y,
+// runs a path, for a press timed to where it is), and "sync act <object id hex> <act>" for the nearest drawn object of
+// that id to be in that act of its state machine (dll18's, state +0x26C: an enemy's attack or pause, which then runs as
+// long as its animation does). In place of x y,
 // "to <x> <z>" walks the player toward that place and "chase <object id hex> [reach]" toward the nearest object of that
 // id, each until within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
@@ -383,11 +385,12 @@ static std::atomic<float> steer_stick_x = 0.0f;
 static std::atomic<float> steer_stick_y = 0.0f;
 // Each sync line's bit (or object for a near), and the --input time it started (-1 until then). Part 0, before any,
 // starts at 0.
-enum class SyncKind { First, Next, Near };
+enum class SyncKind { First, Next, Near, Act };
 struct InputPart {
     SyncKind kind;
     int bit;
     float x, z, reach;
+    int act;
 };
 static constexpr int max_input_parts = 64;
 static InputPart input_part[max_input_parts];
@@ -399,7 +402,8 @@ static double script_seconds();
 static void start_input_part(int i) {
     input_part_start[i] = script_seconds();
     fprintf(stderr, "--input: part %d (sync %s0x%X) at %.1f s\n", i,
-        input_part[i].kind == SyncKind::Next ? "next " : input_part[i].kind == SyncKind::Near ? "near " : "",
+        input_part[i].kind == SyncKind::Next ? "next " : input_part[i].kind == SyncKind::Near ? "near " :
+        input_part[i].kind == SyncKind::Act ? "act " : "",
         input_part[i].bit, input_part_start[i].load());
 }
 
@@ -416,6 +420,7 @@ static void load_input_script(const char* path) {
         InputPart part{};
         if (input_parts < max_input_parts && (sscanf(line, "sync next %x", &part.bit) == 1 ? (part.kind = SyncKind::Next, true) :
             sscanf(line, "sync near %x %f %f %f", &part.bit, &part.x, &part.z, &part.reach) == 4 ? (part.kind = SyncKind::Near, true) :
+            sscanf(line, "sync act %x %d", &part.bit, &part.act) == 2 ? (part.kind = SyncKind::Act, true) :
             sscanf(line, "sync %x", &part.bit) == 1)) {
             input_part[input_parts] = part;
             input_part_start[input_parts] = -1.0;
@@ -465,7 +470,8 @@ extern "C" void dino_input_bit_set(int bit, int value) {
     // Last part first, so a sync next after a part this same set starts waits for the set after it.
     for (int i = input_parts - 1; i >= 1; i--) {
         const InputPart& part = input_part[i];
-        if (value == 0 || part.bit != bit || part.kind == SyncKind::Near || input_part_start[i] >= 0.0) {
+        if (value == 0 || part.bit != bit || part.kind == SyncKind::Near || part.kind == SyncKind::Act ||
+            input_part_start[i] >= 0.0) {
             continue;
         }
         if (part.kind == SyncKind::Next && input_part_start[i - 1] < 0.0) {
@@ -600,12 +606,14 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     }
     for (int i = 1; i < input_parts; i++) {
         const InputPart& part = input_part[i];
-        if (part.kind == SyncKind::Near && input_part_start[i] < 0.0 && input_part_start[i - 1] >= 0.0 &&
-            dino::story_object_near(rdram, part.bit, part.x, part.z, part.reach)) {
+        if (input_part_start[i] < 0.0 && input_part_start[i - 1] >= 0.0 &&
+            (part.kind == SyncKind::Near ? dino::story_object_near(rdram, part.bit, part.x, part.z, part.reach) :
+             part.kind == SyncKind::Act && dino::story_object_act(rdram, part.bit, part.act))) {
             start_input_part(i);
         }
     }
     dino::story_timed_bits(rdram, ctx, now);
+    { static int last_act = -1; for (int a = 0; a < 12; a++) if (dino::story_object_act(rdram, 0x3D9, a)) { if (a != last_act) fprintf(stderr, "TREXACT %.2f %d\n", now, a); last_act = a; break; } } // TEMP
     static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;
     if (check_heap) {
         dino::heap_check(rdram, now);

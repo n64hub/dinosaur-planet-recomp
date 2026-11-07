@@ -441,6 +441,24 @@ bool dino::story_object_near(uint8_t* rdram, int oid, float x, float z, float re
     return false;
 }
 
+// --input's sync act lines: whether a drawn object of that id is in that act. dll18, the state machine the game's
+// characters run on, keeps the act in the object's state (obj+0xB8) at +0x26C, set by its export 4 as a state starts
+// one (and the act before it at +0x26E).
+bool dino::story_object_act(uint8_t* rdram, int oid, int act) {
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr object = MEM_W(i * 4, all);
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+            continue;
+        }
+        gpr state = (gpr)MEM_W(0xB8, object);
+        if (state != 0 && (int16_t)MEM_H(0x26C, state) == act) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Once a second, what an unattended run needs to tell where the player is and whether the player lives.
 void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     int32_t save = word(rdram, save_pointer);
@@ -481,5 +499,7 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
         memcpy(&fx, &ox, 4);
         memcpy(&fz, &oz, 4);
         fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f\n", seconds, oid, fx, fz);
+        { gpr st = (gpr)MEM_W(0xB8, other); gpr path = st ? (gpr)MEM_W(0x3F4, st) : 0; // TEMP
+          if (path) fprintf(stderr, "TREX %.1f act %d flags %X spd %d fd %d hits %d health %d\n", seconds, (int16_t)MEM_H(0x26C, st), MEM_HU(0xFA, path), MEM_BU(0xFC, path), MEM_BU(0xFD, path), MEM_BU(0x101, path), MEM_BU(0x102, path)); }
     }
 }
