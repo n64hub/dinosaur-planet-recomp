@@ -380,8 +380,9 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // stick x and goes by stick y (CloudRunner's race's CRSnowBike, dll732): the turn its own riders' is (dll732 0x3DAC),
 // the angle from her facing (+0x0) to the target (func_800160E0's of her place less the target's), negated, full at
 // 65 * 32, and the throttle full, eased to 0.3 in a turn of more than 45 degrees, whose circle at full throttle is
-// wider than the bike bay's mouth, or of more than 15 within 300 units, where it would circle the target for good. One
-// pinned on a wall (less than 15 units in a second) backs off for 0.8 s.
+// wider than the bike bay's mouth, or toward a place of more than 15 within 300 units, where it would circle it for
+// good, and to 0.4 within 150 units of a place, so a turn there is made (toward an object it stays full: a ram needs
+// the speed). Backing off a wall moves the bike next to nothing, so a script's places lead around them.
 bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
     bool ride, float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
@@ -455,28 +456,8 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
             turn += 0x10000;
         }
         *stick_x = std::fmax(-1.0f, std::fmin(1.0f, -(float)turn / (65.0f * 32.0f)));
-        *stick_y = std::abs(turn) > 0x2000 || (distance < 300.0f && std::abs(turn) > 0xAAA) ? 0.3f : 1.0f;
-        // Pinned on a wall: moved less than 15 units in a second of riding, so back off for 0.8 s, still turning.
-        static double checked = -1.0, backing_until = -1.0;
-        static float checked_x, checked_z;
-        double now = dino_script_seconds();
-        if (now < backing_until) {
-            *stick_y = -1.0f;
-        }
-        else if (checked < 0.0 || now - checked > 2.0) {
-            checked = now;
-            checked_x = x;
-            checked_z = z;
-        }
-        else if (now - checked >= 1.0) {
-            if (std::hypot(x - checked_x, z - checked_z) < 15.0f) {
-                backing_until = now + 0.8;
-                *stick_y = -1.0f;
-            }
-            checked = now;
-            checked_x = x;
-            checked_z = z;
-        }
+        *stick_y = std::abs(turn) > 0x2000 || (oid == -1 && distance < 300.0f && std::abs(turn) > 0xAAA) ? 0.3f :
+            oid == -1 && distance < 150.0f ? 0.4f : 1.0f;
         return true;
     }
     dx /= distance;

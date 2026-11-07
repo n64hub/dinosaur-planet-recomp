@@ -293,12 +293,17 @@ the race (43) at (-20, 29) on layer -2.
   (0x0774) to -2, map 43 (read, not played).
 - The race. Its bikes are in map 43's group 1 (`--bits 4a3=7`). Beating the ClubSharpClaw sets 0x4BA. A beside
   CRSnowBike mounts it (0x49D, 0x497) and the race runs; a lost race (0x499) puts the player back beside the bike. Five
-  rams on CRSnowClaw drop the SpellStone (CRSpellstone, 730), 0x2E8 once picked up, and 0x49A then runs the
-  sequence that sets 0x49F. Played to a lost race; the win is read from the code: a ram is CRSnowBike's hit of type
-  0x14, made only while the player rides it faster than 2 (732 0x1188-0x1214); CRSnowClaw (728 0x0418) counts four
-  then drops the stone at the fifth, if CRSpellstone is within 500 units of it; the race is lost when the fuel runs out
-  (732 0x0DB4, CRFuelTank adds 3000), not to time; stick Y is the throttle and B the one button read. Nothing in code
-  or placements sets 0x49A.
+  rams on CRSnowClaw drop the SpellStone (CRSpellstone, 730), and picking it up sets 0x2E8, on which CRCloudRace (729
+  0x0308) ends the race. A ram is CRSnowBike's hit of type 0x14, made only while the player rides it faster than 2
+  (732 0x1188-0x1214); CRSnowClaw (728 0x0418) counts four then drops the stone at the fifth, if CRSpellstone is within
+  500 units of it; the race is lost when the fuel runs out (732 0x0DB4, CRFuelTank adds 3000), not to time; stick Y is
+  the throttle and B the one button read. The stone's scene plays, and as it ends, about 12 s after 0x2E8, the game
+  sets 0x49A, though no call in code does (`dino.py calls bit 0x49a` finds only Bonehead's read); map 43's CFseqobject
+  30CCA plays sequence 0x18 on it, a CloudRunner over the treasure, which sets 0x49F. Played to the win: the stone at
+  43 s, 0x49A at 55 s, 0x49F at 69 s. The start launches the bike west out of the bay's mouth, over a bank whose back
+  face it can't climb, so the way back in is the launch's own line, east along z 18940, between the bank and a pillar.
+  `tools/cloudrunner_race_input.txt` is the `--input` script that wins it, from `--story before-cloudrunner --place
+  -13460,1262,18866,-2,0 --bits 4a3=7,4a0,4ba`, steering the bike with `ride` lines (main.cpp).
 - Bonehead, CFGuardian (369) in map 43, keeps its state in the field 0x4B and starts from it: 6 with the power on
   (0x57), 9 with 0x43, 10 with 0x4BE (which needs 0x8D1 and 0x300), 12 with 0x4C1. At 12, 0x4B7 plays its sequence
   11 and with 0x49A moves it to 13; at 13 the SpellStone used on it from the item menu sets 0x4AB, its sequence sets
@@ -342,8 +347,8 @@ one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
 Left to play: 29FA's rescue (no way up to its ledge found), the babies 29B3, map 30's and map 15's (from the master
 chest), Kyte landing at the gold perch (she stays by the sideload that loaded her, so 0x8D1, 0x4BE and 0x4C1 are read,
-not played), the way from the caves to the race and the race won. Read from the ROM, nothing sets 0x4B7, 0x4B8
-(CFGuardian's sequence at 0x1D5C), 0x49A or 0x4DC, and Krystal makes no hit of type 0xF, which the ProjectileSwitches by
+not played) and the way from the caves to the race. Read from the ROM, nothing sets 0x4B7, 0x4B8
+(CFGuardian's sequence at 0x1D5C) or 0x4DC, and Krystal makes no hit of type 0xF, which the ProjectileSwitches by
 the main door take, but by the two ZBombs there.
 
 ## Golden Plains and the Desert Force Point

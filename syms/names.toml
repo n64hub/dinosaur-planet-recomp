@@ -462,7 +462,7 @@ bit = 0x499
 name = "snow_race_lost"  # the bike's fuel run out (dll732 0x0DB4)
 [[bit]]
 bit = 0x49A
-name = "snow_race_won"  # set by nothing in the ROM; CloudRunner Race on Restored sets it as the stone is taken
+name = "snow_race_won"  # set ~12 s after 0x2E8, as the stone's scene ends: no call in code sets it
 [[bit]]
 bit = 0x49F
 name = "snow_race_scene_done"  # set by map 43's CFseqobject 30CCA as sequence 0x18 ends
