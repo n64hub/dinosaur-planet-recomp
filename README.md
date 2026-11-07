@@ -125,9 +125,10 @@ Fixed:
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
 - Walled City's way in (Walled City on Restored): the prototype never built the tasks its task list has here, so the
   Queen EarthWalker was missing, the city's gate stood open, and the third SpellStone was active as soon as it was
-  won. Now the Queen waits in the corridor outside and gives Tricky his flame, which nothing else in the game can give,
-  Tricky's flame angers the RedEye by the gate, a RedEye that catches Sabre roars and drops a tooth, ten teeth in the
-  bowl by the arch open the gate, and the King EarthWalker activates the stone once Sabre brings it to him.
+  won. Now the Queen waits in the corridor outside, Tricky's flame (learned from the SnowHorn in DarkIce Mines once
+  the SnowClaw guarding it is beaten) angers the RedEye by the gate, a RedEye that catches Sabre roars and drops a
+  tooth, ten teeth in the bowl by the arch open the gate, and the King EarthWalker activates the stone once Sabre
+  brings it to him.
 
 Under way:
 
