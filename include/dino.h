@@ -25,6 +25,7 @@ namespace dino {
     void story_start(uint8_t* rdram, recomp_context* ctx);
     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
     void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
+    bool story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x, float to_z, float reach, float* stick_x, float* stick_y);
     // DINO_CHECK_HEAP (heap.cpp, development).
     void heap_check(uint8_t* rdram, double seconds);
 
@@ -35,12 +36,15 @@ namespace dino {
     void init_camera();
     void add_camera_options(recomp::config::Config& general);
     void add_mouse_buttons(uint16_t* buttons);
+    // Which way the camera looked at its last tick, on the ground (x, z), false before its first.
+    bool camera_forward(float* x, float* z);
     // The Krazoa shrines' and Cape Claw's Krazoa tablets' settings (krazoa.cpp).
     void add_krazoa_options(recomp::config::Config& general);
     // Drakor's fight's end setting (drakor.cpp).
     void add_drakor_options(recomp::config::Config& general);
     // The Kamerian Dragon's fight's end setting (dragon_rock.cpp).
     void add_dragon_rock_options(recomp::config::Config& general);
+    void add_force_point_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }
