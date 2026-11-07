@@ -59,6 +59,8 @@ namespace dino {
     // The third SpellStone's setting (acts.cpp), and whether it is on Restored (moonseeds.cpp).
     void add_third_stone_options(recomp::config::Config& general);
     bool third_stone_restored();
+    // Walled City's restored tasks' setting (walled_city.cpp).
+    void add_walled_city_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }

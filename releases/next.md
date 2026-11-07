@@ -25,3 +25,6 @@
 - Krazoa Shrines and Krazoa Tablets on Restored: the seqpoints that release Golden Plains' and Northern Wastes'
   spirits at Warlock Mountain, and Cape Claw's third tablet, no longer vanish while the player is still far from
   them, so each is there when the player arrives.
+- Walled City on Restored: the Queen EarthWalker waits outside the city and gives Tricky his flame, a RedEye angered
+  by it chases Sabre and drops a tooth when it catches him, ten teeth open the city's gate, and the King EarthWalker
+  activates the third SpellStone. The prototype never built any of it.
