@@ -15,3 +15,6 @@
   and the TRex keeps charging and facing its way round the ring after each hit.
 - BOSS TRex on Restored: beating the TRex gives the third SpellStone and opens the way back to Walled City. The
   prototype went back to the title with no stone.
+- Third SpellStone on Restored: the Volcano Force Point now opens its second path and takes the third SpellStone,
+  placing it gives the moonseeds Krystal plants in Moon Mountain Pass, and Walled City shows its Sun and Moon Stones
+  once the third spirit is released. In the prototype both places stayed as on the first visit.
