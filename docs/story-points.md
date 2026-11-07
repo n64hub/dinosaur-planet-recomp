@@ -24,6 +24,11 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
 
 `src/game/story.cpp` holds the points, and `src/main/main.cpp` reads the options.
 
+A test of a setting (Original against Restored) edits the `general.json` the game reads, which is beside
+`portable.txt` in the working directory, and without one there is the user's own (`%LOCALAPPDATA%` on Windows, shared
+by every checkout). A build run from the repo's root has none: run it from its build folder with `portable.txt`,
+`assets/` and `recompcontrollerdb.txt` there, or every value is whatever the user's file says.
+
 ## How the game keeps its story
 
 The story is a list of numbered bits. `func_80014670` sets one and `func_800147EC` reads one, through the table in ROM
@@ -425,11 +430,9 @@ SHswapstone refuses a swap on ("You cannot swap when holding a SpellStone"), so 
 SwapStone Hollow's own, as played: 0xC2 counts the white mushrooms given to the Queen Earthwalker and 0xB0 is her
 quest's step. Given them at step 4, five or ten, she plays her sequence, sets 0x486 and step 5, and the game warps to
 the Volcano Force Point (map 4) for its cutscene; 0x487 and step 6 come with a second visit there, and step 7 back in
-the hollow. 0xC3 starts Tricky's run to her (SHtricky, 501, and an SHseqobject, 309, wait on it), and the game sets it
-as the player comes up to that SHseqobject (34841, at 1175,-631,1257 in map 7) with the map's group 6 on: from
-`--story swapstone-hollow --bits 452=64 --place -7785,-631,-1343,0` and an `--input` of `2 0 to -7785 -1943`, it is
-set 19 s in. 0x887 is the SwapStone's zone (SHswapstone answers only while it is set), kept by TriggerPlane 40b79
-(`us.toml` says how).
+the hollow. 0xC3 starts Tricky's run to her (SHtricky, 501, and an SHseqobject, 309, wait on it), and nothing in the
+game sets it: `patches/swapstone_hollow.c` does, with Tricky's Run on Restored. 0x887 is the SwapStone's zone
+(SHswapstone answers only while it is set), kept by TriggerPlane 40b79 (`us.toml` says how).
 
 The way on to the first SpellStone is down the hollow's river: the only warp into the Volcano Force Point is the
 Queen's (entry 81, dll507 0x4F8), and map 4 borders only Diamond Bay. The river is water at y -797 over a bed 3 to 38

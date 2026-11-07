@@ -543,6 +543,14 @@ func = "dll502_0D74"
 before_vram = 0x901FFD58
 text = '{ if (MEM_BU(0x136, ctx->r16) == 2) ctx->r8 = 2; }'
 
+# Tricky's run to his mother (patches/swapstone_hollow.c says what starts it): with Tricky's Run on Restored
+# (src/game/swapstone_hollow.cpp), SHseqobject's update (dll309_0124), for an object whose setup waits on bit 0xC3 (its
+# setup, +0x4C of $a0, holds the bit at +0x1A), asks dino_tricky_run whether the player has come.
+[[patches.hook]]
+func = "dll309_0124"
+before_vram = 0x9017AC40
+text = '{ int dino_tricky_run_restored(void); if ((int16_t)MEM_H(0x1A, MEM_W(0x4C, ctx->r4)) == 0xC3 && dino_tricky_run_restored()) { void dino_tricky_run(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_tricky_run(rdram, &c); } }'
+
 # The SwapStone (SHswapstone, dll515) answers only while bit 0x887 says the player is in its zone, and TriggerPlane
 # 40b79 (map 7, local 2388,-633,1592) keeps that bit with action 0x12 mode 2, arg 0x8887: it flips it on each crossing.
 # A flip stays right only while every way in and out crosses the plane, and the SwapStone's own warp and the Swap
