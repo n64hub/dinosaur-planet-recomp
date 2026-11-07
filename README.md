@@ -63,6 +63,9 @@ Fixed:
 - Cape Claw's Krazoa tablets (Krazoa Tablets on Restored): the third tablet, which the prototype never placed, is
   found where the sand worm fell, and the tablet room's last puzzle, which led nowhere, opens a Transporter to Krazoa
   Palace.
+- The Kamerian Dragon under Dragon Rock (Kamerian Dragon on Restored): its health ran out and the fight went on, and
+  the fourth SpellStone, which the Desert Force Point's second place takes, was nowhere. It now dies once its health
+  runs out and leaves the fourth SpellStone in Krystal's hands, and stays gone.
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
   the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
   was. The prototype started the fight again after his fall, so the game never ended.
@@ -99,6 +102,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
   tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
   tablet is nowhere, and the puzzle's end leads nowhere.
+- **Kamerian Dragon** (General): Restored has the Kamerian Dragon under Dragon Rock die once its health runs out and
+  leave the fourth SpellStone for the Desert Force Point. Original is the prototype as it was left: the fight never
+  ends, and the fourth SpellStone is nowhere.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 
