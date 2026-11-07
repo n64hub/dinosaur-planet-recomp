@@ -1,0 +1,64 @@
+# DarkIce Mines' SnowHorn teaching Tricky his flame, from --story swapstone-hollow,55 --place -6640,-1269,5420,0,0
+# --bits 493=320 (map 19's groups 6 and 8: the SnowClaw and the SnowHorn by it). The SnowClaw comes at Sabre and falls
+# to A swung at it, which sets 0x172; the SnowHorn then answers A within 60 of its head, west of its body at
+# (-6664, 5263), once Z has put the staff away, and its talk sets 0x245 and 0x27.
+0 0 0 0
+2 8000 chase 13A 50
+2.3 0 chase 13A 50
+2.6 8000 chase 13A 50
+2.9 0 chase 13A 50
+3.2 8000 chase 13A 50
+3.5 0 chase 13A 50
+3.8 8000 chase 13A 50
+4.1 0 chase 13A 50
+4.4 8000 chase 13A 50
+4.7 0 chase 13A 50
+5.0 8000 chase 13A 50
+5.3 0 chase 13A 50
+5.6 8000 chase 13A 50
+5.9 0 chase 13A 50
+6.2 8000 chase 13A 50
+6.5 0 chase 13A 50
+6.8 8000 chase 13A 50
+7.1 0 chase 13A 50
+7.4 8000 chase 13A 50
+7.7 0 chase 13A 50
+8.0 8000 chase 13A 50
+8.3 0 chase 13A 50
+8.6 8000 chase 13A 50
+8.9 0 chase 13A 50
+9.2 8000 chase 13A 50
+9.5 0 chase 13A 50
+9.8 8000 chase 13A 50
+10.1 0 chase 13A 50
+10.4 8000 chase 13A 50
+10.7 0 chase 13A 50
+11.0 8000 chase 13A 50
+11.3 0 chase 13A 50
+11.6 8000 chase 13A 50
+11.9 0 chase 13A 50
+# The SnowClaw beaten: round the SnowHorn's north side to its head. What it drops brings up a scroll that holds Sabre
+# until A closes it, so A goes with each leg; after the fight he holds his staff, and A swings it until Z puts it away.
+sync 172
+2 0 to -6640 5400
+3.0 8000 to -6640 5400
+3.3 0 to -6640 5400
+4 0 to -6720 5330
+5.0 8000 to -6720 5330
+5.3 0 to -6720 5330
+6.0 8000 to -6720 5330
+6.3 0 to -6720 5330
+7 0 to -6725 5263
+8.0 8000 to -6725 5263
+8.3 0 to -6725 5263
+10 0 to -6664 5263
+11.0 8000 to -6664 5263
+11.3 0 to -6664 5263
+13.0 2000 0 0
+13.3 0 0 0
+15.0 8000 0 0
+15.3 0 0 0
+17.0 8000 0 0
+17.3 0 0 0
+19.0 8000 0 0
+19.3 0 0 0

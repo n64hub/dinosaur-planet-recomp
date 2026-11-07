@@ -133,8 +133,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **Walled City.** The task list has the Queen EarthWalker, a RedEye chase for ten teeth that open the city's gate
   and the King activating the third SpellStone, and the ROM built none of it: the Queen and the chase have defs and
   stand nowhere, the gate is open and the stone is active once won. The General tab's Walled City setting, Restored
-  by default, places them, gives Tricky his flame from the Queen and has the King activate the stone (0x82E to
-  0x83B), and Original leaves the city as the prototype did (`src/game/walled_city.cpp`'s header has the evidence).
+  by default, places them and has the King activate the stone (0x82E to 0x83B), and Original leaves the city as the
+  prototype did (`src/game/walled_city.cpp`'s header has the evidence). Tricky's flame, which angers the RedEye, is
+  the one DarkIce Mines' SnowHorn teaches him (docs/story-points.md).
 - **CloudRunner Fortress's courtyard roof.** The roof (CFBlastedRoof) blows at the third barrel blown under it, and
   the barrels stand west of the treasure shaft, whose wind drops a player carrying one: the walking states skip the
   check that puts her on the wind while she carries. The General tab's Wind Bridge setting, Restored by default, puts
@@ -177,6 +178,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   <x>,<y>,<z>[,<layer>[,<facing>]]` starts it somewhere the warp table has no entry, `--bits
   <hex>[=<value>][@<seconds>],...` sets more bits, at the start or later (a shrine's own bits are cleared as its map
   starts, so they are set a while after it), and `--report` prints a line a second with the map, the position, the
-  health and the magic (and with `DINO_REPORT_OBJECT=<object id hex>` where each object of that id is);
-  `--watch-bits <hex>,...|all` prints each bit the game sets as it plays. `docs/story-points.md` has the points, each
-  bit's evidence and the warp table's map: each index, its area and what it needs. None of it is in a player's menus.
+  health and the magic (and with `DINO_REPORT_OBJECT=<object id hex>` where each object of that id is, its act, its
+  use flags and where A uses it); `--watch-bits <hex>,...|all` prints each bit the game sets as it plays.
+  `docs/story-points.md` has the points, each bit's evidence and the warp table's map: each index, its area and what
+  it needs. None of it is in a player's menus.
