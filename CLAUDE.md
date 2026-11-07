@@ -16,7 +16,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   (`[[func]]`, which renames it in `syms/`), and the names only the tools print, of addresses, exports, bits and the
   fields of an object, its state and its placement (the file's header says which).
 - `tools/dino.py`: the game's code read in those names, in place of raw MIPS (its header says what each command
-  prints). Read a function with `dis`, and find who calls something or sets a bit with `calls`.
+  prints). Read a function with `dis`, find who calls something or sets a bit with `calls`, and a level's objects,
+  an object's def and the warp table with `map`, `def` and `warp`.
 - `us.toml`: N64Recomp's configuration, with the game's hooks and instruction patches; `tools/recompile.sh` writes
   `RecompiledFuncs/` with it, and the audio microcode with `aspMain.us.toml`.
 - `patches/` and `patches.toml`: MIPS C recompiled into PatchesLib, where a patch to the game's code goes

@@ -289,6 +289,8 @@ force point's top (50) at (1, 17) and its bottom (21) at (1, 16), both on layer 
 ## The bits
 
 Each with what shows it, by the DLL that reads or sets it (`dll <n>`) or the task the table in file 55 gives it.
+`tools/dino.py calls bit <bit>` lists every call that sets or reads one with an immediate bit, and a name added to
+`syms/names.toml` shows wherever the tool prints it.
 
 `to_first_shrine`, what the game has set by the first shrine:
 
@@ -333,7 +335,8 @@ a tenth of Diamond Bay's depth. A BWLog (793) moves only on DFriverflows' pushes
 
 A map's objects come in groups, and most of a level's enemies and props load only while their group is on. Each
 object's setup in ROM file 31 has a flags byte at +4 and its group at +6: with flag 0x10 the object loads only while
-bit `group` of its map's group field is set. A map's field is a story value of 32 bits, numbered by the u16 at
+bit `group` of its map's group field is set (`tools/dino.py map <map>` prints the field and each placement's group).
+A map's field is a story value of 32 bits, numbered by the u16 at
 +0xF0 + 2 × map in dll29's data, and dll29's export 18 reads it. Some maps' fields: 0x480 Discovery Falls (6), 0x4A6
 SwapStone Circle (14), 0x42E Moon Mountain Pass (18), 0x458 CloudRunner Fortress (12), 0x45A its treasure caves (15),
 0x4A3 its race (43), 0x3B7 Cape Claw (29), 0x601 Swap Store (51), 0x5DC Dragon Rock - Bottom (52).
@@ -382,8 +385,9 @@ the worm turn group 11 on with that eel hidden.
 
 ## The warp table
 
-ROM file 30 has 96 entries of 16 bytes, x, y, z and a layer, read by `func_8004D1D4`. 54 hold a place and 42 are all
-zero, and the game's own code warps to some of them (dll 408 to 26, SHswapstone to 86). Each entry below was booted by
+ROM file 30 has 96 entries of 16 bytes, x, y, z and a layer, read by `func_8004D1D4` (`tools/dino.py warp` prints
+each with the maps whose cells hold it and the code that warps there). 54 hold a place and 42 are all zero, and the
+game's own code warps to some of them (dll 408 to 26, SHswapstone to 86). Each entry below was booted by
 `--story new-game,<index>`, played 15 s with no story state and looked at. "Boots" is alive and drawn, with the player
 on a floor and no crash; it says nothing about what the level needs further in.
 
