@@ -465,4 +465,21 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     call(rdram, ctx, map_at);
     fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy,
         fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats), (int16_t)MEM_H(6, stats));
+    // DINO_REPORT_OBJECT=<object id hex>: where each drawn object of that id is too, for an enemy a script times by.
+    static const char* report_object = getenv("DINO_REPORT_OBJECT");
+    if (report_object == nullptr) {
+        return;
+    }
+    int oid = (int)strtol(report_object, nullptr, 16);
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr other = MEM_W(i * 4, all);
+        if (other == 0 || (int16_t)MEM_H(0x46, other) != oid || MEM_BU(0x36, other) == 0) {
+            continue;
+        }
+        uint32_t ox = MEM_W(0x18, other), oz = MEM_W(0x20, other);
+        memcpy(&fx, &ox, 4);
+        memcpy(&fz, &oz, 4);
+        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f\n", seconds, oid, fx, fz);
+    }
 }

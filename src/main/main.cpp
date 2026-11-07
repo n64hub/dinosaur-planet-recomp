@@ -460,9 +460,10 @@ extern "C" double dino_script_seconds() {
 }
 
 // story.cpp's hook on func_80014670, as the game sets a bit: a sync line waiting for it starts its part now, a sync
-// next only once the part before it has started.
+// next only once the part before it has started, at an earlier set.
 extern "C" void dino_input_bit_set(int bit, int value) {
-    for (int i = 1; i < input_parts; i++) {
+    // Last part first, so a sync next after a part this same set starts waits for the set after it.
+    for (int i = input_parts - 1; i >= 1; i--) {
         const InputPart& part = input_part[i];
         if (value == 0 || part.bit != bit || part.kind == SyncKind::Near || input_part_start[i] >= 0.0) {
             continue;
