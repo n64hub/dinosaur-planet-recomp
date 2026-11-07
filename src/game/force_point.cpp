@@ -133,6 +133,11 @@ namespace {
         if (lift != 0) {
             lift_placement = (int32_t)p;
             set_real(rdram, lift + 0x10, lift_bottom);
+            // Its state (+0xB8): idle (2) with no wait (+0xE), as the lift is once it has first risen. Its first state
+            // rises by itself for a player within 230, waits at the top and is called down again before it takes one.
+            gpr state = (gpr)MEM_W(0xB8, lift);
+            MEM_H(0x8, state) = 2;
+            MEM_H(0xE, state) = 0;
         }
         if (logging) {
             fprintf(stderr, "force point: lift placed (object 0x%08X)\n", (uint32_t)lift);
