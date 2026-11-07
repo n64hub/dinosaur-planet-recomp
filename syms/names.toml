@@ -203,3 +203,67 @@ name = "z"
 of = "setup"
 offset = 0x14
 name = "uid"
+
+# An object def, ROM file 66 (read by tools/dino.py: the scale goes to obj+0x8 in dll272's init).
+[[field]]
+of = "def"
+offset = 0x4
+name = "scale"
+[[field]]
+of = "def"
+offset = 0x58
+name = "dll"  # with 0x8000 set, the DLL less 209
+[[field]]
+of = "def"
+offset = 0x5F
+name = "name"
+
+# Bits (docs/story-points.md, The bits and the levels' own sections).
+[[bit]]
+bit = 0x123
+name = "spellstone_carried"
+[[bit]]
+bit = 0x2E8
+name = "spellstone_carried_2"
+[[bit]]
+bit = 0x877
+name = "first_spellstone_placed"  # VFP_SpellPlace (dll637)
+[[bit]]
+bit = 0x5BD
+name = "portal_spell"  # Golden Plains' PortalSpell (dll272)
+[[bit]]
+bit = 0x3FB
+name = "sand_worm_dead"
+[[bit]]
+bit = 0x3D4
+name = "sand_worm_stage"
+[[bit]]
+bit = 0x887
+name = "swapstone_zone"  # SHswapstone answers only while it is set
+[[bit]]
+bit = 0xC2
+name = "white_mushrooms_given"
+[[bit]]
+bit = 0xB0
+name = "queen_earthwalker_step"
+[[bit]]
+bit = 0x4E5
+name = "new_game"  # dll29 export 1 sets it
+[[bit]]
+bit = 0x2D
+name = "spell_2d"  # dll210's export 51 switches on it
+[[bit]]
+bit = 0x1D7
+name = "forcefield_spell"  # task 16, COLLECTED FORCEFIELD SPELL
+[[bit]]
+bit = 0x316
+name = "spirit_1"
+[[bit]]
+bit = 0x277
+name = "spirit_2"
+[[bit]]
+bit = 0x317
+name = "spirit_3"
+[[bit]]
+bit = 0x318
+name = "spirit_4"

@@ -4,6 +4,9 @@ through as raw MIPS. Run it from anywhere; it reads roms/dinoplanet.z64, syms/ a
     python3 tools/dino.py dis dll210_16220        one function: dll<n>_<offset>, func_<address>, a name, dll<n>.<export>
     python3 tools/dino.py dis dll272 0x18-0x200   a range of a DLL's text (offsets in its text)
     python3 tools/dino.py calls bit 0x1EB         every call to it: bit [<bit>], a function or dll<n>.<export>, args
+    python3 tools/dino.py map 29 --name sandeel   a map's cells and group field; its placements summed, or filtered
+    python3 tools/dino.py def SHswapstone         an object def: DLL, object ids, where it is placed, its record
+    python3 tools/dino.py warp [26]               the warp table: each entry's place, the map holding it, who warps
 
 `dis` prints one function densely: each line its offset in the DLL's text (or its address), then the instruction with
 what its registers hold in place of them. Cut: nops, the $gp setups and reloads, the prologue's and epilogue's saves
@@ -24,6 +27,12 @@ kept across calls):
   whose every caller passes the same kind in an argument gets it too.
 - syms/names.toml names functions, addresses, exports, bits and the fields of obj, state and setup (its header says
   how); anything else is its address or offset.
+
+`map` (ROM files 31, 32, 33 and 21) prints a map's cell, the cells it spans and its group field (dll29's data
++0xF0), then a count of each def it places, or with a filter (or --all) one line each: uid, def name, object id, DLL,
+group (when flag 0x10 makes it one), flags, position, world position (local + the cell * 640), and the words of its
+setup from +0x18, named from syms/names.toml where they are. `def` takes a name, an object id or dll<n>. `warp`
+names the maps whose cells and layer hold an entry, and each call to func_8004D1D4 that warps there.
 
 What it reads of the whole ROM (the handles, each function's argument kinds, every call site) is kept in
 build/dino/<the ROM's md5>/, written the first time and read after; nothing from the ROM goes in git.
@@ -48,7 +57,10 @@ SYMS_PATH = ROOT / "syms" / "dinoplanet.syms.toml"
 NAMES_PATH = ROOT / "syms" / "names.toml"
 CACHE_ROOT = ROOT / "build" / "dino"
 
-OBJECT_TAB_FILE, OBJECT_BIN_FILE, BIT_TABLE_FILE = 65, 66, 55
+OBJECT_TAB_FILE, OBJECT_BIN_FILE, OBJECT_INDEX_FILE, BIT_TABLE_FILE = 65, 66, 67, 55
+PLACEMENTS_FILE, MAP_TABLE_FILE, MAP_NAMES_FILE, MAP_GRID_FILE, WARPS_FILE = 31, 32, 33, 21, 30
+CELL = 640
+WARP_ENTRY = 0x8004D1D4
 DLL_LOAD = 0x8000BE04
 BIT_GET, BIT_SET = 0x800147EC, 0x80014670
 
@@ -77,6 +89,7 @@ class Game:
         self.read_names()
         self.read_defs()
         self.read_bit_table()
+        self.read_maps()
         self.handle_words = {}
         for d in self.dlls.values():
             d.exports_set = {e for e in d.exports if e}
@@ -119,6 +132,63 @@ class Game:
             v = struct.unpack_from(">H", r, 0x58)[0]
             self.defs.append((r[0x5F:0x6F].split(b"\0")[0].decode("latin-1"), (v & 0x7FFF) + 209 if v & 0x8000 else v))
         self.object_dlls = {d for _, d in self.defs if d}
+
+    def read_maps(self):
+        """Each map: its name (file 33), its header and placements (file 31, at the offsets file 32 gives), its cell
+        and layer (file 21) and its group field (dll29's data +0xF0)."""
+        rom = self.rom
+        o, n = g.rom_file(rom, OBJECT_INDEX_FILE)
+        self.object_def = struct.unpack_from(f">{n // 2}h", rom, o)
+        names, nn = g.rom_file(rom, MAP_NAMES_FILE)
+        tab, nt = g.rom_file(rom, MAP_TABLE_FILE)
+        self.placements_rom, _ = g.rom_file(rom, PLACEMENTS_FILE)
+        grid, ng = g.rom_file(rom, MAP_GRID_FILE)
+        cells = {}
+        for i in range(0, ng, 12):
+            x, z, layer, m, a, b = struct.unpack_from(">6h", rom, grid + i)
+            cells[m] = (x, z, layer, [k for k in (a, b) if k >= 0])
+        d29 = self.dlls[29]
+        self.maps = {}
+        for m in range(min(nn // 32, nt // 28)):
+            head, _, _, _, start, end, _ = struct.unpack_from(">7I", rom, tab + m * 28)
+            name = rom[names + m * 32:names + m * 32 + 32].split(b"\0")[0].decode("latin-1")
+            w, h, ox, oz = struct.unpack_from(">4h", rom, self.placements_rom + head)
+            field = struct.unpack_from(">H", rom, d29.rom_addr + d29.data + 0xF0 + 2 * m)[0]
+            self.maps[m] = {"name": name, "start": start, "end": end, "size": (w, h), "offset": (ox, oz),
+                            "cell": cells.get(m), "field": field}
+
+    def placements(self, m):
+        """A map's placements: (offset in its list, the record)."""
+        mp = self.maps[m]
+        p, out = mp["start"], []
+        while p < mp["end"]:
+            size = self.rom[self.placements_rom + p + 2] * 4
+            if size < 0x18:
+                break
+            out.append((p - mp["start"], self.rom[self.placements_rom + p:self.placements_rom + p + size]))
+            p += size
+        return out
+
+    def def_of(self, obj):
+        return self.object_def[obj] if obj < len(self.object_def) and self.object_def[obj] < len(self.defs) else -1
+
+    def world(self, m, x, z):
+        c = self.maps[m]["cell"]
+        return (x + c[0] * CELL, z + c[1] * CELL) if c else None
+
+    def maps_at(self, x, z, layer):
+        """The maps whose cells hold a world position: a map's cells run from its file 21 cell less its header's
+        +4 and +6, for +0 by +2 cells."""
+        cx, cz = int(x // CELL), int(z // CELL)
+        out = []
+        for m, mp in self.maps.items():
+            c = mp["cell"]
+            if not c or c[2] != layer:
+                continue
+            x0, z0 = c[0] - mp["offset"][0], c[1] - mp["offset"][1]
+            if x0 <= cx < x0 + mp["size"][0] and z0 <= cz < z0 + mp["size"][1]:
+                out.append(m)
+        return out
 
     def read_bit_table(self):
         o, n = g.rom_file(self.rom, BIT_TABLE_FILE)
@@ -854,6 +924,163 @@ def slot_is_arg(f, i, args):
     return simple and len(writes) == 1 and writes <= set(ARGS) and args.get(next(iter(writes))) is not None
 
 
+# ---- Maps, defs and warps ----
+
+def find_map(game, spec):
+    if spec.isdigit():
+        return int(spec)
+    hits = [m for m, mp in game.maps.items() if spec.lower() in mp["name"].lower()]
+    if len(hits) != 1:
+        sys.exit(f"{spec}: " + (", ".join(f"{m} {game.maps[m]['name']}" for m in hits) or "no such map"))
+    return hits[0]
+
+
+def map_header(game, m):
+    mp = game.maps[m]
+    s = f"map {m} {mp['name']}"
+    c = mp["cell"]
+    if c:
+        x0, z0 = c[0] - mp["offset"][0], c[1] - mp["offset"][1]
+        s += (f"  cell ({c[0]}, {c[1]}) = world ({c[0] * CELL}, {c[1] * CELL}), layer {c[2]}, cells x {x0}.."
+              f"{x0 + mp['size'][0] - 1} z {z0}..{z0 + mp['size'][1] - 1}")
+        if c[3]:
+            s += ", with maps " + ", ".join(f"{k} {game.maps[k]['name']}" for k in c[3] if k in game.maps)
+    else:
+        s += "  (no cell in file 21)"
+    return s + f"  group field {mp['field']:#x}"
+
+
+def placement_line(game, m, off, r, fields):
+    obj, _, _, flags, _, group = struct.unpack_from(">HBBBBB", r, 0)
+    x, y, z = struct.unpack_from(">3f", r, 8)
+    uid = struct.unpack_from(">I", r, 0x14)[0]
+    d = game.def_of(obj)
+    name, dll = game.defs[d] if d >= 0 else ("?", 0)
+    w = game.world(m, x, z)
+    s = f"{uid:x} {name} #{obj:X} dll{dll}" + (f" g{group}" if flags & 0x10 else "") + f" fl{flags:02x}"
+    s += f" ({x:.0f}, {y:.0f}, {z:.0f})" + (f" w({w[0]:.0f}, {w[1]:.0f})" if w else "")
+    if fields:
+        words = [struct.unpack_from(">H", r, o)[0] for o in range(0x18, len(r) - 1, 2)]
+        while words and not words[-1]:
+            words.pop()
+        named = []
+        for i, v in enumerate(words):
+            f = game.field("setup", dll, 0x18 + 2 * i)
+            named.append(f"{f}={v:x}" if f else f"{v:04x}")
+        if named:
+            s += "  +18: " + " ".join(named)
+    return s
+
+
+def show_map(game, a):
+    m = find_map(game, a.map)
+    print(map_header(game, m))
+    rows = game.placements(m)
+    near = [float(v) for v in a.near.split(",")] if a.near else None
+    picked = []
+    for off, r in rows:
+        obj, flags, group = struct.unpack_from(">H", r, 0)[0], r[4], r[6]
+        d = game.def_of(obj)
+        name, dll = game.defs[d] if d >= 0 else ("?", 0)
+        if a.name and a.name.lower() not in name.lower():
+            continue
+        if a.group is not None and not (flags & 0x10 and group == a.group):
+            continue
+        if a.dll is not None and dll != a.dll:
+            continue
+        if a.uid and struct.unpack_from(">I", r, 0x14)[0] != int(a.uid, 16):
+            continue
+        if near:
+            x, _, z = struct.unpack_from(">3f", r, 8)
+            w = game.world(m, x, z) or (x, z)
+            if abs(w[0] - near[0]) > (near[2] if len(near) > 2 else 300) or \
+                    abs(w[1] - near[1]) > (near[2] if len(near) > 2 else 300):
+                continue
+        picked.append((off, r, name, dll, flags, group))
+    filtered = a.name or a.group is not None or a.dll is not None or a.uid or near
+    if not (filtered or a.all):
+        # A summary: each def, how many, in which groups.
+        seen = {}
+        for _, r, name, dll, flags, group in picked:
+            e = seen.setdefault((name, dll), [0, set()])
+            e[0] += 1
+            if flags & 0x10:
+                e[1].add(group)
+        print(f"{len(picked)} placements (one each: --all, or --name/--group/--dll/--uid/--near x,z[,r]):")
+        print("  " + ", ".join(f"{n}/dll{d}" + (f" x{c}" if c > 1 else "") + (" g" + ",".join(map(str, sorted(gs))) if gs else "")
+                           for (n, d), (c, gs) in sorted(seen.items(), key=lambda kv: -kv[1][0])))
+        return
+    for off, r, *_ in picked:
+        print("  " + placement_line(game, m, off, r, True))
+    print(f"{len(picked)} of {len(rows)} placements", file=sys.stderr)
+
+
+def show_def(game, spec):
+    m = re.fullmatch(r"dll(\d+)", spec)
+    if m:
+        found = [i for i, (_, d) in enumerate(game.defs) if d == int(m[1])]
+    elif re.fullmatch(r"(?:0x|#)[0-9A-Fa-f]+", spec):
+        found = [game.def_of(int(spec.lstrip("#"), 16))]
+    else:
+        found = [i for i, (n, _) in enumerate(game.defs) if n.lower() == spec.lower()] or \
+                [i for i, (n, _) in enumerate(game.defs) if spec.lower() in n.lower()]
+    found = [i for i in found if i >= 0]
+    if not found:
+        sys.exit(f"no object def {spec}")
+    if len(found) > 4:
+        print(", ".join(f"{game.defs[i][0]} (def {i}, dll{game.defs[i][1]})" for i in found))
+        return
+    o, _ = g.rom_file(game.rom, OBJECT_TAB_FILE)
+    b, _ = g.rom_file(game.rom, OBJECT_BIN_FILE)
+    for i in found:
+        name, dll = game.defs[i]
+        objs = [k for k, v in enumerate(game.object_def) if v == i]
+        rec = game.rom[b + struct.unpack_from(">I", game.rom, o + 4 * i)[0]:]
+        scale = struct.unpack_from(">f", rec, 4)[0]
+        print(f"{name}  def {i}, dll{dll}, object id " + ", ".join(f"#{k:X}" for k in objs) + f", scale {scale:g}")
+        where = {}
+        for mn in game.maps:
+            for _, r in game.placements(mn):
+                if game.def_of(struct.unpack_from(">H", r, 0)[0]) == i:
+                    where.setdefault(mn, []).append(struct.unpack_from(">I", r, 0x14)[0])
+        if where:
+            print("  placed: " + "; ".join(f"map {mn} {game.maps[mn]['name']} " + ",".join(f"{u:x}" for u in us[:6])
+                                         + (f" (+{len(us) - 6})" if len(us) > 6 else "") for mn, us in where.items()))
+        else:
+            print("  placed nowhere: made by code (new_placement with its object id)")
+        named = [f"+{off:x} {n}" for (of, d, off), n in sorted(game.fields.items(), key=lambda kv: kv[0][2])
+                 if of == "def" and d in (None, dll)]
+        if named:
+            print("  fields: " + ", ".join(named))
+        for row in range(0, 0x58, 0x20):
+            print(f"  +{row:02x}: " + " ".join(rec[row + k:row + k + 4].hex() for k in range(0, 0x20, 4)))
+
+
+def show_warps(game, idx, want):
+    o, n = g.rom_file(game.rom, WARPS_FILE)
+    callers = {}
+    for sec, fa, site, key, args in idx["calls"]:
+        if key == ("main", WARP_ENTRY) and args.get(4) and args[4][0] == "imm":
+            callers.setdefault(args[4][1], []).append(game.func_names.get((sec, fa), f"{fa:X}") + f"+{site - fa:#x}")
+    for i in range(n // 16):
+        if want is not None and i != want:
+            continue
+        x, y, z = struct.unpack_from(">3f", game.rom, o + i * 16)
+        layer = struct.unpack_from(">i", game.rom, o + i * 16 + 12)[0]
+        if not (x or y or z or layer):
+            continue
+        s = f"{i:2} ({x:.0f}, {y:.0f}, {z:.0f}) layer {layer}"
+        ms = game.maps_at(x, z, layer)
+        for m in ms:
+            c = game.maps[m]["cell"]
+            s += f"  map {m} {game.maps[m]['name']} local ({x - c[0] * CELL:.0f}, {y:.0f}, {z - c[1] * CELL:.0f})"
+        if not ms:
+            s += "  in no map's cells"
+        if i in callers:
+            s += "  from " + ", ".join(callers[i])
+        print(s)
+
+
 # ---- Finding what to print ----
 
 def parse_func(game, spec, rng=None):
@@ -967,9 +1194,27 @@ def main():
     c = sub.add_parser("calls", help="every call to a function, an export, or the bit setter and getter")
     c.add_argument("target")
     c.add_argument("arg", nargs="?", help="only calls whose a0 is this (for bit: the bit)")
+    m = sub.add_parser("map", help="a map: its cells, group field and placements")
+    m.add_argument("map", help="its number or part of its name")
+    m.add_argument("--all", action="store_true", help="every placement, one a line")
+    m.add_argument("--name", help="placements whose def's name holds this")
+    m.add_argument("--group", type=int)
+    m.add_argument("--dll", type=int)
+    m.add_argument("--uid")
+    m.add_argument("--near", help="x,z[,r]: placements within r (300) of a world position")
+    o = sub.add_parser("def", help="an object def: its DLL, object ids, where it is placed and its record")
+    o.add_argument("spec", help="a name (or part), an object id (0x1A3 or #1A3), or dll<n>")
+    w = sub.add_parser("warp", help="the warp table (ROM file 30): place, map and the calls that warp there")
+    w.add_argument("index", nargs="?", type=int)
     a = p.parse_args()
     game = Game()
+    if a.cmd == "map":
+        return show_map(game, a)
+    if a.cmd == "def":
+        return show_def(game, a.spec)
     idx = load_index(game)
+    if a.cmd == "warp":
+        return show_warps(game, idx, a.index)
     if a.cmd == "dis":
         sec, s, e, title = parse_func(game, a.func, a.range)
         kinds = {}
