@@ -31,3 +31,8 @@
 - Wind Bridge on Restored: the wind over CloudRunner Fortress's treasure shaft holds Krystal while she carries a
   barrel, so the barrels reach the courtyard and three blown under its roof free Kyte. In the prototype she fell to
   the shaft's bottom with one.
+- Kamerian Dragon on Restored: the Skeetla arena at the bottom of Dragon Rock can be won. The ice spell on the top,
+  the only spell that puts out the arena's lava controls, can be picked up and cast from the spell scroll, and the
+  arena fills Krystal's magic and feeds the Earth Warrior while its fight is on.
+- Dragon Rock's bottom: the way from the stairs to the Skeetla arena no longer shuts once the player comes down from
+  the top's east end.
