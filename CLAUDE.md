@@ -120,6 +120,11 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   and the way to the race, but its direction bit (0x8C8) is flipped only by two levers at the bottom, so from the top
   it only blows up. The General tab's Treasure Lift setting, Restored by default, lowers a player who steps in from
   the top, and Original leaves it as it was (`src/game/cloudrunner.cpp`'s header has the evidence).
+- **Krazoa Palace.** Map 3's rooms are built, but of its objects only two Transporters are placed: the wings' doors,
+  consoles and text blocks, the last door and the red Krazoa have defs and stand nowhere, and nothing leads on to
+  Drakor (map 44). The General tab's Krazoa Palace setting, Restored by default, places them, chains the four wings
+  by saved bits nothing else uses (0x6A7-0x6AA) and has the red Krazoa send the player to Drakor, and Original
+  leaves the rooms empty (`src/game/krazoa.cpp`'s header has the layout and the evidence).
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of

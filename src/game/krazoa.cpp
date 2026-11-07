@@ -83,6 +83,35 @@
 //   the player crosses them (action 0x12 with 0x8000 on the bit): uid 41FC0 in the hall west of the room and 352FB in
 //   the tunnel east of it, so a player who walks in has it set (played, both) and it is saved. Warp entries 71 and 72
 //   land inside with no plane crossed, so they set it, which changes nothing for a player who walked in.
+//
+// Krazoa Palace (map 3, world = local + (6400, 0, 22400)): Krazoa Palace is its own setting. On Restored (the default)
+// the palace's four wings are played in turn and the red Krazoa sends the player on to Drakor; on Original its rooms
+// stand empty. Read from the ROM:
+// - Its objects have defs and are placed nowhere: KP_console_fire, _eart, _wate and _magi (0x58F-0x592, dll339),
+//   KP_textblock_* in the same order (0x593-0x596, dll654, DFP_Textblock's DLL), KP_RedKrazoa (0x598, dll214),
+//   KP_SectionDoor (0x59C) and KP_FinDoor (0x59E, both dll307). Only its two KP_Transporters (0x59A, dll334) are
+//   placed: +0x19 their own entry, which nothing reads, and +0x1A the entry they send to (0xD610), east (@0644, 94) to
+//   west (@0668, 93) and back.
+// - Its floors (map 3's triangles): the west Transporter stands in a high hall at y 960-973, which joins the rest by
+//   no floor: below it a shaft drops to a pit at y -18 by the hub. The hub's floor is at y 0 round a solid block, and
+//   a ramp from the block's east side climbs to 64, where a walkway leads south-east to the earth wing and a slope west
+//   to a bridge (128-160) between the fire wing (north-west) and the water wing (south-west); from the bridge a ramp
+//   climbs to a platform at 192 and a walkway north-east to the magic wing. The east Transporter's room, with the
+//   room the red Krazoa stands in west of it, joins the hub by no floor either.
+// - Restored places a Transporter at the shaft's top and one at its bottom, sending to warp entries 45 and 46 (empty
+//   in ROM file 30), which are filled beside the other pad: an entry on a pad's own spot drops the player down the
+//   shaft to the pit (played). Each wing gets a section door at its mouth, and at its end a console and a text block.
+//   The blocks go off in turn, fire, earth, water, magic, each needing the last one's done bit (+0x20) and setting
+//   its own (+0x1E): 0x6A7-0x6AA, saved bits in ROM file 55 that nothing in the code or the maps uses. The fire wing's
+//   door opens with 0x52B, the tablet room's, and each other wing's with the block before it. The last door, between
+//   the east Transporter and the red Krazoa, is KP_FinDoor's four leaves in an iris, each opened by one wing's bit.
+// - The leaves have no collision, so while the door isn't open the player is held east of it. A section door's
+//   collision stays where it was placed whatever its animation, so an open one is put under the floor.
+// - The red Krazoa, once 0x6AA is set, sends a player who walks up to it to warp entry 44 (empty), filled at BOSS
+//   Drakor's setuppoint (map 44): nothing in the ROM leads to the fight (docs/story-points.md).
+// - The object loop (func_8004A800) frees an object placed by code once the player is out of its range unless its
+//   placement's flag 2 (+4) is set (0x8004A94C), and the palace's are made once, as it loads: a text block was freed
+//   while the player was in another wing and never made again (played). The palace's are placed with flag 2.
 
 #include <algorithm>
 #include <cstdint>

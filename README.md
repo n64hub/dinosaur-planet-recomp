@@ -78,12 +78,14 @@ Fixed:
   blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below and
   the way to the race couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
   turn it back for the way up.
+- Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
+  Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
+  earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
 
 Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
-- The way to the ending the prototype never had: Krazoa Palace's four wings.
 
 ## The ROM
 
@@ -120,6 +122,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Treasure Lift** (General): Restored has CloudRunner Fortress's wind lift past the blasted wall lower a player who
   steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
   the wind only ever blows up, and the caves can't be reached.
+- **Krazoa Palace** (General): Restored places Krazoa Palace's doors, consoles, text blocks and red Krazoa, so its
+  four wings are played in turn and the red Krazoa sends the player on to Drakor. Original is the prototype as it was
+  left: the palace's rooms stand empty and lead nowhere.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 

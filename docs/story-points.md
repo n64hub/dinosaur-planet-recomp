@@ -170,7 +170,14 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   Force Point's DFP_Textblock: +0x19 its sequence, +0x1E its done bit, +0x20 the bit it needs) for fire, earth, water
   and magic, the section doors and the last door (307), and the red Krazoa. Its cells join only Cape Claw's, whose
   edge there is water: nothing in the ROM leads in. Its east end has the local coordinates of Cape Claw's tablet room,
-  and Krazoa Tablets on Restored leads in from there (above), filling entries 93 and 94.
+  and Krazoa Tablets on Restored leads in from there (above), filling entries 93 and 94. Krazoa Palace on Restored,
+  the default, places them: a Transporter pair down the shaft from the high hall to the hub (entries 45 and 46, both
+  empty), and in each wing a section door, a console and a text block, which go off in turn, fire, earth, water and
+  magic (0x6A7-0x6AA, saved bits nothing else uses), each opening the next wing's door and one leaf of the last door.
+  Past it the red Krazoa sends the player to BOSS Drakor (entry 44, empty, filled at its setuppoint). Played from the
+  tablet room's Transporter (`--place 4776,-8,17606,0 --bits 52b,2c0,912`; 0x912 is the Transporter's first-use
+  tutorial, and A on a Transporter is taken about 20 s after an arrival) through the four wings to BOSS Drakor.
+  `src/game/krazoa.cpp`'s header has the layout and the evidence.
 - CloudRunner - TrapRooms (17), Krazoa Shrine (20), krazchamber (22) and MikesLava (49) have no record in file 21:
   nothing reaches them.
 
