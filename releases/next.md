@@ -28,3 +28,6 @@
 - Walled City on Restored: the Queen EarthWalker waits outside the city and gives Tricky his flame, a RedEye angered
   by it chases Sabre and drops a tooth when it catches him, ten teeth open the city's gate, and the King EarthWalker
   activates the third SpellStone. The prototype never built any of it.
+- Wind Bridge on Restored: the wind over CloudRunner Fortress's treasure shaft holds Krystal while she carries a
+  barrel, so the barrels reach the courtyard and three blown under its roof free Kyte. In the prototype she fell to
+  the shaft's bottom with one.

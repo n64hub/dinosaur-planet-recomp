@@ -256,23 +256,24 @@ the race (43) at (-20, 29) on layer -2.
 - The key. SwapStone Circle's chief (SC_chieflightfoot, 518) gives it only at the circle's act 9, the 4-bit field
   0xE7, which SC_levelcontrol (519) moves on as the player enters map 14. Talked to, he sets 0x60E and 0x60F, and his
   sequence sets 0x611, the bit Moon Mountain Pass's padlock needs. Played.
-- The courtyard. Its roof (CFBlastedRoof, 389, about 110 above the courtyard's floor at its middle, group 8 of 0x458)
-  is the deck Kyte is shut in on, and blows at the third barrel blown under it: it counts hits of type 5, a CFbarrel's
+- The courtyard. Its roof (CFBlastedRoof, 389, about 110 above the courtyard's floor at its middle, group 8 of 0x458) is
+  the deck Kyte is shut in on, and blows at the third barrel blown under it: it counts hits of type 5, a CFbarrel's
   explosion (388 0x12A4-0x1314, reach 100, 10 up), one a barrel, each moving 0x2DE+n to 0x2DF+n and 0x900 to n+1, and
   the hit that finds n at its +0x1A (2) sets 0x2E1 (389 0x01CC-0x0398). A barrel on the courtyard's floor under the
-  roof's middle reaches it; none is placed there, and the four behind the explosive key's door are one for the wall
-  and three for the roof. With 0x2E1 the floor below (CFExplodeFloor, 390) blows, its pieces set 0x43, the force field
-  fades (0x34F, 0x359), and Kyte joins: her mother hid her five brothers and sisters. Played: three barrels blown
-  there; one carried over the wind bridge (the shaft, below), set down under the middle and swung at (0x2DF set,
-  0x900 at 1). No barrel reaches the deck itself: the courtyard's ladders (a wall of collision type 0x0A,
-  dll210_BA38) can't be started while carrying, and a carried barrel can't be thrown.
+  roof's middle reaches it; none is placed there, and the four behind the explosive key's door are one for the wall and
+  three for the roof. With 0x2E1 the floor below (CFExplodeFloor, 390) blows, its pieces set 0x43, the force field fades
+  (0x34F, 0x359), and Kyte joins: her mother hid her five brothers and sisters. Played: three barrels placed there by
+  script and blown set 0x2E1; one, 2e32, lifted in the room behind the key's door, carried out along z 18655, up the
+  corridor and over the wind bridge (the shaft, below), set down under the middle and swung at (0x2DF set, 0x900 at 1).
+  No barrel reaches the deck itself: the courtyard's ladders (a wall of collision type 0x0A, dll210_BA38) can't be
+  started while carrying, and a carried barrel can't be thrown.
 - The explosive key. The courtyard's guard, beaten, sets 0x4DF, and CFExplosiveKey (272) appears, 0x8FC once picked
   up. Its door, CCExplosiveDoor (308) in the corridor's east wall at (-13003, 2049, 18679), takes it from the item
   menu: 0x8FC is taken and the door's sequence sets 0x8FF. Played, the key's pickup by bit.
-- The wall. Behind that door are four CFbarrels (388). A within 20 units of one lifts it (A farther off swings the
-  staff), and it is carried through the door and round the corridor to the cracked wall, CFBlastedWall (389) in the
-  same wall at z 18879. A beside the wall sets nothing down; a step back it does. A barrel explodes at its third hit
-  (one set down counts them too), or at once to an explosion or fire: set down at (-13012, 18891) and swung at from
+- The wall. Behind that door are four CFbarrels (388). A within 20 units of one, facing it, lifts it (A farther off
+  swings the staff), and it is carried through the door and round the corridor to the cracked wall, CFBlastedWall (389)
+  in the same wall at z 18879. A beside the wall sets nothing down; a step back it does. A barrel explodes at its third
+  hit (one set down counts them too), or at once to an explosion or fire: set down at (-13012, 18891) and swung at from
   (-13016, 18860) it sets 0x8C9, CFExplodeWall (390) blows (0x8CA) a second later, and Krystal loses 4 health and is
   thrown through. Played from `before-cloudrunner`, walked by a script that steers by her position.
 - The shaft. Past the wall is CFTreasWindLift (370), at (-12902, 1840, 18886): its wind blows while 0x30D is set, which
@@ -339,11 +340,11 @@ the object takes it in the frame the player presses A with it targeted: dll2 set
 the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
-Left to play: the roof's two barrels, 29FA's rescue (no way up to its ledge found), the babies 29B3, map 30's and map
-15's (from the master chest), Kyte landing at the gold perch (she stays by the sideload that loaded her, so 0x8D1,
-0x4BE and 0x4C1 are read, not played), the way from the caves to the race and the race won. Read from the ROM, nothing
-sets 0x4B7, 0x4B8 (CFGuardian's sequence at 0x1D5C), 0x49A or 0x4DC, and Krystal makes no hit of type 0xF, which the
-ProjectileSwitches by the main door take, but by the two ZBombs there.
+Left to play: 29FA's rescue (no way up to its ledge found), the babies 29B3, map 30's and map 15's (from the master
+chest), Kyte landing at the gold perch (she stays by the sideload that loaded her, so 0x8D1, 0x4BE and 0x4C1 are read,
+not played), the way from the caves to the race and the race won. Read from the ROM, nothing sets 0x4B7, 0x4B8
+(CFGuardian's sequence at 0x1D5C), 0x49A or 0x4DC, and Krystal makes no hit of type 0xF, which the ProjectileSwitches by
+the main door take, but by the two ZBombs there.
 
 ## Golden Plains and the Desert Force Point
 
