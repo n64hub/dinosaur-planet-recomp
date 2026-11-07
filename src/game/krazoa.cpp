@@ -53,7 +53,69 @@
 //   0x21E and 0x220, which ROM file 55 has saved between the other released bits and nothing uses, and acts 8 and 9
 //   read them as released. Acts 6 and 7 read CC's and WG's released bits. The done bits of MM's, EC's, CC's
 //   and WG's seqpoints become their released bits.
+//
+// Cape Claw's Krazoa tablets: three are carried into the tablet room (map 29) and set in its receptacles, and its
+// puzzle then opens the way on. Krazoa Tablets is its own setting: on Restored (the default) the third tablet is found
+// and the puzzle's end leads on, and on Original both are as the console plays them. Read from the ROM:
+// - CCkrazoaBits (dll458, uid 34B04) counts a tablet into 0x23B and sets 0x23C for each of 0x234, 0x236 and 0x237,
+//   the bits of the three pickups. 0x234 is a Discovery Falls TriggerPlane, 0x236 a CCKrazoaTabletP (object 0x2ED,
+//   dll308: +0x1B 1 hides it once its bit +0x1C is set) in the settlement room. Nothing in the ROM places one with
+//   0x237, and nothing else sets it. The third is a CCKrazoaTabletP with 0x237, placed once the sand worm is dead
+//   (0x3FB, dll461 0xFD0) where the worm's arena has a sequence object that nothing triggers (CCnewseqobject uid
+//   42BDF, in the worm's object group, trigger bit 0x96). CCkrazoaBits keeps the three bits as it is created (0x18)
+//   and counts each that has turned set since (0xB4), but it is placed by distance in the tablet room, so a tablet
+//   picked up by the worm went uncounted (played): the pickup counts the third itself (dll308 0x288, once it set its
+//   bit), and CCkrazoaBits keeps 0x237 as set.
+// - CCkrazoabright (dll457, uid 34872) runs the room in states, its first update choosing one from bits (0xB4):
+//   0x3AC 4, 0x4D6 3, 0x393 2, else 1. State 1 (0x420): the four perch switches' six lights, solved by each switch
+//   once, plays sequence 0, whose data sets 0x393. State 2 (0x728): the two levers (0x41E, 0x604) set 0x4D6 and play
+//   sequence 1. State 3 (0x808): the three beacons and the three tablets set in (0x3DD-0x3DF, 0x238-0x23A) play
+//   sequence 3, whose data sets 0x3AC, task 136. State 4 (0xAAC): the lights again (0x4D7, 0x3F4 and 0x4D8 once
+//   each) play sequence 5 and go to state 5 (0xD78), which has no handler, and sequence 5 sets nothing: the puzzle's
+//   end led nowhere. Restored sets 0x52B there, a saved bit (ROM file 55, bank 1) that nothing in the code or the maps
+//   uses, and the first update goes to state 5 with it set (0x108), so the solved lights are not asked for again.
+// - Krazoa Palace (map 3) is placed in the world grid beside Cape Claw only, its east end at this room's local
+//   coordinates. Its two KP_Transporters (dll334) send to each other, east (@0644, own entry 94) to west (@0668, 93),
+//   both empty entries. A Transporter in the tablet room, shown by 0x52B, sends to 94 from its own entry 72 (empty),
+//   and 93 and 94 are filled where the palace's Transporters stand.
+// - The tablet room's model is in the ROM (map 29's blocks 932 and 933), and eight VisAnimators (dll354) hide it
+//   and the rooms around it, each the shapes of its groups, while 0x2C0 is clear. Two TriggerPlanes toggle 0x2C0 as
+//   the player crosses them (action 0x12 with 0x8000 on the bit): uid 41FC0 in the hall west of the room and 352FB in
+//   the tunnel east of it, so a player who walks in has it set (played, both) and it is saved. Warp entries 71 and 72
+//   land inside with no plane crossed, so they set it, which changes nothing for a player who walked in.
+//
+// Krazoa Palace (map 3, world = local + (6400, 0, 22400)): Krazoa Palace is its own setting. On Restored (the default)
+// the palace's four wings are played in turn and the red Krazoa sends the player on to Drakor; on Original its rooms
+// stand empty. Read from the ROM:
+// - Its objects have defs and are placed nowhere: KP_console_fire, _eart, _wate and _magi (0x58F-0x592, dll339),
+//   KP_textblock_* in the same order (0x593-0x596, dll654, DFP_Textblock's DLL), KP_RedKrazoa (0x598, dll214),
+//   KP_SectionDoor (0x59C) and KP_FinDoor (0x59E, both dll307). Only its two KP_Transporters (0x59A, dll334) are
+//   placed: +0x19 their own entry, which nothing reads, and +0x1A the entry they send to (0xD610), east (@0644, 94) to
+//   west (@0668, 93) and back.
+// - Its floors (map 3's triangles): the west Transporter stands in a high hall at y 960-973, which joins the rest by
+//   no floor: below it a shaft drops to a pit at y -18 by the hub. The hub's floor is at y 0 round a solid block, and
+//   a ramp from the block's east side climbs to 64, where a walkway leads south-east to the earth wing and a slope west
+//   to a bridge (128-160) between the fire wing (north-west) and the water wing (south-west); from the bridge a ramp
+//   climbs to a platform at 192 and a walkway north-east to the magic wing. The east Transporter's room, with the
+//   room the red Krazoa stands in west of it, joins the hub by no floor either.
+// - Restored places a Transporter at the shaft's top and one at its bottom, sending to warp entries 45 and 46 (empty
+//   in ROM file 30). 45 is filled beside the bottom pad: an entry on a pad's own spot over the shaft drops the player
+//   down it to the pit (played). 46 is filled at the west Transporter, as 93 is: it stands 13 above the high hall's
+//   floor, and a player who walks at it from the hall stops 46 short and isn't taken (played), but one put on it is,
+//   and walks off it east to the shaft's pad. Each wing gets a section door at its mouth, and at its end a console and a text block.
+//   The blocks go off in turn, fire, earth, water, magic, each needing the last one's done bit (+0x20) and setting
+//   its own (+0x1E): 0x6A7-0x6AA, saved bits in ROM file 55 that nothing in the code or the maps uses. The fire wing's
+//   door opens with 0x52B, the tablet room's, and each other wing's with the block before it. The last door, between
+//   the east Transporter and the red Krazoa, is KP_FinDoor's four leaves in an iris, each opened by one wing's bit.
+// - The leaves have no collision, so while the door isn't open the player is held east of it. A section door's
+//   collision stays where it was placed whatever its animation, so an open one is put under the floor.
+// - The red Krazoa, once 0x6AA is set, sends a player who walks up to it to warp entry 44 (empty), filled at BOSS
+//   Drakor's setuppoint (map 44): nothing in the ROM leads to the fight (docs/story-points.md).
+// - The object loop (func_8004A800) frees an object placed by code once the player is out of its range unless its
+//   placement's flag 2 (+4) is set (0x8004A94C), and the palace's are made once, as it loads: a text block was freed
+//   while the player was in another wing and never made again (played). The palace's are placed with flag 2.
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -78,9 +140,61 @@ namespace {
         { KrazoaShrines::Finished, "Finished" },
     };
 
+    const std::string krazoa_tablets = "krazoa_tablets";
+
+    enum class KrazoaTablets {
+        Original,
+        Restored,
+        OptionCount
+    };
+    const std::vector<recomp::config::ConfigOptionEnumOption> krazoa_tablets_options = {
+        { KrazoaTablets::Original, "Original" },
+        { KrazoaTablets::Restored, "Restored" },
+    };
+
+    const std::string krazoa_palace = "krazoa_palace";
+
+    enum class KrazoaPalace {
+        Original,
+        Restored,
+        OptionCount
+    };
+    const std::vector<recomp::config::ConfigOptionEnumOption> krazoa_palace_options = {
+        { KrazoaPalace::Original, "Original" },
+        { KrazoaPalace::Restored, "Restored" },
+    };
+
     bool finished() {
         return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(krazoa_shrines)) ==
             (uint32_t)KrazoaShrines::Finished;
+    }
+
+    bool tablets_restored() {
+        return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(krazoa_tablets)) ==
+            (uint32_t)KrazoaTablets::Restored;
+    }
+
+    bool palace_restored() {
+        return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(krazoa_palace)) ==
+            (uint32_t)KrazoaPalace::Restored;
+    }
+
+    // Which setting an entry of the tables below belongs to.
+    enum class Setting {
+        Shrines,
+        Tablets,
+        Palace
+    };
+
+    bool on(Setting setting) {
+        switch (setting) {
+            case Setting::Shrines:
+                return finished();
+            case Setting::Tablets:
+                return tablets_restored();
+            default:
+                return palace_restored();
+        }
     }
 
     constexpr int32_t set_bit = 0x80014670;
@@ -95,6 +209,27 @@ namespace {
 
     constexpr int transporter = 0xEC;
     constexpr int seqpoint = 0x25F;
+    constexpr int tablet_pickup = 0x2ED;
+
+    constexpr int increment_bit = 0x80014930; // (bit): adds one to its value
+    constexpr int third_tablet = 0x237;
+    constexpr int tablets_counted = 0x23B;    // the tablets counted, which the receptacles read (+0x1E)
+    constexpr int tablet_new = 0x23C;         // opens the settlement room (dll307)
+    constexpr int tablets_done = 0x52B;       // Cape Claw's tablet room solved, Restored
+    constexpr int tablet_area = 0x2C0;        // the VisAnimators' bit that shows the tablet room's part of map 29
+
+    constexpr int kp_transporter = 0x59A;
+    constexpr int kp_red_krazoa = 0x598;
+    constexpr int kp_section_door = 0x59C;
+    constexpr int kp_last_door = 0x59E;
+    constexpr int kp_console_fire = 0x58F;    // then earth, water and magic
+    constexpr int kp_textblock_fire = 0x593;  // then earth, water and magic
+    constexpr int32_t warp_entry = 0x8004D1D4; // (index, 0), as --warp and WM_WarpPoint (dll275 0x584) call it
+    constexpr int palace = 3;
+    constexpr int drakor_entry = 44;
+    constexpr float red_krazoa_x = 9140.0f, red_krazoa_z = 23040.0f, red_krazoa_reach = 100.0f;
+    bool sent_to_drakor = false;
+    constexpr float textblock_reach = 60.0f;
 
     int warlock_act = 0; // as WL_LevelControl last read it, for dll611's release
 
@@ -175,18 +310,28 @@ namespace {
     struct WarpEntry {
         int index;
         float x, y, z;
+        Setting setting;
+        int area; // a bit that shows the part of its map the entry is in, set on the way there, or 0
     };
 
     // Each entry is a place the map it is in holds, in world units (a map's placement + 640 times its world grid cell,
     // ROM file 21). 70 is entry 31, GP's pad itself. 71 is the setuppoint by Cape Claw's receptacles (map 29 @22C8).
     // 68 is the setuppoint between Walled City's two stones (map 13 @0800). 67 is setuppoint 1 by Willow Grove's
     // sundial (map 37 @003C). 65 is the setuppoint in the snow where Northern Wastes is entered (map 10 @00B0).
+    // 72 is the tablet room's Transporter, east of the receptacles. 93 and 94 are Krazoa Palace's west and east
+    // KP_Transporters (map 3 @0668, @0644).
     const WarpEntry warp_entries[] = {
-        { 65, -3932.0f, -110.7f, -361.2f },
-        { 67, -4523.2f, -1316.0f, -4004.5f },
-        { 68, -7939.2f, -1123.0f, -7441.1f },
-        { 70, -833.3f, 208.0f, 13285.5f },
-        { 71, 4200.3f, -7.1f, 17613.1f },
+        { 65, -3932.0f, -110.7f, -361.2f, Setting::Shrines },
+        { 67, -4523.2f, -1316.0f, -4004.5f, Setting::Shrines },
+        { 68, -7939.2f, -1123.0f, -7441.1f, Setting::Shrines },
+        { 70, -833.3f, 208.0f, 13285.5f, Setting::Shrines },
+        { 71, 4200.3f, -7.1f, 17613.1f, Setting::Shrines, tablet_area },
+        { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets, tablet_area },
+        { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
+        { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
+        { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
+        { 45, 4860.0f, 0.0f, 23358.0f, Setting::Palace },
+        { 46, 4481.0f, 973.0f, 23358.0f, Setting::Palace },
     };
 
     // A change to one placement in a map's object list, found by its map, object id and unique id (+0x14).
@@ -228,41 +373,100 @@ namespace {
         float x, y, z;
         uint8_t params[12]; // from +0x18
         int act;            // the Warlock Mountain act it is placed in, or 0 for any
+        Setting setting;
+        int needs;          // a bit it waits for while its map is loaded, or 0
         bool placed;
     };
 
     // Transporters: yaw 0, own entry, destination, then dll334's 0x1E radius and its show bit, as GP's pad.
     // Seqpoints: yaw, mode 3 (walked into with its trigger clear, which it then sets), radius, sequence, trigger, no
     // done bit, at the upper sites of CC (@1570) and WG (@1C0C) with their yaws and radii.
+    // Cape Claw's third tablet: the settlement room's CCKrazoaTabletP (map 29 @435C) with 0x237, at the worm arena's
+    // untriggered sequence object (uid 42BDF), once the worm is dead. The tablet room's Transporter: own entry 72, to
+    // the palace's east end (94), shown once the room is solved.
     Extra extras[] = {
-        { 13, transporter, -7939.2f, -1123.0f, -7441.1f, { 0, 68, 40, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x64, 0, 0 }, 0, false },
-        { 29, transporter, 4200.3f, -7.1f, 17613.1f, { 0, 71, 41, 0, 0, 0, 0x1E, 0xFF, 0x03, 0x18, 0, 0 }, 0, false },
-        { 37, transporter, -4523.2f, -1316.0f, -4004.5f, { 0, 67, 39, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x21, 0, 0 }, 0, false },
-        { 10, transporter, -3932.0f, -110.7f, -361.2f, { 0, 65, 37, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x1E, 0, 0 }, 0, false },
-        { 11, seqpoint, 13959.0f, 470.0f, 2123.0f, { 0x00, 3, 0, 0x46, 0, 0x0F, 0x02, 0x1E, 0xFF, 0xFF, 0, 0 }, 8, false },
-        { 11, seqpoint, 12932.0f, 456.0f, 1091.0f, { 0x7F, 3, 0, 0x48, 0, 0x11, 0x02, 0x20, 0xFF, 0xFF, 0, 0 }, 9, false },
+        { 13, transporter, -7939.2f, -1123.0f, -7441.1f, { 0, 68, 40, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x64, 0, 0 }, 0,
+            Setting::Shrines, 0, false },
+        { 29, transporter, 4200.3f, -7.1f, 17613.1f, { 0, 71, 41, 0, 0, 0, 0x1E, 0xFF, 0x03, 0x18, 0, 0 }, 0,
+            Setting::Shrines, 0, false },
+        { 37, transporter, -4523.2f, -1316.0f, -4004.5f, { 0, 67, 39, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x21, 0, 0 }, 0,
+            Setting::Shrines, 0, false },
+        { 10, transporter, -3932.0f, -110.7f, -361.2f, { 0, 65, 37, 0, 0, 0, 0x1E, 0xFF, 0x02, 0x1E, 0, 0 }, 0,
+            Setting::Shrines, 0, false },
+        { 11, seqpoint, 13959.0f, 470.0f, 2123.0f, { 0x00, 3, 0, 0x46, 0, 0x0F, 0x02, 0x1E, 0xFF, 0xFF, 0, 0 }, 8,
+            Setting::Shrines, 0, false },
+        { 11, seqpoint, 12932.0f, 456.0f, 1091.0f, { 0x7F, 3, 0, 0x48, 0, 0x11, 0x02, 0x20, 0xFF, 0xFF, 0, 0 }, 9,
+            Setting::Shrines, 0, false },
+        { 29, tablet_pickup, 3574.0f, -257.0f, 16514.0f, { 0, 0, 0, 1, 0x02, 0x37, 0xFF, 0xFF, 0, 0, 0xFF, 0xFF }, 0,
+            Setting::Tablets, 0x3FB, false },
+        { 29, transporter, 4776.0f, -8.0f, 17606.0f, { 0, 72, 94, 0, 0, 0, 0x1E, 0xFF, 0x05, 0x2B, 0, 0 }, 0,
+            Setting::Tablets, 0, false },
+        { 3, kp_transporter, 4730.0f, 973.0f, 23358.0f, { 0, 46, 45, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_transporter, 4730.0f, -5.0f, 23358.0f, { 0, 45, 46, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_console_fire, 5300.0f, -31.0f, 21442.0f, { 0, 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_console_fire + 1, 8640.0f, -132.0f, 25432.0f, { 0, 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_console_fire + 2, 5300.0f, -63.0f, 25281.0f, { 0, 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_console_fire + 3, 8643.0f, -3.0f, 21291.0f, { 0, 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_textblock_fire, 5360.0f, -2.0f, 21442.0f, { 0x40, 0, 0x01, 0xF9, 0, 0, 0x06, 0xA7, 0xFF, 0xFF, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_textblock_fire + 1, 8640.0f, -103.0f, 25372.0f, { 0, 1, 0x01, 0xFA, 0, 0, 0x06, 0xA8, 0x06, 0xA7, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_textblock_fire + 2, 5360.0f, -34.0f, 25281.0f, { 0x40, 0, 0x01, 0xFB, 0, 0, 0x06, 0xA9, 0x06, 0xA8, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_textblock_fire + 3, 8643.0f, 26.0f, 21351.0f, { 0, 1, 0x01, 0xFC, 0, 0, 0x06, 0xAA, 0x06, 0xA9, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_red_krazoa, 9140.0f, 0.0f, 23040.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, Setting::Palace, 0, false },
+        // The palace's doors: no bits and no sequence (+0x1C), so dll307 leaves them be; their yaw at +0x1F. The last
+        // door's four leaves are at its centre, each with its roll at +0x1A, which dll307 doesn't read.
+        { 3, kp_section_door, 5757.0f, 95.0f, 21440.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_section_door, 8638.0f, 0.0f, 24957.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_section_door, 5754.0f, 63.0f, 25280.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_section_door, 8641.0f, 127.0f, 21750.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_last_door, 10190.0f, 85.0f, 23040.0f, { 0xFF, 0xFF, 0x00, 0, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_last_door, 10190.0f, 85.0f, 23040.0f, { 0xFF, 0xFF, 0x40, 0, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_last_door, 10190.0f, 85.0f, 23040.0f, { 0xFF, 0xFF, 0x80, 0, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_last_door, 10190.0f, 85.0f, 23040.0f, { 0xFF, 0xFF, 0xC0, 0, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
     };
 
-    void place(uint8_t* rdram, recomp_context* ctx, const Extra& e) {
-        ctx->r4 = 0x24;
-        ctx->r5 = e.object;
+    void place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
+        // dll214 reads +0x24 too (its create, 0x70), so its actors get the 0x28 bytes the ROM's have.
+        int size = object == kp_red_krazoa ? 0x28 : 0x24;
+        ctx->r4 = size;
+        ctx->r5 = object;
         call(rdram, ctx, new_placement);
         gpr p = ctx->r2;
-        MEM_B(2, p) = 0x24 / 4;
-        memcpy(&MEM_W(0x8, p), &e.x, 4);
-        memcpy(&MEM_W(0xC, p), &e.y, 4);
-        memcpy(&MEM_W(0x10, p), &e.z, 4);
+        MEM_B(2, p) = size / 4;
+        // Flag 2 (+4): the object loop (func_8004A800, 0x8004A94C) never frees it as out of range. The palace's are made
+        // once as it loads, and the text blocks were freed while the player was in another wing, never to come back.
+        MEM_B(4, p) = map == palace ? 2 : 0;
+        memcpy(&MEM_W(0x8, p), &x, 4);
+        memcpy(&MEM_W(0xC, p), &y, 4);
+        memcpy(&MEM_W(0x10, p), &z, 4);
         for (int i = 0; i < 12; i++) {
-            MEM_B(0x18 + i, p) = (int8_t)e.params[i];
+            MEM_B(0x18 + i, p) = (int8_t)params[i];
         }
         ctx->r4 = p;
         ctx->r5 = 5;
-        ctx->r6 = e.map;
+        ctx->r6 = map;
         ctx->r7 = -1;
         MEM_W(0x10, ctx->r29) = 0;
         call(rdram, ctx, spawn_object);
         if (logging) {
-            fprintf(stderr, "krazoa: placed object 0x%X in map %d at %.0f %.0f %.0f\n", e.object, e.map, e.x, e.y, e.z);
+            fprintf(stderr, "krazoa: placed object 0x%X in map %d at %.0f %.0f %.0f\n", object, map, x, y, z);
         }
     }
 }
@@ -277,22 +481,41 @@ void dino::add_krazoa_options(recomp::config::Config& general) {
         krazoa_shrines_options,
         KrazoaShrines::Finished
     );
+    general.add_enum_option(
+        krazoa_tablets,
+        "Krazoa Tablets",
+        "Cape Claw's third Krazoa tablet is found where the sand worm fell, and the tablet room's last puzzle opens a "
+        "Transporter to Krazoa Palace. <b>Original is the prototype as it was left</b>: the third tablet is nowhere, "
+        "and the last puzzle leads nowhere.",
+        krazoa_tablets_options,
+        KrazoaTablets::Restored
+    );
+    general.add_enum_option(
+        krazoa_palace,
+        "Krazoa Palace",
+        "Krazoa Palace's four wings each have a section door, a console and a text block, and the four open the last "
+        "door to the red Krazoa, which sends the player on to Drakor. <b>Original is the prototype as it was left</b>: "
+        "the palace's rooms stand empty and lead nowhere.",
+        krazoa_palace_options,
+        KrazoaPalace::Restored
+    );
 }
 
 // us.toml's hook in WARP_ENTRY (func_8004D1D4) once it has read entry 0x20(sp) of ROM file 30 into the buffer at
 // 0x1C(sp): 16 bytes, x, y and z as floats and an s16 layer, all zero in an empty entry.
 extern "C" void dino_krazoa_warp_entry(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished()) {
-        return;
-    }
     int index = MEM_W(0x20, ctx->r29);
     gpr entry = (gpr)MEM_W(0x1C, ctx->r29);
     for (const WarpEntry& w : warp_entries) {
-        if (w.index == index) {
+        if (w.index == index && on(w.setting)) {
             memcpy(&MEM_W(0x0, entry), &w.x, 4);
             memcpy(&MEM_W(0x4, entry), &w.y, 4);
             memcpy(&MEM_W(0x8, entry), &w.z, 4);
             MEM_W(0xC, entry) = 0;
+            if (w.area != 0) {
+                Calls calls(rdram, ctx);
+                set(rdram, ctx, w.area, 1);
+            }
         }
     }
 }
@@ -331,20 +554,42 @@ extern "C" void dino_krazoa_map_loaded(uint8_t* rdram, recomp_context* ctx) {
     }
 }
 
-// us.toml's hook after func_80046BC8 places the loaded maps' objects (func_8004A800).
+// us.toml's hook after func_80046BC8 places the loaded maps' objects (func_8004A800), each frame from the main loop
+// (func_80013D80): an Extra that needs a bit is placed the frame it is set.
 extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished()) {
+    if (!finished() && !tablets_restored() && !palace_restored()) {
         return;
     }
     Calls calls(rdram, ctx);
+    if (word(rdram, map_structs + 4 * palace) == 0) {
+        sent_to_drakor = false;
+    }
+    else if (!sent_to_drakor && palace_restored() && get(rdram, ctx, 0x6AA)) {
+        call(rdram, ctx, player_object);
+        int32_t player = (int32_t)ctx->r2;
+        float px, pz;
+        int32_t wx = word(rdram, player + 0xC), wz = word(rdram, player + 0x14);
+        memcpy(&px, &wx, 4);
+        memcpy(&pz, &wz, 4);
+        float dx = px - red_krazoa_x, dz = pz - red_krazoa_z;
+        if (player != 0 && dx * dx + dz * dz < red_krazoa_reach * red_krazoa_reach) {
+            sent_to_drakor = true;
+            ctx->r4 = drakor_entry;
+            ctx->r5 = 0;
+            call(rdram, ctx, warp_entry);
+            if (logging) {
+                fprintf(stderr, "krazoa: the red Krazoa sends the player to Drakor (entry %d)\n", drakor_entry);
+            }
+        }
+    }
     for (Extra& e : extras) {
         if (word(rdram, map_structs + 4 * e.map) == 0) {
             e.placed = false;
         }
-        else if (!e.placed) {
+        else if (!e.placed && on(e.setting) && (e.needs == 0 || get(rdram, ctx, e.needs))) {
             e.placed = true;
             if (e.act == 0 || warlock_act_now(rdram, ctx) == e.act) {
-                place(rdram, ctx, e);
+                place(rdram, ctx, e.map, e.object, e.x, e.y, e.z, e.params);
             }
         }
     }
@@ -519,5 +764,187 @@ extern "C" void dino_krazoa_gp_event(uint8_t* rdram, recomp_context* ctx) {
         if (logging) {
             fprintf(stderr, "krazoa: Golden Plains' win keeps its reward\n");
         }
+    }
+}
+
+// us.toml's hook in CCkrazoabright's state 4 (dll457 0xD78), the last lights solved, as it stores state 5.
+extern "C" void dino_krazoa_tablets_solved(uint8_t* rdram, recomp_context* ctx) {
+    if (!tablets_restored()) {
+        return;
+    }
+    Calls calls(rdram, ctx);
+    set_if_clear(rdram, ctx, tablets_done);
+    if (logging) {
+        fprintf(stderr, "krazoa: Cape Claw's tablet room solved\n");
+    }
+}
+
+// us.toml's hook in CCkrazoabright's first update (dll457 0x108), which stores state 4 from $t7 with 0x3AC set.
+extern "C" void dino_krazoa_tablets_state(uint8_t* rdram, recomp_context* ctx) {
+    if (!tablets_restored()) {
+        return;
+    }
+    bool solved;
+    {
+        Calls calls(rdram, ctx);
+        solved = get(rdram, ctx, tablets_done) != 0;
+    }
+    if (solved) {
+        ctx->r15 = 5;
+    }
+}
+
+// us.toml's hook in the tablet pickup's update (dll308 0x288), just after it set its bit (+0x1C), which it does only
+// while that bit was clear. CCkrazoaBits counts a pickup only while it is loaded, by the tablet room, so the third
+// tablet, picked up by the worm, is counted here as dll458 0x1C0-0x1E8 would.
+extern "C" void dino_krazoa_tablet_picked(uint8_t* rdram, recomp_context* ctx) {
+    if (!tablets_restored() || MEM_H(0x1C, (gpr)word(rdram, (int32_t)ctx->r29 + 0x20)) != third_tablet) {
+        return;
+    }
+    Calls calls(rdram, ctx);
+    ctx->r4 = tablets_counted;
+    call(rdram, ctx, increment_bit);
+    set(rdram, ctx, tablet_new, 1);
+    if (logging) {
+        fprintf(stderr, "krazoa: the third tablet is counted\n");
+    }
+}
+
+// us.toml's hook in CCkrazoaBits' creation (dll458 0x98), as it keeps 0x237's value in $v0 to count it once set: the
+// third tablet is counted at its pickup instead.
+extern "C" void dino_krazoa_tablet_bits(uint8_t*, recomp_context* ctx) {
+    if (tablets_restored()) {
+        ctx->r2 = 1;
+    }
+}
+
+// us.toml's hook in the text block's update (dll654 0x314), on the answer of the call at 0x30C (dll1 export 7, with
+// 0x7BF). Once its needed bit (+0x20) is set and its done bit (+0x1E) isn't, a text block asks that every frame; on
+// yes it plays its sequence (+0x19) and marks it played (state+0xC), and on the first no after that it sets its done
+// bit (0x350). 0x7BF is Desert Force Point's own: its controller sets it (dll638 0xF58) and DFP's first block needs
+// it (map 21 @uid 405DE +0x20), so a palace block goes off instead with the player standing at it, once: only while
+// its sequence hasn't played ($s0 is its state here).
+extern "C" void dino_krazoa_palace_textblock(uint8_t* rdram, recomp_context* ctx) {
+    int32_t block = word(rdram, (int32_t)ctx->r29 + 0x28);
+    int object = MEM_H(0, (gpr)word(rdram, block + 0x4C));
+    if (object < kp_textblock_fire || object > kp_textblock_fire + 3 || !palace_restored() ||
+        MEM_BU(0xC, (gpr)ctx->r16) != 0) {
+        return;
+    }
+    int32_t player;
+    {
+        Calls calls(rdram, ctx);
+        call(rdram, ctx, player_object);
+        player = (int32_t)ctx->r2;
+    }
+    float dx, dz;
+    int32_t px = word(rdram, player + 0xC), pz = word(rdram, player + 0x14);
+    int32_t bx = word(rdram, block + 0xC), bz = word(rdram, block + 0x14);
+    float pxf, pzf, bxf, bzf;
+    memcpy(&pxf, &px, 4);
+    memcpy(&pzf, &pz, 4);
+    memcpy(&bxf, &bx, 4);
+    memcpy(&bzf, &bz, 4);
+    dx = pxf - bxf;
+    dz = pzf - bzf;
+    if (dx * dx + dz * dz < textblock_reach * textblock_reach) {
+        ctx->r2 = 1;
+        if (logging) {
+            fprintf(stderr, "krazoa: palace text block 0x%X goes off\n", object);
+        }
+    }
+}
+
+namespace {
+    // A palace door, found by where it was placed, and the bit that opens it. A section door shuts and opens by its
+    // model's own animation, 1.0 shut and 0 open (func_80023D30(object, 0, progress, 0)). The last door is four
+    // leaves of one model in an iris, each turned by its roll (+4) and moved out along `out` as it opens.
+    struct PalaceDoor {
+        float x, y, z;
+        int bit;
+        int16_t roll;     // a leaf's, from +0x1A
+        float out_x, out_y, out_z;
+        int32_t object; // as last seen, so a door made again starts where its bit says
+        float shut;     // 1 shut, 0 open
+    };
+
+    constexpr int32_t set_animation = 0x80023D30;
+    constexpr int32_t ticks = 0x8008C958; // the frame's length in ticks, a float (dll654 0x284)
+    constexpr float door_ticks = 90.0f;   // a door opens in 1.5 s
+    constexpr float leaf_travel = 100.0f;
+    constexpr float door_sunk = 1000.0f;
+    constexpr float last_door_stop = 10215.0f;
+
+    PalaceDoor palace_doors[] = {
+        { 5757.0f, 95.0f, 21440.0f, tablets_done },
+        { 8638.0f, 0.0f, 24957.0f, 0x6A7 },
+        { 5754.0f, 63.0f, 25280.0f, 0x6A8 },
+        { 8641.0f, 127.0f, 21750.0f, 0x6A9 },
+        { 10190.0f, 85.0f, 23040.0f, 0x6A7, 0, 0.0f, 1.0f, 0.0f },
+        { 10190.0f, 85.0f, 23040.0f, 0x6A8, 0x4000, 0.0f, 0.0f, 1.0f },
+        { 10190.0f, 85.0f, 23040.0f, 0x6A9, (int16_t)0x8000, 0.0f, -1.0f, 0.0f },
+        { 10190.0f, 85.0f, 23040.0f, 0x6AA, (int16_t)0xC000, 0.0f, 0.0f, -1.0f },
+    };
+
+    float word_float(uint8_t* rdram, int32_t address) {
+        int32_t w = word(rdram, address);
+        float f;
+        memcpy(&f, &w, 4);
+        return f;
+    }
+}
+
+// us.toml's hook in dll307's update (0x1E4, $a0 the door): a palace door is posed from its bit each frame.
+extern "C" void dino_krazoa_palace_door(uint8_t* rdram, recomp_context* ctx) {
+    int32_t door = (int32_t)ctx->r4;
+    int32_t setup = word(rdram, door + 0x4C);
+    int object = MEM_H(0, (gpr)setup);
+    if ((object != kp_section_door && object != kp_last_door) || !palace_restored()) {
+        return;
+    }
+    float x = word_float(rdram, setup + 0x8), y = word_float(rdram, setup + 0xC), z = word_float(rdram, setup + 0x10);
+    for (PalaceDoor& d : palace_doors) {
+        if (d.x != x || d.y != y || d.z != z || (object == kp_last_door && MEM_H(0x1A, (gpr)setup) != d.roll)) {
+            continue;
+        }
+        Calls calls(rdram, ctx);
+        float target = get(rdram, ctx, d.bit) ? 0.0f : 1.0f;
+        if (d.object != door) {
+            d.object = door;
+            d.shut = target;
+        }
+        float step = word_float(rdram, ticks) / door_ticks;
+        d.shut = target < d.shut ? std::max(target, d.shut - step) : std::min(target, d.shut + step);
+        if (object == kp_section_door) {
+            float shut = d.shut;
+            int32_t bits;
+            memcpy(&bits, &shut, 4);
+            ctx->r4 = door;
+            ctx->r5 = 0;
+            ctx->r6 = bits;
+            ctx->r7 = 0;
+            call(rdram, ctx, set_animation);
+            // Its collision stays where it stands whatever its pose, so an open one is put under the floor.
+            float dy = d.y - (d.shut == 0.0f ? door_sunk : 0.0f);
+            memcpy(&MEM_W(0x10, (gpr)door), &dy, 4);
+        }
+        else {
+            float open = (1.0f - d.shut) * leaf_travel;
+            float lx = d.x + d.out_x * open, ly = d.y + d.out_y * open, lz = d.z + d.out_z * open;
+            MEM_H(4, (gpr)door) = d.roll;
+            memcpy(&MEM_W(0xC, (gpr)door), &lx, 4);
+            memcpy(&MEM_W(0x10, (gpr)door), &ly, 4);
+            memcpy(&MEM_W(0x14, (gpr)door), &lz, 4);
+            // The leaves have no collision, so a door not yet open holds the player east of it.
+            if (d.shut > 0.0f) {
+                call(rdram, ctx, player_object);
+                int32_t player = (int32_t)ctx->r2;
+                if (player != 0 && word_float(rdram, player + 0xC) < last_door_stop &&
+                    word_float(rdram, player + 0xC) > d.x - leaf_travel) {
+                    memcpy(&MEM_W(0xC, (gpr)player), &last_door_stop, 4);
+                }
+            }
+        }
+        return;
     }
 }

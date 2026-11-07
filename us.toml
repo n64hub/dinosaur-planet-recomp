@@ -94,6 +94,26 @@ func = "dll210_A3FC"
 vram = 0x900F247C
 value = 0x240D4653
 
+# Picking up an item (a key, a crystal, a tooth, a SpellStone: a collectable, dll272) plays the player's pickup and
+# then the item's scene, sequence 0 of the player, whose actor list has a placeholder (object 0x443) for the item shown.
+# The pickup names that item to dll3 (gDLL_97c->0x7C, dll3 0x9E58) from its definition (def +0x18, then +6), and
+# dll3_8900 swaps the placeholder for it unless it is -1 (0x8DA0-0x8DC0, the name at data +0xA67C). Most items' is 0,
+# so the scene made object 0, the player (Sabre's definition, dll210): a second player that took the camera, and the
+# scene never ended. An item named 0 keeps the placeholder, as -1 does.
+[[patches.hook]]
+func = "dll3_8900"
+before_vram = 0x900139D4
+text = "{ if (ctx->r3 == 0) goto L_900139D8; }"
+
+# The player's pickup state (dll210_16220, state 42, the player in $s1) starts the item's scene once its animation is
+# done (0x16408-0x16424) and stays in the state with its time at 0, so it starts the scene again each frame until the
+# scene takes the player over, and the repeated starts crashed in dll3_8900 (an actor whose state, +0xB8, was 0). A
+# player already in a sequence (+0xB4 not -1) returns 0 there, as the branch at 0x16400 does, so the scene starts once.
+[[patches.hook]]
+func = "dll210_16220"
+before_vram = 0x900FE208
+text = "{ if (MEM_H(0xB4, ctx->r17) != -1) { ctx->r2 = 0; goto L_900FE2C8; } }"
+
 # func_80011C70, which makes each audio frame, reads the AI's remaining length straight from AI_LEN (0xA4500004),
 # where libultra has osAiGetLength: the runtime's gives it (lw $t9, 4($t8) -> nop, then the hook).
 [[patches.instruction]]
@@ -206,6 +226,21 @@ func = "func_80022F94"
 before_vram = 0x80022F94
 text = "{ void dino_object_freed(uint8_t*, uint32_t); dino_object_freed(rdram, (uint32_t)ctx->r4); }"
 
+# An effect drawn after its object is freed: dll13's draw reads the freed object's parent and that parent's first
+# halfword, and a parent word that isn't an address read outside memory (src/game/objects.cpp). It is taken for none.
+[[patches.hook]]
+func = "dll13_1080"
+before_vram = 0x90034A34
+text = "{ void dino_effect_parent(uint8_t*, recomp_context*); dino_effect_parent(rdram, ctx); }"
+
+# The player's weapon read before it is made: a new player's first update runs its state machine before it makes its
+# staff or sword, and the swing's state reads it as it starts with no test, so a swing pressed on the frame the player
+# comes back after a death crashed (src/game/objects.cpp). The update makes it before its state machine runs.
+[[patches.hook]]
+func = "dll210_0934"
+before_vram = 0x900E8A70
+text = "{ void dino_player_weapon(uint8_t*, recomp_context*); dino_player_weapon(rdram, ctx); }"
+
 # The Swap Store's item beams (SPitembeam, dll772) the same: a beam's constructor keeps the nearest object of list 0xA,
 # the item under it, at +0xDC, and its update asks that item's interface +0x28 at 0x902C5888 with no test. With no item
 # it goes on as for an item that is gone, at 0x902C58D8, which hides the beam.
@@ -242,6 +277,39 @@ text = "{ if (ctx->r4 == 0) return; }"
 func = "func_8004D470"
 vram = 0x8004D484
 value = 0x34048FC0
+
+# Too few map block slots: func_80041E84 allocates the loaded blocks' table for 40 (pointers 0xA0 bytes at 0x800B96B4,
+# ids 0x50 at 0x800B96BC, use counts 0x28 at 0x800B96C4), and func_80049024 takes a free slot or else the next one past
+# the used count (the byte at 0x800B96B8) with no test against 40. Every other user counts to that byte. Dragon Rock -
+# Top's east end, on layer 0 beside the Kamerian Dragon's room, holds 43 blocks at once: the slots past 40 went over the
+# heap blocks after the table, and the next block freed there read a pointer of garbage (func_80048C24) and crashed. The
+# table is 80 slots (addiu $a0, $zero, 0xA0 -> 0x140, 0x50 -> 0xA0, 0x28 -> 0x50).
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EAC
+value = 0x24040140
+
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EC4
+value = 0x240400A0
+
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EDC
+value = 0x24040050
+
+# Item pickups: a pickup (dll272) taken with A gives dll3 the object the player's pickup sequence holds up (dll3_9E58,
+# from +6 of the block at its def's +0x18) and plays the player's pickup (state 0x2A), whose end starts the player's
+# sequence 0 (dll210_16220), the one whose event hands the item over. That sequence's VariableObject (object 0x443)
+# becomes the held object, unless it is -1 (dll3_8900), and every pickup's def holds 0 there: object 0, the player.
+# Each start made a second player, the pickup's state started the sequence again the next frame, and so on until the
+# object heap was full and dll3_8900 read +0xB8 of the null object func_800213EC returned, or a copy ran past the
+# heap. Golden Plains' portable hole spell crashed so, as Sabre and as Krystal. A held object of 0 is none ($a0).
+[[patches.hook]]
+func = "dll3_9E58"
+before_vram = 0x90014A6C
+text = "{ if (ctx->r4 == 0) ctx->r4 = -1; }"
 
 # RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
 # write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
@@ -509,6 +577,65 @@ func = "dll216_02C0"
 before_vram = 0x9011CBBC
 text = "{ int32_t bit = (int16_t)MEM_H(0x39C, ctx->r17); if (ctx->r2 != 0 && bit != -1) { gpr v0 = ctx->r2; ctx->r4 = bit; func_800147EC(rdram, ctx); if (ctx->r2 != 0) goto L_9011CDC0; ctx->r2 = v0; } }"
 
+# A scene that moves the player: dll3 holds the player (+0xB0 bit 0x1000) and its update stops. Its collision (dll27.5)
+# keeps where it last stood, and the update's first pass after the scene sweeps from there, before the player's own
+# release (dll210_60A8, by dll210_7260) resets it a pass later, so whatever stands between the two stops the player
+# there: BOSS TRex's intro walks Sabre in from the warp, the door (KT_RexDoorPlaye, z -9810) shuts behind her at the
+# scene's start, and as the scene ended the sweep put her back on the far side of it, 38 units short of the door, shut
+# out of the arena for good. Here dll210_7260 runs at that pass, before dll27.3 to dll27.5 (the player in $s2, the state
+# in $s1), so the collision starts where the scene left the player.
+[[patches.hook]]
+func = "dll210_0934"
+before_vram = 0x900E8EE0
+text = "{ if (MEM_HU(0xB0, ctx->r18) & 0x1000) { recomp_context c = *ctx; c.r4 = ctx->r18; c.r5 = ctx->r17; dll210_7260(rdram, &c); } }"
+
+# Walled City (patches/walled_city.c says what each fixes). A pressure switch's add (dll781_05DC, the switch in $a0,
+# what stands on it in $a1) is done by dino_wc_switch_add in its place.
+[[patches.hook]]
+func = "dll781_05DC"
+before_vram = 0x902CA418
+text = '{ void dino_wc_switch_add(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_switch_add(rdram, &c); if (c.r2) return; }'
+
+# A beacon's update (dll780_011C, the beacon in $a0) has dino_wc_beacon give it a hit volume a player can reach first.
+[[patches.hook]]
+func = "dll780_011C"
+before_vram = 0x902C9938
+text = '{ void dino_wc_beacon(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_beacon(rdram, &c); }'
+
+# BOSS TRex's arena (patches/boss_trex.c says what each fixes). A floor switch's update (dll703_00A4, the switch in
+# $a0) counts a player standing on its pad with dino_trex_switch first.
+[[patches.hook]]
+func = "dll703_00A4"
+before_vram = 0x90289920
+text = '{ void dino_trex_switch(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_switch(rdram, &c); }'
+
+# The TRex's path step (dll702_0FE4, the TRex in $a0, its path data in $a1) starts with its fraction in its speed's
+# range (dino_trex_path), or a corner can skip the next corridor.
+[[patches.hook]]
+func = "dll702_0FE4"
+before_vram = 0x90286938
+text = '{ void dino_trex_path(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_path(rdram, &c); }'
+
+# The TRex's run (dll702_2454, the TRex in $a0, its state in $a1) faces its corridor first (dino_trex_facing), or a
+# charge round a corner runs on sideways.
+[[patches.hook]]
+func = "dll702_2454"
+before_vram = 0x90287DA8
+text = '{ void dino_trex_facing(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_facing(rdram, &c); }'
+
+# With BOSS TRex on Restored (src/game/boss_trex.cpp):
+# The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
+# and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call.
+[[patches.instruction]]
+func = "dll702_2D98"
+vram = 0x9028874C
+value = 0x00000000
+
+[[patches.hook]]
+func = "dll702_2D98"
+before_vram = 0x90288754
+text = '{ int dino_trex_restored(void); void dino_trex_beaten(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_beaten(rdram, &c); } else { func_80013FB4(rdram, ctx); } }'
+
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),
 # but func_80037A14's fills stop a pixel short of the frame's width and its later scissor doesn't, so they'd stay in the
@@ -570,11 +697,12 @@ text = "{ void dino_camera_turn(uint8_t*, recomp_context*); dino_camera_turn(rdr
 # --warp (src/main/main.cpp, development): func_800145AC runs once a pass of the main thread's loop, and at its start
 # asks whether a warp is due; if one is, it calls the game's warp, func_8004D1D4 (the entry's index, then 0 for no
 # fade), as the game's own warps do, and goes on with the registers it had. --story (src/game/story.cpp) starts its
-# point from the same place, before any warp.
+# point from the same place, before any warp. With no --warp due it asks Dragon Rock's way into the Kamerian Dragon's
+# room and out (src/game/dragon_rock.cpp), whose warp fades.
 [[patches.hook]]
 func = "func_800145AC"
 before_vram = 0x800145AC
-text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int w = dino_warp_due(); if (w >= 0) { ctx->r4 = w; ctx->r5 = 0; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
+text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int dino_dragon_rock_door(uint8_t*, recomp_context*); int w = dino_warp_due(); int fade = 0; if (w < 0) { w = dino_dragon_rock_door(rdram, ctx); *ctx = saved; fade = 1; } if (w >= 0) { ctx->r4 = w; ctx->r5 = fade; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
 
 # --watch-bits (src/game/story.cpp, development): func_80014670 sets the bit in $a0 to the value in $a1, and at its start
 # says so when the bit is watched.
@@ -584,12 +712,12 @@ before_vram = 0x80014670
 text = '{ void dino_bit_setting(uint8_t*, recomp_context*); dino_bit_setting(rdram, ctx); }'
 
 # The Krazoa shrines (src/game/krazoa.cpp, whose header has the evidence): WARP_ENTRY once it has read an entry of the
-# warp table into its buffer, the end of func_80045BF4 once a map is loaded, and func_80046BC8 once the loaded maps'
+# warp table into its buffer (Dragon Rock's two entries too, src/game/dragon_rock.cpp), the end of func_80045BF4 once a map is loaded, and func_80046BC8 once the loaded maps'
 # objects are placed.
 [[patches.hook]]
 func = "func_8004D1D4"
 before_vram = 0x8004D208
-text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); dino_krazoa_warp_entry(rdram, ctx); }'
+text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); void dino_dragon_rock_warp_entry(uint8_t*, recomp_context*); dino_krazoa_warp_entry(rdram, ctx); dino_dragon_rock_warp_entry(rdram, ctx); }'
 
 [[patches.hook]]
 func = "func_80045BF4"
@@ -618,7 +746,7 @@ text = '{ void dino_moonseeds_stone_placed(uint8_t*, recomp_context*); dino_moon
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
-text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); }'
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
 # whether their spirit is released by 0x366, a bit nothing sets: they ask CC's (0x221) and WG's (0x222) released bits
@@ -649,6 +777,43 @@ text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_
 func = "dll611_04B4"
 before_vram = 0x90246F40
 text = '{ void dino_krazoa_release_mask(uint8_t*, recomp_context*); dino_krazoa_release_mask(rdram, ctx); }'
+
+# Cape Claw's tablet room (CCkrazoabright, dll457; krazoa.cpp's header): its last lights solved, as state 4 stores
+# state 5 (0xD78), and its first update's store of state 4 from $t7 (0x108).
+[[patches.hook]]
+func = "dll457_0AAC"
+before_vram = 0x901E38B4
+text = '{ void dino_krazoa_tablets_solved(uint8_t*, recomp_context*); dino_krazoa_tablets_solved(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll457_00B4"
+before_vram = 0x901E2C44
+text = '{ void dino_krazoa_tablets_state(uint8_t*, recomp_context*); dino_krazoa_tablets_state(rdram, ctx); }'
+
+# The tablet pickup (dll308) once it has set its bit (0x288), and CCkrazoaBits' creation (dll458) as it keeps 0x237's
+# value (0x98): the third tablet is counted at its pickup.
+[[patches.hook]]
+func = "dll308_0110"
+before_vram = 0x9017A714
+text = '{ void dino_krazoa_tablet_picked(uint8_t*, recomp_context*); dino_krazoa_tablet_picked(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll458_0018"
+before_vram = 0x901E4334
+text = '{ void dino_krazoa_tablet_bits(uint8_t*, recomp_context*); dino_krazoa_tablet_bits(rdram, ctx); }'
+
+# Krazoa Palace: its text blocks ask for Desert Force Point's 0x7BF, so dll654's update (0x314) also lets a player
+# who stands at one set it off.
+[[patches.hook]]
+func = "dll654_01D0"
+before_vram = 0x90260ED0
+text = '{ void dino_krazoa_palace_textblock(uint8_t*, recomp_context*); dino_krazoa_palace_textblock(rdram, ctx); }'
+
+# Krazoa Palace: its doors (dll307, placed with no bits) are posed from the wings' bits in the door's update.
+[[patches.hook]]
+func = "dll307_01C8"
+before_vram = 0x90179DD0
+text = '{ void dino_krazoa_palace_door(uint8_t*, recomp_context*); dino_krazoa_palace_door(rdram, ctx); }'
 
 # Cape Claw's shrine (dll486): its test is one SabreBaddie, which CCSH_ObjCreator (dll487) spawns with kill bit 0x1E7,
 # as Discovery Falls' creator does. State 2 waited for 0x5B2 instead, a bit nothing in the ROM sets, so the test never
@@ -716,3 +881,68 @@ text = '{ void dino_krazoa_gp_timeout(uint8_t*, recomp_context*); dino_krazoa_gp
 func = "dll472_1024"
 before_vram = 0x901EDD60
 text = '{ void dino_krazoa_gp_event(uint8_t*, recomp_context*); dino_krazoa_gp_event(rdram, ctx); }'
+
+# BOSS Drakor and the game's end (src/game/drakor.cpp, whose header has the evidence): a BossDrakor_sequ's update
+# (dll309 0x0124), which tells when sequence 1, Drakor's fall, has ended.
+[[patches.hook]]
+func = "dll309_0124"
+before_vram = 0x9017AC20
+text = '{ void dino_drakor_sequence(uint8_t*, recomp_context*); dino_drakor_sequence(rdram, ctx); }'
+
+# The Kamerian Dragon (src/game/dragon_rock.cpp, whose header has the evidence): KamerianBoss's update once it has stored
+# its health less one (dll707 0x1BB8), and the starts of its and the Nurse's updates (dll707 0x0FC4, dll708 0x0290).
+[[patches.hook]]
+func = "dll707_0FC4"
+before_vram = 0x9028D0E4
+text = '{ void dino_dragon_health(uint8_t*, recomp_context*); dino_dragon_health(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll707_0FC4"
+before_vram = 0x9028C4F0
+text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_update(rdram, ctx)) return; }'
+
+[[patches.hook]]
+func = "dll708_0290"
+before_vram = 0x9028DA9C
+text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_update(rdram, ctx)) return; }'
+
+# The Desert Force Point (src/game/force_point.cpp): GP_LevelControl's BIT_SET(0x5F3, 1) (dll547 0xC8), and DFPLift1's
+# two reads of how far it travels (dll641 0x444, 0x528).
+[[patches.hook]]
+func = "dll547_0018"
+before_vram = 0x9021DB44
+text = '{ void dino_force_point_golden_plains(uint8_t*, recomp_context*); dino_force_point_golden_plains(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll641_009C"
+before_vram = 0x90259204
+text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_point_lift(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll641_009C"
+before_vram = 0x902592E8
+text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_point_lift(rdram, ctx); }'
+
+# CloudRunner Fortress's treasure lift (src/game/cloudrunner.cpp, whose header has the evidence): CFTreasWindLift's
+# update as its wind starts (dll370 0x0484).
+[[patches.hook]]
+func = "dll370_00F8"
+before_vram = 0x901A3930
+text = '{ void dino_treasure_lift_starts(uint8_t*, recomp_context*); dino_treasure_lift_starts(rdram, ctx); }'
+
+# CloudRunner Fortress's baby CloudRunners (src/game/cloudrunner.cpp): CFCloudBaby's test for Kyte (dll373 0x2050) after
+# her export 24 answers, the same answer asked again by a found baby (0x0924), and its update (0x01A0) for the log.
+[[patches.hook]]
+func = "dll373_2050"
+before_vram = 0x901A7FEC
+text = '{ void dino_cloud_baby_found(uint8_t*, recomp_context*); dino_cloud_baby_found(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll373_01A0"
+before_vram = 0x901A6858
+text = '{ void dino_cloud_baby_follows(uint8_t*, recomp_context*); dino_cloud_baby_follows(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll373_01A0"
+before_vram = 0x901A60D4
+text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_baby_update(rdram, ctx); }'

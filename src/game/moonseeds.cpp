@@ -7,7 +7,8 @@
 // groups 2, 3, 4 and 6) takes one as the item is used beside it and lowers the count (0x350). Nothing raises it: no
 // code but dll722 names 0x86A, no placement in any map holds it, the Swap Store's items (dll768) don't list it, and
 // MMP_moonseed (object 0x54B) is a prop of dll214 placed in no map. So here the third SpellStone's placing gives four,
-// one for each receptacle: VFP_SpellPlace (dll637 0x388) sets its placed bit, 0x878 for the third.
+// one for each receptacle: VFP_SpellPlace (dll637 0x388) sets its placed bit, 0x878 for the third. On Third
+// SpellStone's Original (acts.cpp) it gives none, as the prototype.
 
 #include <cstdint>
 #include <cstdio>
@@ -24,7 +25,7 @@ namespace {
 
 // us.toml's hook after VFP_SpellPlace sets its placed bit (dll637 0x388), its state in $s0 with the bit at +0.
 extern "C" void dino_moonseeds_stone_placed(uint8_t* rdram, recomp_context* ctx) {
-    if (MEM_H(0, ctx->r16) != third_stone_placed) {
+    if (MEM_H(0, ctx->r16) != third_stone_placed || !dino::third_stone_restored()) {
         return;
     }
     recomp_context saved = *ctx;

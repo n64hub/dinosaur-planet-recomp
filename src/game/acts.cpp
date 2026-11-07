@@ -1,4 +1,5 @@
-// The maps' acts: the story moves the Volcano Force Point and Walled City on to the objects their later visits play.
+// The maps' acts: the story moves the Volcano Force Point and Walled City on to the objects their later visits play,
+// with Third SpellStone on Restored (the default); on Original both stay in act 1 as in the prototype.
 //
 // Each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets (map 4's is bit 0x4FE,
 // Walled City's 0xE6, Diamond Bay's 0x3EE: the u16 at +0x1F90 + 2 * map in dll29's data). A new game puts every map
@@ -24,8 +25,11 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <string>
+#include <vector>
 
 #include "recomp.h"
+#include "recompui/config.h"
 #include "dino.h"
 
 namespace {
@@ -39,6 +43,19 @@ namespace {
     constexpr int third_stone_carried = 0x83B;
     constexpr int third_stone_placed = 0x878;
     constexpr int third_spirit_released = 0x317;
+
+    const std::string third_stone = "third_stone";
+
+    enum class ThirdStone {
+        Original,
+        Restored,
+        OptionCount
+    };
+
+    const std::vector<recomp::config::ConfigOptionEnumOption> third_stone_options = {
+        { ThirdStone::Original, "Original" },
+        { ThirdStone::Restored, "Restored" },
+    };
 
     // DINO_LOG_ACTS set (development): each act this file moves is printed.
     const bool logging = std::getenv("DINO_LOG_ACTS") != nullptr;
@@ -104,10 +121,27 @@ namespace {
     };
 }
 
+void dino::add_third_stone_options(recomp::config::Config& general) {
+    general.add_enum_option(
+        third_stone,
+        "Third SpellStone",
+        "In the prototype, the Volcano Force Point and Walled City never get past the first visit, so the third "
+        "SpellStone has nowhere to go, and nothing gives the moonseeds Krystal plants. <b>Restored</b> moves both "
+        "with the story and gives four moonseeds as the stone is placed. <b>Original is the prototype as it was "
+        "left</b>.",
+        third_stone_options,
+        ThirdStone::Restored);
+}
+
+bool dino::third_stone_restored() {
+    return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(third_stone)) ==
+        (uint32_t)ThirdStone::Restored;
+}
+
 // us.toml's hook at the end of func_80045BF4, which has loaded map $s0 and placed none of its objects yet.
 extern "C" void dino_acts_map_loaded(uint8_t* rdram, recomp_context* ctx) {
     int map = (int32_t)ctx->r16;
-    if (map != volcano_force_point && map != walled_city) {
+    if ((map != volcano_force_point && map != walled_city) || !dino::third_stone_restored()) {
         return;
     }
     Calls calls(ctx);
@@ -123,6 +157,9 @@ extern "C" void dino_acts_map_loaded(uint8_t* rdram, recomp_context* ctx) {
 
 // us.toml's hook in VFP_LevelControl's constructor (dll619 0x70), as it sets its map's act with $a1 = 1.
 extern "C" void dino_acts_volcano_level_control(uint8_t* rdram, recomp_context* ctx) {
+    if (!dino::third_stone_restored()) {
+        return;
+    }
     int act;
     {
         Calls calls(ctx);

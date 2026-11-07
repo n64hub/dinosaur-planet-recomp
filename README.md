@@ -46,8 +46,11 @@ Fixed:
 - Crashes in the game's own code: the Lunaimars of Moon Mountain Pass and Cape Claw's sand worm with no Kyte beside
   Krystal, the Swap Store's item beams as the player walks in, a crash after a long while in Cape Claw, where more
   sounds at once than an audio frame's command list holds wrote past its end, a small basket or crate carried out
-  of the place it was found, which the game freed in the player's hands, and Dragon Rock's fight with the Skeetlas,
-  which after a minute or two drew more than the game had made room for and wrote over the models.
+  of the place it was found, which the game freed in the player's hands, Dragon Rock's fight with the Skeetlas,
+  which after a minute or two drew more than the game had made room for and wrote over the models, Dragon Rock's
+  top at its east end, where more of the level is loaded at once than the game kept room for, a swing
+  pressed on the very frame the player comes back after a death, before the staff or sword was made, and Golden
+  Plains' portable hole spell, whose pickup made a new player every frame until the game ran out of memory.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
@@ -59,17 +62,54 @@ Fixed:
 - SwapStone Hollow: Tricky's run to his mother, the Queen Earthwalker, never started, and with no Tricky beside Sabre
   it would have crashed. And the SwapStone could stop answering in its own corner of the hollow, and answer only
   outside it, after a trip through the Swap Store or the SwapStone's warp.
-- The third SpellStone: the Volcano Force Point loaded as on the first visit every time, so Walled City's SpellStone
-  had no path to open and no place to go, and Walled City never showed its Sun and Moon Stones. And the moonseeds
-  Krystal plants in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives
-  Sabre four, one for each of the pass's receptacles.
+- Cape Claw's Krazoa tablets (Krazoa Tablets on Restored): the third tablet, which the prototype never placed, is
+  found where the sand worm fell, and the tablet room's last puzzle, which led nowhere, opens a Transporter to Krazoa
+  Palace.
+- The Kamerian Dragon under Dragon Rock (Kamerian Dragon on Restored): its health ran out and the fight went on, and
+  the fourth SpellStone, which the Desert Force Point's second place takes, was nowhere. It now dies once its health
+  runs out and leaves the fourth SpellStone in Krystal's hands, and stays gone. Nothing led to its room: the room is
+  the Skeetla arena at the bottom of Dragon Rock on the level's next layer, and the arena, once won, now leads into
+  it, and the SpellStone, once picked up, back out.
+- Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
+  the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
+  was. The prototype started the fight again after his fall, so the game never ended.
+- The Desert Force Point's second SpellStone (Desert Force Point on Restored): Golden Plains filled its place each time
+  it loaded, so the stone stayed carried and SwapStone Circle refused the swap back to Sabre, and nothing led up from
+  the force point's floor to the duct that reaches the place. Golden Plains now leaves the place to the player, and a
+  second of the force point's own lifts stands in the corridor behind the round door, under the duct.
+- CloudRunner Fortress's treasure lift (Treasure Lift on Restored): past the blasted wall the wind lift only ever
+  blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below and
+  the way to the race couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
+  turn it back for the way up.
+- CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
+  found the ones waiting for her, so they never came out to be rescued. Kyte now finds a baby once she is near it, and
+  it comes out for Krystal to rescue.
+- Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
+  ended, and could crash.
+- Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
+  so the city's slab door never opened.
+- BOSS TRex: the door behind Sabre shut the player out of the arena as its intro ended, standing on a floor switch never
+  charged it, so no laser wall fired and the TRex couldn't be hurt, after its first hit the TRex circled its corners in
+  place and never charged again, and a charge that ran on round a corner left it facing sideways, so its stunned head
+  could lie out of reach.
+- BOSS TRex's SpellStone (BOSS TRex on Restored): beating the TRex went back to the title with no SpellStone. The
+  third SpellStone is now carried out, through the arena's own way back to Walled City.
+- The third SpellStone (Third SpellStone on Restored): the Volcano Force Point loaded as on the first visit every
+  time, so the SpellStone carried back from BOSS TRex had no path to open and no place to go, and Walled City never
+  showed its Sun and Moon Stones. The force point now loads its second visit while the stone is carried and its third
+  once it is placed, and Walled City its second once the third spirit is released. And the moonseeds Krystal plants
+  in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives Sabre four, one for
+  each of the pass's receptacles.
+- Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
+  Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
+  earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
 
 Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
-- The ending the prototype never had: Cape Claw's missing third Krazoa tablet, a way into Krazoa Palace and its four
-  wings, and a Drakor who can be beaten, with what follows him.
+- Dragon Rock's bottom: the way from the portal's landing, or from the top's east end, to the Skeetla arena, and the
+  arena's win, which the way into the Kamerian Dragon's room waits for.
 
 ## The ROM
 
@@ -94,6 +134,29 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Krazoa Shrines** (General): Finished makes all eight Krazoa shrines reachable and playable, and gives each spirit
   its release at Warlock Mountain, from what the prototype's own maps and code hold. Original is the prototype as it
   was left: three shrines are reached from the world, and three spirits have nowhere to go.
+- **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
+  tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
+  tablet is nowhere, and the puzzle's end leads nowhere.
+- **Kamerian Dragon** (General): Restored has the Skeetla arena at the bottom of Dragon Rock, once won, lead into the
+  Kamerian Dragon's room, and the dragon die once its health runs out and leave the fourth SpellStone for the Desert
+  Force Point, which leads back out. Original is the prototype as it was left: nothing leads to the room, the fight
+  never ends, and the fourth SpellStone is nowhere.
+- **Desert Force Point** (General): Restored leaves the second SpellStone's place empty until the player places the
+  stone, and adds a lift up to the duct that leads there, in the corridor behind the round door. Original is the
+  prototype as it was left: Golden Plains fills the place, and nothing leads up to it.
+- **Treasure Lift** (General): Restored has CloudRunner Fortress's wind lift past the blasted wall lower a player who
+  steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
+  the wind only ever blows up, and the caves can't be reached.
+- **Baby CloudRunners** (General): Restored has Kyte find CloudRunner Fortress's hidden baby CloudRunners once she
+  is near one, so it comes out to be rescued. Original is the prototype as it was left: the babies waiting for her
+  never come out.
+- **Krazoa Palace** (General): Restored places Krazoa Palace's doors, consoles, text blocks and red Krazoa, so its
+  four wings are played in turn and the red Krazoa sends the player on to Drakor. Original is the prototype as it was
+  left: the palace's rooms stand empty and lead nowhere.
+- **BOSS TRex** (General): Restored gives the third SpellStone once the TRex is beaten and opens the arena's way
+  back to Walled City. Original is the prototype as it was left: beating it goes back to the title with no stone.
+- **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
+  own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 
 Controls are rebound in Controls. A cutscene's camera and the first person view are the game's own in either mode.
 
@@ -124,6 +187,11 @@ On Linux the same lines take `clang` and `clang++` in place of `clang-cl`, and t
 
 `syms/` is written from the ROM by `tools/gen_syms.py` (its header says how; it needs spimdisasm and n64sym's
 signatures). Only a change to how it finds functions needs it again.
+
+`tools/dino.py` reads the game's code from the ROM in names, for working out what it does: `dis` prints one function
+with its registers, GOT loads, DLL calls and bits named from `syms/names.toml`, `calls` every call to a function, an
+export or a bit with its arguments, `map` a map's placements, `def` an object def and `warp` the warp table. Its
+header says how; it needs the rabbitizer spimdisasm installs.
 
 ## License
 
