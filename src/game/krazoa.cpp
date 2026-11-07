@@ -115,6 +115,18 @@ namespace {
         { KrazoaTablets::Restored, "Restored" },
     };
 
+    const std::string krazoa_palace = "krazoa_palace";
+
+    enum class KrazoaPalace {
+        Original,
+        Restored,
+        OptionCount
+    };
+    const std::vector<recomp::config::ConfigOptionEnumOption> krazoa_palace_options = {
+        { KrazoaPalace::Original, "Original" },
+        { KrazoaPalace::Restored, "Restored" },
+    };
+
     bool finished() {
         return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(krazoa_shrines)) ==
             (uint32_t)KrazoaShrines::Finished;
@@ -125,14 +137,27 @@ namespace {
             (uint32_t)KrazoaTablets::Restored;
     }
 
+    bool palace_restored() {
+        return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(krazoa_palace)) ==
+            (uint32_t)KrazoaPalace::Restored;
+    }
+
     // Which setting an entry of the tables below belongs to.
     enum class Setting {
         Shrines,
-        Tablets
+        Tablets,
+        Palace
     };
 
     bool on(Setting setting) {
-        return setting == Setting::Shrines ? finished() : tablets_restored();
+        switch (setting) {
+            case Setting::Shrines:
+                return finished();
+            case Setting::Tablets:
+                return tablets_restored();
+            default:
+                return palace_restored();
+        }
     }
 
     constexpr int32_t set_bit = 0x80014670;
@@ -154,6 +179,15 @@ namespace {
     constexpr int tablets_counted = 0x23B;    // the tablets counted, which the receptacles read (+0x1E)
     constexpr int tablet_new = 0x23C;         // opens the settlement room (dll307)
     constexpr int tablets_done = 0x52B;       // Cape Claw's tablet room solved, Restored
+
+    constexpr int kp_transporter = 0x59A;
+    constexpr int kp_red_krazoa = 0x598;
+    constexpr int kp_section_door = 0x59C;
+    constexpr int kp_last_door = 0x59E;
+    constexpr int kp_console_fire = 0x58F;    // then earth, water and magic
+    constexpr int kp_textblock_fire = 0x593;  // then earth, water and magic
+    constexpr int warp_point = 0x265;
+    constexpr float textblock_reach = 60.0f;
 
     int warlock_act = 0; // as WL_LevelControl last read it, for dll611's release
 
@@ -252,6 +286,9 @@ namespace {
         { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets },
         { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
+        { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
+        { 45, 4730.0f, -5.0f, 23358.0f, Setting::Palace },
+        { 46, 4730.0f, 973.0f, 23358.0f, Setting::Palace },
     };
 
     // A change to one placement in a map's object list, found by its map, object id and unique id (+0x14).
@@ -321,23 +358,46 @@ namespace {
             Setting::Tablets, 0x3FB, false },
         { 29, transporter, 4776.0f, -8.0f, 17606.0f, { 0, 72, 94, 0, 0, 0, 0x1E, 0xFF, 0x05, 0x2B, 0, 0 }, 0,
             Setting::Tablets, 0, false },
+        { 3, kp_transporter, 4730.0f, 973.0f, 23358.0f, { 0, 46, 45, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_transporter, 4730.0f, -5.0f, 23358.0f, { 0, 45, 46, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_console_fire, 5300.0f, -31.0f, 21442.0f, { 0, 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_console_fire + 1, 8640.0f, -132.0f, 25432.0f, { 0, 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_console_fire + 2, 5300.0f, -63.0f, 25281.0f, { 0, 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_console_fire + 3, 8643.0f, -3.0f, 21291.0f, { 0, 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_textblock_fire, 5360.0f, -2.0f, 21442.0f, { 0x40, 0, 0x01, 0xF9, 0, 0, 0x06, 0xA7, 0xFF, 0xFF, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_textblock_fire + 1, 8640.0f, -103.0f, 25372.0f, { 0, 1, 0x01, 0xFA, 0, 0, 0x06, 0xA8, 0x06, 0xA7, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_textblock_fire + 2, 5360.0f, -34.0f, 25281.0f, { 0x40, 0, 0x01, 0xFB, 0, 0, 0x06, 0xA9, 0x06, 0xA8, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_textblock_fire + 3, 8643.0f, 26.0f, 21351.0f, { 0, 1, 0x01, 0xFC, 0, 0, 0x06, 0xAA, 0x06, 0xA9, 0, 0 }, 0,
+            Setting::Palace, 0, false },
+        { 3, kp_red_krazoa, 9140.0f, 0.0f, 23040.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, Setting::Palace, 0, false },
+        { 3, warp_point, 9140.0f, 0.0f, 23040.0f, { 0, 0xFF, 44, 0, 1, 2, 0x18, 0xFF, 0x06, 0xAA, 0, 0 }, 0,
+            Setting::Palace, 0, false },
     };
 
-    void place(uint8_t* rdram, recomp_context* ctx, const Extra& e) {
+    int32_t place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
         ctx->r4 = 0x24;
-        ctx->r5 = e.object;
+        ctx->r5 = object;
         call(rdram, ctx, new_placement);
         gpr p = ctx->r2;
         MEM_B(2, p) = 0x24 / 4;
-        memcpy(&MEM_W(0x8, p), &e.x, 4);
-        memcpy(&MEM_W(0xC, p), &e.y, 4);
-        memcpy(&MEM_W(0x10, p), &e.z, 4);
+        memcpy(&MEM_W(0x8, p), &x, 4);
+        memcpy(&MEM_W(0xC, p), &y, 4);
+        memcpy(&MEM_W(0x10, p), &z, 4);
         for (int i = 0; i < 12; i++) {
-            MEM_B(0x18 + i, p) = (int8_t)e.params[i];
+            MEM_B(0x18 + i, p) = (int8_t)params[i];
         }
         ctx->r4 = p;
         ctx->r5 = 5;
-        ctx->r6 = e.map;
+        ctx->r6 = map;
         ctx->r7 = -1;
         MEM_W(0x10, ctx->r29) = 0;
         call(rdram, ctx, spawn_object);
@@ -365,6 +425,15 @@ void dino::add_krazoa_options(recomp::config::Config& general) {
         "and the last puzzle leads nowhere.",
         krazoa_tablets_options,
         KrazoaTablets::Restored
+    );
+    general.add_enum_option(
+        krazoa_palace,
+        "Krazoa Palace",
+        "Krazoa Palace's four wings each have a section door, a console and a text block, and the four open the last "
+        "door to the red Krazoa, which sends the player on to Drakor. <b>Original is the prototype as it was left</b>: "
+        "the palace's rooms stand empty and lead nowhere.",
+        krazoa_palace_options,
+        KrazoaPalace::Restored
     );
 }
 
@@ -420,7 +489,7 @@ extern "C" void dino_krazoa_map_loaded(uint8_t* rdram, recomp_context* ctx) {
 // us.toml's hook after func_80046BC8 places the loaded maps' objects (func_8004A800), each frame from the main loop
 // (func_80013D80): an Extra that needs a bit is placed the frame it is set.
 extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished() && !tablets_restored()) {
+    if (!finished() && !tablets_restored() && !palace_restored()) {
         return;
     }
     Calls calls(rdram, ctx);
@@ -431,7 +500,7 @@ extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
         else if (!e.placed && on(e.setting) && (e.needs == 0 || get(rdram, ctx, e.needs))) {
             e.placed = true;
             if (e.act == 0 || warlock_act_now(rdram, ctx) == e.act) {
-                place(rdram, ctx, e);
+                place(rdram, ctx, e.map, e.object, e.x, e.y, e.z, e.params);
             }
         }
     }
@@ -657,5 +726,37 @@ extern "C" void dino_krazoa_tablet_picked(uint8_t* rdram, recomp_context* ctx) {
 extern "C" void dino_krazoa_tablet_bits(uint8_t*, recomp_context* ctx) {
     if (tablets_restored()) {
         ctx->r2 = 1;
+    }
+}
+
+// us.toml's hook in the text block's update (dll654 0x314), on dll1's export 7's answer: whether the item it asks for
+// (0x7BF) was used. Nothing gives that item, so a palace text block goes off with the player standing at it.
+extern "C" void dino_krazoa_palace_textblock(uint8_t* rdram, recomp_context* ctx) {
+    int32_t block = word(rdram, (int32_t)ctx->r29 + 0x28);
+    int object = MEM_H(0, (gpr)word(rdram, block + 0x4C));
+    if (object < kp_textblock_fire || object > kp_textblock_fire + 3 || !palace_restored()) {
+        return;
+    }
+    int32_t player;
+    {
+        Calls calls(rdram, ctx);
+        call(rdram, ctx, player_object);
+        player = (int32_t)ctx->r2;
+    }
+    float dx, dz;
+    int32_t px = word(rdram, player + 0xC), pz = word(rdram, player + 0x14);
+    int32_t bx = word(rdram, block + 0xC), bz = word(rdram, block + 0x14);
+    float pxf, pzf, bxf, bzf;
+    memcpy(&pxf, &px, 4);
+    memcpy(&pzf, &pz, 4);
+    memcpy(&bxf, &bx, 4);
+    memcpy(&bzf, &bz, 4);
+    dx = pxf - bxf;
+    dz = pzf - bzf;
+    if (dx * dx + dz * dz < textblock_reach * textblock_reach) {
+        ctx->r2 = 1;
+        if (logging) {
+            fprintf(stderr, "krazoa: palace text block 0x%X goes off\n", object);
+        }
     }
 }
