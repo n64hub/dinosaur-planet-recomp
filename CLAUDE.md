@@ -114,7 +114,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
-  timed button states (`main.cpp` says the format), and on Windows `--stacks <seconds>` prints every thread's stack
+  timed button states (`main.cpp` says the format), `--steer <file>` plays it closed loop, walking to points by the
+  player's real position (`main.cpp` says the steps), and on Windows `--stacks <seconds>` prints every thread's stack
   that long after start, for unattended runs and hangs, and `--watch <address>,...` stops on each write to those
   words (four at most) of the game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says
   the form: `**8008C994+4` follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps

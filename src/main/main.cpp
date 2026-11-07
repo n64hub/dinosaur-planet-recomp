@@ -543,7 +543,15 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     }
 }
 
-// TEMP (scratch, not to land as is): DINO_STEER=<file>, a closed-loop script: wait <s> | goto <x> <z> [r] | press <hex> | hold <hex> <s>
+// --steer <file> (development): port 1 played closed loop, by the player's real position, for what a timed --input
+// can't do (stop at a spot, carry something there). One step a line, each started when the last ends:
+//   wait <s>            nothing pressed for that long
+//   goto <x> <z> [r]    walk to within r (40) of that world point; the stick is turned by the camera's yaw, since
+//                       the game walks by the view. A step not there in 30 s gives up and the next starts.
+//   face <x> <z>        turn toward that point in place, 0.3 s
+//   press <hex>         those buttons for 0.15 s, then 0.25 s of nothing; hold <hex> <s> for that long
+//   until <bit>         the steps after it, up to the next loop, repeat until that bit of the game's is set
+// Each step it starts prints "steer: <seconds> step <n>" with where the player is.
 extern int dino_steer_camera_yaw;
 static size_t steer_at = 0;
 static double steer_since = -1.0;
@@ -568,7 +576,7 @@ static void load_steer(const char* path) {
 }
 
 static void steer_input(uint16_t* buttons, float* x, float* y) {
-    static const float sign = getenv("DINO_STEER_SIGN") ? (float)atof(getenv("DINO_STEER_SIGN")) : -1.0f;
+    const float sign = -1.0f; // the stick's x is the view's right, which is the world's -x at yaw 0
     if (steer_at >= steer_steps.size() || !steer_seen) return;
     double now = script_seconds();
     const SteerStep& s = steer_steps[steer_at];
