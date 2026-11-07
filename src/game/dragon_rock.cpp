@@ -1,8 +1,23 @@
-// BOSS Kamerian Dragon (map 53), under Dragon Rock, and the fourth SpellStone. The fight is built but can't be won in
-// the ROM: the dragon's health runs down and nothing reads it, and no object anywhere gives the fourth SpellStone
-// (0x7A8), which the Desert Force Point's other SpellPlace takes (docs/story-points.md, Dragon Rock). With Kamerian
-// Dragon on Restored (the default) the dragon dies when its health runs out and leaves the fourth SpellStone; on
-// Original it plays as the console does.
+// BOSS Kamerian Dragon (map 53), under Dragon Rock, and the fourth SpellStone. Nothing leads to the room in the ROM,
+// and the fight is built but can't be won: the dragon's health runs down and nothing reads it, and no object anywhere
+// gives the fourth SpellStone (0x7A8), which the Desert Force Point's other SpellPlace takes (docs/story-points.md,
+// Dragon Rock). With Kamerian Dragon on Restored (the default) the Skeetla arena, once won, leads into the room, the
+// dragon dies when its health runs out and leaves the fourth SpellStone, and the stone leads back out; on Original it
+// plays as the console does.
+//
+// The room, read from the ROM:
+// - Nothing joins it to anything: no warp entry lies in it (ROM file 30), no code warps to map 53, and its entrance, a
+//   TriggerPlane at its north (uid 0x41AF3, local 729,-1769,-835) that sets 0x4D7 for the KD_Sequences there, faces cells
+//   with no blocks, where the player falls and is put back.
+// - It is the bottom's Skeetla arena (map 52, layer -1) on layer 0: both lie at the world cell (2, -8), over the same
+//   ground at the same height (the arena's floor at y -1831, the room's at -1805), and where the arena has its
+//   DRLavaControls and DR_Creators (1615,-6339 and 2240,-6492) the room has its KamColumns and KamSwitches' pits
+//   (1623,-6482 and 2217,-6484).
+// - The arena's fight is won when 0x628 is set (DR_EarthWarrior, dll713, once all three DRLavaControls are out, 0x789
+//   at 3, and no Skeetla is left), which plays the DR_Seqobj uid 0x339C6's sequence 7, whose end sets 0x609 (on the top it
+//   opens the CloudRunner's cage). A DRLavaControl (dll737) loses a point of its health (+0x1A) to each hit of kind
+//   0x19 (export 2, 0x0170), and at 0 sets its bit (+0x1E) and raises 0x789.
+// - Warp entries 84 and 89 are empty, 89 between Dragon Rock - Bottom's 88 and BOSS TRex's 90.
 //
 // The fight, read from the ROM (offsets are a DLL's text):
 // - KamerianBoss (dll707, object 0x4D9) keeps its state in the word at its +0xB8 pointer, its health in bits 9-16,
@@ -20,6 +35,10 @@
 //   in map 43 has already set by then.
 //
 // What Restored changes:
+// - The way in and out: in the arena on layer -1 once 0x609 is set and the dragon isn't beaten, the player is warped
+//   by entry 89, filled with the room's setuppoint (uid 0x3534A); in the room 3 s after the stone is picked up, by entry
+//   84, filled with the arena's middle (TriggerPlane uid 0x33F78), on layer -1. The main thread's loop asks each pass
+//   (us.toml's hook on func_800145AC), and the warp fades as the game's own do.
 // - The health's store (0x1BB8): at 0 the dragon is beaten. A CRSpellstone is placed at the player, its +0x1E 0x7A8
 //   and +0x20 0x5F4 (the stone placed at the Desert Force Point), and picked up there at once.
 // - The dragon's and the Nurse's updates: once it is beaten (0x7A8 or 0x5F4 set, so on every later visit too) each is
@@ -173,9 +192,10 @@ void dino::add_dragon_rock_options(recomp::config::Config& general) {
     general.add_enum_option(
         kamerian_dragon,
         "Kamerian Dragon",
-        "The Kamerian Dragon under Dragon Rock dies once its health runs out, and leaves the fourth SpellStone for the "
-        "Desert Force Point. <b>Original is the prototype as it was left</b>: the fight never ends, and the fourth "
-        "SpellStone is nowhere.",
+        "The Skeetla arena at the bottom of Dragon Rock, once won, leads into the Kamerian Dragon's room. The dragon "
+        "dies once its health runs out, and leaves the fourth SpellStone for the Desert Force Point, which leads back "
+        "out. <b>Original is the prototype as it was left</b>: nothing leads to the room, the fight never ends, and the "
+        "fourth SpellStone is nowhere.",
         kamerian_dragon_options,
         KamerianDragon::Restored
     );

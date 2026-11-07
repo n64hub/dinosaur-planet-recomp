@@ -618,7 +618,8 @@ text = "{ void dino_camera_turn(uint8_t*, recomp_context*); dino_camera_turn(rdr
 # --warp (src/main/main.cpp, development): func_800145AC runs once a pass of the main thread's loop, and at its start
 # asks whether a warp is due; if one is, it calls the game's warp, func_8004D1D4 (the entry's index, then 0 for no
 # fade), as the game's own warps do, and goes on with the registers it had. --story (src/game/story.cpp) starts its
-# point from the same place, before any warp.
+# point from the same place, before any warp. With no --warp due it asks Dragon Rock's way into the Kamerian Dragon's
+# room and out (src/game/dragon_rock.cpp), whose warp fades.
 [[patches.hook]]
 func = "func_800145AC"
 before_vram = 0x800145AC
@@ -632,7 +633,7 @@ before_vram = 0x80014670
 text = '{ void dino_bit_setting(uint8_t*, recomp_context*); dino_bit_setting(rdram, ctx); }'
 
 # The Krazoa shrines (src/game/krazoa.cpp, whose header has the evidence): WARP_ENTRY once it has read an entry of the
-# warp table into its buffer, the end of func_80045BF4 once a map is loaded, and func_80046BC8 once the loaded maps'
+# warp table into its buffer (Dragon Rock's two entries too, src/game/dragon_rock.cpp), the end of func_80045BF4 once a map is loaded, and func_80046BC8 once the loaded maps'
 # objects are placed.
 [[patches.hook]]
 func = "func_8004D1D4"
