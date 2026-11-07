@@ -1,0 +1,316 @@
+# BOSS TRex from --story before-walled-city,90. A round: the TRex comes round a corner into the corridor of that
+# round's walls, pauses there (act 5, then act 4, the charge 5.6 s after it starts) and charges; the player waits at the
+# far end, stands on the floor switch on that side 3 s into act 4, so the wall fires as the TRex reaches it, swings as
+# its stun's act 7 starts, from chasing to 300 of the TRex, then closer, and steps back before its act 8, whose reach is wider.
+# Round 1: the east corridor, the TRex charging north from the south-east corner.
+0 0 0 0
+47 0 to -12731 -8400
+sync near 3D9 -12712 -9579 200
+0 0 to -12731 -8400
+sync act 3D9 4
+3.0 0 to -12731 -8446
+6.6 0 to -12731 -8446
+sync act 3D9 7
+0 0 chase 3D9 60 3
+2.5 8000 chase 3D9 60 3
+2.7 0 chase 3D9 60 3
+3.0 8000 chase 3D9 60 3
+3.2 0 chase 3D9 60 3
+3.5 8000 chase 3D9 60 3
+3.7 0 chase 3D9 60 3
+4.0 8000 chase 3D9 60 3
+4.2 0 chase 3D9 60 3
+4.5 8000 chase 3D9 60 3
+4.7 0 chase 3D9 60 3
+5.0 8000 chase 3D9 60 3
+5.2 0 chase 3D9 60 3
+5.5 8000 chase 3D9 60 3
+5.7 0 chase 3D9 60 3
+6.0 8000 chase 3D9 60 3
+6.2 0 chase 3D9 60 3
+6.5 8000 chase 3D9 60 3
+6.7 0 chase 3D9 60 3
+7.0 8000 chase 3D9 60 3
+7.2 0 chase 3D9 60 3
+7.5 8000 chase 3D9 60 3
+7.7 0 chase 3D9 60 3
+8.0 8000 chase 3D9 60 3
+8.2 0 chase 3D9 60 3
+8.5 8000 chase 3D9 60 3
+8.7 0 chase 3D9 60 3
+9.0 8000 chase 3D9 60 3
+9.2 0 chase 3D9 60 3
+9.5 8000 chase 3D9 60 3
+9.7 0 chase 3D9 60 3
+sync act 3D9 8
+0 0 to -12715 -8450
+sync next 572
+3 0 to -12712 -9640
+14 0 to -13440 -9710
+# Round 2: the south corridor.
+sync next 572
+choose
+# From the south-east corner, westward: the west end.
+sync near 3D9 -12703 -9697 300
+0 0 to -13940 -9718
+sync act 3D9 4
+3.0 0 to -13883 -9722
+6.6 0 to -13883 -9722
+sync act 3D9 7
+0 0 chase 3D9 60 3
+2.5 8000 chase 3D9 60 3
+2.7 0 chase 3D9 60 3
+3.0 8000 chase 3D9 60 3
+3.2 0 chase 3D9 60 3
+3.5 8000 chase 3D9 60 3
+3.7 0 chase 3D9 60 3
+4.0 8000 chase 3D9 60 3
+4.2 0 chase 3D9 60 3
+4.5 8000 chase 3D9 60 3
+4.7 0 chase 3D9 60 3
+5.0 8000 chase 3D9 60 3
+5.2 0 chase 3D9 60 3
+5.5 8000 chase 3D9 60 3
+5.7 0 chase 3D9 60 3
+6.0 8000 chase 3D9 60 3
+6.2 0 chase 3D9 60 3
+6.5 8000 chase 3D9 60 3
+6.7 0 chase 3D9 60 3
+7.0 8000 chase 3D9 60 3
+7.2 0 chase 3D9 60 3
+7.5 8000 chase 3D9 60 3
+7.7 0 chase 3D9 60 3
+8.0 8000 chase 3D9 60 3
+8.2 0 chase 3D9 60 3
+8.5 8000 chase 3D9 60 3
+8.7 0 chase 3D9 60 3
+9.0 8000 chase 3D9 60 3
+9.2 0 chase 3D9 60 3
+9.5 8000 chase 3D9 60 3
+9.7 0 chase 3D9 60 3
+sync act 3D9 8
+0 0 to -13900 -9715
+sync next 572
+3 0 to -14177 -9690
+8 0 to -14190 -8960
+or
+# From the south-west corner, eastward: the east end.
+sync near 3D9 -14177 -9697 300
+0 0 to -13010 -9718
+sync act 3D9 4
+3.0 0 to -13070 -9724
+6.6 0 to -13070 -9724
+sync act 3D9 7
+0 0 chase 3D9 60 3
+2.5 8000 chase 3D9 60 3
+2.7 0 chase 3D9 60 3
+3.0 8000 chase 3D9 60 3
+3.2 0 chase 3D9 60 3
+3.5 8000 chase 3D9 60 3
+3.7 0 chase 3D9 60 3
+4.0 8000 chase 3D9 60 3
+4.2 0 chase 3D9 60 3
+4.5 8000 chase 3D9 60 3
+4.7 0 chase 3D9 60 3
+5.0 8000 chase 3D9 60 3
+5.2 0 chase 3D9 60 3
+5.5 8000 chase 3D9 60 3
+5.7 0 chase 3D9 60 3
+6.0 8000 chase 3D9 60 3
+6.2 0 chase 3D9 60 3
+6.5 8000 chase 3D9 60 3
+6.7 0 chase 3D9 60 3
+7.0 8000 chase 3D9 60 3
+7.2 0 chase 3D9 60 3
+7.5 8000 chase 3D9 60 3
+7.7 0 chase 3D9 60 3
+8.0 8000 chase 3D9 60 3
+8.2 0 chase 3D9 60 3
+8.5 8000 chase 3D9 60 3
+8.7 0 chase 3D9 60 3
+9.0 8000 chase 3D9 60 3
+9.2 0 chase 3D9 60 3
+9.5 8000 chase 3D9 60 3
+9.7 0 chase 3D9 60 3
+sync act 3D9 8
+0 0 to -12980 -9715
+sync next 572
+3 0 to -14177 -9690
+14 0 to -14190 -8960
+end
+# Round 3: the west corridor.
+sync next 572
+choose
+# From the north-west corner, southward: the south end.
+sync near 3D9 -14177 -8222 300
+0 0 to -14205 -9300
+sync act 3D9 4
+3.0 0 to -14206 -9243
+6.6 0 to -14206 -9243
+sync act 3D9 7
+0 0 chase 3D9 60 3
+2.5 8000 chase 3D9 60 3
+2.7 0 chase 3D9 60 3
+3.0 8000 chase 3D9 60 3
+3.2 0 chase 3D9 60 3
+3.5 8000 chase 3D9 60 3
+3.7 0 chase 3D9 60 3
+4.0 8000 chase 3D9 60 3
+4.2 0 chase 3D9 60 3
+4.5 8000 chase 3D9 60 3
+4.7 0 chase 3D9 60 3
+5.0 8000 chase 3D9 60 3
+5.2 0 chase 3D9 60 3
+5.5 8000 chase 3D9 60 3
+5.7 0 chase 3D9 60 3
+6.0 8000 chase 3D9 60 3
+6.2 0 chase 3D9 60 3
+6.5 8000 chase 3D9 60 3
+6.7 0 chase 3D9 60 3
+7.0 8000 chase 3D9 60 3
+7.2 0 chase 3D9 60 3
+7.5 8000 chase 3D9 60 3
+7.7 0 chase 3D9 60 3
+8.0 8000 chase 3D9 60 3
+8.2 0 chase 3D9 60 3
+8.5 8000 chase 3D9 60 3
+8.7 0 chase 3D9 60 3
+9.0 8000 chase 3D9 60 3
+9.2 0 chase 3D9 60 3
+9.5 8000 chase 3D9 60 3
+9.7 0 chase 3D9 60 3
+sync act 3D9 8
+0 0 to -14190 -9450
+sync next 572
+3 0 to -14177 -9690
+6 0 to -13440 -9710
+or
+# From the south-west corner, northward: the north end.
+sync near 3D9 -14177 -9697 300
+0 0 to -14205 -8660
+sync act 3D9 4
+3.0 0 to -14204 -8719
+6.6 0 to -14204 -8719
+sync act 3D9 7
+0 0 chase 3D9 60 3
+2.5 8000 chase 3D9 60 3
+2.7 0 chase 3D9 60 3
+3.0 8000 chase 3D9 60 3
+3.2 0 chase 3D9 60 3
+3.5 8000 chase 3D9 60 3
+3.7 0 chase 3D9 60 3
+4.0 8000 chase 3D9 60 3
+4.2 0 chase 3D9 60 3
+4.5 8000 chase 3D9 60 3
+4.7 0 chase 3D9 60 3
+5.0 8000 chase 3D9 60 3
+5.2 0 chase 3D9 60 3
+5.5 8000 chase 3D9 60 3
+5.7 0 chase 3D9 60 3
+6.0 8000 chase 3D9 60 3
+6.2 0 chase 3D9 60 3
+6.5 8000 chase 3D9 60 3
+6.7 0 chase 3D9 60 3
+7.0 8000 chase 3D9 60 3
+7.2 0 chase 3D9 60 3
+7.5 8000 chase 3D9 60 3
+7.7 0 chase 3D9 60 3
+8.0 8000 chase 3D9 60 3
+8.2 0 chase 3D9 60 3
+8.5 8000 chase 3D9 60 3
+8.7 0 chase 3D9 60 3
+9.0 8000 chase 3D9 60 3
+9.2 0 chase 3D9 60 3
+9.5 8000 chase 3D9 60 3
+9.7 0 chase 3D9 60 3
+sync act 3D9 8
+0 0 to -14190 -8470
+sync next 572
+3 0 to -14177 -9690
+12 0 to -13440 -9710
+end
+# Round 4: the south corridor, with this round's switches beside the wall.
+sync next 572
+choose
+sync near 3D9 -12703 -9697 300
+0 0 to -13650 -9718
+sync act 3D9 4
+2.5 0 to -13595 -9722
+6.6 0 to -13595 -9722
+sync act 3D9 7
+0 0 chase 3D9 60 3
+2.5 8000 chase 3D9 60 3
+2.7 0 chase 3D9 60 3
+3.0 8000 chase 3D9 60 3
+3.2 0 chase 3D9 60 3
+3.5 8000 chase 3D9 60 3
+3.7 0 chase 3D9 60 3
+4.0 8000 chase 3D9 60 3
+4.2 0 chase 3D9 60 3
+4.5 8000 chase 3D9 60 3
+4.7 0 chase 3D9 60 3
+5.0 8000 chase 3D9 60 3
+5.2 0 chase 3D9 60 3
+5.5 8000 chase 3D9 60 3
+5.7 0 chase 3D9 60 3
+6.0 8000 chase 3D9 60 3
+6.2 0 chase 3D9 60 3
+6.5 8000 chase 3D9 60 3
+6.7 0 chase 3D9 60 3
+7.0 8000 chase 3D9 60 3
+7.2 0 chase 3D9 60 3
+7.5 8000 chase 3D9 60 3
+7.7 0 chase 3D9 60 3
+8.0 8000 chase 3D9 60 3
+8.2 0 chase 3D9 60 3
+8.5 8000 chase 3D9 60 3
+8.7 0 chase 3D9 60 3
+9.0 8000 chase 3D9 60 3
+9.2 0 chase 3D9 60 3
+9.5 8000 chase 3D9 60 3
+9.7 0 chase 3D9 60 3
+or
+sync near 3D9 -14177 -9697 300
+0 0 to -13230 -9718
+sync act 3D9 4
+2.3 0 to -13356 -9725
+6.6 0 to -13356 -9725
+sync act 3D9 7
+0 0 chase 3D9 60 3
+2.5 8000 chase 3D9 60 3
+2.7 0 chase 3D9 60 3
+3.0 8000 chase 3D9 60 3
+3.2 0 chase 3D9 60 3
+3.5 8000 chase 3D9 60 3
+3.7 0 chase 3D9 60 3
+4.0 8000 chase 3D9 60 3
+4.2 0 chase 3D9 60 3
+4.5 8000 chase 3D9 60 3
+4.7 0 chase 3D9 60 3
+5.0 8000 chase 3D9 60 3
+5.2 0 chase 3D9 60 3
+5.5 8000 chase 3D9 60 3
+5.7 0 chase 3D9 60 3
+6.0 8000 chase 3D9 60 3
+6.2 0 chase 3D9 60 3
+6.5 8000 chase 3D9 60 3
+6.7 0 chase 3D9 60 3
+7.0 8000 chase 3D9 60 3
+7.2 0 chase 3D9 60 3
+7.5 8000 chase 3D9 60 3
+7.7 0 chase 3D9 60 3
+8.0 8000 chase 3D9 60 3
+8.2 0 chase 3D9 60 3
+8.5 8000 chase 3D9 60 3
+8.7 0 chase 3D9 60 3
+9.0 8000 chase 3D9 60 3
+9.2 0 chase 3D9 60 3
+9.5 8000 chase 3D9 60 3
+9.7 0 chase 3D9 60 3
+end
+sync 83B
+# The way back: out by the door the player came in by, south of the south-east corner, to the WarpPoint beyond it.
+3 0 to -12703 -9697
+15 0 to -12699 -10150
+22 0 to -12699 -10600
+30 0 to -12699 -11000
