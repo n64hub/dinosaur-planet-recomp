@@ -390,7 +390,7 @@ namespace {
             Setting::Palace, 0, false },
     };
 
-    int32_t place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
+    void place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
         ctx->r4 = 0x24;
         ctx->r5 = object;
         call(rdram, ctx, new_placement);
@@ -409,7 +409,7 @@ namespace {
         MEM_W(0x10, ctx->r29) = 0;
         call(rdram, ctx, spawn_object);
         if (logging) {
-            fprintf(stderr, "krazoa: placed object 0x%X in map %d at %.0f %.0f %.0f\n", e.object, e.map, e.x, e.y, e.z);
+            fprintf(stderr, "krazoa: placed object 0x%X in map %d at %.0f %.0f %.0f\n", object, map, x, y, z);
         }
     }
 }
