@@ -32,7 +32,8 @@
 //   the place in their area the ROM ties to the shrine: EC's between Walled City's Sun and Moon stones, which open the
 //   shrine in the older layout of map 36, a map with no place in the world grid; CC's by Cape Claw's three Krazoa
 //   tablet receptacles; WG's by Willow Grove's sundial; NW's where Northern Wastes is entered. Each shows once the
-//   spirit before it in the act order is released, EC's once the Moon Stone is placed.
+//   spirit before it in the act order is released, EC's once both stones are in the TRex statues' sockets (once the
+//   Moon Stone is picked up with Third SpellStone on Original, where the sockets never load).
 // - Golden Plains' shrine exit (map 34 @06A0) went to DB's pad (66), a copy of DB's map, and in its mode 0 it sent
 //   the player out on the way to the shrine: it goes to GP's pad (70), and only once the shrine is won.
 // - Willow Grove: its state 3 (dll488 0x8FC) gave the spirit only while 0x1D1, the torch puzzle's bit, was clear, and
@@ -586,6 +587,19 @@ extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
                 fprintf(stderr, "krazoa: the red Krazoa sends the player to Drakor (entry %d)\n", drakor_entry);
             }
         }
+    }
+    // EC's Transporter (extras[0]) stands once both stones are in the TRex statues' sockets, the task list's "used Sun
+    // and Moon Stones to open shrine": Walled City's act 2 loads the sockets (dll785), and each sets its done bit at
+    // its sequence's event 1 (0x202 the sun's, 0x243 the moon's, dll785_0634). It is placed already shown: one placed
+    // hidden and shown while the map stays loaded never takes A. Without that act (Third SpellStone on Original) it
+    // stands once the Moon Stone is picked up (0x264), from the moon temple.
+    Extra& ec = extras[0];
+    if (!ec.placed) {
+        bool sockets = dino::third_stone_restored();
+        int show = sockets ? 0x243 : 0x264;
+        ec.needs = !sockets ? 0x264 : get(rdram, ctx, 0x202) ? 0x243 : 0x202;
+        ec.params[8] = (uint8_t)(show >> 8);
+        ec.params[9] = (uint8_t)show;
     }
     for (Extra& e : extras) {
         if (word(rdram, map_structs + 4 * e.map) == 0) {

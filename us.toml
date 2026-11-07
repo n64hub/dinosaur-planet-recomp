@@ -743,6 +743,13 @@ func = "dll637_02E0"
 before_vram = 0x90255D3C
 text = '{ void dino_moonseeds_stone_placed(uint8_t*, recomp_context*); dino_moonseeds_stone_placed(rdram, ctx); }'
 
+# The meteor (src/game/moonseeds.cpp): MMP_moonrock's vent count (dll445_0628 0xA14), once it has set or cleared 0x89B,
+# sets the meteor's sequence trigger nothing else sets.
+[[patches.hook]]
+func = "dll445_0628"
+before_vram = 0x901DDE00
+text = '{ void dino_moonseeds_meteor(uint8_t*, recomp_context*); dino_moonseeds_meteor(rdram, ctx); }'
+
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
