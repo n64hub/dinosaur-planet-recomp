@@ -47,8 +47,9 @@ Fixed:
   Krystal, the Swap Store's item beams as the player walks in, a crash after a long while in Cape Claw, where more
   sounds at once than an audio frame's command list holds wrote past its end, a small basket or crate carried out
   of the place it was found, which the game freed in the player's hands, Dragon Rock's fight with the Skeetlas,
-  which after a minute or two drew more than the game had made room for and wrote over the models, and a swing
-  pressed on the very frame the player comes back after a death, before the staff or sword was made.
+  which after a minute or two drew more than the game had made room for and wrote over the models, a swing
+  pressed on the very frame the player comes back after a death, before the staff or sword was made, and Golden
+  Plains' portable hole spell, whose pickup made a new player every frame until the game ran out of memory.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
@@ -69,6 +70,14 @@ Fixed:
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
   the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
   was. The prototype started the fight again after his fall, so the game never ended.
+- The Desert Force Point's second SpellStone (Desert Force Point on Restored): Golden Plains filled its place each time
+  it loaded, so the stone stayed carried and SwapStone Circle refused the swap back to Sabre, and nothing led up from
+  the force point's floor to the duct that reaches the place. Golden Plains now leaves the place to the player, and a
+  second of the force point's own lifts stands in the corridor behind the round door, under the duct.
+- CloudRunner Fortress's treasure lift (Treasure Lift on Restored): past the blasted wall the wind lift only ever
+  blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below and
+  the way to the race couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
+  turn it back for the way up.
 
 Under way:
 
@@ -105,6 +114,12 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Kamerian Dragon** (General): Restored has the Kamerian Dragon under Dragon Rock die once its health runs out and
   leave the fourth SpellStone for the Desert Force Point. Original is the prototype as it was left: the fight never
   ends, and the fourth SpellStone is nowhere.
+- **Desert Force Point** (General): Restored leaves the second SpellStone's place empty until the player places the
+  stone, and adds a lift up to the duct that leads there, in the corridor behind the round door. Original is the
+  prototype as it was left: Golden Plains fills the place, and nothing leads up to it.
+- **Treasure Lift** (General): Restored has CloudRunner Fortress's wind lift past the blasted wall lower a player who
+  steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
+  the wind only ever blows up, and the caves can't be reached.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 

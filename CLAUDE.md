@@ -27,8 +27,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   (`src/game/recomp_api.cpp`), the libultra functions the runtime lacks (`src/game/libultra.cpp`), the HUD's and the
   clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
   Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the Kamerian Dragon's end
-  (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), the settings, and on Windows a stack trace on a
-  crash (`src/main/crash_trace.cpp`).
+  (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), CloudRunner Fortress's treasure lift
+  (`src/game/cloudrunner.cpp`), the settings, and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
@@ -107,29 +107,41 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   nothing reads it, and nothing gives the fourth SpellStone (0x7A8) that the Desert Force Point's other place takes.
   The General tab's Kamerian Dragon setting, Restored by default, has it die there and leave that stone, and Original
   leaves the fight endless (`src/game/dragon_rock.cpp`'s header has the evidence).
+- **The Desert Force Point.** Golden Plains' level control sets the second SpellStone's place (0x5F3) on every load,
+  and no surface joins the force point's floor (map 21) to the duct that reaches the place. The General tab's Desert
+  Force Point setting, Restored by default, leaves the place to the player and stands a second DFPLift1 in the
+  corridor behind the round door, under one of the duct's stubs, and Original leaves both as they were
+  (`src/game/force_point.cpp`'s header has the evidence).
 - **Drakor's end.** The last fight (map 44) is won in the ROM as it is: a hit lets the Kamerian Diamond go, and the
   player who reaches it in the room below plays Drakor's fall, sequence 1 (0x7AE). Nothing followed it; the General
   tab's Ending setting, Restored by default, goes back to the title at its end as the game's own menus do, and Original
   starts the fight again (`src/game/drakor.cpp`'s header has the evidence).
+- **CloudRunner Fortress's treasure lift.** Past the blasted wall (map 12) a wind lift goes down to the treasure caves
+  and the way to the race, but its direction bit (0x8C8) is flipped only by two levers at the bottom, so from the top
+  it only blows up. The General tab's Treasure Lift setting, Restored by default, lowers a player who steps in from
+  the top, and Original leaves it as it was (`src/game/cloudrunner.cpp`'s header has the evidence).
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
-  timed button states (`main.cpp` says the format), `--steer <file>` plays it closed loop, walking to points by the
-  player's real position (`main.cpp` says the steps), and on Windows `--stacks <seconds>` prints every thread's stack
-  that long after start, for unattended runs and hangs, and `--watch <address>,...` stops on each write to those
-  words (four at most) of the game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says
-  the form: `**8008C994+4` follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps
-  the player by the game's own warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads,
-  `DINO_LOG_CUTS=1` each camera cut and object jump `src/game/interpolation.cpp` finds, with each origin step,
-  `DINO_LOG_KRAZOA=1` each object `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each
-  event of Golden Plains' shrine, `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian
-  Dragon's state, health and end, `DINO_DRAGON_HEALTH=<n>` starts its fight with n health, and `DINO_CHECK_HEAP=1`
-  each block of the game's heaps written past its end, with the tag of what asked for it (`src/game/heap.cpp`).
-- **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the game's
-  bits, the character and the place set as the save would have them, in memory and with nothing written to Flash:
-  `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place <x>,<y>,<z>[,<layer>[,<facing>]]`
-  starts it somewhere the warp table has no entry, `--bits <hex>[=<value>][@<seconds>],...` sets more bits, at the start
-  or later (a shrine's own bits are cleared as its map starts, so they are set a while after it), and `--report` prints
-  a line a second with the map, the position and the health; `--watch-bits <hex>,...|all` prints each bit the game sets
-  as it plays. `docs/story-points.md` has the points, each bit's evidence and the warp table's map: each index, its area
-  and what it needs. None of it is in a player's menus.
+  timed button states, which can wait for a bit the game sets and walk the player to a place or an object (`main.cpp`
+  says the format), and on Windows `--stacks <seconds>` prints every thread's stack that long after start, for
+  unattended runs and hangs, and `--watch <address>,...` stops on each write to those words (four at most) of the
+  game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says the form: `**8008C994+4`
+  follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps the player by the game's own
+  warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and object
+  jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
+  `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each event of Golden Plains' shrine,
+  `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
+  `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on, `DINO_LOG_EFFECTS=1`
+  each effect drawn after its object was freed,
+  `DINO_DRAGON_HEALTH=<n>` starts its fight with n health, and `DINO_CHECK_HEAP=1` each block of the game's heaps
+  written past its end, with the tag of what asked for it (`src/game/heap.cpp`).
+- **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the
+  game's bits, the character and the place set as the save would have them, in memory and with nothing written to
+  Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place
+  <x>,<y>,<z>[,<layer>[,<facing>]]` starts it somewhere the warp table has no entry, `--bits
+  <hex>[=<value>][@<seconds>],...` sets more bits, at the start or later (a shrine's own bits are cleared as its map
+  starts, so they are set a while after it), and `--report` prints a line a second with the map, the position, the
+  health and the magic; `--watch-bits <hex>,...|all` prints each bit the game sets as it plays. `docs/story-points.md`
+  has the points, each bit's evidence and the warp table's map: each index, its area and what it needs. None of it is
+  in a player's menus.

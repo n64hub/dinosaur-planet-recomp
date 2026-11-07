@@ -2,7 +2,6 @@
 // render context. The natives the patches call are recomp_api.cpp, the settings config.cpp.
 
 #include <cstdio>
-#include <cmath>
 #include <cstring>
 #include <cassert>
 #include <vector>
@@ -357,14 +356,32 @@ static std::string game_thread_name(const OSThread* t) {
 // --input <file> (development): scripted port 1 input for unattended runs. Each line is
 // "<seconds> <buttons hex> [x y [camera_x camera_y]]", seconds counted from the game's first input read, camera_x and
 // camera_y the right stick the free camera reads, and the last line whose time has passed is held. Lines starting with
-// # are comments.
+// # are comments. A line "sync <bit hex>" counts the lines after it from the moment the game first sets that bit to a
+// value other than 0 (us.toml's hook on func_80014670), and holds them until then: a script that plays on after a
+// sequence or a fight starts its next part when the game gets there, however long a busy host took. In place of x y,
+// "to <x> <z>" walks the player toward that place and "chase <object id hex> [reach]" toward the nearest object of that
+// id, each until within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
+// (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
 struct ScriptedInput {
     double at;
     uint32_t buttons;
     float x, y;
     float camera_x, camera_y;
+    int part;
+    bool steer;
+    int oid;
+    float to_x, to_z, reach;
 };
 static std::vector<ScriptedInput> input_script;
+// The steering line being played (to or chase), and the stick the last pass worked out for it.
+static std::atomic<const ScriptedInput*> steering = nullptr;
+static std::atomic<float> steer_stick_x = 0.0f;
+static std::atomic<float> steer_stick_y = 0.0f;
+// Each sync line's bit, and the --input time it was first set (-1 until then). Part 0, before any, starts at 0.
+static constexpr int max_input_parts = 16;
+static int input_part_bit[max_input_parts];
+static std::atomic<double> input_part_start[max_input_parts];
+static int input_parts = 1;
 
 static void load_input_script(const char* path) {
     FILE* f = fopen(path, "r");
@@ -373,9 +390,32 @@ static void load_input_script(const char* path) {
         return;
     }
     char line[256];
+    input_part_start[0] = 0.0;
     while (fgets(line, sizeof(line), f) != nullptr) {
         ScriptedInput in{};
-        if (line[0] != '#' && sscanf(line, "%lf %x %f %f %f %f", &in.at, &in.buttons, &in.x, &in.y, &in.camera_x, &in.camera_y) >= 2) {
+        int bit;
+        if (sscanf(line, "sync %x", &bit) == 1 && input_parts < max_input_parts) {
+            input_part_bit[input_parts] = bit;
+            input_part_start[input_parts] = -1.0;
+            input_parts++;
+        }
+        else if (line[0] != '#' && sscanf(line, "%lf %x to %f %f", &in.at, &in.buttons, &in.to_x, &in.to_z) == 4) {
+            in.steer = true;
+            in.oid = -1;
+            in.reach = 20.0f;
+            in.part = input_parts - 1;
+            input_script.push_back(in);
+        }
+        else if (line[0] != '#' && sscanf(line, "%lf %x chase %x %f", &in.at, &in.buttons, &in.oid, &in.reach) >= 3) {
+            in.steer = true;
+            if (in.reach <= 0.0f) {
+                in.reach = 30.0f;
+            }
+            in.part = input_parts - 1;
+            input_script.push_back(in);
+        }
+        else if (line[0] != '#' && sscanf(line, "%lf %x %f %f %f %f", &in.at, &in.buttons, &in.x, &in.y, &in.camera_x, &in.camera_y) >= 2) {
+            in.part = input_parts - 1;
             input_script.push_back(in);
         }
     }
@@ -395,6 +435,16 @@ static double script_seconds() {
 
 extern "C" double dino_script_seconds() {
     return script_seconds();
+}
+
+// story.cpp's hook on func_80014670, as the game sets a bit: a sync line waiting for it starts its part now.
+extern "C" void dino_input_bit_set(int bit, int value) {
+    for (int i = 1; i < input_parts; i++) {
+        if (value != 0 && input_part_bit[i] == bit && input_part_start[i] < 0.0) {
+            input_part_start[i] = script_seconds();
+            fprintf(stderr, "--input: sync 0x%X at %.1f s\n", bit, input_part_start[i].load());
+        }
+    }
 }
 
 // --warp <index>@<seconds>[,<index>@<seconds>...] (development): at each time on the --input clock, warp the player to
@@ -508,26 +558,19 @@ static void take_web_options() {
 
 void watch_writes_arm(uint8_t* rdram);
 
-struct SteerStep { char kind; float x, z, r; uint32_t buttons; };
-static std::vector<SteerStep> steer_steps;
-static volatile float steer_px = 0, steer_pz = 0;
-static volatile int steer_yaw = 0;
-static volatile bool steer_seen = false;
-static volatile int steer_watch = -1;
-static volatile int steer_bit_value = 0;
-
 extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     watch_writes_arm(rdram);
 #ifdef __EMSCRIPTEN__
     take_web_options();
 #endif
     double now = script_seconds();
-    dino::story_timed_bits(rdram, ctx, now);
-    if (!steer_steps.empty()) {
-        float px, pz; int yaw;
-        if (dino::story_player(rdram, ctx, &px, &pz, &yaw)) { steer_px = px; steer_pz = pz; steer_yaw = yaw; steer_seen = true; }
-        if (steer_watch >= 0) steer_bit_value = dino::story_bit(rdram, ctx, steer_watch);
+    if (const ScriptedInput* in = steering) {
+        float x, y;
+        dino::story_steer(rdram, ctx, in->oid, in->to_x, in->to_z, in->reach, &x, &y);
+        steer_stick_x = x;
+        steer_stick_y = y;
     }
+    dino::story_timed_bits(rdram, ctx, now);
     static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;
     if (check_heap) {
         dino::heap_check(rdram, now);
@@ -543,82 +586,6 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     }
 }
 
-// --steer <file> (development): port 1 played closed loop, by the player's real position, for what a timed --input
-// can't do (stop at a spot, carry something there). One step a line, each started when the last ends:
-//   wait <s>            nothing pressed for that long
-//   goto <x> <z> [r]    walk to within r (40) of that world point; the stick is turned by the camera's yaw, since
-//                       the game walks by the view. A step not there in 30 s gives up and the next starts.
-//   face <x> <z>        turn toward that point, 0.3 s, which walks the player up to about 30 units: to stand at
-//                       a spot facing something, goto it from the far side instead
-//   press <hex>         those buttons for 0.15 s, then 0.25 s of nothing; hold <hex> <s> for that long
-//   until <bit>         the steps after it, up to the next loop, repeat until that bit of the game's is set
-// Each step it starts prints "steer: <seconds> step <n>" with where the player is.
-extern int dino_steer_camera_yaw;
-static size_t steer_at = 0;
-static double steer_since = -1.0;
-
-static void load_steer(const char* path) {
-    FILE* f = fopen(path, "r");
-    if (!f) { fprintf(stderr, "steer: can't open %s\n", path); return; }
-    char line[128];
-    while (fgets(line, sizeof(line), f)) {
-        SteerStep s{}; float a = 0, b = 0, c = 40; unsigned h = 0;
-        if (sscanf(line, "wait %f", &a) == 1) { s.kind = 'w'; s.r = a; }
-        else if (sscanf(line, "goto %f %f %f", &a, &b, &c) >= 2) { s.kind = 'g'; s.x = a; s.z = b; s.r = c; }
-        else if (sscanf(line, "face %f %f", &a, &b) == 2) { s.kind = 'f'; s.x = a; s.z = b; s.r = 0.3f; }
-        else if (sscanf(line, "until %x", &h) == 1) { s.kind = 'u'; s.buttons = h; }
-        else if (strncmp(line, "loop", 4) == 0) { s.kind = 'l'; }
-        else if (sscanf(line, "press %x", &h) == 1) { s.kind = 'p'; s.buttons = h; s.r = 0.15f; }
-        else if (sscanf(line, "hold %x %f", &h, &a) == 2) { s.kind = 'p'; s.buttons = h; s.r = a; }
-        else continue;
-        steer_steps.push_back(s);
-    }
-    fclose(f);
-}
-
-static void steer_input(uint16_t* buttons, float* x, float* y) {
-    const float sign = -1.0f; // the stick's x is the view's right, which is the world's -x at yaw 0
-    if (steer_at >= steer_steps.size() || !steer_seen) return;
-    double now = script_seconds();
-    const SteerStep& s = steer_steps[steer_at];
-    if (steer_since < 0) {
-        steer_since = now;
-        fprintf(stderr, "steer: %.1f step %d '%c' from %.0f %.0f\n", now, (int)steer_at, s.kind, steer_px, steer_pz);
-    }
-    double t = now - steer_since;
-    bool done = false;
-    *buttons = 0; *x = 0; *y = 0;
-    static size_t loop_from = 0;
-    if (s.kind == 'u') { steer_watch = (int)s.buttons; steer_bit_value = 0; loop_from = steer_at + 1; done = true; }
-    else if (s.kind == 'l') {
-        if (steer_bit_value == 0) { steer_at = loop_from; steer_since = -1.0; return; }
-        done = true;
-    }
-    else if (s.kind == 'w') done = t >= s.r;
-    else if (s.kind == 'p') { if (t < s.r) *buttons = (uint16_t)s.buttons; done = t >= s.r + 0.25; }
-    else if (s.kind == 'f') {
-        float dx = s.x - steer_px, dz = s.z - steer_pz;
-        float err = atan2f(-dx, -dz) * 32768.0f / 3.14159265f - (float)(0x8000 - dino_steer_camera_yaw);
-        float e = err * 3.14159265f / 32768.0f;
-        if (t < s.r) { *x = sign * 24.0f * sinf(e); *y = 24.0f * cosf(e); }
-        done = t >= s.r + 0.3;
-    }
-    else {
-        float dx = s.x - steer_px, dz = s.z - steer_pz;
-        if (dx * dx + dz * dz < s.r * s.r) done = true;
-        else if (t > 30.0) { fprintf(stderr, "steer: gave up at %.0f %.0f\n", steer_px, steer_pz); done = true; }
-        else {
-            float want = atan2f(-dx, -dz) * 32768.0f / 3.14159265f;
-            float err = want - (float)(0x8000 - dino_steer_camera_yaw);
-            while (err > 32768.0f) err -= 65536.0f;
-            while (err < -32768.0f) err += 65536.0f;
-            float e = err * 3.14159265f / 32768.0f;
-            *x = sign * 70.0f * sinf(e);
-            *y = 70.0f * cosf(e);
-        }
-    }
-    if (done) { steer_at++; steer_since = -1.0; }
-}
 static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out, float* y_out) {
     bool ret = recompinput::profiles::get_n64_input(player_index, buttons_out, x_out, y_out);
     if (player_index == 0) {
@@ -629,19 +596,19 @@ static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out,
     }
     if (!input_script.empty() && player_index == 0) {
         double now = script_seconds();
+        const ScriptedInput* steer_line = nullptr;
         for (const ScriptedInput& in : input_script) {
-            if (in.at <= now) {
+            double start = input_part_start[in.part];
+            if (start >= 0.0 && start + in.at <= now) {
                 *buttons_out = (uint16_t)in.buttons;
-                *x_out = in.x;
-                *y_out = in.y;
+                *x_out = in.steer ? steer_stick_x.load() : in.x;
+                *y_out = in.steer ? steer_stick_y.load() : in.y;
+                steer_line = &in;
                 dino::set_scripted_camera(in.camera_x, in.camera_y);
                 ret = true;
             }
         }
-    }
-    if (!steer_steps.empty() && player_index == 0) {
-        steer_input(buttons_out, x_out, y_out);
-        ret = true;
+        steering = steer_line != nullptr && steer_line->steer ? steer_line : nullptr;
     }
     return ret;
 }
@@ -705,9 +672,6 @@ int main(int argc, char** argv) {
         else if (strcmp(argv[i], "--boot-after") == 0 && i + 1 < argc) {
             autoboot = true;
             autoboot_after = atof(argv[++i]);
-        }
-        else if (strcmp(argv[i], "--steer") == 0 && i + 1 < argc) {
-            load_steer(argv[++i]);
         }
         else if (strcmp(argv[i], "--input") == 0 && i + 1 < argc) {
             load_input_script(argv[++i]);

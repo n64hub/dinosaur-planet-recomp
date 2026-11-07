@@ -12,8 +12,8 @@
 // retry restores. func_800142F0 is the
 // rolling demo, not a new game.
 
-#include <cstdlib>
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -27,6 +27,7 @@
 
 extern "C" uint32_t dino_rom_word(uint32_t offset);
 extern "C" double dino_script_seconds();
+extern "C" void dino_input_bit_set(int bit, int value);
 
 namespace {
     constexpr int32_t dll29_handle = 0x8008C9F4; // the pointer the game keeps to its loaded dll29
@@ -37,6 +38,9 @@ namespace {
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
     constexpr int32_t current_menu = 0x800A7D84;
+    // Every object: the array this points at, and how many it holds (func_80020C48 frees each from there).
+    constexpr int32_t objects = 0x800B1920;
+    constexpr int32_t object_count = 0x800B1924;
     // The game boots in a 640x480 mode for its logos, and dll63 and dll65 drop to play's 320x240 with this, mode 1 and
     // the settings func_80014604 returns. In the boot's mode the Z buffer (0x80093010) is the first framebuffer, so a
     // level played in it shows depth as colour in a third of its frames.
@@ -137,6 +141,9 @@ namespace {
     // Dragon Rock - Top (map 2): its setuppoint 2. The map's setuppoint 0 is in a cell of the map's that holds no
     // geometry, and a start in a cell no map fills loads nothing (func_80045DC0 finds no map there).
     constexpr Place dragon_rock_place = { -3464.0f, -1502.0f, -4482.0f, 0 };
+    // Golden Plains (map 9, grid cell (-6, 19)): its setuppoint 0, where the way from SwapStone Circle comes in. Its
+    // pad's entry, 31, stands under the sand: a start there falls through the map and is put back, forever.
+    constexpr Place golden_plains_place = { -940.2f, 116.3f, 15302.0f, 0 };
 
     const std::vector<StoryPoint> points = {
         { "new-game", krystal, no_place, {}, {} },
@@ -152,11 +159,11 @@ namespace {
         { "before-cc-shrine", krystal, 41, {}, four_spirits },
         { "before-wg-shrine", krystal, 39, {}, four_spirits },
         { "before-cloudrunner", krystal, 73, {}, to_second_stone },
-        { "before-desert-force-point", krystal, 31, {}, to_second_stone + second_stone_carried },
+        { "before-desert-force-point", krystal, -1, golden_plains_place, to_second_stone + second_stone_carried },
         { "before-walled-city", sabre, 91, {}, to_second_stone + second_stone + portal_spell },
         { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + portal_spell + third_stone_carried },
         { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
-        { "after-dragon-rock", krystal, 31, {},
+        { "after-dragon-rock", krystal, -1, golden_plains_place,
             four_spirits + second_stone + portal_spell + third_stone + fourth_stone_carried },
         { "before-drakor", krystal, -1, drakor_place, four_spirits + second_stone + portal_spell + third_stone },
     };
@@ -267,6 +274,7 @@ extern "C" void dino_bit_setting(uint8_t* rdram, recomp_context* ctx) {
     if (bit == -1) {
         return;
     }
+    dino_input_bit_set(bit, value);
     if (!watch_all_bits &&std::find(watched_bits.begin(), watched_bits.end(), bit) == watched_bits.end()) {
         return;
     }
@@ -332,6 +340,15 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     for (const StoryBit& b : extra_bits) {
         set_game_bit(rdram, ctx, b);
     }
+    // A new game's save gives each character no magic (12 bytes each from the save's start, magic at +4 and its most
+    // at +6), and a spell is cast only with some (dll210_6DD8 returns at once without): a point past the opening
+    // starts both full, as health is.
+    if (!point.bits.empty()) {
+        gpr save = (gpr)word(rdram, save_pointer);
+        for (int character : { sabre, krystal }) {
+            MEM_H(4, save + 12 * character) = MEM_H(6, save + 12 * character);
+        }
+    }
     if (place_given) {
         store_place(rdram, ctx, given_place);
     }
@@ -346,27 +363,61 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     fprintf(stderr, "--story: started %s, %d bits, at warp %d\n", point.name, (int)(point.bits.size() + extra_bits.size()), chosen_warp);
 }
 
-// A bit's value, for --steer's until (main.cpp).
-int dino::story_bit(uint8_t* rdram, recomp_context* ctx, int bit) {
-    ctx->r4 = bit;
-    call(rdram, ctx, get_bit);
-    return (int)ctx->r2;
-}
-
-// The player's position and facing, for --steer (main.cpp).
-bool dino::story_player(uint8_t* rdram, recomp_context* ctx, float* x, float* z, int* yaw) {
-    if (word(rdram, save_pointer) == 0) {
+// --input's to and chase lines (src/main/main.cpp): the stick that walks the player toward (to_x, to_z), or with oid
+// other than -1 toward the nearest object of that id (its halfword at +0x46) that is drawn, as the player's code reads
+// the stick: up the way the camera looks at the player. An enemy beaten stays where it fell with its alpha (+0x36)
+// faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. 0 within reach. False with
+// no player, no camera or no such object.
+bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x, float to_z, float reach, float* stick_x,
+    float* stick_y) {
+    *stick_x = 0.0f;
+    *stick_y = 0.0f;
+    float fx, fz;
+    if (word(rdram, save_pointer) == 0 || !dino::camera_forward(&fx, &fz)) {
         return false;
     }
     call(rdram, ctx, player_object);
-    int32_t object = (int32_t)ctx->r2;
-    if (object == 0) {
+    gpr player = (gpr)(int32_t)ctx->r2;
+    if (player == 0) {
         return false;
     }
-    uint32_t ux = MEM_W(0x18, (gpr)object), uz = MEM_W(0x20, (gpr)object);
-    memcpy(x, &ux, 4);
-    memcpy(z, &uz, 4);
-    *yaw = (int)(int16_t)MEM_H(0, (gpr)object);
+    auto position = [&](gpr object, float* x, float* z) {
+        uint32_t wx = MEM_W(0x18, object), wz = MEM_W(0x20, object);
+        memcpy(x, &wx, 4);
+        memcpy(z, &wz, 4);
+    };
+    float x, z;
+    position(player, &x, &z);
+    if (oid != -1) {
+        float best = -1.0f;
+        gpr all = (gpr)MEM_W(0, (gpr)objects);
+        for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+            gpr object = MEM_W(i * 4, all);
+            if (object == 0 || object == player || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+                continue;
+            }
+            float ox, oz;
+            position(object, &ox, &oz);
+            float d = (ox - x) * (ox - x) + (oz - z) * (oz - z);
+            if (best < 0.0f || d < best) {
+                best = d;
+                to_x = ox;
+                to_z = oz;
+            }
+        }
+        if (best < 0.0f) {
+            return false;
+        }
+    }
+    float dx = to_x - x, dz = to_z - z;
+    float distance = std::sqrt(dx * dx + dz * dz);
+    if (distance <= reach) {
+        return true;
+    }
+    dx /= distance;
+    dz /= distance;
+    *stick_y = dx * fx + dz * fz;
+    *stick_x = dz * fx - dx * fz;
     return true;
 }
 
@@ -392,5 +443,6 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     ctx->f12.fl = fx;
     ctx->f14.fl = fz;
     call(rdram, ctx, map_at);
-    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats));
+    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy,
+        fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats), (int16_t)MEM_H(6, stats));
 }
