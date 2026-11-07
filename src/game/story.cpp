@@ -1,5 +1,5 @@
-// --story, --place and --bits (development, src/main/main.cpp reads them): start a run from a chosen point of the
-// story, for what a warp can't set. --watch-bits says each time the game sets a bit, for what a test changes. docs/story-points.md lists the points and what each bit is, with its evidence from
+// --story, --place, --bits and --time (development, src/main/main.cpp reads them): start a run from a chosen point of
+// the story, for what a warp can't set. --watch-bits says each time the game sets a bit, for what a test changes. docs/story-points.md lists the points and what each bit is, with its evidence from
 // the ROM.
 //
 // The story is the game's bits: func_80014670 sets one and func_800147EC reads one, a number that the table in ROM file
@@ -31,6 +31,11 @@ extern "C" void dino_input_bit_set(int bit, int value);
 
 namespace {
     constexpr int32_t dll29_handle = 0x8008C9F4; // the pointer the game keeps to its loaded dll29
+    // dll7, the sky and the time of day: its export 9 sets the time (f12, in seconds of a day of 86400, taken modulo a
+    // day; dll7 0xEA0-0xF18), which it keeps at +0xC0 of its environment and copies into the save each frame
+    // (dll29's export 38, dll7 0xBEC), and export 8 says night from 21:00 to 5:00 (75600 and 18000, dll7 0xDF4).
+    constexpr int32_t dll7_handle = 0x8008C980;
+    constexpr int dll7_set_time = 9;
     constexpr int32_t save_pointer = 0x800AE2A0; // the save in dll29's bss, which func_80014670 writes to
     constexpr int32_t set_bit = 0x80014670;
     constexpr int32_t get_bit = 0x800147EC;
@@ -171,6 +176,9 @@ namespace {
     const StoryPoint* chosen = &points[0];
     std::vector<StoryBit> extra_bits;
     std::vector<StoryBit> timed_bits;
+    bool time_due = false;
+    float time_hours = 0.0f;
+    double time_at = 0.0;
     int chosen_warp = -1;
     std::vector<int> watched_bits;
     bool watch_all_bits = false;
@@ -298,6 +306,31 @@ void dino::story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds)
     }
 }
 
+// --time <hour>[@<seconds>]: the time of day from then on, once the --input clock reaches that time (the story's start
+// by default) and there is a player in a level, for a test of what plays only at night.
+void dino::story_set_time(const char* arg) {
+    time_hours = (float)atof(arg);
+    const char* at = strchr(arg, '@');
+    time_at = at != nullptr ? atof(at + 1) : 0.0;
+    time_due = true;
+}
+
+void dino::story_timed_time(uint8_t* rdram, recomp_context* ctx, double seconds) {
+    int32_t handle = word(rdram, dll7_handle);
+    if (!time_due || seconds < time_at || handle == 0 || word(rdram, save_pointer) == 0) {
+        return;
+    }
+    call(rdram, ctx, player_object);
+    if (ctx->r2 == 0) {
+        return;
+    }
+    time_due = false;
+    int32_t table = word(rdram, handle);
+    ctx->f12.fl = time_hours * 3600.0f;
+    call(rdram, ctx, word(rdram, table + 4 + 4 * dll7_set_time));
+    fprintf(stderr, "--time: %.2f h at %.1f s\n", time_hours, seconds);
+}
+
 void dino::story_set_warp(int index) {
     chosen_warp = index;
 }
@@ -313,6 +346,7 @@ void dino::story_forget() {
     extra_bits.clear();
     timed_bits.clear();
     place_given = false;
+    time_due = false;
 }
 
 void dino::story_start(uint8_t* rdram, recomp_context* ctx) {

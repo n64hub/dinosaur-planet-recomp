@@ -16,6 +16,8 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
   a 16-bit angle (0, the default, faces -z).
 - `--bits <hex>[=<value>][@<seconds>],...` sets more of the game's bits at the start, after the point's own, or one
   given a time when the `--input` clock reaches it: what a test's own object sets, for a test a script can't play.
+- `--time <hour>[@<seconds>]` sets the time of day once there is a player in a level, or once the `--input` clock
+  reaches that time: night is 21 to 5 (The third SpellStone and the moonseeds).
 - `--report` prints a line a second, from the start or from the game's first pass without `--story`: the clock, the map
   number, the position, the health and the magic. A run's `--story:` line says what started.
 - `--watch-bits <hex>,...` prints a `bits:` line each time the game sets one of those bits, with the clock, the value

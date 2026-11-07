@@ -581,7 +581,7 @@ static double story_at = 2.0;
 static double story_reported = -1.0;
 
 // The development options a run can also be given after it starts (--warp, --story, --place, --report, --bits,
-// --watch-bits): true with the one at argv[i] taken, i moved past its value.
+// --watch-bits, --time): true with the one at argv[i] taken, i moved past its value.
 static bool dev_option(int argc, char** argv, int& i) {
     if (strcmp(argv[i], "--warp") == 0 && i + 1 < argc) {
         for (const char* p = argv[++i]; p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
@@ -614,6 +614,9 @@ static bool dev_option(int argc, char** argv, int& i) {
     }
     else if (strcmp(argv[i], "--watch-bits") == 0 && i + 1 < argc) {
         dino::story_watch_bits(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--time") == 0 && i + 1 < argc) {
+        dino::story_set_time(argv[++i]);
     }
     else {
         return false;
@@ -682,6 +685,7 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
         }
     }
     dino::story_timed_bits(rdram, ctx, now);
+    dino::story_timed_time(rdram, ctx, now);
     static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;
     if (check_heap) {
         dino::heap_check(rdram, now);
