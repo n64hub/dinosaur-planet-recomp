@@ -70,6 +70,7 @@ namespace {
     constexpr int32_t new_placement = 0x800233F4; // (size, object id): a zeroed placement record
     constexpr int32_t spawn_object = 0x800213EC;  // (placement, 5, map, -1, [sp+0x10] parent): the object
     constexpr int32_t set_animation = 0x80023D30; // (object, animation, progress, 0)
+    constexpr int32_t add_to_list = 0x80030EF0;   // (object, list), as a constructor joins its object to a list
     constexpr int32_t map_structs = 0x800B5328;   // each loaded map's header, by map number (0 while not loaded)
     constexpr int32_t objects = 0x800B1920;
     constexpr int32_t object_count = 0x800B1924;
@@ -83,8 +84,12 @@ namespace {
     constexpr int tooth_object = 0x522;
     constexpr int flame_object = 0x4F0;
     constexpr int king_object = 0x500;
+    constexpr int sideload_object = 0x75;
 
     constexpr int queen_met = 0x80A;
+    constexpr int flame_learned = 0x245;
+    constexpr int flame_command = 4;
+    constexpr int flame_targets = 0x33;
     constexpr int teeth = 0xD5;
     constexpr int ten_teeth = 0x821;
     constexpr int gate_open = 0x82D;
@@ -94,10 +99,11 @@ namespace {
     struct Place {
         float x, y, z;
     };
-    constexpr Place queen_place = { -8330.0f, -733.0f, -4800.0f };
+    constexpr Place queen_place = { -8330.0f, -733.0f, -4720.0f };
     constexpr Place chaser_place = { -7820.0f, -735.0f, -4810.0f };
     constexpr Place bowl_place = { -7720.0f, -748.0f, -4700.0f };
-    constexpr uint8_t queen_yaw = 0xC0;  // facing the way in, west
+    constexpr Place sideload_place = { -8634.0f, -733.0f, -4480.0f };
+    constexpr uint8_t queen_yaw = 0x00;  // facing across the corridor
     constexpr uint8_t bowl_yaw = 0x40;
 
     // The arch, as a line across the corridor a player from outside doesn't cross while the gate is shut.
@@ -108,9 +114,9 @@ namespace {
     constexpr float meet_reach = 150.0f;
     constexpr float tricky_reach = 400.0f;
     constexpr float flame_reach = 150.0f;
+    constexpr float offer_reach = 300.0f;
     constexpr float catch_reach = 70.0f;
     constexpr float king_reach = 120.0f;
-    constexpr float spawn_reach = 2500.0f; // the player nearer the corridor than this has its objects placed
     constexpr float chase_speed = 3.2f;    // per tick: a running Sabre outruns it, a walking one doesn't
     constexpr float walk_speed = 1.4f;
     constexpr float give_up_ticks = 600.0f;
@@ -136,7 +142,9 @@ namespace {
         Chase chase = Chase::Waiting;
         float chase_ticks = 0.0f;
         float progress = 0.0f;
-        bool outside = false; // the player was last seen west of the gate, in the corridor
+        bool placed = false;
+        bool outside = false;
+        int test_mad = 0; // the player was last seen west of the gate, in the corridor
     } state;
 
     void call(uint8_t* rdram, recomp_context* ctx, int32_t function) {
@@ -184,7 +192,7 @@ namespace {
         }
     };
 
-    // Whether an object made here is still in the game's list: one out of the player's range is freed.
+    // Whether an object made here is still in the game's list.
     bool alive(uint8_t* rdram, int32_t object, int oid) {
         if (object == 0) {
             return false;
@@ -230,6 +238,9 @@ namespace {
         call(rdram, ctx, new_placement);
         gpr p = ctx->r2;
         MEM_B(2, p) = size / 4;
+        // Flag 2: the object loop (func_8004A800, 0x8004A94C) never frees it as out of the player's range, since
+        // these are made once as the map loads (krazoa.cpp's palace objects are too).
+        MEM_B(4, p) = 2;
         set_real(rdram, p + 0x8, at.x);
         set_real(rdram, p + 0xC, at.y);
         set_real(rdram, p + 0x10, at.z);
@@ -251,23 +262,34 @@ namespace {
     }
 
     void place_objects(uint8_t* rdram, recomp_context* ctx) {
-        if (!alive(rdram, state.queen, queen_object)) {
+        {
             // As the King's placement: its turn, then no bits.
             const uint8_t setup[] = { queen_yaw, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF };
             state.queen = spawn(rdram, ctx, queen_object, 0x24, queen_place, setup, sizeof(setup));
         }
-        if (!alive(rdram, state.chaser, chaser_object)) {
+        {
             const uint8_t setup[] = { 0x40, 0x00, 0x00, 0x00 };
             state.chaser = spawn(rdram, ctx, chaser_object, 0x1C, chaser_place, setup, sizeof(setup));
+            if (state.chaser != 0) {
+                // Tricky's flame (dll211 0x8F18) is aimed at the object of list 0x33 nearest the player.
+                ctx->r4 = state.chaser;
+                ctx->r5 = flame_targets;
+                call(rdram, ctx, add_to_list);
+            }
             state.chase = Chase::Waiting;
             state.progress = 0.0f;
         }
-        if (!alive(rdram, state.bowl, bowl_object)) {
+        {
             // dll308: its turn (+0x18-0x1A), 0x18 (unusable until its bit, which it clears once used), the bit it sets
             // (+0x1C), no item (+0x1E), no sequence (+0x20), model 0, the bit it waits for (+0x22).
             const uint8_t setup[] = { bowl_yaw, 0x00, 0x00, 0x18, gate_open >> 8, gate_open & 0xFF, 0xFF, 0xFF,
                 0xFF, 0x00, ten_teeth >> 8, ten_teeth & 0xFF, 0x00, 0x00, 0x00, 0x00 };
             state.bowl = spawn(rdram, ctx, bowl_object, 0x28, bowl_place, setup, sizeof(setup));
+        }
+        {
+            // dll269 with no bit of its own waits for 0x4E5, Tricky's, and makes him when no sidekick is out.
+            const uint8_t setup[] = { 0xFF, 0xFF, 0x00, 0x00 };
+            spawn(rdram, ctx, sideload_object, 0x1C, sideload_place, setup, sizeof(setup));
         }
     }
 
@@ -296,6 +318,12 @@ namespace {
         call(rdram, ctx, set_animation);
     }
 
+    // Turns the chaser to (x, z).
+    void face(uint8_t* rdram, gpr chaser, float x, float z) {
+        float dx = x - real(rdram, chaser + 0xC), dz = z - real(rdram, chaser + 0x14);
+        MEM_H(0, chaser) = (int16_t)(atan2f(-dx, -dz) * (32768.0f / 3.14159265f));
+    }
+
     // Moves the chaser on the ground toward (x, z) by up to `by`, facing that way; true once it is there.
     bool walk_to(uint8_t* rdram, gpr chaser, float x, float y, float z, float by) {
         float cx = real(rdram, chaser + 0xC), cz = real(rdram, chaser + 0x14);
@@ -309,7 +337,7 @@ namespace {
         set_real(rdram, chaser + 0x14, cz + dz * t);
         float cy = real(rdram, chaser + 0x10);
         set_real(rdram, chaser + 0x10, cy + (y - cy) * 0.1f);
-        MEM_H(0, chaser) = (int16_t)(atan2f(-dx, -dz) * (32768.0f / 3.14159265f));
+        face(rdram, chaser, x, z);
         return by >= d;
     }
 
@@ -320,12 +348,15 @@ namespace {
         switch (state.chase) {
         case Chase::Waiting: {
             pose(rdram, ctx, chaser, idle_animation, frame / walk_cycle_ticks);
+            if (d < 600.0f) {
+                face(rdram, chaser, real(rdram, player + 0xC), real(rdram, player + 0x14));
+            }
             if (!get(rdram, ctx, queen_met)) {
                 break;
             }
             float flame_d;
             int32_t flame = nearest(rdram, flame_object, real(rdram, chaser + 0x18), real(rdram, chaser + 0x20), &flame_d);
-            if (flame != 0 && flame_d < flame_reach) {
+            if ((flame != 0 && flame_d < flame_reach) || (getenv("DINO_WC_TEST_MAD") && d < 300.0f && !state.test_mad++)) {
                 state.chase = Chase::Mad;
                 state.chase_ticks = 0.0f;
                 if (logging) {
@@ -373,6 +404,22 @@ namespace {
         }
     }
 
+    // As a flame target near the player does (SwapStone Hollow's vines, dll265 0x104), the waiting RedEye puts the
+    // flame on Tricky's command scroll this frame through his export 14 (dll211 0x1248), which 0x245 lets through.
+    void offer_flame(uint8_t* rdram, recomp_context* ctx, gpr player) {
+        if (state.chase != Chase::Waiting || ground_distance(rdram, (gpr)state.chaser, player) > offer_reach) {
+            return;
+        }
+        call(rdram, ctx, sidekick_object);
+        gpr tricky = ctx->r2;
+        if (tricky == 0) {
+            return;
+        }
+        ctx->r4 = tricky;
+        ctx->r5 = flame_command;
+        call(rdram, ctx, word(rdram, word(rdram, word(rdram, (int32_t)tricky + 0x68)) + 4 + 4 * 14));
+    }
+
     void meet_queen(uint8_t* rdram, recomp_context* ctx, gpr player) {
         if (get(rdram, ctx, queen_met) || ground_distance(rdram, (gpr)state.queen, player) > meet_reach) {
             return;
@@ -383,6 +430,7 @@ namespace {
             return;
         }
         set(rdram, ctx, queen_met, 1);
+        set(rdram, ctx, flame_learned, 1);
         if (logging) {
             fprintf(stderr, "walled city: met the Queen (%s)\n", tricky != 0 ? "with Tricky" : "no sidekick out");
         }
@@ -472,16 +520,37 @@ extern "C" void dino_walled_city_frame(uint8_t* rdram, recomp_context* ctx) {
     if (player == 0) {
         return;
     }
-    float px = real(rdram, player + 0x18), pz = real(rdram, player + 0x20);
-    float dx = px - queen_place.x, dz = pz - queen_place.z;
-    if (dx * dx + dz * dz < spawn_reach * spawn_reach) {
+    if (!state.placed) {
+        state.placed = true;
         place_objects(rdram, ctx);
+    }
+    static int frames = 0;
+    if (logging && frames++ % 30 == 0) {
+        float flame_d = -1.0f;
+        if (state.chaser != 0) {
+            nearest(rdram, flame_object, real(rdram, (gpr)state.chaser + 0x18), real(rdram, (gpr)state.chaser + 0x20),
+                &flame_d);
+        }
+        call(rdram, ctx, sidekick_object);
+        gpr tricky = ctx->r2;
+        if (flame_d < 1e29f) {
+            fprintf(stderr, "walled city: a flame %.0f from the RedEye\n", flame_d);
+        }
+        gpr ts = tricky ? (gpr)(int32_t)MEM_W(0xB8, tricky) : 0;
+        fprintf(stderr, "walled city: sidekick 0x%08X at (%.0f, %.0f) w(%.0f, %.0f) parent %08X alive %d st %d cmd %d "
+            "tgt %08X, chase %d, teeth %d\n", (uint32_t)tricky,
+            tricky ? real(rdram, tricky + 0xC) : 0.0f, tricky ? real(rdram, tricky + 0x14) : 0.0f,
+            tricky ? real(rdram, tricky + 0x18) : 0.0f, tricky ? real(rdram, tricky + 0x20) : 0.0f,
+            tricky ? (uint32_t)MEM_W(0x30, tricky) : 0, alive(rdram, (int32_t)tricky, 0x4E5) ? 1 : 0,
+            ts ? (int)MEM_BU(0x18, ts) : -1, ts ? (int)MEM_BU(0x1D, ts) : -1, ts ? (uint32_t)MEM_W(0x28, ts) : 0,
+            (int)state.chase, get(rdram, ctx, teeth));
     }
     if (alive(rdram, state.queen, queen_object)) {
         meet_queen(rdram, ctx, player);
     }
     if (alive(rdram, state.chaser, chaser_object)) {
         run_chase(rdram, ctx, player);
+        offer_flame(rdram, ctx, player);
     }
     hold_gate(rdram, ctx, player);
     count_teeth(rdram, ctx);
