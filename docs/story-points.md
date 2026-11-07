@@ -269,8 +269,10 @@ force point's top (50) at (1, 17) and its bottom (21) at (1, 16), both on layer 
   second DFPLift1 (641) under the stub at (-275, 9280), in the corridor behind the round door, with that corridor's
   travel (`src/game/force_point.cpp`). Played on Restored from the corridor (`--place -324,-1459,9660,-1` with the
   power's bits, 0x5E2 to 0x5E8): onto the lift, which rises once the player stands on it, off it into the stub, along
-  the duct and the walkway to the place, A, C-right, A: 0x5F3, 0x78C, and 0x2E8 cleared. The lift waits at the top
-  while the player is off it and takes them down again, as the force point's own lift does.
+  the duct and the walkway to the place, A, C-right, A: 0x5F3, 0x78C, and 0x2E8 cleared; then back along the duct
+  and down the lift to the corridor. The lift waits at the top while the player is off it and takes them down again,
+  as the force point's own lift does. On some of those plays the game crashed a second into the sequence, drawing an
+  effect whose object was freed (`src/game/objects.cpp`, fixed). On Original no lift stands there.
 - The acts. DFP_LevelControl keeps the force point at act 1, and nothing moves it to 2
   or 3. The other place (uid 40323, east) takes a stone only with 0x7A8 set: in act 1 the stone carried as 0x2E8
   (played with 0x7A8 set: 0x5F4 at 17.5 s), in act 2 the one carried as 0x123. 0x7A8 is DFP_TargetBlock 401bb's
