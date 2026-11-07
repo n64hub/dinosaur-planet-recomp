@@ -22,3 +22,6 @@
   new setting for Tricky's run to his mother in SwapStone Hollow, Cape Claw's shrine test is now under Krazoa
   Shrines, and that setting's Finished is now called Restored (a saved Finished reads as Restored). Crash fixes stay
   on with either value.
+- Krazoa Shrines and Krazoa Tablets on Restored: the seqpoints that release Golden Plains' and Northern Wastes'
+  spirits at Warlock Mountain, and Cape Claw's third tablet, no longer vanish while the player is still far from
+  them, so each is there when the player arrives.
