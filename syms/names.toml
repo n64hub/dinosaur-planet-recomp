@@ -1,0 +1,205 @@
+# Names worked out from the game's code. Each says where its evidence is (a file of src/game, docs/story-points.md, a
+# function), and a name found wrong is changed here.
+#
+# - [[func]]: section ("main" or "dll<n>"), vram (as in syms/), name. tools/gen_syms.py writes it into syms/, so the
+#   recompiled code and us.toml's hooks use it: rerun gen_syms.py and change whatever used the old name.
+# - [[addr]]: vram, name, and returns ("obj <dll> <label>") for a function that returns an object. A main-segment
+#   function or data address as tools/dino.py prints it; its symbol in syms/ keeps its func_<address> name.
+# - [[export]]: dll, index, name: a DLL's export, as `dll<n>.<index> <name>`.
+# - [[bit]]: bit, name: one of the story's bits (docs/story-points.md, The bits). One without a name prints its task.
+# - [[field]]: of ("obj", "state" or "setup"), offset, name, and dll for a state or setup only that DLL's has: the
+#   field at that offset of an object, its state (obj+0xB8) or its placement (ROM file 31).
+
+# The main segment (src/game's constants, docs/story-points.md).
+[[addr]]
+vram = 0x8000BE04
+name = "dll_load"  # (number, ...): 46 calls in main store what it returns in a word, which the DLL's calls read
+[[addr]]
+vram = 0x8000CBC8
+name = "drop_texture_group"
+[[addr]]
+vram = 0x8000F404
+name = "set_menu"
+[[addr]]
+vram = 0x80013FB4
+name = "to_front_end"
+[[addr]]
+vram = 0x8001440C
+name = "set_paused"
+[[addr]]
+vram = 0x80014604
+name = "video_settings"
+[[addr]]
+vram = 0x80014670
+name = "bit_set"  # (bit, value), through ROM file 55's table
+[[addr]]
+vram = 0x800147EC
+name = "bit_get"  # (bit)
+[[addr]]
+vram = 0x80014930
+name = "bit_increment"  # (bit): adds one to its value
+[[addr]]
+vram = 0x80014B6C
+name = "unload_title_dlls"
+[[addr]]
+vram = 0x800213EC
+name = "spawn_object"  # (placement, 5, map, -1, [sp+0x10] parent)
+[[addr]]
+vram = 0x80022274
+name = "leave_hit_list"
+[[addr]]
+vram = 0x80022F94
+name = "free_object"  # src/game/objects.cpp
+[[addr]]
+vram = 0x800233F4
+name = "new_placement"  # (size, object id): a zeroed placement record
+[[addr]]
+vram = 0x80023914
+name = "player_object"
+returns = "obj 210 player"
+[[addr]]
+vram = 0x8002394C
+name = "sidekick_object"  # 0 with no Kyte out (the pad's Crashes)
+[[addr]]
+vram = 0x80041C6C
+name = "play_flag_10"
+[[addr]]
+vram = 0x80041D20
+name = "play_flag_2000"
+[[addr]]
+vram = 0x80044810
+name = "map_at"  # the map at a position: x in f12, z in f14
+[[addr]]
+vram = 0x80045BF4
+name = "load_map"  # src/game/krazoa.cpp
+[[addr]]
+vram = 0x8004D1D4
+name = "warp_entry"  # reads the warp table, ROM file 30
+[[addr]]
+vram = 0x8005D410
+name = "set_video_mode"
+[[addr]]
+vram = 0x80092A70
+name = "world_origin_x"  # src/game/interpolation.cpp
+[[addr]]
+vram = 0x80092A74
+name = "world_origin_z"
+[[addr]]
+vram = 0x800A6278
+name = "cameras"
+[[addr]]
+vram = 0x800A7D84
+name = "current_menu"
+[[addr]]
+vram = 0x800AE2A0
+name = "save_pointer"  # the save in dll29's bss
+[[addr]]
+vram = 0x800B5328
+name = "map_structs"  # each loaded map's header, by map number
+[[addr]]
+vram = 0x800B96AC
+name = "loading_map"
+
+# dll29, the save (docs/story-points.md).
+[[export]]
+dll = 29
+index = 1
+name = "new_game"  # (slot, name)
+[[export]]
+dll = 29
+index = 6
+name = "set_start"  # (position, yaw, flags, layer)
+[[export]]
+dll = 29
+index = 7
+name = "start_world"
+[[export]]
+dll = 29
+index = 15
+name = "map_act"  # (map): read
+[[export]]
+dll = 29
+index = 16
+name = "set_map_act"  # (map, act)
+[[export]]
+dll = 29
+index = 18
+name = "group_field"  # (map): its group field
+[[export]]
+dll = 29
+index = 29
+name = "set_character"  # 1 Krystal, 0 Sabre
+[[export]]
+dll = 210
+index = 11
+name = "let_go"  # (player, 0): drops what it carries (src/game/krazoa.cpp)
+
+# Every object (src/game/objects.cpp, krazoa.cpp, dragon_rock.cpp).
+[[field]]
+of = "obj"
+offset = 0xC
+name = "x"
+[[field]]
+of = "obj"
+offset = 0x10
+name = "y"
+[[field]]
+of = "obj"
+offset = 0x14
+name = "z"
+[[field]]
+of = "obj"
+offset = 0x68
+name = "dll"
+[[field]]
+of = "obj"
+offset = 0xB8
+name = "state"
+[[field]]
+of = "obj"
+offset = 0xC8
+name = "child"  # the player's weapon
+[[field]]
+of = "state"
+dll = 210
+offset = 0x868
+name = "held"  # what the player carries
+[[field]]
+of = "state"
+dll = 210
+offset = 0x8B4
+name = "character"
+
+# A placement's header (docs/story-points.md, Object groups).
+[[field]]
+of = "setup"
+offset = 0x0
+name = "object"
+[[field]]
+of = "setup"
+offset = 0x2
+name = "size"
+[[field]]
+of = "setup"
+offset = 0x4
+name = "flags"
+[[field]]
+of = "setup"
+offset = 0x6
+name = "group"
+[[field]]
+of = "setup"
+offset = 0x8
+name = "x"
+[[field]]
+of = "setup"
+offset = 0xC
+name = "y"
+[[field]]
+of = "setup"
+offset = 0x10
+name = "z"
+[[field]]
+of = "setup"
+offset = 0x14
+name = "uid"
