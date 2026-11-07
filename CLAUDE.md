@@ -28,8 +28,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
   Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the Kamerian Dragon's end
   (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), CloudRunner Fortress's treasure lift
-  (`src/game/cloudrunner.cpp`) and wind bridge (`src/game/cloudrunner_barrels.cpp`), the settings, and on Windows a
-  stack trace on a crash (`src/main/crash_trace.cpp`).
+  and baby CloudRunners (`src/game/cloudrunner.cpp`), wind bridge (`src/game/cloudrunner_barrels.cpp`), BOSS
+  TRex's setting (`src/game/boss_trex.cpp`), Walled City's way in and its King (`src/game/walled_city.cpp`), the
+  settings, and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
@@ -100,7 +101,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   world and each model interpolate their translations, which RT64 by itself drops for a step that size.
 - **Krazoa shrines.** Eight tests, each giving a spirit the player carries as a mask of its own to Warlock Mountain
   (map 11), whose act (bit 0xE4) each win moves on. The prototype reaches three from the world and has no step at
-  Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Finished by default, finishes them out
+  Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Restored by default, finishes them out
   of what the ROM holds, and Original leaves them as the console plays them (`src/game/krazoa.cpp`'s header has the
   order, the bits and the evidence). Its Krazoa Tablets setting, Restored by default, does the same for Cape Claw's
   tablet room: the third tablet and the way on to Krazoa Palace.
@@ -121,6 +122,19 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   and the way to the race, but its direction bit (0x8C8) is flipped only by two levers at the bottom, so from the top
   it only blows up. The General tab's Treasure Lift setting, Restored by default, lowers a player who steps in from
   the top, and Original leaves it as it was (`src/game/cloudrunner.cpp`'s header has the evidence).
+- **CloudRunner Fortress's baby CloudRunners.** A baby waiting to be found (CFCloudBaby, dll373) comes out when Kyte's
+  export 24 answers yes, a flag of hers nothing in the ROM sets. The General tab's Baby CloudRunners setting, Restored
+  by default, answers yes while Kyte is within 400 of it, and Original leaves them hidden (the same header).
+- **BOSS TRex.** The TRex's defeat loads the front end with no SpellStone. The General tab's BOSS TRex setting,
+  Restored by default, gives the third SpellStone (0x83B) and the way back to Walled City in its place, and Original
+  goes to the title as the prototype did. The fixes that let the fight be won at all (the floor switches' pads, the
+  TRex's corners and facing, the door behind the player) are always on (`patches/boss_trex.c` and us.toml beside them
+  have the evidence, docs/story-points.md how the fight plays).
+- **Walled City.** The task list has the Queen EarthWalker, a RedEye chase for ten teeth that open the city's gate
+  and the King activating the third SpellStone, and the ROM built none of it: the Queen and the chase have defs and
+  stand nowhere, the gate is open and the stone is active once won. The General tab's Walled City setting, Restored
+  by default, places them, gives Tricky his flame from the Queen and has the King activate the stone (0x82E to
+  0x83B), and Original leaves the city as the prototype did (`src/game/walled_city.cpp`'s header has the evidence).
 - **CloudRunner Fortress's courtyard roof.** The roof (CFBlastedRoof) blows at the third barrel blown under it, and
   the barrels stand west of the treasure shaft, whose wind drops a player carrying one: the walking states skip the
   check that puts her on the wind while she carries. The General tab's Wind Bridge setting, Restored by default, puts
@@ -130,19 +144,30 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   Drakor (map 44). The General tab's Krazoa Palace setting, Restored by default, places them, chains the four wings
   by saved bits nothing else uses (0x6A7-0x6AA) and has the red Krazoa send the player to Drakor, and Original
   leaves the rooms empty (`src/game/krazoa.cpp`'s header has the layout and the evidence).
+- **The third SpellStone.** A map's act, a story value, picks which of its objects load, and the Volcano Force Point
+  and Walled City never leave act 1 in the ROM, so the third SpellStone has nowhere to go and Walled City's Sun and
+  Moon Stones never show; nothing gives the moonseeds Krystal plants in Moon Mountain Pass either. The General tab's
+  Third SpellStone setting, Restored by default, moves both maps' acts with the story and gives four moonseeds as the
+  stone is placed, and Original leaves them as they were (`src/game/acts.cpp` and `src/game/moonseeds.cpp` have the
+  evidence, docs/story-points.md, The maps' acts, how they move).
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
-  timed button states, which can wait for a bit the game sets and walk the player to a place or an object (`main.cpp`
-  says the format), and on Windows `--stacks <seconds>` prints every thread's stack that long after start, for
-  unattended runs and hangs, and `--watch <address>,...` stops on each write to those words (four at most) of the
+  timed button states, which can wait for a bit the game sets, an enemy's place or act, and take whichever of two
+  ways an enemy comes, and walk the player to a place, an object or one of its hit spheres (`main.cpp` says the
+  format), and on Windows `--stacks <seconds>` prints every thread's stack that long after start, for unattended runs
+  and hangs, and `--watch <address>,...` stops on each write to those words (four at most) of the
   game's memory and prints the value and the stack that wrote it (`crash_trace.cpp` says the form: `**8008C994+4`
   follows two pointers), for what writes over something. `--warp <index>@<seconds>` warps the player by the game's own
   warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and object
   jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
-  `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each event of Golden Plains' shrine,
+  `src/game/krazoa.cpp` places and any of them freed while its map is loaded, each spirit it gives and has taken
+  back and each event of Golden Plains' shrine,
+  `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves,
   `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
-  `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on, `DINO_LOG_EFFECTS=1`
+  `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on,
+  `DINO_LOG_WALLED_CITY=1` each object `src/game/walled_city.cpp` places and each step of the chase, the gate and the
+  stone, `DINO_LOG_EFFECTS=1`
   each effect drawn after its object was freed,
   `DINO_DRAGON_HEALTH=<n>` starts its fight with n health, and `DINO_CHECK_HEAP=1` each block of the game's heaps
   written past its end, with the tag of what asked for it (`src/game/heap.cpp`).
@@ -152,6 +177,6 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   <x>,<y>,<z>[,<layer>[,<facing>]]` starts it somewhere the warp table has no entry, `--bits
   <hex>[=<value>][@<seconds>],...` sets more bits, at the start or later (a shrine's own bits are cleared as its map
   starts, so they are set a while after it), and `--report` prints a line a second with the map, the position, the
-  health and the magic; `--watch-bits <hex>,...|all` prints each bit the game sets as it plays. `docs/story-points.md`
-  has the points, each bit's evidence and the warp table's map: each index, its area and what it needs. None of it is
-  in a player's menus.
+  health and the magic (and with `DINO_REPORT_OBJECT=<object id hex>` where each object of that id is);
+  `--watch-bits <hex>,...|all` prints each bit the game sets as it plays. `docs/story-points.md` has the points, each
+  bit's evidence and the warp table's map: each index, its area and what it needs. None of it is in a player's menus.

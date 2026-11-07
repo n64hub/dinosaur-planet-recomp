@@ -21,12 +21,16 @@ void dino::init_config() {
     general_options.has_mouse_sensitivity = false;
     recomp::config::Config& general = recompui::config::create_general_tab(general_options);
     dino::add_camera_options(general);
+    dino::add_swapstone_hollow_options(general);
     dino::add_krazoa_options(general);
     dino::add_drakor_options(general);
     dino::add_dragon_rock_options(general);
     dino::add_force_point_options(general);
     dino::add_cloudrunner_options(general);
     dino::add_cloudrunner_barrel_options(general);
+    dino::add_boss_trex_options(general);
+    dino::add_third_stone_options(general);
+    dino::add_walled_city_options(general);
     recompui::config::create_controls_tab();
     recompui::config::create_graphics_tab();
     recompui::config::create_sound_tab();

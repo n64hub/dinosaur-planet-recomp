@@ -94,6 +94,26 @@ func = "dll210_A3FC"
 vram = 0x900F247C
 value = 0x240D4653
 
+# Picking up an item (a key, a crystal, a tooth, a SpellStone: a collectable, dll272) plays the player's pickup and
+# then the item's scene, sequence 0 of the player, whose actor list has a placeholder (object 0x443) for the item shown.
+# The pickup names that item to dll3 (gDLL_97c->0x7C, dll3 0x9E58) from its definition (def +0x18, then +6), and
+# dll3_8900 swaps the placeholder for it unless it is -1 (0x8DA0-0x8DC0, the name at data +0xA67C). Most items' is 0,
+# so the scene made object 0, the player (Sabre's definition, dll210): a second player that took the camera, and the
+# scene never ended. An item named 0 keeps the placeholder, as -1 does.
+[[patches.hook]]
+func = "dll3_8900"
+before_vram = 0x900139D4
+text = "{ if (ctx->r3 == 0) goto L_900139D8; }"
+
+# The player's pickup state (dll210_16220, state 42, the player in $s1) starts the item's scene once its animation is
+# done (0x16408-0x16424) and stays in the state with its time at 0, so it starts the scene again each frame until the
+# scene takes the player over, and the repeated starts crashed in dll3_8900 (an actor whose state, +0xB8, was 0). A
+# player already in a sequence (+0xB4 not -1) returns 0 there, as the branch at 0x16400 does, so the scene starts once.
+[[patches.hook]]
+func = "dll210_16220"
+before_vram = 0x900FE208
+text = "{ if (MEM_H(0xB4, ctx->r17) != -1) { ctx->r2 = 0; goto L_900FE2C8; } }"
+
 # func_80011C70, which makes each audio frame, reads the AI's remaining length straight from AI_LEN (0xA4500004),
 # where libultra has osAiGetLength: the runtime's gives it (lw $t9, 4($t8) -> nop, then the hook).
 [[patches.instruction]]
@@ -523,13 +543,13 @@ func = "dll502_0D74"
 before_vram = 0x901FFD58
 text = '{ if (MEM_BU(0x136, ctx->r16) == 2) ctx->r8 = 2; }'
 
-# Tricky's run to his mother (patches/swapstone_hollow.c says what starts it): SHseqobject's update (dll309_0124), for an
-# object whose setup waits on bit 0xC3 (its setup, +0x4C of $a0, holds the bit at +0x1A), asks dino_tricky_run whether
-# the player has come.
+# Tricky's run to his mother (patches/swapstone_hollow.c says what starts it): with Tricky's Run on Restored
+# (src/game/swapstone_hollow.cpp), SHseqobject's update (dll309_0124), for an object whose setup waits on bit 0xC3 (its
+# setup, +0x4C of $a0, holds the bit at +0x1A), asks dino_tricky_run whether the player has come.
 [[patches.hook]]
 func = "dll309_0124"
 before_vram = 0x9017AC40
-text = '{ if ((int16_t)MEM_H(0x1A, MEM_W(0x4C, ctx->r4)) == 0xC3) { void dino_tricky_run(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_tricky_run(rdram, &c); } }'
+text = '{ int dino_tricky_run_restored(void); if ((int16_t)MEM_H(0x1A, MEM_W(0x4C, ctx->r4)) == 0xC3 && dino_tricky_run_restored()) { void dino_tricky_run(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_tricky_run(rdram, &c); } }'
 
 # The SwapStone (SHswapstone, dll515) answers only while bit 0x887 says the player is in its zone, and TriggerPlane
 # 40b79 (map 7, local 2388,-633,1592) keeps that bit with action 0x12 mode 2, arg 0x8887: it flips it on each crossing.
@@ -556,6 +576,75 @@ text = '{ if ((ctx->r11 & 0xFFFF) == 0x8887) { recomp_context c = *ctx; c.r4 = 0
 func = "dll216_02C0"
 before_vram = 0x9011CBBC
 text = "{ int32_t bit = (int16_t)MEM_H(0x39C, ctx->r17); if (ctx->r2 != 0 && bit != -1) { gpr v0 = ctx->r2; ctx->r4 = bit; func_800147EC(rdram, ctx); if (ctx->r2 != 0) goto L_9011CDC0; ctx->r2 = v0; } }"
+
+# A scene that moves the player: dll3 holds the player (+0xB0 bit 0x1000) and its update stops. Its collision (dll27.5)
+# keeps where it last stood, and the update's first pass after the scene sweeps from there, before the player's own
+# release (dll210_60A8, by dll210_7260) resets it a pass later, so whatever stands between the two stops the player
+# there: BOSS TRex's intro walks Sabre in from the warp, the door (KT_RexDoorPlaye, z -9810) shuts behind her at the
+# scene's start, and as the scene ended the sweep put her back on the far side of it, 38 units short of the door, shut
+# out of the arena for good. Here dll210_7260 runs at that pass, before dll27.3 to dll27.5 (the player in $s2, the state
+# in $s1), so the collision starts where the scene left the player.
+[[patches.hook]]
+func = "dll210_0934"
+before_vram = 0x900E8EE0
+text = "{ if (MEM_HU(0xB0, ctx->r18) & 0x1000) { recomp_context c = *ctx; c.r4 = ctx->r18; c.r5 = ctx->r17; dll210_7260(rdram, &c); } }"
+
+# Walled City (patches/walled_city.c says what each fixes). A pressure switch's add (dll781_05DC, the switch in $a0,
+# what stands on it in $a1) is done by dino_wc_switch_add in its place.
+[[patches.hook]]
+func = "dll781_05DC"
+before_vram = 0x902CA418
+text = '{ void dino_wc_switch_add(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_switch_add(rdram, &c); if (c.r2) return; }'
+
+# A beacon's update (dll780_011C, the beacon in $a0) has dino_wc_beacon give it a hit volume a player can reach first.
+[[patches.hook]]
+func = "dll780_011C"
+before_vram = 0x902C9938
+text = '{ void dino_wc_beacon(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_beacon(rdram, &c); }'
+
+# BOSS TRex's arena (patches/boss_trex.c says what each fixes). A floor switch's update (dll703_00A4, the switch in
+# $a0) counts a player standing on its pad with dino_trex_switch first.
+[[patches.hook]]
+func = "dll703_00A4"
+before_vram = 0x90289920
+text = '{ void dino_trex_switch(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_switch(rdram, &c); }'
+
+# The TRex's path step (dll702_0FE4, the TRex in $a0, its path data in $a1) starts with its fraction in its speed's
+# range (dino_trex_path), or a corner can skip the next corridor.
+[[patches.hook]]
+func = "dll702_0FE4"
+before_vram = 0x90286938
+text = '{ void dino_trex_path(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_path(rdram, &c); }'
+
+# The TRex's run (dll702_2454, the TRex in $a0, its state in $a1) faces its corridor first (dino_trex_facing), or a
+# charge round a corner runs on sideways.
+[[patches.hook]]
+func = "dll702_2454"
+before_vram = 0x90287DA8
+text = '{ void dino_trex_facing(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_facing(rdram, &c); }'
+
+# With BOSS TRex on Restored (src/game/boss_trex.cpp):
+# The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
+# and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call. With
+# Walled City on Restored (src/game/walled_city.cpp) the stone is then won, for the King to activate.
+[[patches.instruction]]
+func = "dll702_2D98"
+vram = 0x9028874C
+value = 0x00000000
+
+[[patches.hook]]
+func = "dll702_2D98"
+before_vram = 0x90288754
+text = '{ int dino_trex_restored(void); void dino_trex_beaten(uint8_t*, recomp_context*); void dino_walled_city_trex_beaten(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_beaten(rdram, &c); dino_walled_city_trex_beaten(rdram, ctx); } else { func_80013FB4(rdram, ctx); } }'
+
+# Walled City on Restored (src/game/walled_city.cpp): Tricky's flame (command 4, dll211 0x8B0) goes on with a target
+# whose object id it knows (dll211 0x8D4-0x914: the vines, the ice walls, the log fires and the like) and resets him to
+# following for any other, so the RedEye by the gate (WCTrexChase, #506) is taken as the vines (#194) are, a target
+# with nothing of its own to call when burnt. $v1 holds the target's id.
+[[patches.hook]]
+func = "dll211_03FC"
+before_vram = 0x901080A4
+text = '{ int dino_walled_city_flame_target(int); ctx->r3 = (gpr)(int32_t)dino_walled_city_flame_target((int)(int16_t)ctx->r3); }'
 
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),
@@ -645,29 +734,48 @@ func = "func_80045BF4"
 before_vram = 0x80045D38
 text = '{ void dino_krazoa_map_loaded(uint8_t*, recomp_context*); dino_krazoa_map_loaded(rdram, ctx); }'
 
+# The maps' acts (src/game/acts.cpp, whose header has the evidence): the end of func_80045BF4, after the Krazoa
+# shrines' hook, and VFP_LevelControl's constructor (dll619 0x70), which sets its map to act 1 whatever the story.
+[[patches.hook]]
+func = "func_80045BF4"
+before_vram = 0x80045D3C
+text = '{ void dino_acts_map_loaded(uint8_t*, recomp_context*); dino_acts_map_loaded(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll619_0018"
+before_vram = 0x9024D34C
+text = '{ void dino_acts_volcano_level_control(uint8_t*, recomp_context*); dino_acts_volcano_level_control(rdram, ctx); }'
+
+# The moonseeds (src/game/moonseeds.cpp, whose header has the evidence): VFP_SpellPlace once it has set its placed bit
+# (dll637 0x388), which for the third SpellStone gives the moonseeds nothing else gives.
+[[patches.hook]]
+func = "dll637_02E0"
+before_vram = 0x90255D3C
+text = '{ void dino_moonseeds_stone_placed(uint8_t*, recomp_context*); dino_moonseeds_stone_placed(rdram, ctx); }'
+
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
-text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); }'
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); void dino_walled_city_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); dino_walled_city_frame(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
-# whether their spirit is released by 0x366, a bit nothing sets: they ask CC's (0x221) and WG's (0x222) released bits
-# (addiu $a0, $zero, 0x366 -> 0x221 at 0x1544, 0x222 at 0x17D4). Neither act is reached without the Krazoa shrines'
-# ways in.
+# whether their spirit is released by 0x366, a bit nothing sets: on Restored they ask CC's (0x221) and WG's (0x222)
+# released bits, $a0 as the call to GET_BIT takes it (0x1548, 0x17D8). Neither act is reached without the Krazoa
+# shrines' ways in.
 [[patches.hook]]
 func = "dll607_025C"
 before_vram = 0x90243044
 text = '{ void dino_krazoa_warlock(uint8_t*, recomp_context*); dino_krazoa_warlock(rdram, ctx); }'
 
-[[patches.instruction]]
+[[patches.hook]]
 func = "dll607_14FC"
-vram = 0x902442F0
-value = 0x24040221
+before_vram = 0x902442F4
+text = '{ int dino_krazoa_shrines_restored(void); if (dino_krazoa_shrines_restored()) ctx->r4 = 0x221; }'
 
-[[patches.instruction]]
+[[patches.hook]]
 func = "dll607_1788"
-vram = 0x90244580
-value = 0x24040222
+before_vram = 0x90244584
+text = '{ int dino_krazoa_shrines_restored(void); if (dino_krazoa_shrines_restored()) ctx->r4 = 0x222; }'
 
 # WL_seqpoint's release events (dll611), before the player's export 0xA0 takes back WG's mask (0x778) and CC's (0x8D4).
 [[patches.hook]]
@@ -719,17 +827,17 @@ text = '{ void dino_krazoa_palace_door(uint8_t*, recomp_context*); dino_krazoa_p
 
 # Cape Claw's shrine (dll486): its test is one SabreBaddie, which CCSH_ObjCreator (dll487) spawns with kill bit 0x1E7,
 # as Discovery Falls' creator does. State 2 waited for 0x5B2 instead, a bit nothing in the ROM sets, so the test never
-# ended: it reads 0x1E7, and its reset clears 0x1E7 (addiu $a0, $zero, 0x5B2 -> 0x1E7 at 0x7C0 and 0x998). The shrine
-# isn't reached without the Krazoa shrines' ways in.
-[[patches.instruction]]
+# ended: on Restored it reads 0x1E7, and its reset clears 0x1E7, $a0 as the calls to GET_BIT (0x7C4) and SET_BIT
+# (0x99C) take it. The shrine isn't reached without the Krazoa shrines' ways in.
+[[patches.hook]]
 func = "dll486_01EC"
-vram = 0x901F5E1C
-value = 0x240401E7
+before_vram = 0x901F5E20
+text = '{ int dino_krazoa_shrines_restored(void); if (dino_krazoa_shrines_restored()) ctx->r4 = 0x1E7; }'
 
-[[patches.instruction]]
+[[patches.hook]]
 func = "dll486_01EC"
-vram = 0x901F5FF4
-value = 0x240401E7
+before_vram = 0x901F5FF8
+text = '{ int dino_krazoa_shrines_restored(void); if (dino_krazoa_shrines_restored()) ctx->r4 = 0x1E7; }'
 
 # Golden Plains' fly baddie (dll475) shoots by making an object from a placement record it zeroes and never gives an
 # id, so each shot asked for object 0, the player (Sabre's definition, dll210): a second player where the fly baddie
@@ -850,3 +958,20 @@ text = '{ int dino_carried_in_wind(uint8_t*, uint32_t); if (dino_carried_in_wind
 func = "dll210_AE34"
 before_vram = 0x900F2D28
 text = '{ int dino_carried_in_wind(uint8_t*, uint32_t); if (dino_carried_in_wind(rdram, (uint32_t)ctx->r3)) { ctx->r2 = 0x4A; goto L_900F32B4; } }'
+
+# CloudRunner Fortress's baby CloudRunners (src/game/cloudrunner.cpp): CFCloudBaby's test for Kyte (dll373 0x2050) after
+# her export 24 answers, the same answer asked again by a found baby (0x0924), and its update (0x01A0) for the log.
+[[patches.hook]]
+func = "dll373_2050"
+before_vram = 0x901A7FEC
+text = '{ void dino_cloud_baby_found(uint8_t*, recomp_context*); dino_cloud_baby_found(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll373_01A0"
+before_vram = 0x901A6858
+text = '{ void dino_cloud_baby_follows(uint8_t*, recomp_context*); dino_cloud_baby_follows(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll373_01A0"
+before_vram = 0x901A60D4
+text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_baby_update(rdram, ctx); }'

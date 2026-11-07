@@ -219,12 +219,17 @@ target_sources(DinosaurPlanet PRIVATE
     ${CMAKE_SOURCE_DIR}/src/game/cartridge.cpp
     ${CMAKE_SOURCE_DIR}/src/game/widescreen.cpp
     ${CMAKE_SOURCE_DIR}/src/game/camera.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/swapstone_hollow.cpp
     ${CMAKE_SOURCE_DIR}/src/game/krazoa.cpp
     ${CMAKE_SOURCE_DIR}/src/game/drakor.cpp
     ${CMAKE_SOURCE_DIR}/src/game/dragon_rock.cpp
     ${CMAKE_SOURCE_DIR}/src/game/force_point.cpp
     ${CMAKE_SOURCE_DIR}/src/game/cloudrunner.cpp
     ${CMAKE_SOURCE_DIR}/src/game/cloudrunner_barrels.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/boss_trex.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/acts.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/moonseeds.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/walled_city.cpp
 )
 if (DINO_PATCHES)
     target_sources(DinosaurPlanet PRIVATE ${CMAKE_SOURCE_DIR}/src/main/register_patches.cpp)
@@ -317,7 +322,11 @@ if (WIN32)
             LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
     )
 
-    target_sources(DinosaurPlanet PRIVATE ${CMAKE_SOURCE_DIR}/icons/app.rc)
+    # The icon is a target of its own, so its .rc is compiled with none of the game's include directories: with ccache
+    # as the C launcher, CMake preprocesses an .rc through clang-cl with each of them, twice, past cmd's 8191
+    # characters in a checkout with a longer path.
+    add_library(DinosaurPlanetIcon OBJECT ${CMAKE_SOURCE_DIR}/icons/app.rc)
+    target_sources(DinosaurPlanet PRIVATE $<TARGET_OBJECTS:DinosaurPlanetIcon>)
     target_link_libraries(DinosaurPlanet PRIVATE SDL2 Winmm.lib Dbghelp.lib)
     add_compile_definitions(NOMINMAX)
 endif()

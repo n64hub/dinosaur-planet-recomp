@@ -41,6 +41,11 @@ player fixed, and the story's unfinished parts finished from what the game's own
 is an attempt, written by AI agents from the game's own code (the patches in `patches/` and the hooks in `us.toml`),
 and none has been played by a human, so report one that falls short.
 
+A fix that restores, adding or finishing what the prototype doesn't have (a warp entry filled, an object placed, a
+bit nothing set now set, a scene or win that never came), is behind a General setting, Restored by default, whose
+Original plays the prototype as the ROM has it there. A fix of a crash, or of a plain bug in what the prototype has,
+is always on: an Original that crashes is no use to anybody.
+
 Fixed:
 
 - Crashes in the game's own code: the Lunaimars of Moon Mountain Pass and Cape Claw's sand worm with no Kyte beside
@@ -55,13 +60,15 @@ Fixed:
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
   there it vanished without counting, so only nine of the ten for the Queen Earthwalker could be brought to her.
-- The Krazoa shrines (Krazoa Shrines on Finished): all eight finished, a way into the five that have none, and their
-  spirits taken to Warlock Mountain, and Walled City's shell game, which a player who stood still won as its answer
-  time ran out. Two of the fixes are always on: Cape Claw's test, which never ended, and Golden Plains' fly baddie,
+- The Krazoa shrines (Krazoa Shrines on Restored): all eight finished, a way into the five that have none, and their
+  spirits taken to Warlock Mountain, Cape Claw's test, which never ended, and Walled City's shell game, which a player
+  who stood still won as its answer time ran out. Two of the fixes are always on: the pad the player arrives on in
+  Moon Mountain Pass's shrine, which sent a player who stepped back on it nowhere, and Golden Plains' fly baddie,
   whose every shot made a second player who took the camera.
-- SwapStone Hollow: Tricky's run to his mother, the Queen Earthwalker, never started, and with no Tricky beside Sabre
-  it would have crashed. And the SwapStone could stop answering in its own corner of the hollow, and answer only
-  outside it, after a trip through the Swap Store or the SwapStone's warp.
+- SwapStone Hollow's Tricky's run to his mother, the Queen Earthwalker (Tricky's Run on Restored): it never started.
+  With no Tricky beside Sabre it would have crashed, which is fixed on either setting.
+- SwapStone Hollow's SwapStone could stop answering in its own corner of the hollow, and answer only outside it,
+  after a trip through the Swap Store or the SwapStone's warp.
 - Cape Claw's Krazoa tablets (Krazoa Tablets on Restored): the third tablet, which the prototype never placed, is
   found where the sand worm fell, and the tablet room's last puzzle, which led nowhere, opens a Transporter to Krazoa
   Palace.
@@ -81,6 +88,25 @@ Fixed:
   blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below and
   the way to the race couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
   turn it back for the way up.
+- CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
+  found the ones waiting for her, so they never came out to be rescued. Kyte now finds a baby once she is near it, and
+  it comes out for Krystal to rescue.
+- Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
+  ended, and could crash.
+- Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
+  so the city's slab door never opened.
+- BOSS TRex: the door behind Sabre shut the player out of the arena as its intro ended, standing on a floor switch never
+  charged it, so no laser wall fired and the TRex couldn't be hurt, after its first hit the TRex circled its corners in
+  place and never charged again, and a charge that ran on round a corner left it facing sideways, so its stunned head
+  could lie out of reach.
+- BOSS TRex's SpellStone (BOSS TRex on Restored): beating the TRex went back to the title with no SpellStone. The
+  third SpellStone is now carried out, through the arena's own way back to Walled City.
+- The third SpellStone (Third SpellStone on Restored): the Volcano Force Point loaded as on the first visit every
+  time, so the SpellStone carried back from BOSS TRex had no path to open and no place to go, and Walled City never
+  showed its Sun and Moon Stones. The force point now loads its second visit while the stone is carried and its third
+  once it is placed, and Walled City its second once the third spirit is released. And the moonseeds Krystal plants
+  in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives Sabre four, one for
+  each of the pass's receptacles.
 - CloudRunner Fortress's courtyard roof (Wind Bridge on Restored): its barrels stand west of the treasure shaft, and
   the shaft's wind, which holds an empty-handed player at the corridor's height, dropped one carrying a barrel to the
   bottom, so no barrel reached the courtyard and its roof, which three of them blow, kept Kyte shut in. The wind now
@@ -88,6 +114,11 @@ Fixed:
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
+- Walled City's way in (Walled City on Restored): the prototype never built the tasks its task list has here, so the
+  Queen EarthWalker was missing, the city's gate stood open, and the third SpellStone was active as soon as it was
+  won. Now the Queen waits in the corridor outside and gives Tricky his flame, which nothing else in the game can give,
+  Tricky's flame angers the RedEye by the gate, a RedEye that catches Sabre roars and drops a tooth, ten teeth in the
+  bowl by the arch open the gate, and the King EarthWalker activates the stone once Sabre brings it to him.
 
 Under way:
 
@@ -116,9 +147,12 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Mouse Sensitivity** (General): how far the mouse turns the camera, with left click B and right click Z. 0% is no
   mouse, as on a console, and leaves the pointer free.
 - **Invert Camera Y** (General): moving the mouse or the right stick up looks down.
-- **Krazoa Shrines** (General): Finished makes all eight Krazoa shrines reachable and playable, and gives each spirit
-  its release at Warlock Mountain, from what the prototype's own maps and code hold. Original is the prototype as it
-  was left: three shrines are reached from the world, and three spirits have nowhere to go.
+- **Tricky's Run** (General): Restored has Tricky run to his mother in SwapStone Hollow as the player comes near, the
+  run the Queen Earthwalker's clue asks the player to watch. Original is the prototype as it was left: he never runs.
+- **Krazoa Shrines** (General): Restored makes all eight Krazoa shrines reachable and playable, has Cape Claw's test
+  end once its baddie is beaten, and gives each spirit its release at Warlock Mountain, from what the prototype's own
+  maps and code hold. Original is the prototype as it was left: three shrines are reached from the world, Cape Claw's
+  test never ends, and three spirits have nowhere to go.
 - **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
   tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
   tablet is nowhere, and the puzzle's end leads nowhere.
@@ -132,12 +166,20 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Treasure Lift** (General): Restored has CloudRunner Fortress's wind lift past the blasted wall lower a player who
   steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
   the wind only ever blows up, and the caves can't be reached.
+- **Baby CloudRunners** (General): Restored has Kyte find CloudRunner Fortress's hidden baby CloudRunners once she
+  is near one, so it comes out to be rescued. Original is the prototype as it was left: the babies waiting for her
+  never come out.
 - **Wind Bridge** (General): Restored has the wind over CloudRunner Fortress's treasure shaft hold a player carrying a
   barrel, as it holds one empty-handed, so the barrels reach the courtyard and blow its roof. Original is the
   prototype as it was left: carrying one, she falls to the shaft's bottom, and the roof can't be blown.
 - **Krazoa Palace** (General): Restored places Krazoa Palace's doors, consoles, text blocks and red Krazoa, so its
   four wings are played in turn and the red Krazoa sends the player on to Drakor. Original is the prototype as it was
   left: the palace's rooms stand empty and lead nowhere.
+- **BOSS TRex** (General): Restored gives the third SpellStone once the TRex is beaten and opens the arena's way
+  back to Walled City. Original is the prototype as it was left: beating it goes back to the title with no stone.
+- **Walled City** (General): Restored has the Queen EarthWalker in the corridor outside Walled City, a RedEye there
+  to anger with Tricky's flame for ten teeth that open the city's gate, and the King EarthWalker activating the third
+  SpellStone. Original is the prototype as it was left: the gate stands open and the stone is active once won.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 

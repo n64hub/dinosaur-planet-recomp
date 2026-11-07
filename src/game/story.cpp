@@ -106,10 +106,10 @@ namespace {
     };
     const Bits to_first_shrine = to_swapstone_hollow + Bits {
         { 0xBF, 1 }, { 0x15A, 1 }, { 0x3A0, 1 }, { 0x88, 1 }, { 0x3B0, 1 }, { 0x2C5, 1 }, { 0x615, 1 }, { 0x2D, 1 },
-        { 0x1D7, 1 },
+        { 0x1D7, 1 }, { 0x40, 1 },
     };
     const Bits first_spirit = { { 0x316, 1 }, { 0x21F, 1 } };
-    const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x877, 1 } };
+    const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x4E9, 1 }, { 0x877, 1 } };
     const Bits second_spirit = { { 0x277, 1 }, { 0x21B, 1 } };
     const Bits third_spirit = { { 0x317, 1 }, { 0x21C, 1 } };
     const Bits fourth_spirit = { { 0x318, 1 }, { 0x21D, 1 } };
@@ -130,6 +130,9 @@ namespace {
     // Dragon Rock's DR_SupPortal (754) opens only to it.
     const Bits portal_spell = { { 0x5BD, 1 } };
     const Bits third_stone_carried = { { 0x83B, 1 } };
+    // Tricky's commands (his export 13, dll211 0x10D4, offers none without it): DarkIce Mines' boss (dll565) sets it as
+    // Sabre rescues him, and Northern Wastes' Tricky (dll497) as he joins.
+    const Bits tricky_commands = { { 0x4E4, 1 } };
     const Bits third_stone = { { 0x878, 1 } };
     // The fourth, which the Kamerian Dragon leaves with Kamerian Dragon on Restored (dragon_rock.cpp), is carried as
     // 0x7A8 to the Desert Force Point's other place (0x5F4).
@@ -144,6 +147,8 @@ namespace {
     // Golden Plains (map 9, grid cell (-6, 19)): its setuppoint 0, where the way from SwapStone Circle comes in. Its
     // pad's entry, 31, stands under the sand: a start there falls through the map and is put back, forever.
     constexpr Place golden_plains_place = { -940.2f, 116.3f, 15302.0f, 0 };
+    // Walled City (map 13): its setuppoint 0, where the way from SwapStone Hollow comes in, outside the city's gate.
+    constexpr Place walled_city_place = { -8634.0f, -733.0f, -4413.0f, 0 };
 
     const std::vector<StoryPoint> points = {
         { "new-game", krystal, no_place, {}, {} },
@@ -160,7 +165,8 @@ namespace {
         { "before-wg-shrine", krystal, 39, {}, four_spirits },
         { "before-cloudrunner", krystal, 73, {}, to_second_stone },
         { "before-desert-force-point", krystal, -1, golden_plains_place, to_second_stone + second_stone_carried },
-        { "before-walled-city", sabre, 91, {}, to_second_stone + second_stone + portal_spell },
+        { "before-walled-city", sabre, -1, walled_city_place,
+            to_second_stone + second_stone + portal_spell + tricky_commands },
         { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + portal_spell + third_stone_carried },
         { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
         { "after-dragon-rock", krystal, -1, golden_plains_place,
@@ -366,10 +372,12 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // --input's to and chase lines (src/main/main.cpp): the stick that walks the player toward (to_x, to_z), or with oid
 // other than -1 toward the nearest object of that id (its halfword at +0x46) that is drawn, as the player's code reads
 // the stick: up the way the camera looks at the player. An enemy beaten stays where it fell with its alpha (+0x36)
-// faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. 0 within reach. False with
+// faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. With sphere other than -1,
+// toward that hit sphere of the object instead: its model instance's (+0x7C, the one at +0xAD) spheres at +0x24, 16
+// bytes each with x, y and z at +4, from the world's origin. 0 within reach. False with
 // no player, no camera or no such object.
-bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x, float to_z, float reach, float* stick_x,
-    float* stick_y) {
+bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
+    float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
     *stick_y = 0.0f;
     float fx, fz;
@@ -403,6 +411,20 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x,
                 best = d;
                 to_x = ox;
                 to_z = oz;
+                gpr model = (gpr)MEM_W(0x7C, object);
+                gpr instance = model != 0 ? (gpr)MEM_W(4 * (int8_t)MEM_B(0xAD, object), model) : 0;
+                gpr spheres = instance != 0 ? (gpr)MEM_W(0x24, instance) : 0;
+                if (sphere >= 0 && spheres != 0) {
+                    uint32_t sx = MEM_W(16 * sphere + 4, spheres), sz = MEM_W(16 * sphere + 0xC, spheres);
+                    uint32_t ox_ = MEM_W(0, (gpr)(int32_t)0x80092A70), oz_ = MEM_W(0, (gpr)(int32_t)0x80092A74);
+                    float fsx, fsz, fox, foz;
+                    memcpy(&fsx, &sx, 4);
+                    memcpy(&fsz, &sz, 4);
+                    memcpy(&fox, &ox_, 4);
+                    memcpy(&foz, &oz_, 4);
+                    to_x = fsx + fox;
+                    to_z = fsz + foz;
+                }
             }
         }
         if (best < 0.0f) {
@@ -419,6 +441,44 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x,
     *stick_y = dx * fx + dz * fz;
     *stick_x = dz * fx - dx * fz;
     return true;
+}
+
+// --input's sync near lines (src/main/main.cpp): whether a drawn object of that id (as story_steer chases) stands
+// within reach of (x, z) on the ground.
+bool dino::story_object_near(uint8_t* rdram, int oid, float x, float z, float reach) {
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr object = MEM_W(i * 4, all);
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+            continue;
+        }
+        uint32_t wx = MEM_W(0x18, object), wz = MEM_W(0x20, object);
+        float ox, oz;
+        memcpy(&ox, &wx, 4);
+        memcpy(&oz, &wz, 4);
+        if ((ox - x) * (ox - x) + (oz - z) * (oz - z) <= reach * reach) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// --input's sync act lines: whether a drawn object of that id is in that act. dll18, the state machine the game's
+// characters run on, keeps the act in the object's state (obj+0xB8) at +0x26C, set by its export 4 as a state starts
+// one (and the act before it at +0x26E).
+bool dino::story_object_act(uint8_t* rdram, int oid, int act) {
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr object = MEM_W(i * 4, all);
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+            continue;
+        }
+        gpr state = (gpr)MEM_W(0xB8, object);
+        if (state != 0 && (int16_t)MEM_H(0x26C, state) == act) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // Once a second, what an unattended run needs to tell where the player is and whether the player lives.
@@ -445,4 +505,21 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     call(rdram, ctx, map_at);
     fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy,
         fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats), (int16_t)MEM_H(6, stats));
+    // DINO_REPORT_OBJECT=<object id hex>: where each drawn object of that id is too, for an enemy a script times by.
+    static const char* report_object = getenv("DINO_REPORT_OBJECT");
+    if (report_object == nullptr) {
+        return;
+    }
+    int oid = (int)strtol(report_object, nullptr, 16);
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr other = MEM_W(i * 4, all);
+        if (other == 0 || (int16_t)MEM_H(0x46, other) != oid || MEM_BU(0x36, other) == 0) {
+            continue;
+        }
+        uint32_t ox = MEM_W(0x18, other), oz = MEM_W(0x20, other);
+        memcpy(&fx, &ox, 4);
+        memcpy(&fz, &oz, 4);
+        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f\n", seconds, oid, fx, fz);
+    }
 }

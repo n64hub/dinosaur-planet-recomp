@@ -1,10 +1,11 @@
 // The Krazoa shrines: the eight tests that each give Krystal or Sabre a spirit, carried to Warlock Mountain (map 11) and
 // released there. The prototype has all eight shrines' maps and tests, but only Discovery Falls', Diamond Bay's and Moon
 // Mountain Pass's are reached from the world, and the spirits of three (Willow Grove's, Golden Plains' and Northern
-// Wastes') have no step at Warlock Mountain. With Krazoa Shrines on Finished (the default) this file finishes them out
-// of what the ROM already holds, and on Original it leaves them as the console plays them. Three fixes are always on:
-// Moon Mountain Pass's shrine Transporter sent the player to an empty warp entry (here), and in us.toml, Cape Claw's
-// test waited for a bit nothing sets (dll486) and Golden Plains' fly baddie shot second players (dll475).
+// Wastes') have no step at Warlock Mountain. With Krazoa Shrines on Restored (the default) this file finishes them out
+// of what the ROM already holds, and on Original it leaves them as the console plays them. Two fixes are always on,
+// since each is in a shrine the prototype reaches: Moon Mountain Pass's shrine Transporter, the pad the player arrives
+// on, sent the player to an empty warp entry, which has no map (here), and Golden Plains' fly baddie shot second
+// players (us.toml, dll475).
 //
 // How a spirit goes, read from the ROM (offsets are a DLL's text, `@` a placement in its map's object list):
 // - A shrine's win sets Warlock Mountain's act with dll29's export 16 (map 0xB): DF 2 (dll433 0xBC4), DB 3 (dll477
@@ -23,7 +24,7 @@
 // - The seqpoint's done bit is set the frame its sequence starts, and once set the seqpoint never plays again (dll611
 //   0xD8-0x144). MM's, EC's, CC's and WG's all name bit 0, so the first of them to play stopped the other three.
 //
-// What Finished changes:
+// What Restored changes:
 // - Ways in. ROM file 30's warp table has empty entries where the shrines' own Transporters send the player back: 65
 //   (NW), 67 (WG), 68 (EC), 70 (GP) and 71 (CC); WARP_ENTRY (func_8004D1D4) gets them filled. Golden Plains has its
 //   pad (map 9 @03F0, own entry 31) pointed at the empty entry 32: it goes to GP's shrine (42). The others get a
@@ -53,6 +54,8 @@
 //   0x21E and 0x220, which ROM file 55 has saved between the other released bits and nothing uses, and acts 8 and 9
 //   read them as released. Acts 6 and 7 read CC's and WG's released bits. The done bits of MM's, EC's, CC's
 //   and WG's seqpoints become their released bits.
+// - Cape Claw's test (dll486) waited for 0x5B2, a bit nothing sets, where its one SabreBaddie's kill bit is 0x1E7: it
+//   reads and resets 0x1E7 (us.toml).
 //
 // Cape Claw's Krazoa tablets: three are carried into the tablet room (map 29) and set in its receptacles, and its
 // puzzle then opens the way on. Krazoa Tablets is its own setting: on Restored (the default) the third tablet is found
@@ -111,9 +114,16 @@
 //   collision stays where it was placed whatever its animation, so an open one is put under the floor.
 // - The red Krazoa, once 0x6AA is set, sends a player who walks up to it to warp entry 44 (empty), filled at BOSS
 //   Drakor's setuppoint (map 44): nothing in the ROM leads to the fight (docs/story-points.md).
-// - The object loop (func_8004A800) frees an object placed by code once the player is out of its range unless its
-//   placement's flag 2 (+4) is set (0x8004A94C), and the palace's are made once, as it loads: a text block was freed
-//   while the player was in another wing and never made again (played). The palace's are placed with flag 2.
+//
+// Every object this file places (extras, below) is made once, as its map loads, and is in no map's object list, so
+// nothing makes it again until that map loads again. The object loop (func_8004A800) frees an object with no flag in
+// its placement (+4) once the camera is out of its range (func_8004B190 0x8004B40C-0x8004B478), the placement's +6
+// times 8 (func_80021450 0x800215B8) plus 40, and an extra's +6 is 0. Played with no flag: Warlock Mountain's release
+// seqpoints in acts 8 and 9 and Cape Claw's third tablet were freed within 2 s of being placed, the player 1500 away,
+// and a palace text block while the player was in another wing; the Transporters stayed. Each is placed with flag 1,
+// as the palace's own KP_Transporters are (@0644, @0668): the loop keeps it however far the player goes (0x8004B1D8)
+// and frees it with its map (func_8004AEFC), which is when this file places it again (played: none freed, in each of
+// their maps). Flag 2 takes it out of the loop altogether (0x8004A950), its map's unloading included.
 
 #include <algorithm>
 #include <cstdint>
@@ -132,12 +142,13 @@ namespace {
 
     enum class KrazoaShrines {
         Original,
-        Finished,
+        Restored,
         OptionCount
     };
+    // A value saved under a key not here, as the Finished that Restored was called, loads as the default, Restored.
     const std::vector<recomp::config::ConfigOptionEnumOption> krazoa_shrines_options = {
         { KrazoaShrines::Original, "Original" },
-        { KrazoaShrines::Finished, "Finished" },
+        { KrazoaShrines::Restored, "Restored" },
     };
 
     const std::string krazoa_tablets = "krazoa_tablets";
@@ -164,9 +175,9 @@ namespace {
         { KrazoaPalace::Restored, "Restored" },
     };
 
-    bool finished() {
+    bool shrines_restored() {
         return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(krazoa_shrines)) ==
-            (uint32_t)KrazoaShrines::Finished;
+            (uint32_t)KrazoaShrines::Restored;
     }
 
     bool tablets_restored() {
@@ -189,7 +200,7 @@ namespace {
     bool on(Setting setting) {
         switch (setting) {
             case Setting::Shrines:
-                return finished();
+                return shrines_restored();
             case Setting::Tablets:
                 return tablets_restored();
             default:
@@ -376,6 +387,7 @@ namespace {
         Setting setting;
         int needs;          // a bit it waits for while its map is loaded, or 0
         bool placed;
+        uint32_t setup;     // its placement while it stands, for DINO_LOG_KRAZOA
     };
 
     // Transporters: yaw 0, own entry, destination, then dll334's 0x1E radius and its show bit, as GP's pad.
@@ -442,7 +454,8 @@ namespace {
             0, Setting::Palace, 0, false },
     };
 
-    void place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
+    // Returns its placement.
+    gpr place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
         // dll214 reads +0x24 too (its create, 0x70), so its actors get the 0x28 bytes the ROM's have.
         int size = object == kp_red_krazoa ? 0x28 : 0x24;
         ctx->r4 = size;
@@ -450,9 +463,8 @@ namespace {
         call(rdram, ctx, new_placement);
         gpr p = ctx->r2;
         MEM_B(2, p) = size / 4;
-        // Flag 2 (+4): the object loop (func_8004A800, 0x8004A94C) never frees it as out of range. The palace's are made
-        // once as it loads, and the text blocks were freed while the player was in another wing, never to come back.
-        MEM_B(4, p) = map == palace ? 2 : 0;
+        // Flag 1 (+4): kept while its map is loaded, however far the player goes (the header says why).
+        MEM_B(4, p) = 1;
         memcpy(&MEM_W(0x8, p), &x, 4);
         memcpy(&MEM_W(0xC, p), &y, 4);
         memcpy(&MEM_W(0x10, p), &z, 4);
@@ -468,6 +480,22 @@ namespace {
         if (logging) {
             fprintf(stderr, "krazoa: placed object 0x%X in map %d at %.0f %.0f %.0f\n", object, map, x, y, z);
         }
+        return p;
+    }
+
+    constexpr int32_t objects = 0x800B1920;      // the objects that stand, an array
+    constexpr int32_t object_count = 0x800B1924;
+
+    // Whether an object of that id stands with that placement (+0x4C).
+    bool standing(uint8_t* rdram, int object, uint32_t setup) {
+        int32_t all = word(rdram, objects);
+        for (int32_t i = 0; all != 0 && i < word(rdram, object_count); i++) {
+            int32_t o = word(rdram, all + 4 * i);
+            if (o != 0 && (uint32_t)word(rdram, o + 0x4C) == setup && MEM_H(0x46, (gpr)o) == object) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -475,11 +503,12 @@ void dino::add_krazoa_options(recomp::config::Config& general) {
     general.add_enum_option(
         krazoa_shrines,
         "Krazoa Shrines",
-        "All eight Krazoa shrines can be reached and played, and each spirit is released at Warlock Mountain. "
-        "<b>Original is the prototype as it was left</b>: three shrines are reached from the world, and Willow Grove's, "
-        "Golden Plains' and Northern Wastes' spirits have nowhere to go.",
+        "<b>Restored</b>: all eight Krazoa shrines can be reached and played, Cape Claw's test ends once its baddie is "
+        "beaten, and each spirit is released at Warlock Mountain. <b>Original is the prototype as it was left</b>: three "
+        "shrines are reached from the world, Cape Claw's test never ends, and Willow Grove's, Golden Plains' and "
+        "Northern Wastes' spirits have nowhere to go.",
         krazoa_shrines_options,
-        KrazoaShrines::Finished
+        KrazoaShrines::Restored
     );
     general.add_enum_option(
         krazoa_tablets,
@@ -524,7 +553,7 @@ extern "C" void dino_krazoa_warp_entry(uint8_t* rdram, recomp_context* ctx) {
 // +0x20 the list) is at 0x800B96AC, and none of its objects is placed yet.
 extern "C" void dino_krazoa_map_loaded(uint8_t* rdram, recomp_context* ctx) {
     int map = (int32_t)ctx->r16;
-    bool on = finished();
+    bool on = shrines_restored();
     for (Extra& e : extras) {
         if (e.map == map) {
             e.placed = false;
@@ -557,7 +586,7 @@ extern "C" void dino_krazoa_map_loaded(uint8_t* rdram, recomp_context* ctx) {
 // us.toml's hook after func_80046BC8 places the loaded maps' objects (func_8004A800), each frame from the main loop
 // (func_80013D80): an Extra that needs a bit is placed the frame it is set.
 extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished() && !tablets_restored() && !palace_restored()) {
+    if (!shrines_restored() && !tablets_restored() && !palace_restored()) {
         return;
     }
     Calls calls(rdram, ctx);
@@ -585,21 +614,33 @@ extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
     for (Extra& e : extras) {
         if (word(rdram, map_structs + 4 * e.map) == 0) {
             e.placed = false;
+            e.setup = 0;
         }
         else if (!e.placed && on(e.setting) && (e.needs == 0 || get(rdram, ctx, e.needs))) {
             e.placed = true;
             if (e.act == 0 || warlock_act_now(rdram, ctx) == e.act) {
-                place(rdram, ctx, e.map, e.object, e.x, e.y, e.z, e.params);
+                e.setup = (uint32_t)place(rdram, ctx, e.map, e.object, e.x, e.y, e.z, e.params);
             }
         }
+        else if (logging && e.setup != 0 && !standing(rdram, e.object, e.setup)) {
+            fprintf(stderr, "krazoa: object 0x%X in map %d at %.0f %.0f %.0f was freed with its map loaded\n", e.object,
+                e.map, e.x, e.y, e.z);
+            e.setup = 0;
+        }
     }
+}
+
+// us.toml's hooks in Cape Claw's test (dll486) and Warlock Mountain's acts 6 and 7 (dll607), which read the bit they ask
+// for from this.
+extern "C" int dino_krazoa_shrines_restored(void) {
+    return shrines_restored();
 }
 
 // us.toml's hook in WL_LevelControl's update (dll607 0x298), which has read Warlock Mountain's act into $v0.
 extern "C" void dino_krazoa_warlock(uint8_t* rdram, recomp_context* ctx) {
     int act = (int32_t)ctx->r2;
     warlock_act = act;
-    if (!finished()) {
+    if (!shrines_restored()) {
         return;
     }
     Calls calls(rdram, ctx);
@@ -652,7 +693,7 @@ extern "C" void dino_krazoa_release_mask(uint8_t*, recomp_context* ctx) {
 // us.toml's hook at Willow Grove's state 3 (dll488 0x8FC), on GET_BIT(0x1D1)'s answer: with it set the shrine gives
 // nothing.
 extern "C" void dino_krazoa_wg_won(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished()) {
+    if (!shrines_restored()) {
         return;
     }
     int won;
@@ -665,7 +706,7 @@ extern "C" void dino_krazoa_wg_won(uint8_t* rdram, recomp_context* ctx) {
 
 // us.toml's hook at Willow Grove's state 4 (dll488 0xA18), its win, which sets no act.
 extern "C" void dino_krazoa_wg_win(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished()) {
+    if (!shrines_restored()) {
         return;
     }
     Calls calls(rdram, ctx);
@@ -678,7 +719,7 @@ extern "C" void dino_krazoa_wg_win(uint8_t* rdram, recomp_context* ctx) {
 // (1 right, 0 wrong, -1 none yet): with none and the answer time running out this frame (+0x14 less the frame's ticks,
 // as 0xF98 counts it), the pick is wrong.
 extern "C" void dino_krazoa_ec_answer(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished() || (int32_t)ctx->r3 != -1) {
+    if (!shrines_restored() || (int32_t)ctx->r3 != -1) {
         return;
     }
     int32_t ticks = MEM_BU(0, (gpr)word(rdram, (int32_t)ctx->r28 + 0x2C));
@@ -694,14 +735,14 @@ extern "C" void dino_krazoa_ec_answer(uint8_t* rdram, recomp_context* ctx) {
 // us.toml's hook at Walled City's state 6 (dll469 0x1054), which asks the player's export 0x9C whether it already
 // carries the spirit, with Diamond Bay's mask in a1.
 extern "C" void dino_krazoa_ec_carried(uint8_t*, recomp_context* ctx) {
-    if (finished()) {
+    if (shrines_restored()) {
         ctx->r5 = 8;
     }
 }
 
 // us.toml's hook at Golden Plains' state 4 (dll472 0xBB0), on GET_BIT(0x12A)'s answer, which MM's win set.
 extern "C" void dino_krazoa_gp_won(uint8_t* rdram, recomp_context* ctx) {
-    if (!finished()) {
+    if (!shrines_restored()) {
         return;
     }
     int won;
@@ -756,7 +797,7 @@ extern "C" void dino_krazoa_gp_event(uint8_t* rdram, recomp_context* ctx) {
     if (logging) {
         fprintf(stderr, "krazoa: Golden Plains' event %d in state %d\n", (int)ctx->r12 + 1, (int)MEM_BU(0x15, ctx->r16));
     }
-    if (!finished()) {
+    if (!shrines_restored()) {
         return;
     }
     if ((int32_t)ctx->r12 == 4 - 1 && MEM_BU(0x15, ctx->r16) == 5) {

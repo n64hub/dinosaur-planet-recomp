@@ -25,7 +25,12 @@ namespace dino {
     void story_start(uint8_t* rdram, recomp_context* ctx);
     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
     void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
-    bool story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x, float to_z, float reach, float* stick_x, float* stick_y);
+    bool story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
+        float* stick_x, float* stick_y);
+    // --input's sync near: whether a drawn object of that id is within reach of (x, z).
+    bool story_object_near(uint8_t* rdram, int oid, float x, float z, float reach);
+    // --input's sync act: whether a drawn object of that id is in that act of its state machine.
+    bool story_object_act(uint8_t* rdram, int oid, int act);
     // DINO_CHECK_HEAP (heap.cpp, development).
     void heap_check(uint8_t* rdram, double seconds);
 
@@ -38,6 +43,8 @@ namespace dino {
     void add_mouse_buttons(uint16_t* buttons);
     // Which way the camera looked at its last tick, on the ground (x, z), false before its first.
     bool camera_forward(float* x, float* z);
+    // SwapStone Hollow's Tricky's Run setting (swapstone_hollow.cpp).
+    void add_swapstone_hollow_options(recomp::config::Config& general);
     // The Krazoa shrines' and Cape Claw's Krazoa tablets' settings (krazoa.cpp).
     void add_krazoa_options(recomp::config::Config& general);
     // Drakor's fight's end setting (drakor.cpp).
@@ -51,6 +58,13 @@ namespace dino {
     // something.
     void add_cloudrunner_barrel_options(recomp::config::Config& general);
     bool player_carries(uint8_t* rdram, int32_t player);
+    // BOSS TRex's fight's setting (boss_trex.cpp).
+    void add_boss_trex_options(recomp::config::Config& general);
+    // The third SpellStone's setting (acts.cpp), and whether it is on Restored (moonseeds.cpp).
+    void add_third_stone_options(recomp::config::Config& general);
+    bool third_stone_restored();
+    // Walled City's restored tasks' setting (walled_city.cpp).
+    void add_walled_city_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }
