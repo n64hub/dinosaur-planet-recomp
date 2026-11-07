@@ -510,7 +510,8 @@ inventory with it selected, and A uses it on what is in reach (`--input` lines `
   level control's act 2 (779).
 - The volcano in act 3 (`--story before-third-stone,81 --bits 878,500=1024`, group 10 holding VFP_LevelControl):
   its act-3 timer (130, less the frame's time each frame, 0x69C) runs out 2 to 4 s in and sets 0x63C and 0x83C, and
-  Diamond Bay goes to act 3. That was two runs of three: in the other, nothing was set in 48 s, and why is not known.
+  Diamond Bay goes to act 3. That was three runs of four (4.2 s, on Third
+  SpellStone's Restored): in the other, nothing was set in 48 s, and why is not known.
 
 Not played from here: the second egg given to the Pointback's mother (talking to her plays her act-2 sequence, and
 a script's inventory stays on the SpellStone, above the egg), the log of task 84 (no ThornTail sells one, as for
