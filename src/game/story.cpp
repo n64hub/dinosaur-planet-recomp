@@ -385,7 +385,8 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // 65 * 32, and the throttle full, eased to 0.3 in a turn of more than 45 degrees, whose circle at full throttle is
 // wider than the bike bay's mouth, or toward a place of more than 15 within 300 units, where it would circle it for
 // good, and to 0.4 within 150 units of a place, so a turn there is made (toward an object it stays full: a ram needs
-// the speed). Backing off a wall moves the bike next to nothing, so a script's places lead around them.
+// the speed). Backing off a wall moves the bike next to nothing, so a script's places lead around them, and a bike
+// stalled for 2 s (at the foot of the rise into the bay, come to slowly) turns at full lock for 1.2 s and comes round.
 bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
     bool ride, float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
@@ -457,6 +458,27 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
         }
         else if (turn < -0x8000) {
             turn += 0x10000;
+        }
+        // Moved under 4 units in 2 s of riding: stalled. For 1.2 s it turns at full lock, each time the other way.
+        static double anchor_at = -1.0, last_at = -1.0, escape_until = -1.0;
+        static float anchor_x, anchor_z;
+        static float escape_side = 1.0f;
+        double now = dino_script_seconds();
+        if (now - last_at > 0.5 || std::abs(x - anchor_x) + std::abs(z - anchor_z) > 4.0f) {
+            anchor_at = now;
+            anchor_x = x;
+            anchor_z = z;
+        }
+        else if (now - anchor_at > 2.0 && now >= escape_until) {
+            escape_until = now + 1.2;
+            escape_side = -escape_side;
+            anchor_at = now;
+        }
+        last_at = now;
+        if (now < escape_until) {
+            *stick_x = escape_side;
+            *stick_y = 1.0f;
+            return true;
         }
         *stick_x = std::fmax(-1.0f, std::fmin(1.0f, -(float)turn / (65.0f * 32.0f)));
         *stick_y = std::abs(turn) > 0x2000 || (oid == -1 && distance < 300.0f && std::abs(turn) > 0xAAA) ? 0.3f :

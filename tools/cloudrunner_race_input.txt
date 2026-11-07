@@ -98,5 +98,53 @@ sync near 1F -13165 18760 75
 0 0 ride to -13416 18825 30
 sync near 1F -13416 18825 150
 0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
 sync 2e8
 0 0 0 0
