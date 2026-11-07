@@ -12,7 +12,11 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - `syms/`: the symbols N64Recomp reads, written from the ROM by `tools/gen_syms.py` (its header says how), never
   edited by hand: the main segment and each DLL as a section, libultra's functions named by n64sym's signatures or by
   hand (`MANUAL_NAMES`, `DLL_MANUAL_NAMES`, each with its evidence) and the rest `func_<address>` or
-  `dll<number>_<offset>`. A name worked out since goes into `syms/names.toml`, and keeps it.
+  `dll<number>_<offset>`. A name worked out since goes into `syms/names.toml`, and keeps it: a function's
+  (`[[func]]`, which renames it in `syms/`), and the names only the tools print, of addresses, exports, bits and the
+  fields of an object, its state and its placement (the file's header says which).
+- `tools/dino.py`: the game's code read in those names, in place of raw MIPS (its header says what each command
+  prints). Read a function with `dis`, and find who calls something or sets a bit with `calls`.
 - `us.toml`: N64Recomp's configuration, with the game's hooks and instruction patches; `tools/recompile.sh` writes
   `RecompiledFuncs/` with it, and the audio microcode with `aspMain.us.toml`.
 - `patches/` and `patches.toml`: MIPS C recompiled into PatchesLib, where a patch to the game's code goes
