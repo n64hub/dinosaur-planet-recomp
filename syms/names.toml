@@ -305,6 +305,51 @@ name = "kp_magic_done"
 bit = 0x912
 name = "transporter_tutorial"  # dll334 shows its first-use text while it is clear
 [[bit]]
+bit = 0x572
+name = "trex_round"  # BOSS TRex: dll702 sets it to its count of hits and fast laps; odd turns every floor switch off
+[[bit]]
+bit = 0x55A
+name = "trex_east_west_live"  # set as the fight starts (dll701); a switch that fires its wall swaps the pair (dll703)
+[[bit]]
+bit = 0x55B
+name = "trex_north_south_live"
+[[bit]]
+bit = 0x56A
+name = "trex_east_charge"  # a floor switch charges it while stood on (dll703), and the wall fires at 15
+[[bit]]
+bit = 0x56B
+name = "trex_west_charge"
+[[bit]]
+bit = 0x56C
+name = "trex_north_charge"
+[[bit]]
+bit = 0x56D
+name = "trex_south_charge"
+[[bit]]
+bit = 0x560
+name = "trex_east_fire"  # set for 120 frames as the wall fires (dll704)
+[[bit]]
+bit = 0x561
+name = "trex_west_fire"
+[[bit]]
+bit = 0x562
+name = "trex_north_fire"
+[[bit]]
+bit = 0x563
+name = "trex_south_fire"
+[[bit]]
+bit = 0x554
+name = "trex_stomp"  # dll702_12DC on a heavy step: KT_Fallingrocks (dll706) drops rocks round the player
+[[bit]]
+bit = 0x56E
+name = "trex_player_door"  # KT_RexDoorPlaye (dll307) opens on it
+[[bit]]
+bit = 0x81C
+name = "trex_way_back"  # the arena's WarpPoint (dll275) to warp 91
+[[bit]]
+bit = 0x83B
+name = "third_spellstone_carried"
+[[bit]]
 bit = 0x40
 name = "sharpclaw_disguise"  # the spell; CFPrisonGuard (dll375) lets Krystal by while it is cast
 [[bit]]

@@ -491,6 +491,67 @@ never has: the eels load hidden beside the fight. `--bits 3b7=1024,1eb,1eb@30` p
 first eel: the constructor clears 0x1EB and sets 0x22A, and 0x1EB set again at 30 s, the first eel beaten again, has
 the worm turn group 11 on with that eel hidden.
 
+## Walled City and BOSS TRex
+
+`--story before-walled-city` starts Sabre in Walled City's corridor (warp 91). From there to the third SpellStone, as
+played:
+
+- The beacons. Each of the two pressure switches (WCPressureSwitc, 781) arms its beacon (WCBeacon, 780) for about a
+  minute (0x7EF, 0x7F0), and any hit lights an armed one (0x7F9, 0x7FA). With both lit, WCLevelControl (779) plays
+  its sequence 0, which sets the slab door's locks 0x7F7 and 0x802 (779 0x12F8). The door leads down to the chamber
+  under the city (group 4). A switch that was stood on crashed the game, and no attack reached a beacon
+  (`patches/walled_city.c`).
+- The teeth. The two RedEye teeth (WCTrexTooth, a collectable, 272) lie in that chamber, at local (856,-1112,-4932)
+  and (1011,-1114,-4933), and A picks one up: 0x81E the sun's, 0x81D the moon's. Picking up any item hung the game
+  (us.toml, beside dll3_8900). Bats fly there and take A's target, and a sword swing steps the player out of a tooth's
+  pickup radius of 15, so the player stands on the tooth with no bat in front.
+- The statues. A WCInvUseObj (785) beside each statue takes its tooth: C-right, then A with the tooth chosen. It plays
+  the statue's sequence and sets 0x25A (sun) or 0x25B (moon).
+- The boss door (WCBossDoor, 307) opens a half on each of 0x25A and 0x25B. Sabre then walks down between the statues
+  to a plane, which sets 0x81B, and to the WarpPoint (275) it shows, which goes to warp 90, BOSS TRex (map 48). The
+  door's sequence would set 0x819 at its event 2 (307 0x5A4-0x5E4), but nothing on the way needs it.
+- BOSS TRex. The arena is a square ring of four corridors (east x -12703, west x -14177, north z -8222, south z -9697),
+  with a laser wall (KT_Lazerwall, 704) across the middle of each and two floor switches (KT_RexFloorSwit, 703) in each,
+  one either side of its wall. The TRex (KT_Rex, 702) has 4 health and runs the ring on a path. Two corridors are live,
+  east and west (0x55A) as the fight starts or north and south (0x55B), and the TRex pauses (its acts 5, then 4, in
+  dll18's state at +0x26C) and charges (act 1) when the player is ahead of it on its way round, often a corner or two
+  away. A player standing on a live switch charges its corridor's wall (0x56A-0x56D, a step each 10 frames to 15, about
+  2.7 s). At 15 the wall fires (0x560-0x563) for 120 frames (dll704 0x144-0x1F4), and the switch clears its charge and
+  swaps the live pair (dll703 0x5F0-0x6B0), so a wall fires once a round and the player times it: on the switch about 3
+  s into the pause's act 4, whose charge starts 5.6 s in, beyond the wall from the TRex. The TRex charging into the
+  firing wall is thrown back (act 6, 2.8 s) and then stunned (act 7) for 600 frames. A sword hit on its head (its hit
+  spheres 2 and 3, dll702 0x2010), which the stun lowers from about 330 up to the ground about 370 ahead of its feet,
+  then costs it one health and ends the stun at once. After the stun, hit or not, its act 8 stamps for about 10 s and
+  its contact reaches about 260 from its middle, a hit every 2.2 s that holds the player stunned, so a player swings at
+  the head and steps back. Its stomps (0x554) drop rocks round the player (KT_Fallingrocks, 706). The round (0x572)
+  counts on as the stun after a hit ends, and again at the end of the fast lap that follows, which turns the next
+  round's switches on at new places nearer the walls (dll324's curves, by 0x572), and the TRex turns round, sometimes
+  twice. In the last round the switches stand within the TRex's contact of the wall, so the wall has to fire before the
+  TRex reaches the player: on the switch 2.5 s into act 4. As played, the rounds' walls were the east, south, west and
+  south ones.
+
+  Four things stopped the fight. The door behind the player (KT_RexDoorPlaye, 307) shut it out of the arena as the
+  intro ended (us.toml, beside dll210_0934). A switch's collision mesh lies 28 off the pad drawn round it, so a player
+  standing on the pad never charged it, and no wall ever fired. After the first hit the TRex went round its corners in
+  place and never charged again. And a charge that ran on round a corner kept the TRex's facing, so it ran sideways,
+  its later corners swung it out of the ring, and a stun could leave its head beyond the corridor's outer wall
+  (`patches/boss_trex.c` has the last three, with their evidence). Once beaten, it loaded the front end and gave no
+  stone. With BOSS TRex on Restored it gives 0x83B and opens the player's door and the WarpPoint (0x81C) back to warp
+  91 (`patches/boss_trex.c`). The beaten TRex lies across its corridor, so a player beyond it from the south-east
+  corner, where the door is, goes back the other way round the ring. `DINO_REPORT_OBJECT=3D9` with `--report` reports
+  where the TRex is and its act, and `sync act 3D9 <act>` in an `--input` script waits for one.
+  `tools/boss_trex_input.txt` is the `--input` script that wins the fight and walks out to the WarpPoint, from
+  `--story before-walled-city,90` with `DINO_REPORT_OBJECT=3D9`; its comments say how each round is timed.
+
+The task list has more here than the ROM:
+
+- Tasks 76 and 77, the Queen and Tricky's mother: the Queen (WCQueenEarthWal, 773) has code, but no map places
+  her, and she reads and sets no bit.
+- Task 78, ten RedEye teeth: the chases (WCTrexChase, 777, and WCSabreChase, 778) are empty DLLs, placed nowhere.
+  The two RedEyes (WCTrex, 775) give no tooth, and the two teeth above are all the ROM holds.
+- Task 83, the King activating the stone: the King (WCKingEarthWalk, 774) talks once a load (0x7FB, sequence 2 of
+  seqobject 411bc) and sets nothing else, and nothing in Walled City or the arena sets 0x83B.
+
 ## The warp table
 
 ROM file 30 has 96 entries of 16 bytes, x, y, z and a layer, read by `func_8004D1D4` (`tools/dino.py warp` prints

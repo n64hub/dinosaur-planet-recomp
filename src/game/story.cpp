@@ -366,10 +366,12 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // --input's to and chase lines (src/main/main.cpp): the stick that walks the player toward (to_x, to_z), or with oid
 // other than -1 toward the nearest object of that id (its halfword at +0x46) that is drawn, as the player's code reads
 // the stick: up the way the camera looks at the player. An enemy beaten stays where it fell with its alpha (+0x36)
-// faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. 0 within reach. False with
+// faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. With sphere other than -1,
+// toward that hit sphere of the object instead: its model instance's (+0x7C, the one at +0xAD) spheres at +0x24, 16
+// bytes each with x, y and z at +4, from the world's origin. 0 within reach. False with
 // no player, no camera or no such object.
-bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x, float to_z, float reach, float* stick_x,
-    float* stick_y) {
+bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
+    float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
     *stick_y = 0.0f;
     float fx, fz;
@@ -403,6 +405,20 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x,
                 best = d;
                 to_x = ox;
                 to_z = oz;
+                gpr model = (gpr)MEM_W(0x7C, object);
+                gpr instance = model != 0 ? (gpr)MEM_W(4 * (int8_t)MEM_B(0xAD, object), model) : 0;
+                gpr spheres = instance != 0 ? (gpr)MEM_W(0x24, instance) : 0;
+                if (sphere >= 0 && spheres != 0) {
+                    uint32_t sx = MEM_W(16 * sphere + 4, spheres), sz = MEM_W(16 * sphere + 0xC, spheres);
+                    uint32_t ox_ = MEM_W(0, (gpr)(int32_t)0x80092A70), oz_ = MEM_W(0, (gpr)(int32_t)0x80092A74);
+                    float fsx, fsz, fox, foz;
+                    memcpy(&fsx, &sx, 4);
+                    memcpy(&fsz, &sz, 4);
+                    memcpy(&fox, &ox_, 4);
+                    memcpy(&foz, &oz_, 4);
+                    to_x = fsx + fox;
+                    to_z = fsz + foz;
+                }
             }
         }
         if (best < 0.0f) {
@@ -419,6 +435,44 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, float to_x,
     *stick_y = dx * fx + dz * fz;
     *stick_x = dz * fx - dx * fz;
     return true;
+}
+
+// --input's sync near lines (src/main/main.cpp): whether a drawn object of that id (as story_steer chases) stands
+// within reach of (x, z) on the ground.
+bool dino::story_object_near(uint8_t* rdram, int oid, float x, float z, float reach) {
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr object = MEM_W(i * 4, all);
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+            continue;
+        }
+        uint32_t wx = MEM_W(0x18, object), wz = MEM_W(0x20, object);
+        float ox, oz;
+        memcpy(&ox, &wx, 4);
+        memcpy(&oz, &wz, 4);
+        if ((ox - x) * (ox - x) + (oz - z) * (oz - z) <= reach * reach) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// --input's sync act lines: whether a drawn object of that id is in that act. dll18, the state machine the game's
+// characters run on, keeps the act in the object's state (obj+0xB8) at +0x26C, set by its export 4 as a state starts
+// one (and the act before it at +0x26E).
+bool dino::story_object_act(uint8_t* rdram, int oid, int act) {
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr object = MEM_W(i * 4, all);
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+            continue;
+        }
+        gpr state = (gpr)MEM_W(0xB8, object);
+        if (state != 0 && (int16_t)MEM_H(0x26C, state) == act) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // Once a second, what an unattended run needs to tell where the player is and whether the player lives.
@@ -445,4 +499,21 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     call(rdram, ctx, map_at);
     fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy,
         fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats), (int16_t)MEM_H(6, stats));
+    // DINO_REPORT_OBJECT=<object id hex>: where each drawn object of that id is too, for an enemy a script times by.
+    static const char* report_object = getenv("DINO_REPORT_OBJECT");
+    if (report_object == nullptr) {
+        return;
+    }
+    int oid = (int)strtol(report_object, nullptr, 16);
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr other = MEM_W(i * 4, all);
+        if (other == 0 || (int16_t)MEM_H(0x46, other) != oid || MEM_BU(0x36, other) == 0) {
+            continue;
+        }
+        uint32_t ox = MEM_W(0x18, other), oz = MEM_W(0x20, other);
+        memcpy(&fx, &ox, 4);
+        memcpy(&fz, &oz, 4);
+        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f\n", seconds, oid, fx, fz);
+    }
 }

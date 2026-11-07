@@ -84,6 +84,16 @@ Fixed:
 - CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
   found the ones waiting for her, so they never came out to be rescued. Kyte now finds a baby once she is near it, and
   it comes out for Krystal to rescue.
+- Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
+  ended, and could crash.
+- Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
+  so the city's slab door never opened.
+- BOSS TRex: the door behind Sabre shut the player out of the arena as its intro ended, standing on a floor switch never
+  charged it, so no laser wall fired and the TRex couldn't be hurt, after its first hit the TRex circled its corners in
+  place and never charged again, and a charge that ran on round a corner left it facing sideways, so its stunned head
+  could lie out of reach.
+- BOSS TRex's SpellStone (BOSS TRex on Restored): beating the TRex went back to the title with no SpellStone. The
+  third SpellStone is now carried out, through the arena's own way back to Walled City.
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
@@ -137,6 +147,8 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Krazoa Palace** (General): Restored places Krazoa Palace's doors, consoles, text blocks and red Krazoa, so its
   four wings are played in turn and the red Krazoa sends the player on to Drakor. Original is the prototype as it was
   left: the palace's rooms stand empty and lead nowhere.
+- **BOSS TRex** (General): Restored gives the third SpellStone once the TRex is beaten and opens the arena's way
+  back to Walled City. Original is the prototype as it was left: beating it goes back to the title with no stone.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 
