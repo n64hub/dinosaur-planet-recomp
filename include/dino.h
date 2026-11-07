@@ -39,6 +39,8 @@ namespace dino {
     void add_krazoa_options(recomp::config::Config& general);
     // Drakor's fight's end setting (drakor.cpp).
     void add_drakor_options(recomp::config::Config& general);
+    // The Kamerian Dragon's fight's end setting (dragon_rock.cpp).
+    void add_dragon_rock_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }

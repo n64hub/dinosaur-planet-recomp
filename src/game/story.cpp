@@ -121,8 +121,14 @@ namespace {
     const Bits to_second_stone = to_first_shrine + first_spirit + first_stone + second_spirit + circle_act_9;
     const Bits second_stone_carried = { { 0x49F, 1 }, { 0x2E8, 1 } };
     const Bits second_stone = { { 0x49F, 1 }, { 0x5F3, 1 } };
+    // Golden Plains' PortalSpell (dll272, map 9) gives the portal spell, 0x5BD, before the Desert Force Point (task 70);
+    // Dragon Rock's DR_SupPortal (754) opens only to it.
+    const Bits portal_spell = { { 0x5BD, 1 } };
     const Bits third_stone_carried = { { 0x83B, 1 } };
     const Bits third_stone = { { 0x878, 1 } };
+    // The fourth, which the Kamerian Dragon leaves with Kamerian Dragon on Restored (dragon_rock.cpp), is carried as
+    // 0x7A8 to the Desert Force Point's other place (0x5F4).
+    const Bits fourth_stone_carried = { { 0x7A8, 1 } };
 
     // BOSS Drakor (map 44) is in no way of the story's (docs/story-points.md, The story after the first SpellStone):
     // its setuppoint, at grid cell (7, 8).
@@ -146,10 +152,12 @@ namespace {
         { "before-wg-shrine", krystal, 39, {}, four_spirits },
         { "before-cloudrunner", krystal, 73, {}, to_second_stone },
         { "before-desert-force-point", krystal, 31, {}, to_second_stone + second_stone_carried },
-        { "before-walled-city", sabre, 91, {}, to_second_stone + second_stone },
-        { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + third_stone_carried },
-        { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + third_stone },
-        { "before-drakor", krystal, -1, drakor_place, four_spirits + second_stone + third_stone },
+        { "before-walled-city", sabre, 91, {}, to_second_stone + second_stone + portal_spell },
+        { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + portal_spell + third_stone_carried },
+        { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
+        { "after-dragon-rock", krystal, 31, {},
+            four_spirits + second_stone + portal_spell + third_stone + fourth_stone_carried },
+        { "before-drakor", krystal, -1, drakor_place, four_spirits + second_stone + portal_spell + third_stone },
     };
 
     const StoryPoint* chosen = &points[0];
