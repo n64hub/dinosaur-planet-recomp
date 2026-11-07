@@ -946,3 +946,16 @@ text = '{ void dino_cloud_baby_follows(uint8_t*, recomp_context*); dino_cloud_ba
 func = "dll373_01A0"
 before_vram = 0x901A60D4
 text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_baby_update(rdram, ctx); }'
+
+# CloudRunner Fortress's snow race (src/game/cloudrunner_race.cpp, whose header has the evidence): CRCloudRace's race
+# as it sees the SpellStone taken (dll729 0x0380), and CRSnowClaw's count of the rams it takes (dll728 0x0440) for
+# the log.
+[[patches.hook]]
+func = "dll729_0308"
+before_vram = 0x902A6B1C
+text = '{ void dino_cloud_race_won(uint8_t*, recomp_context*); dino_cloud_race_won(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll728_03CC"
+before_vram = 0x902A5B3C
+text = '{ void dino_snow_claw_rammed(uint8_t*, recomp_context*); dino_snow_claw_rammed(rdram, ctx); }'
