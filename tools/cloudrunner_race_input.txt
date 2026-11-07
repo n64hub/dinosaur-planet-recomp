@@ -1,0 +1,102 @@
+# CloudRunner's race won, from --story before-cloudrunner --place -13460,1262,18866,-2,0 --bits 4a3=7,4a0,4ba (beside
+# CRSnowBike). A mounts the bike (0x49D), pressed each second until it does, since a busy host boots late. The start
+# then launches it west out of the bay's mouth and north; the way back in is the launch's own line east along z 18940,
+# around the pillar to its north and the bank's face to its south, then over a lip that wants full throttle. Then
+# rams on CRSnowClaw (389), each followed by a turn back past the SpellStone's place, until the fifth drops the stone
+# and the pass over it picks it up (0x2E8); then the player stands still for the stone's scene, 0x49A and sequence
+# 0x18, which ends with 0x49F. `ride` lines steer the bike (main.cpp's --input, story.cpp's story_steer).
+0 0 0 0
+5 8000 0 0
+5.3 0 0 0
+6 8000 0 0
+6.3 0 0 0
+7 8000 0 0
+7.3 0 0 0
+8 8000 0 0
+8.3 0 0 0
+9 8000 0 0
+9.3 0 0 0
+10 8000 0 0
+10.3 0 0 0
+11 8000 0 0
+11.3 0 0 0
+12 8000 0 0
+12.3 0 0 0
+13 8000 0 0
+13.3 0 0 0
+14 8000 0 0
+14.3 0 0 0
+15 8000 0 0
+15.3 0 0 0
+16 8000 0 0
+16.3 0 0 0
+17 8000 0 0
+17.3 0 0 0
+18 8000 0 0
+18.3 0 0 0
+19 8000 0 0
+19.3 0 0 0
+20 8000 0 0
+20.3 0 0 0
+21 8000 0 0
+21.3 0 0 0
+22 8000 0 0
+22.3 0 0 0
+23 8000 0 0
+23.3 0 0 0
+24 8000 0 0
+24.3 0 0 0
+25 8000 0 0
+25.3 0 0 0
+26 8000 0 0
+26.3 0 0 0
+27 8000 0 0
+27.3 0 0 0
+28 8000 0 0
+28.3 0 0 0
+29 8000 0 0
+29.3 0 0 0
+30 8000 0 0
+30.3 0 0 0
+sync 49d
+8 0 ride to -13760 19060 40
+sync near 1F -13760 19060 60
+0 0 ride to -13770 18945 30
+sync near 1F -13770 18945 45
+0 0 ride to -13300 18930 80
+sync near 1F -13300 18930 100
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 ride to -13416 18825 30
+sync near 1F -13416 18825 150
+0 0 ride 389
+sync 2e8
+0 0 0 0
