@@ -1,0 +1,29 @@
+101 cells 60 walls
+ -6960            ###### 
+ -6912           #jjjjjj#
+ -6864           #jjjjjj#
+ -6816  #     ####jjjjjj#
+ -6768 #jjjjjjjjjjjjjjjj#
+ -6720 #jjjjjjjjjjjjjjjj#
+ -6672 #jj#jjj####jjjjjj#
+ -6624 #jj####    ###### 
+ -6576 #iii7#            
+ -6528 #hh##             
+ -6480 #hg               
+ -6432 #gg               
+ -6384 #ff               
+ -6336 #ff               
+ -6288 #ff               
+ -6240 #ff               
+ -6192 #ff               
+ -6144 #ff               
+ -6096 #ff               
+ -6048 #ee               
+ -6000 #ee               
+ -5952 #dd               
+ -5904 #dd               
+ -5856 #cc               
+ -5808 #cc               
+ -5760 #cc               
+ -5712  #                
+x from -1920.0 to -1104.0  y code: char*25-2000
