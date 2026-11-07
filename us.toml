@@ -625,7 +625,8 @@ text = '{ void dino_trex_facing(uint8_t*, recomp_context*); recomp_context c = *
 
 # With BOSS TRex on Restored (src/game/boss_trex.cpp):
 # The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
-# and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call.
+# and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call. With
+# Walled City on Restored (src/game/walled_city.cpp) the stone is then won, for the King to activate.
 [[patches.instruction]]
 func = "dll702_2D98"
 vram = 0x9028874C
@@ -634,7 +635,16 @@ value = 0x00000000
 [[patches.hook]]
 func = "dll702_2D98"
 before_vram = 0x90288754
-text = '{ int dino_trex_restored(void); void dino_trex_beaten(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_beaten(rdram, &c); } else { func_80013FB4(rdram, ctx); } }'
+text = '{ int dino_trex_restored(void); void dino_trex_beaten(uint8_t*, recomp_context*); void dino_walled_city_trex_beaten(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_beaten(rdram, &c); dino_walled_city_trex_beaten(rdram, ctx); } else { func_80013FB4(rdram, ctx); } }'
+
+# Walled City on Restored (src/game/walled_city.cpp): Tricky's flame (command 4, dll211 0x8B0) goes on with a target
+# whose object id it knows (dll211 0x8D4-0x914: the vines, the ice walls, the log fires and the like) and resets him to
+# following for any other, so the RedEye by the gate (WCTrexChase, #506) is taken as the vines (#194) are, a target
+# with nothing of its own to call when burnt. $v1 holds the target's id.
+[[patches.hook]]
+func = "dll211_03FC"
+before_vram = 0x901080A4
+text = '{ int dino_walled_city_flame_target(int); ctx->r3 = (gpr)(int32_t)dino_walled_city_flame_target((int)(int16_t)ctx->r3); }'
 
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),
@@ -766,7 +776,7 @@ text = '{ void dino_diamond_bay_flame_switch(uint8_t*, recomp_context*); dino_di
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
-text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); }'
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); void dino_walled_city_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); dino_walled_city_frame(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
 # whether their spirit is released by 0x366, a bit nothing sets: on Restored they ask CC's (0x221) and WG's (0x222)
@@ -949,6 +959,25 @@ text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_poin
 func = "dll370_00F8"
 before_vram = 0x901A3930
 text = '{ void dino_treasure_lift_starts(uint8_t*, recomp_context*); dino_treasure_lift_starts(rdram, ctx); }'
+
+# CloudRunner Fortress's wind bridge (src/game/cloudrunner_barrels.cpp, whose header has the evidence): the player's
+# walking states' carry paths, which skip dll210_BA38's check of the wind's push, go to the wind's ride (state 0x49,
+# returned as 0x4A) while she carries something still held and the wind pushes her. State 1 (dll210_A3FC) at the carry
+# branch's target ($t0 her state), state 3 (AA80) the same ($t9), state 4 (AE34) at its carry test ($v1).
+[[patches.hook]]
+func = "dll210_A3FC"
+before_vram = 0x900F2328
+text = '{ int dino_carried_in_wind(uint8_t*, uint32_t); if (dino_carried_in_wind(rdram, (uint32_t)ctx->r8)) { ctx->r2 = 0x4A; goto L_900F26B8; } }'
+
+[[patches.hook]]
+func = "dll210_AA80"
+before_vram = 0x900F295C
+text = '{ int dino_carried_in_wind(uint8_t*, uint32_t); if (dino_carried_in_wind(rdram, (uint32_t)ctx->r25)) { ctx->r2 = 0x4A; goto L_900F2C20; } }'
+
+[[patches.hook]]
+func = "dll210_AE34"
+before_vram = 0x900F2D28
+text = '{ int dino_carried_in_wind(uint8_t*, uint32_t); if (dino_carried_in_wind(rdram, (uint32_t)ctx->r3)) { ctx->r2 = 0x4A; goto L_900F32B4; } }'
 
 # CloudRunner Fortress's baby CloudRunners (src/game/cloudrunner.cpp): CFCloudBaby's test for Kyte (dll373 0x2050) after
 # her export 24 answers, the same answer asked again by a found baby (0x0924), and its update (0x01A0) for the log.

@@ -28,8 +28,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
   Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the Kamerian Dragon's end
   (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), CloudRunner Fortress's treasure lift
-  and baby CloudRunners (`src/game/cloudrunner.cpp`), BOSS TRex's setting (`src/game/boss_trex.cpp`), the settings,
-  and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
+  and baby CloudRunners (`src/game/cloudrunner.cpp`), wind bridge (`src/game/cloudrunner_barrels.cpp`), BOSS
+  TRex's setting (`src/game/boss_trex.cpp`), Walled City's way in and its King (`src/game/walled_city.cpp`), the
+  settings, and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
@@ -129,6 +130,15 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   goes to the title as the prototype did. The fixes that let the fight be won at all (the floor switches' pads, the
   TRex's corners and facing, the door behind the player) are always on (`patches/boss_trex.c` and us.toml beside them
   have the evidence, docs/story-points.md how the fight plays).
+- **Walled City.** The task list has the Queen EarthWalker, a RedEye chase for ten teeth that open the city's gate
+  and the King activating the third SpellStone, and the ROM built none of it: the Queen and the chase have defs and
+  stand nowhere, the gate is open and the stone is active once won. The General tab's Walled City setting, Restored
+  by default, places them, gives Tricky his flame from the Queen and has the King activate the stone (0x82E to
+  0x83B), and Original leaves the city as the prototype did (`src/game/walled_city.cpp`'s header has the evidence).
+- **CloudRunner Fortress's courtyard roof.** The roof (CFBlastedRoof) blows at the third barrel blown under it, and
+  the barrels stand west of the treasure shaft, whose wind drops a player carrying one: the walking states skip the
+  check that puts her on the wind while she carries. The General tab's Wind Bridge setting, Restored by default, puts
+  her on it, and Original leaves it as it was (`src/game/cloudrunner_barrels.cpp`'s header has the evidence).
 - **Krazoa Palace.** Map 3's rooms are built, but of its objects only two Transporters are placed: the wings' doors,
   consoles and text blocks, the last door and the red Krazoa have defs and stand nowhere, and nothing leads on to
   Drakor (map 44). The General tab's Krazoa Palace setting, Restored by default, places them, chains the four wings
@@ -155,7 +165,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   back and each event of Golden Plains' shrine,
   `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves,
   `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
-  `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on, `DINO_LOG_EFFECTS=1`
+  `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on,
+  `DINO_LOG_WALLED_CITY=1` each object `src/game/walled_city.cpp` places and each step of the chase, the gate and the
+  stone, `DINO_LOG_EFFECTS=1`
   each effect drawn after its object was freed,
   `DINO_DRAGON_HEALTH=<n>` starts its fight with n health, and `DINO_CHECK_HEAP=1` each block of the game's heaps
   written past its end, with the tag of what asked for it (`src/game/heap.cpp`).

@@ -56,11 +56,17 @@ namespace dino {
     void add_force_point_options(recomp::config::Config& general);
     // CloudRunner Fortress's treasure lift setting (cloudrunner.cpp).
     void add_cloudrunner_options(recomp::config::Config& general);
+    // CloudRunner Fortress's wind bridge setting (cloudrunner_barrels.cpp), and whether the player object carries
+    // something.
+    void add_cloudrunner_barrel_options(recomp::config::Config& general);
+    bool player_carries(uint8_t* rdram, int32_t player);
     // BOSS TRex's fight's setting (boss_trex.cpp).
     void add_boss_trex_options(recomp::config::Config& general);
     // The third SpellStone's setting (acts.cpp), and whether it is on Restored (moonseeds.cpp).
     void add_third_stone_options(recomp::config::Config& general);
     bool third_stone_restored();
+    // Walled City's restored tasks' setting (walled_city.cpp).
+    void add_walled_city_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }

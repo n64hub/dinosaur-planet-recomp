@@ -107,9 +107,18 @@ Fixed:
   once it is placed, and Walled City its second once the third spirit is released. And the moonseeds Krystal plants
   in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives Sabre four, one for
   each of the pass's receptacles.
+- CloudRunner Fortress's courtyard roof (Wind Bridge on Restored): its barrels stand west of the treasure shaft, and
+  the shaft's wind, which holds an empty-handed player at the corridor's height, dropped one carrying a barrel to the
+  bottom, so no barrel reached the courtyard and its roof, which three of them blow, kept Kyte shut in. The wind now
+  holds a player carrying a barrel too, and with Treasure Lift on Restored it lowers only an empty-handed one.
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
+- Walled City's way in (Walled City on Restored): the prototype never built the tasks its task list has here, so the
+  Queen EarthWalker was missing, the city's gate stood open, and the third SpellStone was active as soon as it was
+  won. Now the Queen waits in the corridor outside and gives Tricky his flame, which nothing else in the game can give,
+  Tricky's flame angers the RedEye by the gate, a RedEye that catches Sabre roars and drops a tooth, ten teeth in the
+  bowl by the arch open the gate, and the King EarthWalker activates the stone once Sabre brings it to him.
 
 Under way:
 
@@ -160,11 +169,17 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Baby CloudRunners** (General): Restored has Kyte find CloudRunner Fortress's hidden baby CloudRunners once she
   is near one, so it comes out to be rescued. Original is the prototype as it was left: the babies waiting for her
   never come out.
+- **Wind Bridge** (General): Restored has the wind over CloudRunner Fortress's treasure shaft hold a player carrying a
+  barrel, as it holds one empty-handed, so the barrels reach the courtyard and blow its roof. Original is the
+  prototype as it was left: carrying one, she falls to the shaft's bottom, and the roof can't be blown.
 - **Krazoa Palace** (General): Restored places Krazoa Palace's doors, consoles, text blocks and red Krazoa, so its
   four wings are played in turn and the red Krazoa sends the player on to Drakor. Original is the prototype as it was
   left: the palace's rooms stand empty and lead nowhere.
 - **BOSS TRex** (General): Restored gives the third SpellStone once the TRex is beaten and opens the arena's way
   back to Walled City. Original is the prototype as it was left: beating it goes back to the title with no stone.
+- **Walled City** (General): Restored has the Queen EarthWalker in the corridor outside Walled City, a RedEye there
+  to anger with Tricky's flame for ten teeth that open the city's gate, and the King EarthWalker activating the third
+  SpellStone. Original is the prototype as it was left: the gate stands open and the stone is active once won.
 - **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
   own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
 
