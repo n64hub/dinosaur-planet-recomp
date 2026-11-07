@@ -23,6 +23,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -49,6 +50,18 @@ namespace {
         return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(treasure_lift)) ==
             (uint32_t)TreasureLift::Restored;
     }
+
+    const std::string cloud_babies = "cloud_babies";
+
+    bool babies_restored() {
+        return std::get<uint32_t>(recompui::config::get_general_config().get_option_value(cloud_babies)) ==
+            (uint32_t)TreasureLift::Restored;
+    }
+
+    const bool logging = std::getenv("DINO_LOG_CLOUDRUNNER") != nullptr;
+    constexpr int32_t player_object = 0x80023914;
+    constexpr int32_t sidekick_object = 0x8002394C;
+    constexpr float kyte_finds = 150.0f;
 
     constexpr int32_t set_bit = 0x80014670;
     constexpr int wind_on = 0x30D;
@@ -89,6 +102,14 @@ void dino::add_cloudrunner_options(recomp::config::Config& general) {
         treasure_lift_options,
         TreasureLift::Restored
     );
+    general.add_enum_option(
+        cloud_babies,
+        "Baby CloudRunners",
+        "In CloudRunner Fortress the baby CloudRunners Kyte's mother hid come out to be rescued once Kyte finds them. "
+        "<b>Original is the prototype as it was left</b>: four of the five never come out.",
+        treasure_lift_options,
+        TreasureLift::Restored
+    );
 }
 
 // us.toml's hook in CFTreasWindLift's update (dll370 0x0484) as its wind starts: $s3 its state (+0x4 the on-bit, +0x8
@@ -107,4 +128,91 @@ extern "C" void dino_treasure_lift_starts(uint8_t* rdram, recomp_context* ctx) {
     ctx->r4 = wind_down;
     ctx->r5 = 1;
     call(rdram, ctx, set_bit);
+}
+
+// us.toml's hooks in CFCloudBaby's test for Kyte (dll373 0x2050), which brings a hidden baby out to be rescued when the
+// sidekick's export 24 answers yes. The first, as the sidekick is looked up ($v0, 0 with none out), only logs; the
+// second, after export 24 answered ($v0), answers yes on Restored when Kyte is within reach of the baby ($sp+0x20).
+extern "C" void dino_cloud_baby_sidekick(uint8_t* rdram, recomp_context* ctx) {
+    if (logging && ctx->r2 == 0) {
+        gpr baby = MEM_W(0x20, ctx->r29);
+        fprintf(stderr, "cloudrunner: baby %08X state %d: no sidekick out\n", (uint32_t)baby,
+            (int32_t)MEM_W(0xAC, MEM_W(0xB8, baby)));
+    }
+}
+
+// us.toml's hook at CFCloudBaby's update (dll373 0x01A0, $a0 the baby), with DINO_LOG_CLOUDRUNNER: each baby's state as it
+// changes, with how far Krystal and Kyte are.
+extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
+    if (!logging) {
+        return;
+    }
+    static gpr babies[8];
+    static int32_t states[8];
+    gpr baby = ctx->r4;
+    int32_t state = (int32_t)MEM_W(0xAC, MEM_W(0xB8, baby));
+    int i = 0;
+    while (i < 8 && babies[i] != 0 && babies[i] != baby) {
+        i++;
+    }
+    if (i == 8) {
+        return;
+    }
+    gpr player, kyte;
+    {
+        Calls calls(ctx);
+        call(rdram, ctx, player_object);
+        player = ctx->r2;
+        call(rdram, ctx, sidekick_object);
+        kyte = ctx->r2;
+    }
+    auto away = [&](gpr o) {
+        if (o == 0) {
+            return -1.0f;
+        }
+        float dx = read_float(rdram, o + 0x18) - read_float(rdram, baby + 0x18);
+        float dy = read_float(rdram, o + 0x1C) - read_float(rdram, baby + 0x1C);
+        float dz = read_float(rdram, o + 0x20) - read_float(rdram, baby + 0x20);
+        return sqrtf(dx * dx + dy * dy + dz * dz);
+    };
+    // The state, and Kyte's distance in steps of 100 while Krystal is within 600.
+    int32_t seen = state * 100 + (away(player) < 600.0f ? (int32_t)(away(kyte) / 100.0f) : 99);
+    if (babies[i] == baby && states[i] == seen) {
+        return;
+    }
+    babies[i] = baby;
+    states[i] = seen;
+    fprintf(stderr, "cloudrunner: baby %08X at %.0f %.0f %.0f state %d, Krystal %.0f away, Kyte %.0f\n", (uint32_t)baby,
+        read_float(rdram, baby + 0x18), read_float(rdram, baby + 0x1C), read_float(rdram, baby + 0x20), state,
+        away(player), away(kyte));
+}
+
+extern "C" void dino_cloud_baby_found(uint8_t* rdram, recomp_context* ctx) {
+    gpr baby = MEM_W(0x20, ctx->r29);
+    gpr answer = ctx->r2;
+    gpr kyte;
+    {
+        Calls calls(ctx);
+        call(rdram, ctx, sidekick_object);
+        kyte = ctx->r2;
+    }
+    float d = -1.0f;
+    if (kyte != 0) {
+        float dx = read_float(rdram, kyte + 0x18) - read_float(rdram, baby + 0x18);
+        float dy = read_float(rdram, kyte + 0x1C) - read_float(rdram, baby + 0x1C);
+        float dz = read_float(rdram, kyte + 0x20) - read_float(rdram, baby + 0x20);
+        d = sqrtf(dx * dx + dy * dy + dz * dz);
+    }
+    // A baby rescued (its bit set as it loads) is hidden, +0x6's 0x4000, and its states still run: never find it again.
+    bool hidden = (MEM_H(0x6, baby) & 0x4000) != 0;
+    bool found = answer == 0 && babies_restored() && kyte != 0 && !hidden && d < kyte_finds;
+    if (logging && found) {
+        fprintf(stderr, "cloudrunner: baby %08X at %.0f %.0f %.0f state %d, Kyte %.0f away, export 24 %d%s\n",
+            (uint32_t)baby, read_float(rdram, baby + 0x18), read_float(rdram, baby + 0x1C),
+            read_float(rdram, baby + 0x20), (int32_t)MEM_W(0xAC, MEM_W(0xB8, baby)), d, (int)answer,
+            found ? ", found" : "");
+    }
+    if (found) {
+        ctx->r2 = 1;
+    }
 }

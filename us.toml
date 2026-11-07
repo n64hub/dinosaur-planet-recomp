@@ -831,3 +831,20 @@ text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_poin
 func = "dll370_00F8"
 before_vram = 0x901A3930
 text = '{ void dino_treasure_lift_starts(uint8_t*, recomp_context*); dino_treasure_lift_starts(rdram, ctx); }'
+
+# CloudRunner Fortress's baby CloudRunners (src/game/cloudrunner.cpp): CFCloudBaby's test for Kyte (dll373 0x2050), as
+# the sidekick is looked up and after its export 24 answers.
+[[patches.hook]]
+func = "dll373_2050"
+before_vram = 0x901A7FC0
+text = '{ void dino_cloud_baby_sidekick(uint8_t*, recomp_context*); dino_cloud_baby_sidekick(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll373_2050"
+before_vram = 0x901A7FEC
+text = '{ void dino_cloud_baby_found(uint8_t*, recomp_context*); dino_cloud_baby_found(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll373_01A0"
+before_vram = 0x901A60D4
+text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_baby_update(rdram, ctx); }'
