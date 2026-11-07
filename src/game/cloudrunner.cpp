@@ -3,7 +3,8 @@
 // shaft's wind lift, CFTreasWindLift, only ever starts the way up for a player who comes from the top: she hovers at
 // the corridor's height and no button lets her down (docs/story-points.md, CloudRunner Fortress). With Treasure Lift on
 // Restored (the default) a player who steps into it from the top is lowered to the bottom; on Original it plays as the
-// console does.
+// console does. And its baby CloudRunners, whom Kyte never finds: with Baby CloudRunners on Restored (the default) she
+// finds them, and on Original they stay hidden as in the prototype.
 //
 // The lift, read from the ROM (offsets are a DLL's text; map 12's placement at 0x51A4, at (-12902, 1840, 18886)):
 // - CFTreasWindLift (dll370) runs while its on-bit, the placement's +0x1E (0x30D), is set, and blows the way its
@@ -20,6 +21,18 @@
 // What Restored changes: when the wind starts with the player at the top (more than 150 above the lift's base), 0x8C8
 // is set, so the lift lowers her and lets her go at the bottom. Either lever there turns it back to up for the way
 // back, as the ROM has it, and a player who steps in at the bottom rides up to the top and steps off on either side.
+//
+// The baby CloudRunners (setting Baby CloudRunners), read from the ROM:
+// - CFCloudBaby (dll373) keeps its state at its state's +0xAC, from its placement's +0x1C (or +0x20 once the bit at
+//   +0x1E is set). Its rescue bit is the placement's +0x22 (0x24F-0x253): set, it loads hidden (+0x6's 0x4000).
+// - Waiting to be found (states 0, 1 and 4) it asks Kyte, the sidekick (0x8002394C), every frame (0x2050): her export
+//   24, her state's +0x1C8 & 0x200000. Yes brings it out to face her (state 5), and Krystal rescues it by pressing A
+//   within its +0x1A (0x07A0): 0x901 counts it, its bit is set, and it flies to its golden perch (0x2FC-0x300). Nothing
+//   in the ROM sets that flag of Kyte's, so no baby waiting to be found ever comes out.
+// - A found baby asks again each frame (0x0924): no and it flies home and back to the state it had.
+//
+// What Restored changes: both asks answer yes while Kyte is within 400 of the baby and it isn't a rescued one. 400 is
+// Kyte flying beside Krystal on the floor below the baby on a ledge (29FA, 300 below and beside).
 
 #include <cstdint>
 #include <cstdio>
@@ -137,9 +150,8 @@ extern "C" void dino_treasure_lift_starts(uint8_t* rdram, recomp_context* ctx) {
     call(rdram, ctx, set_bit);
 }
 
-
-// us.toml's hook at CFCloudBaby's update (dll373 0x01A0, $a0 the baby), with DINO_LOG_CLOUDRUNNER: each baby's state as it
-// changes, with how far Krystal and Kyte are in steps of 100.
+// us.toml's hook at CFCloudBaby's update (dll373 0x01A0, $a0 the baby), with DINO_LOG_CLOUDRUNNER: each baby's state as
+// it changes, with how far Krystal and Kyte are in steps of 100.
 extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
     if (!logging) {
         return;
@@ -176,10 +188,10 @@ extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
         krystal_away, kyte_is);
 }
 
-// us.toml's hook in CFCloudBaby's test for Kyte (dll373 0x2050), which a baby waiting to be found (state 0, 1 or 4) runs
-// each frame: after the sidekick's export 24 answered ($v0), yes brings it out to face her (state 5). Export 24 is her
-// state's +0x1C8 & 0x200000, which nothing in the ROM sets, so on Original no baby waiting to be found ever comes out.
-// On Restored it answers yes while Kyte is within 400 of the baby ($sp+0x20) and the baby isn't a rescued one (hidden,
+// us.toml's hook in CFCloudBaby's test for Kyte (dll373 0x2050), which a baby waiting to be found (state 0, 1 or 4)
+// runs each frame: after the sidekick's export 24 answered ($v0), yes brings it out to face her (state 5). Export 24 is
+// her state's +0x1C8 & 0x200000, which nothing in the ROM sets, so on Original no baby waiting to be found ever comes
+// out. On Restored it answers yes while Kyte is within 400 of the baby ($sp+0x20) and the baby isn't a rescued one (hidden,
 // +0x6's 0x4000, as it loads with its bit set; its states still run).
 extern "C" void dino_cloud_baby_found(uint8_t* rdram, recomp_context* ctx) {
     if (ctx->r2 != 0 || !babies_restored()) {
@@ -208,9 +220,9 @@ extern "C" void dino_cloud_baby_found(uint8_t* rdram, recomp_context* ctx) {
     ctx->r2 = 1;
 }
 
-// us.toml's hook in CFCloudBaby's update (dll373 0x0924, $s1 the baby): a found baby (state 5) asks export 24 again each
-// frame ($v0), yes and it stays out facing Kyte (0x09C8), no and it flies home and back to the state it had (0x0930).
-// Krystal rescues it by pressing A within its +0x1A (0x07A0). On Restored the answer is the first ask's.
+// us.toml's hook in CFCloudBaby's update (dll373 0x0924, $s1 the baby): a found baby (state 5) asks export 24 again
+// each frame ($v0), yes and it stays out facing Kyte (0x09C8), no and it flies home and back to the state it had
+// (0x0930). Krystal rescues it by pressing A within its +0x1A (0x07A0). On Restored the answer is the first ask's.
 extern "C" void dino_cloud_baby_follows(uint8_t* rdram, recomp_context* ctx) {
     if (ctx->r2 != 0 || !babies_restored()) {
         return;
