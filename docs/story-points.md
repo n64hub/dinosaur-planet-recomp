@@ -83,7 +83,9 @@ file 19, each task's name and clue), which says when the player swaps.
   and SwapStone Circle at its act 9, where its chief gives the pass's key (CloudRunner Fortress).
 - `before-desert-force-point`: Krystal in Golden Plains, at its setuppoint 0 where the way from SwapStone Circle comes
   in, carrying CloudRunner's SpellStone. Its warp, 31, stands under the sand: a start there falls and is put back.
-- `before-walled-city`: Sabre in Walled City (warp 91), with the second SpellStone placed.
+- `before-walled-city`: Sabre in Walled City at its setuppoint 0, where the way from SwapStone Hollow comes in,
+  outside the city's gate, with the second SpellStone placed and Tricky's commands (0x4E4). With a warp it
+  starts there instead: `before-walled-city,91` where BOSS TRex's way back comes out.
 - `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone.
 - `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits, three SpellStones
   placed and Golden Plains' portal spell (0x5BD, its PortalSpell, dll272), which DR_SupPortal on the top opens to.
@@ -555,8 +557,8 @@ the worm turn group 11 on with that eel hidden.
 
 ## Walled City and BOSS TRex
 
-`--story before-walled-city` starts Sabre in Walled City's corridor (warp 91). From there to the third SpellStone, as
-played:
+`--story before-walled-city` starts Sabre outside Walled City's gate (its setuppoint 0), and `before-walled-city,91`
+where BOSS TRex's way back comes out. From there to the third SpellStone, as played:
 
 - The beacons. Each of the two pressure switches (WCPressureSwitc, 781) arms its beacon (WCBeacon, 780) for about a
   minute (0x7EF, 0x7F0), and any hit lights an armed one (0x7F9, 0x7FA). With both lit, WCLevelControl (779) plays
@@ -613,6 +615,27 @@ The task list has more here than the ROM:
   The two RedEyes (WCTrex, 775) give no tooth, and the two teeth above are all the ROM holds.
 - Task 83, the King activating the stone: the King (WCKingEarthWalk, 774) talks once a load (0x7FB, sequence 2 of
   seqobject 411bc) and sets nothing else, and nothing in Walled City or the arena sets 0x83B.
+- Tricky's flame, which task 77 needs: it is command 4 of his scroll, which 0x245 lets through, and only DarkIce
+  Mines' SnowHorn (DIMSnowHorn1, 712) sets 0x245, once 0x172 is set, which nothing sets.
+
+Fixed (Walled City on Restored, `src/game/walled_city.cpp`, whose header has the evidence):
+
+- The Queen stands in the corridor outside the gate, at (-8330, -733, -4720). Sabre coming to her with Tricky near
+  meets her (0x80A) and has Tricky's flame (0x245). Tricky comes from a sideload beside her: he walks only inside his
+  zones (type-0x26 curves), and the corridor's are unlinked, so he is made in the RedEye's, 184.
+- A RedEye (WCTrexChase) waits by the arch, in Tricky's target list (0x33), and offers his flame within 300. Its flame
+  point, a type-0x24 curve of kind 4 at (-7900, -735, -4800), is added to the curves' table with the map. Tricky's
+  flame reaching it makes it mad: it runs at Sabre, roars as it catches him, and a tooth (WCTrexTooth) falls between
+  them. Standing on the tooth, A picks it up and the 4 bits at 0xD5 count it. At ten, 0x821 lets the bowl
+  (WCTeethBowl, 308) by the arch be used, and A by it opens the gate (0x82D). The bowl's def has no focus point, so
+  the game never targets it, and Restored marks it used for A within 80 as the targeting would. Until then the arch
+  holds Sabre back at x -7660.
+- BOSS TRex's defeat gives the stone as won (0x82E), and talking to the King with it activates it (0x83B).
+- Played from `--story before-walled-city --bits d5=9`, in one run: the Queen met with Tricky, the flame offered and
+  breathed, the RedEye mad, the tenth tooth dropped and picked up (its first pickup's scene waits for A), A by the
+  bowl, and Sabre through the gate. With no teeth the gate held. From `--place -7987,-874,-6790,0,0 --bits
+  82e,36a=32` the King's talk activated the stone. The fight giving 0x82E was not played to its end. On Original none
+  of it is placed and the arch is open.
 
 ## The warp table
 

@@ -20,17 +20,27 @@
 //   Volcano Force Point's second place takes (patches/boss_trex.c).
 // - The way in from SwapStone Hollow (setup point 0, (-8634, -733, -4413)) is a corridor south and then east along z
 //   -4800 to the RedEye-faced arch at x -7640, the gate, and the city beyond it. The prototype's arch is open.
+// - Tricky walks only inside his zones, map curves of type 0x26 (dll25 export 0 builds them, and dll211 0x53E4 puts
+//   him back where he was when he leaves them), and he starts following once he stands in one (dll211 0x183C). The
+//   corridor's six zones are unlinked: the RedEye's place is in 184 (uid 0x41086, x -8295 to -7702, z -4885 to -4714).
+//   His flame, command 4 (dll211 0x8B0), is offered while an object calls his export 14 with 4 (the vines, dll265
+//   0x104) and 0x245 is set, aims at the object of list 0x33 nearest the player (dll211 0x8F18), and has him go to the
+//   curve of type 0x24, kind 4, nearest the player (dll211 0x3664, dll25 export 6) and breathe flameblasts there. Only
+//   DarkIce Mines' SnowHorn sets 0x245 (dll712 0x2470), behind 0x172, which nothing sets.
 //
 // What Restored adds, with bits no code and no placement uses (the 4 bits at 0xD5 count the teeth):
 // - The Queen stands in the corridor. Sabre coming to her with Tricky near (or alone, if no sidekick is out) has met
-//   her (0x80A), and from then the RedEye by the gate can be angered.
-// - The RedEye (WCTrexChase) waits by the gate. Tricky's flame reaching it (a flameblast within 150) makes it mad, and
-//   it runs at Sabre; catching him it roars, and a tooth falls from it. Then it walks back to its place and waits for
-//   the next flame, and it calms after 10 s of not catching him.
-// - Ten teeth (0xD5 at 10) set 0x821, which lets the bowl beside the arch be used, and A on it opens the gate (0x82D)
+//   her (0x80A) and has Tricky's flame (0x245), and from then the RedEye by the gate can be angered. Tricky comes from
+//   a sideload (dll269) in zone 184, beside her.
+// - The RedEye (WCTrexChase) waits by the gate, in list 0x33, and offers the flame to Sabre within 300 of it. Tricky
+//   takes it as the vines (#194), a target he knows (us.toml's hook in dll211 0x8D4). A flame point (a curve record
+//   added to dll26's table with the map) stands between them, so Tricky's flame reaching it (a flameblast within 150)
+//   makes it mad, and it runs at Sabre; catching him it roars, and a tooth falls between them. Then it walks back to
+//   its place and waits for the next flame, and it calms after 10 s of not catching him.
+// - Ten teeth (0xD5 at 10) set 0x821, which lets the bowl beside the arch be used, and A by it opens the gate (0x82D)
 //   and uses the teeth up. Until then the arch holds back a player coming from outside: one who starts inside the city
 //   walks out freely.
-// - BOSS TRex's defeat gives the stone as 0x82E, won but not active, and Sabre coming to the King with it has him
+// - BOSS TRex's defeat gives the stone as 0x82E, won but not active, and Sabre talking to the King with it has him
 //   activate it: 0x83B, carried on to the Volcano Force Point as on Original.
 
 #include <cmath>
@@ -75,6 +85,9 @@ namespace {
     constexpr int32_t objects = 0x800B1920;
     constexpr int32_t object_count = 0x800B1924;
     constexpr int32_t ticks = 0x8008C958;         // the frame's length in ticks, a float
+    constexpr int32_t allocate = 0x80016AA8;      // (size, tag, name): a block of the game's heap
+    constexpr int32_t dll26_handle = 0x8008C9E4;  // the curves' DLL: export 1 adds a curve, 2 takes it away
+    constexpr int32_t buttons_pressed = 0x80010D50; // (controller): the buttons pressed this frame
 
     constexpr int walled_city = 13;
 
@@ -102,7 +115,8 @@ namespace {
     constexpr Place queen_place = { -8330.0f, -733.0f, -4720.0f };
     constexpr Place chaser_place = { -7820.0f, -735.0f, -4810.0f };
     constexpr Place bowl_place = { -7720.0f, -748.0f, -4700.0f };
-    constexpr Place sideload_place = { -8634.0f, -733.0f, -4480.0f };
+    constexpr Place sideload_place = { -8250.0f, -733.0f, -4800.0f };
+    constexpr Place flame_point_place = { -7900.0f, -735.0f, -4800.0f };
     constexpr uint8_t queen_yaw = 0x00;  // facing across the corridor
     constexpr uint8_t bowl_yaw = 0x40;
 
@@ -115,8 +129,8 @@ namespace {
     constexpr float tricky_reach = 400.0f;
     constexpr float flame_reach = 150.0f;
     constexpr float offer_reach = 300.0f;
+    constexpr float bowl_reach = 80.0f;
     constexpr float catch_reach = 70.0f;
-    constexpr float king_reach = 120.0f;
     constexpr float chase_speed = 3.2f;    // per tick: a running Sabre outruns it, a walking one doesn't
     constexpr float walk_speed = 1.4f;
     constexpr float give_up_ticks = 600.0f;
@@ -143,8 +157,8 @@ namespace {
         float chase_ticks = 0.0f;
         float progress = 0.0f;
         bool placed = false;
-        bool outside = false;
-        int test_mad = 0; // the player was last seen west of the gate, in the corridor
+        bool outside = false; // the player was last seen west of the gate, in the corridor
+        bool flame_point = false;
     } state;
 
     void call(uint8_t* rdram, recomp_context* ctx, int32_t function) {
@@ -232,15 +246,16 @@ namespace {
         return sqrtf(dx * dx + dz * dz);
     }
 
-    int32_t spawn(uint8_t* rdram, recomp_context* ctx, int oid, int size, Place at, const uint8_t* setup, int setup_size) {
+    int32_t spawn(uint8_t* rdram, recomp_context* ctx, int oid, int size, Place at, const uint8_t* setup,
+        int setup_size) {
         ctx->r4 = size;
         ctx->r5 = oid;
         call(rdram, ctx, new_placement);
         gpr p = ctx->r2;
         MEM_B(2, p) = size / 4;
-        // Flag 2: the object loop (func_8004A800, 0x8004A94C) never frees it as out of the player's range, since
-        // these are made once as the map loads (krazoa.cpp's palace objects are too).
-        MEM_B(4, p) = 2;
+        // Flag 1, as krazoa.cpp's extras: the object loop (func_8004A800) keeps it however far the camera goes and
+        // frees it with its map, which is when State is reset and this places it again.
+        MEM_B(4, p) = 1;
         set_real(rdram, p + 0x8, at.x);
         set_real(rdram, p + 0xC, at.y);
         set_real(rdram, p + 0x10, at.z);
@@ -261,7 +276,58 @@ namespace {
         return object;
     }
 
+    int32_t dll26_export(uint8_t* rdram, int n) {
+        return word(rdram, word(rdram, word(rdram, dll26_handle)) + 4 + 4 * n);
+    }
+
+    // The place Tricky stands to breathe fire at the RedEye: a curve of type 0x24, kind 4, as SwapStone Hollow's by its
+    // vines (41979), which his flame (dll211 0x3664) looks for nearest the player through dll25's export 6. It is in
+    // the RedEye's zone, 184, the type-0x26 curve (uid 0x41086) that his walking (dll211 0x53E4) keeps him inside. The
+    // map loader adds its curves to dll26's table as the map loads and takes them away as it goes (func_80045FC4), and
+    // a curve object made later adds nothing, so this record, kept for the game, is added here and taken away with the
+    // map. Its uid, 0x4FF00, is no placement's.
+    int32_t flame_point_record(uint8_t* rdram, recomp_context* ctx) {
+        static int32_t record = 0;
+        if (record == 0) {
+            ctx->r4 = 0x34;
+            ctx->r5 = -1;
+            ctx->r6 = 0;
+            call(rdram, ctx, allocate);
+            record = (int32_t)ctx->r2;
+            if (record == 0) {
+                return 0;
+            }
+            const uint8_t bytes[0x34] = { 0x00, 0x6E, 0x0D, 0xB8, 0x00, 0x18, 0x00, 0x18, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0x00, 0x04, 0xFF, 0x00, 0x00, 0x24, 0x04, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0x00, 0x10, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+            for (int i = 0; i < 0x34; i++) {
+                MEM_B(i, (gpr)record) = bytes[i];
+            }
+            set_real(rdram, (gpr)record + 8, flame_point_place.x);
+            set_real(rdram, (gpr)record + 0xC, flame_point_place.y);
+            set_real(rdram, (gpr)record + 0x10, flame_point_place.z);
+        }
+        return record;
+    }
+
+    void add_flame_point(uint8_t* rdram, recomp_context* ctx) {
+        int32_t record = flame_point_record(rdram, ctx);
+        if (record == 0) {
+            return;
+        }
+        ctx->r4 = record;
+        call(rdram, ctx, dll26_export(rdram, 1));
+        state.flame_point = true;
+    }
+
+    void take_flame_point(uint8_t* rdram, recomp_context* ctx) {
+        ctx->r4 = flame_point_record(rdram, ctx);
+        call(rdram, ctx, dll26_export(rdram, 2));
+        state.flame_point = false;
+    }
+
     void place_objects(uint8_t* rdram, recomp_context* ctx) {
+        add_flame_point(rdram, ctx);
         {
             // As the King's placement: its turn, then no bits.
             const uint8_t setup[] = { queen_yaw, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -355,8 +421,9 @@ namespace {
                 break;
             }
             float flame_d;
-            int32_t flame = nearest(rdram, flame_object, real(rdram, chaser + 0x18), real(rdram, chaser + 0x20), &flame_d);
-            if ((flame != 0 && flame_d < flame_reach) || (getenv("DINO_WC_TEST_MAD") && d < 300.0f && !state.test_mad++)) {
+            int32_t flame = nearest(rdram, flame_object, real(rdram, chaser + 0x18), real(rdram, chaser + 0x20),
+                &flame_d);
+            if (flame != 0 && flame_d < flame_reach) {
                 state.chase = Chase::Mad;
                 state.chase_ticks = 0.0f;
                 if (logging) {
@@ -440,6 +507,9 @@ namespace {
         float x = real(rdram, player + 0xC), z = real(rdram, player + 0x14);
         bool in_corridor = z > gate_z_low && z < gate_z_high;
         if (!in_corridor || get(rdram, ctx, gate_open)) {
+            if (logging && state.outside && in_corridor && x >= gate_x) {
+                fprintf(stderr, "walled city: through the open gate\n");
+            }
             state.outside = in_corridor && x < gate_x;
             return;
         }
@@ -449,6 +519,29 @@ namespace {
         else if (state.outside) {
             set_real(rdram, player + 0xC, gate_x - 1.0f);
             set_real(rdram, player + 0x18, gate_x - 1.0f);
+        }
+    }
+
+    // The bowl's def (WCTeethBowl) has no focus point, so the game's targeting (dll2 0xE58-0xF84), which marks its
+    // target used (+0xAF bit 0) when A is pressed within reach, never picks it: Restored marks it so, and its own
+    // update (dll308 0x66C-0x73C) sets the gate's bit and clears the teeth's.
+    void use_bowl(uint8_t* rdram, recomp_context* ctx, gpr player) {
+        gpr bowl = (gpr)state.bowl;
+        if (!get(rdram, ctx, ten_teeth) || get(rdram, ctx, gate_open)) {
+            return;
+        }
+        float dx = real(rdram, bowl + 0x18) - real(rdram, player + 0x18);
+        float dz = real(rdram, bowl + 0x20) - real(rdram, player + 0x20);
+        if (dx * dx + dz * dz > bowl_reach * bowl_reach) {
+            return;
+        }
+        ctx->r4 = 0;
+        call(rdram, ctx, buttons_pressed);
+        if (ctx->r2 & 0x8000) {
+            MEM_B(0xAF, bowl) |= 1;
+            if (logging) {
+                fprintf(stderr, "walled city: A on the bowl\n");
+            }
         }
     }
 
@@ -466,9 +559,11 @@ namespace {
         if (!get(rdram, ctx, stone_won)) {
             return;
         }
+        // A with the King plays his sequence and sets bit 0 of his state's +0x4DD, once a load (dll774 0x1B0-0x200).
+        // The stone is won in BOSS TRex's map, so he has not spoken in this load before Sabre brings it.
         float d;
         int32_t king = nearest(rdram, king_object, real(rdram, player + 0x18), real(rdram, player + 0x20), &d);
-        if (king == 0 || d > king_reach) {
+        if (king == 0 || !(MEM_BU(0x4DD, (gpr)(int32_t)MEM_W(0xB8, (gpr)king)) & 1)) {
             return;
         }
         set(rdram, ctx, stone_won, 0);
@@ -505,9 +600,18 @@ extern "C" void dino_walled_city_trex_beaten(uint8_t* rdram, recomp_context* ctx
     }
 }
 
+// us.toml's hook in Tricky's flame command (dll211 0x8D4): the id it checks its target's against.
+extern "C" int dino_walled_city_flame_target(int id) {
+    return id == chaser_object && restored() ? 0x194 : id;
+}
+
 // us.toml's hook after func_80046BC8 places the loaded maps' objects, each frame.
 extern "C" void dino_walled_city_frame(uint8_t* rdram, recomp_context* ctx) {
     if (word(rdram, map_structs + 4 * walled_city) == 0) {
+        if (state.flame_point) {
+            Calls calls(ctx);
+            take_flame_point(rdram, ctx);
+        }
         state = State();
         return;
     }
@@ -524,33 +628,15 @@ extern "C" void dino_walled_city_frame(uint8_t* rdram, recomp_context* ctx) {
         state.placed = true;
         place_objects(rdram, ctx);
     }
-    static int frames = 0;
-    if (logging && frames++ % 30 == 0) {
-        float flame_d = -1.0f;
-        if (state.chaser != 0) {
-            nearest(rdram, flame_object, real(rdram, (gpr)state.chaser + 0x18), real(rdram, (gpr)state.chaser + 0x20),
-                &flame_d);
-        }
-        call(rdram, ctx, sidekick_object);
-        gpr tricky = ctx->r2;
-        if (flame_d < 1e29f) {
-            fprintf(stderr, "walled city: a flame %.0f from the RedEye\n", flame_d);
-        }
-        gpr ts = tricky ? (gpr)(int32_t)MEM_W(0xB8, tricky) : 0;
-        fprintf(stderr, "walled city: sidekick 0x%08X at (%.0f, %.0f) w(%.0f, %.0f) parent %08X alive %d st %d cmd %d "
-            "tgt %08X, chase %d, teeth %d\n", (uint32_t)tricky,
-            tricky ? real(rdram, tricky + 0xC) : 0.0f, tricky ? real(rdram, tricky + 0x14) : 0.0f,
-            tricky ? real(rdram, tricky + 0x18) : 0.0f, tricky ? real(rdram, tricky + 0x20) : 0.0f,
-            tricky ? (uint32_t)MEM_W(0x30, tricky) : 0, alive(rdram, (int32_t)tricky, 0x4E5) ? 1 : 0,
-            ts ? (int)MEM_BU(0x18, ts) : -1, ts ? (int)MEM_BU(0x1D, ts) : -1, ts ? (uint32_t)MEM_W(0x28, ts) : 0,
-            (int)state.chase, get(rdram, ctx, teeth));
-    }
     if (alive(rdram, state.queen, queen_object)) {
         meet_queen(rdram, ctx, player);
     }
     if (alive(rdram, state.chaser, chaser_object)) {
         run_chase(rdram, ctx, player);
         offer_flame(rdram, ctx, player);
+    }
+    if (alive(rdram, state.bowl, bowl_object)) {
+        use_bowl(rdram, ctx, player);
     }
     hold_gate(rdram, ctx, player);
     count_teeth(rdram, ctx);

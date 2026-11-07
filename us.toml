@@ -637,6 +637,15 @@ func = "dll702_2D98"
 before_vram = 0x90288754
 text = '{ int dino_trex_restored(void); void dino_trex_beaten(uint8_t*, recomp_context*); void dino_walled_city_trex_beaten(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_beaten(rdram, &c); dino_walled_city_trex_beaten(rdram, ctx); } else { func_80013FB4(rdram, ctx); } }'
 
+# Walled City on Restored (src/game/walled_city.cpp): Tricky's flame (command 4, dll211 0x8B0) goes on with a target
+# whose object id it knows (dll211 0x8D4-0x914: the vines, the ice walls, the log fires and the like) and resets him to
+# following for any other, so the RedEye by the gate (WCTrexChase, #506) is taken as the vines (#194) are, a target
+# with nothing of its own to call when burnt. $v1 holds the target's id.
+[[patches.hook]]
+func = "dll211_03FC"
+before_vram = 0x901080A4
+text = '{ int dino_walled_city_flame_target(int); ctx->r3 = (gpr)(int32_t)dino_walled_city_flame_target((int)(int16_t)ctx->r3); }'
+
 # Widescreen (src/game/widescreen.cpp). The screen's clear and a cutscene's bars reach the window's sides. RT64 takes a
 # fill that spans the scissor for the whole picture, whatever its width (rt64_framebuffer_renderer.cpp, invRatioScale),
 # but func_80037A14's fills stop a pixel short of the frame's width and its later scissor doesn't, so they'd stay in the
