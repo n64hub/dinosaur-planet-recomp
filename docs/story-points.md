@@ -118,13 +118,47 @@ only to its tasks up to 39, so the rest is told by the levels' own objects. In i
 Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
 
 - Dragon Rock - Top (map 2) and - Bottom (52), and BOSS Kamerian Dragon (53), placed in full. Their cells join Willow
-  Grove's at layer 0, so they are reached on foot; no code warps there by number. The top's ProjectileSpell (dll272)
-  gives the projectile spell (0x5CE). Its DR_SupPortal (754) is hidden once 0x776 is set (which only HitAnimator 353
-  beside it reads); with the player's spell the portal spell (0x5BD, from Golden Plains) it plays its sequence, and
-  its trigger plane sets 0x783, on which it warps to the bottom (warp 88). In a run from `before-dragon-rock` the
-  portal loaded only once in four minutes, and 0x783 set by hand without it warps nowhere, so what loads it is not
-  known yet. The bottom and the dragon's room share a grid cell, and the room's floor (y -1805) is the bottom's east
-  end's.
+  Grove's at layer 0, so they are reached on foot; no code warps there by number. Bits 0x95 and 0x96 are constants:
+  the getter answers 1 and 0 and nothing sets them, so a placement's 0x95 means always and 0x96 never. The top's
+  ProjectileSpell (dll272, at -3553, -1502, -4662) gives the projectile spell (0x5CE). Its DR_SupPortal (754, in
+  group 8) is hidden once 0x776 is set (which only HitAnimator 353 beside it reads); with the player's spell the
+  portal spell (0x5BD, from Golden Plains) it plays its sequence, and its trigger plane sets 0x783, on which it warps
+  to the bottom (warp 88, at -1350, -1522, -6746 on layer -1). Group 8 is turned on by walking into TriggerPoint
+  0x35319 by the ledge, not by a start inside it. C-left opens the spell scroll and each further C-left rolls it one
+  item (dll1_1FEC; the stick and the other C buttons don't), and from its first opening two rolls highlight the portal
+  spell, which A takes. A spell needs magic (dll210_6DD8 returns at once with none), and a target needs the player
+  facing it as well as near: at (-1333, -6466) nothing is targeted, on the lid's line at (-1346, -6444) the portal
+  is. Played from `before-dragon-rock` with `--place -1346,-986,-6289` and an `--input` that walks onto the lid's
+  line at 26 s, opens the scroll at 30 s, rolls it at 32 s and 34 s and takes the spell at 36 s: the lid opened
+  (0x776) at 37 s and the warp to the bottom came at 45 s.
+- The bottom is two parts on layer -1. The west part holds warp 88's landing, the tracks under it (DR_PushCart,
+  DR_TrackLevers, DR_pulleys and DR_cradles), DR_ExplodeDoors and DRProjectileSwitches for the projectile spell, and a
+  shaft at (-1395, -5807) whose TriggerPlane steps up a layer to the top's west (and down again). The landing's way
+  out is a gap in its west wall, then a corridor west at y -1522 and a ramp south along x -1870 to a floor at y -1805.
+  The east part is the top's east end's layer below: TriggerPlanes at (171, -6198) and (222, -6166) step between
+  them, setuppoint 1 at (128, -1426, -6184) on the top's side. From there it goes east past a DR_Platform (0x5CD, its
+  DR_Lever at 109, -6103) and setuppoint 4 (572, -1568, -6174) to the Skeetla arena's door at setuppoint 0 (1152,
+  -1618, -6692), where TriggerPlane 0x33EAB sets 0x5F9 (DR_Seqobj sequence 0, 0x5FA), and down to the arena (y
+  -1831). Neither part is played through yet: from setuppoint 8 (-817, -1613, -5830) a walk east stops at x -721,
+  and from setuppoint 1 on layer 0 one stops at (154, -1470, -6221) a step past the layer change.
+- The arena (groups 0 to 2, `--bits 5dc=7`): DR_Creators (738) send Skeetlas (615), at most 20, at DR_EarthWarrior
+  (713), shackled there. It is won when 0x628 is set, by the Warrior's update once 0x789 is 3 and no Skeetla is left,
+  which plays DR_Seqobj 0x339C6's sequence 7, and its end sets 0x609 (on the top it opens the CloudRunner's cage,
+  DR_Cage, DR_CageControl and DR_CloudRunner). 0x789 counts the three DRLavaControls (737) put out: each loses a
+  point of health (3 or 15, its +0x1A) to a hit of kind 0x19 (export 2) and at 0 sets its bit (0x5D8, 0x5D9, 0x5DA)
+  and raises 0x789. Neither the staff (B) nor the projectile spell put one out in a run, so what hits as 0x19 is not
+  known yet. The Warrior is freed by 0x5FD (DR_NiceSharpy, 739, given item 0x380 or 0x381, which item not known yet:
+  sequence 2 sets 0x5FE, which frees the DR_Shackles, 0x654, sequence 0xC and 0x655); 0x5DE is his death. The
+  TriggerPlane 0x33F78 in the middle of the arena would set 0x5FD, but its only action's flags (0x04, repeat, without
+  0x01, forward) never run.
+- The arena and the dragon's room share the world cell (2, -8) and their ground: the room is the arena on layer 0,
+  its KamColumns' pits where the arena's DRLavaControls stand. Nothing in the ROM leads into the room: no warp entry
+  lies in it, and its entrance, a TriggerPlane at its north (0x41AF3, which sets 0x4D7 for its KD_Sequences), faces
+  cells with no blocks, where the player falls and is put back. With Kamerian Dragon on Restored, the arena once won
+  (0x609) leads into the room by the empty warp entry 89, and the fourth SpellStone, 3 s after it is picked up, back
+  to the arena by the empty entry 84 (`src/game/dragon_rock.cpp`). Played from `before-dragon-rock` with `--place
+  1659,-1822,-6121,-1 --bits 5dc=7,609`: the warp into the room came at once, and with `7a8@20` added, the warp back
+  to the arena at 23 s, where she stayed.
 - BOSS Kamerian Dragon (53): KamerianBoss (dll707) and the Nurse (708). The fight is built and can't be won: each hit
   in its last stage lowers its health (10 at the start), nothing reads it, and at 0 it wraps and the fight goes on.
   Nothing anywhere gives the fourth SpellStone (0x7A8), which the Desert Force Point's other place takes. Dragon Rock
