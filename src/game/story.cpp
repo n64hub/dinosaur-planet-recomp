@@ -131,6 +131,9 @@ namespace {
     // Dragon Rock's DR_SupPortal (754) opens only to it.
     const Bits portal_spell = { { 0x5BD, 1 } };
     const Bits third_stone_carried = { { 0x83B, 1 } };
+    // Tricky's commands (his export 13, dll211 0x10D4, offers none without it): DarkIce Mines' boss (dll565) sets it as
+    // Sabre rescues him, and Northern Wastes' Tricky (dll497) as he joins.
+    const Bits tricky_commands = { { 0x4E4, 1 } };
     const Bits third_stone = { { 0x878, 1 } };
     // The fourth, which the Kamerian Dragon leaves with Kamerian Dragon on Restored (dragon_rock.cpp), is carried as
     // 0x7A8 to the Desert Force Point's other place (0x5F4).
@@ -145,6 +148,8 @@ namespace {
     // Golden Plains (map 9, grid cell (-6, 19)): its setuppoint 0, where the way from SwapStone Circle comes in. Its
     // pad's entry, 31, stands under the sand: a start there falls through the map and is put back, forever.
     constexpr Place golden_plains_place = { -940.2f, 116.3f, 15302.0f, 0 };
+    // Walled City (map 13): its setuppoint 0, where the way from SwapStone Hollow comes in, outside the city's gate.
+    constexpr Place walled_city_place = { -8634.0f, -733.0f, -4413.0f, 0 };
 
     const std::vector<StoryPoint> points = {
         { "new-game", krystal, no_place, {}, {} },
@@ -161,7 +166,8 @@ namespace {
         { "before-wg-shrine", krystal, 39, {}, four_spirits },
         { "before-cloudrunner", krystal, 73, {}, to_second_stone },
         { "before-desert-force-point", krystal, -1, golden_plains_place, to_second_stone + second_stone_carried },
-        { "before-walled-city", sabre, 91, {}, to_second_stone + second_stone + portal_spell },
+        { "before-walled-city", sabre, -1, walled_city_place,
+            to_second_stone + second_stone + portal_spell + tricky_commands },
         { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + portal_spell + third_stone_carried },
         { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
         { "after-dragon-rock", krystal, -1, golden_plains_place,

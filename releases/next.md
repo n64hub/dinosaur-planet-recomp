@@ -22,3 +22,12 @@
   new setting for Tricky's run to his mother in SwapStone Hollow, Cape Claw's shrine test is now under Krazoa
   Shrines, and that setting's Finished is now called Restored (a saved Finished reads as Restored). Crash fixes stay
   on with either value.
+- Krazoa Shrines and Krazoa Tablets on Restored: the seqpoints that release Golden Plains' and Northern Wastes'
+  spirits at Warlock Mountain, and Cape Claw's third tablet, no longer vanish while the player is still far from
+  them, so each is there when the player arrives.
+- Walled City on Restored: the Queen EarthWalker waits outside the city and gives Tricky his flame, a RedEye angered
+  by it chases Sabre and drops a tooth when it catches him, ten teeth open the city's gate, and the King EarthWalker
+  activates the third SpellStone. The prototype never built any of it.
+- Wind Bridge on Restored: the wind over CloudRunner Fortress's treasure shaft holds Krystal while she carries a
+  barrel, so the barrels reach the courtyard and three blown under its roof free Kyte. In the prototype she fell to
+  the shaft's bottom with one.

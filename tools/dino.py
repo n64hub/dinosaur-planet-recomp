@@ -2,7 +2,7 @@
 through as raw MIPS. Run it from anywhere; it reads roms/dinoplanet.z64, syms/ and syms/names.toml.
 
     python3 tools/dino.py dis dll210_16220        one function: dll<n>_<offset>, func_<address>, a name, dll<n>.<export>
-    python3 tools/dino.py dis dll272 0x18-0x200   a range of a DLL's text (offsets in its text)
+    python3 tools/dino.py dis dll272 0x18-0x200   a range of a DLL's text (offsets in its text, cut at its end)
     python3 tools/dino.py calls bit 0x1EB         every call to it: bit [<bit>], a function or dll<n>.<export>, args
     python3 tools/dino.py map 29 --name sandeel   a map's cells and group field; its placements summed, or filtered
     python3 tools/dino.py def SHswapstone         an object def: DLL, object ids, where it is placed, its record
@@ -1099,9 +1099,12 @@ def parse_func(game, spec, rng=None):
             sys.exit(f"no dll{n}")
         if rng:
             a, b = (int(x, 16) for x in rng.split("-"))
+            b = min(b, len(game.dlls[n].text_bytes))
+            if a >= b:
+                sys.exit(f"dll{n}'s text ends at {b:#x}")
             return n, a, b, f"dll{n} {a:#x}-{b:#x}"
         if m[2] is None:
-            sys.exit("dis dll<n> needs a function (dll<n>_<offset>, dll<n>.<export>) or a range: whole DLLs are not printed")
+            sys.exit("dis dll<n> needs a function (dll<n>_<offset>, dll<n>.<export>) or a range of its text (0-ffff: all of it)")
         return func_span(game, n, int(m[2], 16), "")
     m = re.fullmatch(r"(?:func_|0x)?([0-9A-Fa-f]{8})", spec)
     if m:
