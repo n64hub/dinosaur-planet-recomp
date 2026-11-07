@@ -299,7 +299,7 @@ namespace {
         { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
         { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
-        { 45, 4730.0f, -5.0f, 23358.0f, Setting::Palace },
+        { 45, 4860.0f, 0.0f, 23358.0f, Setting::Palace },
         { 46, 4730.0f, 973.0f, 23358.0f, Setting::Palace },
     };
 
@@ -839,6 +839,7 @@ namespace {
     constexpr float door_ticks = 90.0f;   // a door opens in 1.5 s
     constexpr float leaf_travel = 100.0f;
     constexpr float door_sunk = 1000.0f;
+    constexpr float last_door_stop = 10215.0f;
 
     PalaceDoor palace_doors[] = {
         { 5757.0f, 95.0f, 21440.0f, tablets_done },
@@ -900,6 +901,15 @@ extern "C" void dino_krazoa_palace_door(uint8_t* rdram, recomp_context* ctx) {
             memcpy(&MEM_W(0xC, (gpr)door), &lx, 4);
             memcpy(&MEM_W(0x10, (gpr)door), &ly, 4);
             memcpy(&MEM_W(0x14, (gpr)door), &lz, 4);
+            // The leaves have no collision, so a door not yet open holds the player east of it.
+            if (d.shut > 0.0f) {
+                call(rdram, ctx, player_object);
+                int32_t player = (int32_t)ctx->r2;
+                if (player != 0 && word_float(rdram, player + 0xC) < last_door_stop &&
+                    word_float(rdram, player + 0xC) > d.x - leaf_travel) {
+                    memcpy(&MEM_W(0xC, (gpr)player), &last_door_stop, 4);
+                }
+            }
         }
         return;
     }
