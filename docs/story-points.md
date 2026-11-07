@@ -241,7 +241,8 @@ over black with the objects floating, so a test there needs the bit: `--story be
 ## CloudRunner Fortress
 
 Tasks 56 to 68, played from `before-cloudrunner` on the desktop build a link at a time, each started with `--place`
-and the bits of the links before it. None of it needed a fix to the game; the story point did (SwapStone Circle's act).
+and the bits of the links before it. Two links needed a fix to the game (the treasure lift and the babies, each behind
+a setting), and the story point did too (SwapStone Circle's act, and the SharpClaw disguise for the dungeon).
 World coordinates: the fortress (map 12) lies at cell (-15, 29), its treasure caves (15) at (-20, 28) on layer -1 and
 the race (43) at (-20, 29) on layer -2.
 
@@ -285,6 +286,36 @@ the race (43) at (-20, 29) on layer -2.
   (0x57), 9 with 0x43, 10 with 0x4BE (which needs 0x8D1 and 0x300), 12 with 0x4C1. At 12, 0x4B7 plays its sequence
   11 and with 0x49A moves it to 13; at 13 the SpellStone used on it from the item menu sets 0x4AB, its sequence sets
   0x4AA, and it goes to 14. Played from 13.
+- The dungeon (map 16, warp 12). Krystal starts in a cell; A held while walking into the green CFDungeonBlock pushes
+  it, and she gets out behind it. The prison key (0x44) lies past CFPrisonGuard (375), who catches her within 150 of
+  him and puts her back in the cell (his sequence, 0x574) unless she holds the key, 0x50 is set, or she casts the
+  SharpClaw disguise (spell 0x40, her state 0x40): disguised, she walks past him to the key (played;
+  `before-cloudrunner` gives 0x40). The three cell locks (dll308) take the key from the item menu and open their doors, 0x45 0x257, 0x46
+  0x258 and 0x47 0x259. Bonehead's cell's lock has to be targeted from its east: from the west he, talking, takes A.
+  The cage switches (CFCageSwitch, 384) take the key the same way and play their sequence, whose message 0xA0005 sets
+  the switch's bit: the uncle's, at (-11708, 1368, 20410), sets 0x4D (played), and CFPrisonUncle (376) sets 0x50 as the
+  dungeon next loads (played), so the guard lets her by from then on.
+- The power. With his door open (0x257) Bonehead (CFGuardian in map 16) leads Krystal east to a room with a wall valve
+  and gives her the power item, 0x60, as she walks into him (played). CFPowerLock in the fortress at (-11407, 17950)
+  takes it from the item menu for 0x5F, which opens CFPowerDoor1 (played). The three power crystals are in baskets
+  (map 12's group 7): lifting one breaks it (0x8B2 to 0x8B4) and A picks up its crystal (items 0x51 to 0x53). In the
+  power room, whose radiation costs about 1 health in 3 s until they are in, each base takes its own crystal from the
+  item menu (0x54 takes 0x51, 0x55 0x52, 0x56 0x53), each base's sequence sends 0xA0005, and with all three 0x4E0 and
+  then 0x57, the power on, are set (played).
+- The baby CloudRunners. Each CFCloudBaby (373) waiting to be found (map 12's groups 20 to 22, `--bits 458=7340032`)
+  comes out only when Kyte's export 24 answers yes, a flag of hers nothing in the ROM sets, so on the prototype four of
+  the five never come out. Found, it faces Kyte, and A within its reach rescues it: 0x901 counts it, its bit (0x24F to
+  0x253) is set, and it flies to its golden perch (0x2FC to 0x300). Fixed (Baby CloudRunners on Restored,
+  `src/game/cloudrunner.cpp`): Kyte finds a baby while she is within 400 of it. Kyte is loaded by the sideload objects
+  (269), so a `--place` far from one has her nowhere. Played: 236A, from `--place -10428,1895,18659,0 --bits
+  43,458=7340032`, found with Kyte 240 away, rescued (0x901, 0x250) and on its perch (0x2FD); 29FA, on a ledge 300
+  above the corridor, found with Kyte 382 away and held out while she stays near.
+- The gold. Each rescued baby's perch bit is one of 0x2FC to 0x300, and CFLevelControl (400) sets 0x4BE (Bonehead's
+  state 10) from 0x8D1 and 0x300. 0x8D1 is the +0x32 bit of the curve (429D9, at (-12672, 2239, 18806)) that
+  PerchObject (718, 429D8) above CFKyteGoldPerch sends Kyte to: with Kyte out and Krystal within 134 of it, Kyte's
+  command scroll (C-down, C-down rolls it, A uses it) offers its star, which sets 0x46E to 0xC0 (played), and Kyte's
+  message 5 as she lands there sets 0x8D1. Map 12's group 8 plays Kyte's Guardian scene on the way (`--bits
+  34f,359,2e1` skips it) and 0x4DF has the courtyard's guard beaten.
 
 An object that wants an item (a lock, dll308, its item at +0x1E; CFGuardian) takes it only as used from the item menu,
 never from the bit alone. C-right opens Krystal's items (dll1's menu 1), A uses the one shown and closes the menu, and
@@ -292,10 +323,11 @@ the object takes it in the frame the player presses A with it targeted: dll2 set
 the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
-Not played: the roof's two barrels, the dungeon (map 16), the power, the five baby CloudRunners (the fifth is in map
-15, from the master chest), the gold, the way from the caves to the race and the race won. Read from the ROM, nothing
-sets 0x8D1 (so 0x4BE, Bonehead's state 10, never comes), 0x4B8 (CFGuardian's sequence at 0x1D5C) or 0x49A, and Krystal
-makes no hit of type 0xF, which the ProjectileSwitches by the main door take, but by the two ZBombs there.
+Left to play: the roof's two barrels, 29FA's rescue (no way up to its ledge found), the babies 29B3, map 30's and map
+15's (from the master chest), Kyte landing at the gold perch (she stays by the sideload that loaded her, so 0x8D1,
+0x4BE and 0x4C1 are read, not played), the way from the caves to the race and the race won. Read from the ROM, nothing
+sets 0x4B7, 0x4B8 (CFGuardian's sequence at 0x1D5C), 0x49A or 0x4DC, and Krystal makes no hit of type 0xF, which the
+ProjectileSwitches by the main door take, but by the two ZBombs there.
 
 ## Golden Plains and the Desert Force Point
 
@@ -374,8 +406,12 @@ Each with what shows it, by the DLL that reads or sets it (`dll <n>`) or the tas
 - 0x3A0: task 14, swapped to Krystal.
 - 0x88, 0x3B0, 0x2C5, 0x615: tasks 15 to 18 in Cape Claw: the bribe (CCguardgiving, 447), Lightfoot (CClightfoot, 449),
   Kyte, the courtyard (0x2C5 and 0x615 are read by CClevcontrol, 460).
-- 0x2D, 0x1D7: spells. dll 210's function behind its export 51 switches on these, and CClightfoot sets 0x1D7 with task
-  16, "COLLECTED FORCEFIELD SPELL". WL_LevelControl (607) sets both too.
+- 0x2D, 0x1D7, 0x40: spells, the bits that show them on the spell scroll (dll1's menu 6), and the value its message
+  0x80002 hands the player (dll210 0x1DDC), held at her state's +0x87C (dll210's export 50). CClightfoot sets 0x1D7
+  with task 16, "COLLECTED FORCEFIELD SPELL". WL_LevelControl (607 0x1118) sets all three in its first update each
+  time it loads, until the fourth spirit (0x318), so Krystal has them from her first visit to Warlock Mountain; the
+  MMShrine's and WGShrine's controls (466, 488) set 0x40 too. 0x40 is the SharpClaw disguise: cast, it puts her in a
+  SharpClaw's shape and drains her magic, and CFPrisonGuard (375) and ClubSharpClaw (215) let her by.
 
 The spirits, set in this order by WL_seqpoint (611) and read by WL_LevelControl (607):
 

@@ -106,7 +106,7 @@ namespace {
     };
     const Bits to_first_shrine = to_swapstone_hollow + Bits {
         { 0xBF, 1 }, { 0x15A, 1 }, { 0x3A0, 1 }, { 0x88, 1 }, { 0x3B0, 1 }, { 0x2C5, 1 }, { 0x615, 1 }, { 0x2D, 1 },
-        { 0x1D7, 1 },
+        { 0x1D7, 1 }, { 0x40, 1 },
     };
     const Bits first_spirit = { { 0x316, 1 }, { 0x21F, 1 } };
     const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x877, 1 } };

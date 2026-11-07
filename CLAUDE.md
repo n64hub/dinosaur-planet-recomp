@@ -28,7 +28,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
   Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the Kamerian Dragon's end
   (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), CloudRunner Fortress's treasure lift
-  (`src/game/cloudrunner.cpp`), the settings, and on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
+  and baby CloudRunners (`src/game/cloudrunner.cpp`), the settings, and on Windows a stack trace on a crash
+  (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
@@ -120,6 +121,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   and the way to the race, but its direction bit (0x8C8) is flipped only by two levers at the bottom, so from the top
   it only blows up. The General tab's Treasure Lift setting, Restored by default, lowers a player who steps in from
   the top, and Original leaves it as it was (`src/game/cloudrunner.cpp`'s header has the evidence).
+- **CloudRunner Fortress's baby CloudRunners.** A baby waiting to be found (CFCloudBaby, dll373) comes out when Kyte's
+  export 24 answers yes, a flag of hers nothing in the ROM sets. The General tab's Baby CloudRunners setting, Restored
+  by default, answers yes while Kyte is within 400 of it, and Original leaves them hidden (the same header).
 - **Krazoa Palace.** Map 3's rooms are built, but of its objects only two Transporters are placed: the wings' doors,
   consoles and text blocks, the last door and the red Krazoa have defs and stand nowhere, and nothing leads on to
   Drakor (map 44). The General tab's Krazoa Palace setting, Restored by default, places them, chains the four wings
