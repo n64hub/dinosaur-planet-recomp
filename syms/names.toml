@@ -184,7 +184,7 @@ dll = 373
 offset = 0x22
 name = "rescued_bit"
 
-# CloudRunner Fortress's snow race, map 43 (src/game/cloudrunner_race.cpp, docs/story-points.md).
+# CloudRunner Fortress's snow race, map 43 (docs/story-points.md, tools/cloudrunner_race_input.txt).
 [[export]]
 dll = 730
 index = 7
@@ -527,6 +527,9 @@ name = "snow_race_won"  # set ~12 s after 0x2E8, as the stone's scene ends: no c
 [[bit]]
 bit = 0x49F
 name = "snow_race_scene_done"  # set by map 43's CFseqobject 30CCA as sequence 0x18 ends
+[[bit]]
+bit = 0x4BF
+name = "race_pool_drained"  # map 12's XYZAnimator 32DDB, once the pool over the way to the race drains on 0x4BE
 [[bit]]
 bit = 0x245
 name = "tricky_flame"  # lets his scroll's command 4 through (dll211); DIMSnowHorn1 sets it behind 0x172, never set

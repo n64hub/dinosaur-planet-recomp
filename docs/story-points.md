@@ -328,9 +328,14 @@ the race (43) at (-20, 29) on layer -2.
   (four tries): the walking states skip BA38, where the wind's push (+0x808) puts the player on the wind (state 0x49),
   while she carries (dll210 0xA470, 0xAAB4, 0xAF28). Fixed (Wind Bridge on Restored,
   `src/game/cloudrunner_barrels.cpp`): she goes on the wind carrying too, and Treasure Lift leaves her to it. Played:
-  carried across and up into the courtyard. The bottom leads north to the caves and east to the
-  drop to the race, a TriggerPlane at (-12285, 1753, 18871) that takes the layer from 0 to -1, then map 15's at y 1630
-  (0x0774) to -2, map 43 (read, not played).
+  carried across and up into the courtyard. The bottom leads north and south into the caves; east of it is a grate.
+- The way to the race. In the hall east of the courtyard, on the fortress's floor (y 1866), a pool fills a pit at
+  (-11960, 18867), its water at y 1824 over a tunnel that runs west under the courtyard. Swimming, no button dives (Z,
+  B, A, R and L played). XYZAnimator (356, 32DDB) drains it on 0x4BE, the gold's (below), and sets 0x4BF once drained.
+  The tunnel crosses map 12's TriggerPlane at (-12285, 1753, 18871), layer 0 to -1, and map 15's at y 1630, to -2,
+  and drops into map 43, 1100 units east of the bikes. Played: from `--place -12068,1870,18867,0` with `--bits
+  458=8448,2e1,43,34f,359` and 0x4BE set 3 s in (`4be@6`), the pool drained in 6 s and she walked west into map 43, at
+  y 1263, 10 s later. Without 0x34F and 0x359, Kyte's Guardian scene pulls her into the courtyard and holds her there.
 - The race. Its bikes are in map 43's group 1 (`--bits 4a3=7`). Beating the ClubSharpClaw sets 0x4BA. A beside
   CRSnowBike mounts it (0x49D, 0x497) and the race runs; a lost race (0x499) puts the player back beside the bike. Five
   rams on CRSnowClaw drop the SpellStone (CRSpellstone, 730), and picking it up sets 0x2E8, on which CRCloudRace (729
@@ -387,7 +392,7 @@ one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
 Left to play: 29FA's rescue (no way up to its ledge found), the babies 29B3, map 30's and map 15's (from the master
 chest), Kyte landing at the gold perch (she stays by the sideload that loaded her, so 0x8D1, 0x4BE and 0x4C1 are read,
-not played) and the way from the caves to the race. Read from the ROM, nothing sets 0x4B7, 0x4B8
+not played; the way to the race waits on 0x4BE too). Read from the ROM, nothing sets 0x4B7, 0x4B8
 (CFGuardian's sequence at 0x1D5C) or 0x4DC, and Krystal makes no hit of type 0xF, which the ProjectileSwitches by
 the main door take, but by the two ZBombs there.
 
