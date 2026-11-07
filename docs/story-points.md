@@ -374,8 +374,12 @@ Each with what shows it, by the DLL that reads or sets it (`dll <n>`) or the tas
 - 0x3A0: task 14, swapped to Krystal.
 - 0x88, 0x3B0, 0x2C5, 0x615: tasks 15 to 18 in Cape Claw: the bribe (CCguardgiving, 447), Lightfoot (CClightfoot, 449),
   Kyte, the courtyard (0x2C5 and 0x615 are read by CClevcontrol, 460).
-- 0x2D, 0x1D7: spells. dll 210's function behind its export 51 switches on these, and CClightfoot sets 0x1D7 with task
-  16, "COLLECTED FORCEFIELD SPELL". WL_LevelControl (607) sets both too.
+- 0x2D, 0x1D7, 0x40: spells, the bits that show them on the spell scroll (dll1's menu 6), and the value its message
+  0x80002 hands the player (dll210 0x1DDC), held at her state's +0x87C (dll210's export 50). CClightfoot sets 0x1D7
+  with task 16, "COLLECTED FORCEFIELD SPELL". WL_LevelControl (607 0x1118) sets all three in its first update each
+  time it loads, until the fourth spirit (0x318), so Krystal has them from her first visit to Warlock Mountain; the
+  MMShrine's and WGShrine's controls (466, 488) set 0x40 too. 0x40 is the SharpClaw disguise: cast, it puts her in a
+  SharpClaw's shape and drains her magic, and CFPrisonGuard (375) and ClubSharpClaw (215) let her by.
 
 The spirits, set in this order by WL_seqpoint (611) and read by WL_LevelControl (607):
 

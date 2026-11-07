@@ -248,3 +248,18 @@ extern "C" void dino_prison_guard_update(uint8_t* rdram, recomp_context* ctx) {
     float dz = read_float(rdram, player + 0x20) - read_float(rdram, guard + 0x20);
     fprintf(stderr, "cloudrunner: player state 0x%X, %.0f from the guard\n", state, sqrtf(dx * dx + dz * dz));
 }
+
+// Debug: the item menu's message to the player (dll1 0x2504: $a1 the message, $t4 its value) and the player's held
+// spell as it is asked to change (dll210 0x6DD8: $a2 the spell).
+extern "C" void dino_debug_menu_send(uint8_t* rdram, recomp_context* ctx) {
+    if (logging) {
+        fprintf(stderr, "cloudrunner: menu sends 0x%X value 0x%X\n", (uint32_t)ctx->r5, (uint32_t)ctx->r12);
+    }
+}
+
+extern "C" void dino_debug_player_spell(uint8_t* rdram, recomp_context* ctx) {
+    if (logging) {
+        fprintf(stderr, "cloudrunner: spell 0x%X asked, held 0x%X\n", (uint32_t)ctx->r6,
+            (uint32_t)(int16_t)MEM_H(0x87C, ctx->r5));
+    }
+}

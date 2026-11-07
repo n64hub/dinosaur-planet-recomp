@@ -853,3 +853,13 @@ text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_bab
 func = "dll375_00D0"
 before_vram = 0x901A902C
 text = '{ void dino_prison_guard_update(uint8_t*, recomp_context*); dino_prison_guard_update(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll1_1FEC"
+before_vram = 0x90002584
+text = '{ void dino_debug_menu_send(uint8_t*, recomp_context*); dino_debug_menu_send(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll210_6DD8"
+before_vram = 0x900EEBD8
+text = '{ void dino_debug_player_spell(uint8_t*, recomp_context*); dino_debug_player_spell(rdram, ctx); }'
