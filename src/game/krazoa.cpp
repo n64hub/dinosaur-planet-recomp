@@ -99,8 +99,10 @@
 //   climbs to a platform at 192 and a walkway north-east to the magic wing. The east Transporter's room, with the
 //   room the red Krazoa stands in west of it, joins the hub by no floor either.
 // - Restored places a Transporter at the shaft's top and one at its bottom, sending to warp entries 45 and 46 (empty
-//   in ROM file 30), which are filled beside the other pad: an entry on a pad's own spot drops the player down the
-//   shaft to the pit (played). Each wing gets a section door at its mouth, and at its end a console and a text block.
+//   in ROM file 30). 45 is filled beside the bottom pad: an entry on a pad's own spot over the shaft drops the player
+//   down it to the pit (played). 46 is filled at the west Transporter, as 93 is: it stands 13 above the high hall's
+//   floor, and a player who walks at it from the hall stops 46 short and isn't taken (played), but one put on it is,
+//   and walks off it east to the shaft's pad. Each wing gets a section door at its mouth, and at its end a console and a text block.
 //   The blocks go off in turn, fire, earth, water, magic, each needing the last one's done bit (+0x20) and setting
 //   its own (+0x1E): 0x6A7-0x6AA, saved bits in ROM file 55 that nothing in the code or the maps uses. The fire wing's
 //   door opens with 0x52B, the tablet room's, and each other wing's with the block before it. The last door, between
@@ -329,7 +331,7 @@ namespace {
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
         { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
         { 45, 4860.0f, 0.0f, 23358.0f, Setting::Palace },
-        { 46, 4620.0f, 960.0f, 23358.0f, Setting::Palace },
+        { 46, 4481.0f, 973.0f, 23358.0f, Setting::Palace },
     };
 
     // A change to one placement in a map's object list, found by its map, object id and unique id (+0x14).
