@@ -622,7 +622,7 @@ text = "{ void dino_camera_turn(uint8_t*, recomp_context*); dino_camera_turn(rdr
 [[patches.hook]]
 func = "func_800145AC"
 before_vram = 0x800145AC
-text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int w = dino_warp_due(); if (w >= 0) { ctx->r4 = w; ctx->r5 = 0; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
+text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int dino_dragon_rock_door(uint8_t*, recomp_context*); int w = dino_warp_due(); int fade = 0; if (w < 0) { w = dino_dragon_rock_door(rdram, ctx); *ctx = saved; fade = 1; } if (w >= 0) { ctx->r4 = w; ctx->r5 = fade; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
 
 # --watch-bits (src/game/story.cpp, development): func_80014670 sets the bit in $a0 to the value in $a1, and at its start
 # says so when the bit is watched.
@@ -637,7 +637,7 @@ text = '{ void dino_bit_setting(uint8_t*, recomp_context*); dino_bit_setting(rdr
 [[patches.hook]]
 func = "func_8004D1D4"
 before_vram = 0x8004D208
-text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); dino_krazoa_warp_entry(rdram, ctx); }'
+text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); void dino_dragon_rock_warp_entry(uint8_t*, recomp_context*); dino_krazoa_warp_entry(rdram, ctx); dino_dragon_rock_warp_entry(rdram, ctx); }'
 
 [[patches.hook]]
 func = "func_80045BF4"
