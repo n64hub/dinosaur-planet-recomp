@@ -206,21 +206,38 @@ the race (43) at (-20, 29) on layer -2.
 - The key. SwapStone Circle's chief (SC_chieflightfoot, 518) gives it only at the circle's act 9, the 4-bit field
   0xE7, which SC_levelcontrol (519) moves on as the player enters map 14. Talked to, he sets 0x60E and 0x60F, and his
   sequence sets 0x611, the bit Moon Mountain Pass's padlock needs. Played.
-- The courtyard. Its roof (CFBlastedRoof, 389) sets 0x2E1 after two explosions; with 0x2E1 the floor below
-  (CFExplodeFloor, 390) blows, its pieces set 0x43, and the force field fades (0x34F, 0x359). Played from 0x2E1 set:
-  what explodes on the roof is not played.
+- The courtyard. Its roof (CFBlastedRoof, 389, about 110 above the courtyard's floor at its middle) sets 0x2E1 after
+  two explosions: it counts hits of type 5, a CFbarrel's explosion (388 0x1274), one a barrel, up to its +0x1A, each
+  setting the next of 0x2DF on (389 0x0204-0x02B0). With 0x2E1 the floor below (CFExplodeFloor, 390) blows, its pieces
+  set 0x43, the force field fades (0x34F, 0x359), and Kyte joins: her mother hid her five brothers and sisters. Played
+  from 0x2E1 set, walked in over the wind bridge (the shaft, below); a barrel carried there and blown is not played.
 - The explosive key. The courtyard's guard, beaten, sets 0x4DF, and CFExplosiveKey (272) appears, 0x8FC once picked
   up. Its door, CCExplosiveDoor (308) in the corridor's east wall at (-13003, 2049, 18679), takes it from the item
   menu: 0x8FC is taken and the door's sequence sets 0x8FF. Played, the key's pickup by bit.
-- The wall. Behind that door are four CFbarrels (388). A barrel explodes at its third hit, or at once to an explosion
-  or fire, but counts hits only after it has been picked up, and a script beside one pressing A, B, Z, L, R or a C
-  button never lifted it, so carrying one is not played. An explosion at CFBlastedWall (389), in the same wall at
-  z 18879, sets 0x8C9; CFExplodeWall (390) then blows (0x8CA), and walking east through it drops the player into the
-  treasure caves in two seconds. Played from 0x8C9 set.
+- The wall. Behind that door are four CFbarrels (388). A within 20 units of one lifts it (A farther off swings the
+  staff), and it is carried through the door and round the corridor to the cracked wall, CFBlastedWall (389) in the
+  same wall at z 18879. A beside the wall sets nothing down; a step back it does. A barrel explodes at its third hit
+  (one set down counts them too), or at once to an explosion or fire: set down at (-13012, 18891) and swung at from
+  (-13016, 18860) it sets 0x8C9, CFExplodeWall (390) blows (0x8CA) a second later, and Krystal loses 4 health and is
+  thrown through. Played from `before-cloudrunner` with `--steer` (CLAUDE.md, Testing).
+- The shaft. Past the wall is CFTreasWindLift (370), at (-12902, 1840, 18886): its wind blows while 0x30D is set, which
+  the TriggerPlanes in the hole, on the east lip and at the bottom's two sides flip on each crossing, and its direction
+  is 0x8C8, which only the two CFWindSwitch levers (386) at the bottom flip. Clear, it holds the player at the
+  corridor's height, a bridge to the courtyard on the east (played); set, it lowers her and lets her go at the bottom.
+  So a player from the top hovered there and no button let her down (played: Z, B, A, R, L, Z+R), and only once, of
+  two tries, did one carrying a barrel fall. Fixed (Treasure Lift on Restored, `src/game/cloudrunner.cpp`): stepping in
+  from the top sets 0x8C8. Played: lowered to the bottom (map 15, y 1859), on north into the treasure caves; A at the
+  south lever, standing still within 20 units, turns 0x8C8 back. The bottom leads north to the caves and east to the
+  drop to the race, a TriggerPlane at (-12285, 1753, 18871) that takes the layer from 0 to -1, then map 15's at y 1630
+  (0x0774) to -2, map 43 (read, not played).
 - The race. Its bikes are in map 43's group 1 (`--bits 4a3=7`). Beating the ClubSharpClaw sets 0x4BA. A beside
   CRSnowBike mounts it (0x49D, 0x497) and the race runs; a lost race (0x499) puts the player back beside the bike. Five
   rams on CRSnowClaw drop the SpellStone (CRSpellstone, 730), 0x2E8 once picked up, and 0x49A then runs the
-  sequence that sets 0x49F. Played to a lost race; the win is read from the code.
+  sequence that sets 0x49F. Played to a lost race; the win is read from the code: a ram is CRSnowBike's hit of type
+  0x14, made only while the player rides it faster than 2 (732 0x1188-0x1214); CRSnowClaw (728 0x0418) counts four
+  then drops the stone at the fifth, if CRSpellstone is within 500 units of it; the race is lost when the fuel runs out
+  (732 0x0DB4, CRFuelTank adds 3000), not to time; stick Y is the throttle and B the one button read. Nothing in code
+  or placements sets 0x49A.
 - Bonehead, CFGuardian (369) in map 43, keeps its state in the field 0x4B and starts from it: 6 with the power on
   (0x57), 9 with 0x43, 10 with 0x4BE (which needs 0x8D1 and 0x300), 12 with 0x4C1. At 12, 0x4B7 plays its sequence
   11 and with 0x49A moves it to 13; at 13 the SpellStone used on it from the item menu sets 0x4AB, its sequence sets
@@ -232,9 +249,10 @@ the object takes it in the frame the player presses A with it targeted: dll2 set
 the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
-Not played: the dungeon (map 16), the power, Kyte, the five baby CloudRunners (the fifth is in map 15, from the master
-chest, which needs 0x529 and 0x8CC), the gold, and the way from the treasure caves to the race. Nothing sets 0x4B8, the
-bit CFGuardian's sequence at 0x1D5C waits on.
+Not played: the roof's two barrels, the dungeon (map 16), the power, the five baby CloudRunners (the fifth is in map
+15, from the master chest), the gold, the way from the caves to the race and the race won. Read from the ROM, nothing
+sets 0x8D1 (so 0x4BE, Bonehead's state 10, never comes), 0x4B8 (CFGuardian's sequence at 0x1D5C) or 0x49A, and Krystal
+makes no hit of type 0xF, which the ProjectileSwitches by the main door take, but by the two ZBombs there.
 
 ## The bits
 

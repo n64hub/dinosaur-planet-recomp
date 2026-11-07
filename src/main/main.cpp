@@ -548,7 +548,8 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
 //   wait <s>            nothing pressed for that long
 //   goto <x> <z> [r]    walk to within r (40) of that world point; the stick is turned by the camera's yaw, since
 //                       the game walks by the view. A step not there in 30 s gives up and the next starts.
-//   face <x> <z>        turn toward that point in place, 0.3 s
+//   face <x> <z>        turn toward that point, 0.3 s, which walks the player up to about 30 units: to stand at
+//                       a spot facing something, goto it from the far side instead
 //   press <hex>         those buttons for 0.15 s, then 0.25 s of nothing; hold <hex> <s> for that long
 //   until <bit>         the steps after it, up to the next loop, repeat until that bit of the game's is set
 // Each step it starts prints "steer: <seconds> step <n>" with where the player is.
