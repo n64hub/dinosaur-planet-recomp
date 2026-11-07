@@ -17,6 +17,16 @@
 // as it starts, with no test: a swing pressed on the frame a player comes back after a death, or comes into a map, read
 // address 0x44 and crashed. Pressed every other frame through falls into the Volcano Force Point's lava it crashed in
 // the first run; a swing a frame later finds its weapon.
+//
+// An effect (dll13, each 0x90 bytes) keeps the object it belongs to in a table of its own, 16 bytes an entry, that the
+// effect's +0x11A >> 9 indexes, and the object free doesn't clear that table. The effects' draw (dll13_1080) reads the
+// object's +0x18 position and, for its parent at +0x30 (0 for none), the parent's first halfword: an effect drawn after
+// its object is freed reads what the freed memory holds, and a word there that isn't an address read outside memory
+// and crashed, about a second into the Desert Force Point's place's sequence (0x373) on some plays of it. The draw now
+// takes a parent outside the game's memory for none.
+
+#include <cstdio>
+#include <cstdlib>
 
 #include "recomp.h"
 
@@ -74,4 +84,20 @@ extern "C" void dino_player_weapon(uint8_t* rdram, recomp_context* ctx) {
     MEM_W(0x10, call.r29) = MEM_W(0x30, player);
     LOOKUP_FUNC(MEM_W(0x3C, ctx->r28))(rdram, &call);
     MEM_W(0xC8, player) = call.r2;
+}
+
+// dll13_1080 at 0x90034A34, which has read the parent of an effect's object (at its +0x30) into $v0 and goes on when
+// it isn't 0, the object in $s3: a parent outside the game's memory is a freed object's, so none. DINO_LOG_EFFECTS set
+// (development) prints each.
+extern "C" void dino_effect_parent(uint8_t* rdram, recomp_context* ctx) {
+    uint32_t parent = (uint32_t)ctx->r2;
+    if (parent == 0 || (parent >= 0x80000000u && parent < 0x80800000u)) {
+        return;
+    }
+    static const bool logging = std::getenv("DINO_LOG_EFFECTS") != nullptr;
+    if (logging) {
+        fprintf(stderr, "effects: object 0x%08X has parent 0x%08X, freed (its +0x44 %04X, +0x46 %04X)\n",
+            (uint32_t)ctx->r19, parent, (uint16_t)MEM_H(0x44, ctx->r19), (uint16_t)MEM_H(0x46, ctx->r19));
+    }
+    ctx->r2 = 0;
 }
