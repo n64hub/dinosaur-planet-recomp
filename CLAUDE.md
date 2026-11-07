@@ -100,7 +100,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   world and each model interpolate their translations, which RT64 by itself drops for a step that size.
 - **Krazoa shrines.** Eight tests, each giving a spirit the player carries as a mask of its own to Warlock Mountain
   (map 11), whose act (bit 0xE4) each win moves on. The prototype reaches three from the world and has no step at
-  Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Finished by default, finishes them out
+  Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Restored by default, finishes them out
   of what the ROM holds, and Original leaves them as the console plays them (`src/game/krazoa.cpp`'s header has the
   order, the bits and the evidence). Its Krazoa Tablets setting, Restored by default, does the same for Cape Claw's
   tablet room: the third tablet and the way on to Krazoa Palace.
