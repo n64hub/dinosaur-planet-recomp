@@ -206,6 +206,13 @@ func = "func_80022F94"
 before_vram = 0x80022F94
 text = "{ void dino_object_freed(uint8_t*, uint32_t); dino_object_freed(rdram, (uint32_t)ctx->r4); }"
 
+# An effect drawn after its object is freed: dll13's draw reads the freed object's parent and that parent's first
+# halfword, and a parent word that isn't an address read outside memory (src/game/objects.cpp). It is taken for none.
+[[patches.hook]]
+func = "dll13_1080"
+before_vram = 0x90034A34
+text = "{ void dino_effect_parent(uint8_t*, recomp_context*); dino_effect_parent(rdram, ctx); }"
+
 # The player's weapon read before it is made: a new player's first update runs its state machine before it makes its
 # staff or sword, and the swing's state reads it as it starts with no test, so a swing pressed on the frame the player
 # comes back after a death crashed (src/game/objects.cpp). The update makes it before its state machine runs.
@@ -250,6 +257,18 @@ text = "{ if (ctx->r4 == 0) return; }"
 func = "func_8004D470"
 vram = 0x8004D484
 value = 0x34048FC0
+
+# Item pickups: a pickup (dll272) taken with A gives dll3 the object the player's pickup sequence holds up (dll3_9E58,
+# from +6 of the block at its def's +0x18) and plays the player's pickup (state 0x2A), whose end starts the player's
+# sequence 0 (dll210_16220), the one whose event hands the item over. That sequence's VariableObject (object 0x443)
+# becomes the held object, unless it is -1 (dll3_8900), and every pickup's def holds 0 there: object 0, the player.
+# Each start made a second player, the pickup's state started the sequence again the next frame, and so on until the
+# object heap was full and dll3_8900 read +0xB8 of the null object func_800213EC returned, or a copy ran past the
+# heap. Golden Plains' portable hole spell crashed so, as Sabre and as Krystal. A held object of 0 is none ($a0).
+[[patches.hook]]
+func = "dll3_9E58"
+before_vram = 0x90014A6C
+text = "{ if (ctx->r4 == 0) ctx->r4 = -1; }"
 
 # RT64's interpolation to the display's rate: each hook writes RT64's commands into the list where the game is about to
 # write its own (src/game/interpolation.cpp's header says what and why). func_8004225C draws the frame, and takes the
@@ -607,7 +626,7 @@ text = '{ void dino_krazoa_map_loaded(uint8_t*, recomp_context*); dino_krazoa_ma
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
-text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); }'
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
 # whether their spirit is released by 0x366, a bit nothing sets: they ask CC's (0x221) and WG's (0x222) released bits
@@ -753,3 +772,20 @@ text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_upd
 func = "dll708_0290"
 before_vram = 0x9028DA9C
 text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_update(rdram, ctx)) return; }'
+
+# The Desert Force Point (src/game/force_point.cpp): GP_LevelControl's BIT_SET(0x5F3, 1) (dll547 0xC8), and DFPLift1's
+# two reads of how far it travels (dll641 0x444, 0x528).
+[[patches.hook]]
+func = "dll547_0018"
+before_vram = 0x9021DB44
+text = '{ void dino_force_point_golden_plains(uint8_t*, recomp_context*); dino_force_point_golden_plains(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll641_009C"
+before_vram = 0x90259204
+text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_point_lift(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll641_009C"
+before_vram = 0x902592E8
+text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_point_lift(rdram, ctx); }'
