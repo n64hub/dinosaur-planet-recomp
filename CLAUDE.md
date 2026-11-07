@@ -134,6 +134,12 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   Drakor (map 44). The General tab's Krazoa Palace setting, Restored by default, places them, chains the four wings
   by saved bits nothing else uses (0x6A7-0x6AA) and has the red Krazoa send the player to Drakor, and Original
   leaves the rooms empty (`src/game/krazoa.cpp`'s header has the layout and the evidence).
+- **The third SpellStone.** A map's act, a story value, picks which of its objects load, and the Volcano Force Point
+  and Walled City never leave act 1 in the ROM, so the third SpellStone has nowhere to go and Walled City's Sun and
+  Moon Stones never show; nothing gives the moonseeds Krystal plants in Moon Mountain Pass either. The General tab's
+  Third SpellStone setting, Restored by default, moves both maps' acts with the story and gives four moonseeds as the
+  stone is placed, and Original leaves them as they were (`src/game/acts.cpp` and `src/game/moonseeds.cpp` have the
+  evidence, docs/story-points.md, The maps' acts, how they move).
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
@@ -146,6 +152,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and object
   jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
   `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each event of Golden Plains' shrine,
+  `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves,
   `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
   `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on, `DINO_LOG_EFFECTS=1`
   each effect drawn after its object was freed,

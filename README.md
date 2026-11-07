@@ -101,6 +101,12 @@ Fixed:
   could lie out of reach.
 - BOSS TRex's SpellStone (BOSS TRex on Restored): beating the TRex went back to the title with no SpellStone. The
   third SpellStone is now carried out, through the arena's own way back to Walled City.
+- The third SpellStone (Third SpellStone on Restored): the Volcano Force Point loaded as on the first visit every
+  time, so the SpellStone carried back from BOSS TRex had no path to open and no place to go, and Walled City never
+  showed its Sun and Moon Stones. The force point now loads its second visit while the stone is carried and its third
+  once it is placed, and Walled City its second once the third spirit is released. And the moonseeds Krystal plants
+  in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives Sabre four, one for
+  each of the pass's receptacles.
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.

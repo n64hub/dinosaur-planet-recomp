@@ -56,6 +56,9 @@ namespace dino {
     void add_cloudrunner_options(recomp::config::Config& general);
     // BOSS TRex's fight's setting (boss_trex.cpp).
     void add_boss_trex_options(recomp::config::Config& general);
+    // The third SpellStone's setting (acts.cpp), and whether it is on Restored (moonseeds.cpp).
+    void add_third_stone_options(recomp::config::Config& general);
+    bool third_stone_restored();
     // The right stick of --input (src/main/main.cpp, development).
     void set_scripted_camera(float x, float y);
 }
