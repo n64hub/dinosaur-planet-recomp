@@ -425,8 +425,8 @@ SwapStone Hollow's own, as played: 0xC2 counts the white mushrooms given to the 
 quest's step. Given them at step 4, five or ten, she plays her sequence, sets 0x486 and step 5, and the game warps to
 the Volcano Force Point (map 4) for its cutscene; 0x487 and step 6 come with a second visit there, and step 7 back in
 the hollow. 0xC3 starts Tricky's run to her (SHtricky, 501, and an SHseqobject, 309, wait on it), and nothing in the
-game sets it: `patches/swapstone_hollow.c` does. 0x887 is the SwapStone's zone (SHswapstone answers only while it is
-set), kept by TriggerPlane 40b79 (`us.toml` says how).
+game sets it: `patches/swapstone_hollow.c` does, with Tricky's Run on Restored. 0x887 is the SwapStone's zone
+(SHswapstone answers only while it is set), kept by TriggerPlane 40b79 (`us.toml` says how).
 
 The way on to the first SpellStone is down the hollow's river: the only warp into the Volcano Force Point is the
 Queen's (entry 81, dll507 0x4F8), and map 4 borders only Diamond Bay. The river is water at y -797 over a bed 3 to 38
