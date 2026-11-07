@@ -25,8 +25,8 @@
 //   and nothing reads it: at 0 it wraps to 255 and the fight goes on. The update also fills the player's magic.
 // - Its stages: a hit of any kind on a head's spheres (13 and 14 on the left, 8 and 9 on the right) lights it, a hit of
 //   type 0xF within about 9 s provokes it, and a hit of type 0xF on sphere 0 or 1 finishes that head; then the last
-//   stage, with its health bar and flame. Type 0xF is the projectile spell's (projball, dll255), which Krystal picks up
-//   on Dragon Rock's top (ProjectileSpell, 0x5CE) and casts from the spell scroll (C-left): A on it aims, A fires.
+//   stage, with its health bar and flame. Type 0xF is the projectile spell's (projball, dll255, the scroll's item
+//   0x2D), cast from the spell scroll (C-left): A on it aims, A fires.
 // - The Nurse (dll708) circles the player and knocks her back, into the pit beside the dragon too; a KamSwitch (dll285)
 //   hit by the projectile raises the KamColumn (dll709) out of it.
 // - CRSpellstone (dll730, object 0x390) is the SpellStone CloudRunner's race drops: +0x1E the bit set once picked up,
@@ -38,12 +38,18 @@
 // - The way in and out: in the arena on layer -1 once 0x609 is set and the dragon isn't beaten, the player is warped
 //   by entry 89, filled with the room's setuppoint (uid 0x3534A); in the room 3 s after the stone is picked up, by entry
 //   84, filled with the arena's middle (TriggerPlane uid 0x33F78), on layer -1. The main thread's loop asks each pass
-//   (us.toml's hook on func_800145AC), and the warp fades as the game's own do.
+//   (us.toml's hook on func_800145AC), and the warp fades as the game's own do. The same hook fills the arena's magic.
 // - The health's store (0x1BB8): at 0 the dragon is beaten. A CRSpellstone is placed at the player, its +0x1E 0x7A8
 //   and +0x20 0x5F4 (the stone placed at the Desert Force Point), and picked up there at once.
 // - The dragon's and the Nurse's updates: once it is beaten (0x7A8 or 0x5F4 set, so on every later visit too) each is
 //   hidden (+0x6 0x4000, as CRSpellstone hides itself) and taken out of the hit list (func_80022274), and its update
 //   is skipped.
+// - The ice spell (0x5CE), the only spell that puts out a DRLavaControl: its pickup on the top reaches far enough for
+//   the player to take it, and the scroll aims and casts it as it does the projectile (below).
+// - The arena's magic: while its fight is on, the player's magic is filled there as the dragon's fight fills it
+//   (below), so its three DRLavaControls can be put out.
+// - The arena's DR_EarthWarrior: fed as the item nothing on Dragon Rock gives would feed him, once in the fight and
+//   once more for each DRLavaControl put out (below).
 
 #include <chrono>
 #include <cstdint>
@@ -86,6 +92,7 @@ namespace {
     constexpr int spellstone = 0x390;
     constexpr int fourth_stone_carried = 0x7A8;
     constexpr int fourth_stone_placed = 0x5F4;
+    constexpr int ice_spell = 0x5CE;
 
     // DINO_LOG_DRAGON set (development): the dragon's health as it falls, and its end, are printed.
     const bool logging = std::getenv("DINO_LOG_DRAGON") != nullptr;
@@ -161,6 +168,7 @@ namespace {
     // The way in and out. The layer the player is on is the signed byte at 0x80092A8C (func_80047374 raises it).
     constexpr int32_t player_layer = 0x80092A8C;
     constexpr int arena_won = 0x609;
+    constexpr int arena_fight_won = 0x628;
     constexpr int into_room = 89;
     constexpr int out_of_room = 84;
 
@@ -172,7 +180,7 @@ namespace {
     };
     // In world units: the Skeetla arena at the bottom's east end (map 52, layer -1), and the dragon's room (53, layer
     // 0) over the same ground.
-    const Box arena = { 1300.0f, 2400.0f, -1900.0f, -1700.0f, -6550.0f, -5900.0f };
+    const Box arena = { 1300.0f, 2500.0f, -1900.0f, -1700.0f, -6750.0f, -5900.0f };
     const Box room = { 1280.0f, 2560.0f, -2100.0f, -1600.0f, -7040.0f, -5700.0f };
 
     // The two warp entries, empty in ROM file 30: the room's setuppoint (map 53 @0000), and the arena where the
@@ -192,10 +200,12 @@ void dino::add_dragon_rock_options(recomp::config::Config& general) {
     general.add_enum_option(
         kamerian_dragon,
         "Kamerian Dragon",
-        "The Skeetla arena at the bottom of Dragon Rock, once won, leads into the Kamerian Dragon's room. The dragon "
-        "dies once its health runs out, and leaves the fourth SpellStone for the Desert Force Point, which leads back "
-        "out. <b>Original is the prototype as it was left</b>: nothing leads to the room, the fight never ends, and the "
-        "fourth SpellStone is nowhere.",
+        "The ice spell on Dragon Rock's top can be picked up and cast, and the Skeetla arena at its bottom fills "
+        "Krystal's magic and feeds the Earth Warrior while its fight is on and, once won, leads into the Kamerian "
+        "Dragon's room. The dragon dies once its health runs out, and leaves the fourth SpellStone for the Desert "
+        "Force Point, which leads back out. <b>Original is the prototype as it was left</b>: the ice spell can't be "
+        "taken or cast, the arena can't be won, nothing leads to the room, the fight never ends, and the fourth "
+        "SpellStone is nowhere.",
         kamerian_dragon_options,
         KamerianDragon::Restored
     );
@@ -249,6 +259,58 @@ extern "C" int dino_dragon_update(uint8_t* rdram, recomp_context* ctx) {
     return 1;
 }
 
+// The ice spell's pickup on the top (ProjectileSpell, object 0x4A, dll272, uid 0x3397C), which sets 0x5CE once taken.
+// A takes it within 16 of it: that is its def's reach, its target point's bytes 0 and 2 times 4 (within them the player
+// highlights it, dll2_1F8C, and A marks it taken, dll2.19), and dll272's own, its state's +0x8 (0x02BC, from the same
+// point). But the player stops about 18 from its middle, from whichever side she comes, so A never takes it.
+constexpr int ice_spell_pickup = 0x4A;
+constexpr int pickup_reach = 24;
+
+// us.toml's hook at the start of dll272's update (0x0430): a0 the object. The ice spell's pickup reaches 24.
+extern "C" void dino_ice_spell_pickup(uint8_t* rdram, recomp_context* ctx) {
+    gpr object = ctx->r4;
+    if (!restored() || MEM_H(0x46, object) != ice_spell_pickup) {
+        return;
+    }
+    gpr points = (gpr)MEM_W(0x78, object);
+    if (points != 0) {
+        gpr point = points + 5 * MEM_BU(0xD4, object);
+        MEM_B(0, point) = pickup_reach / 4;
+        MEM_B(2, point) = pickup_reach / 4;
+    }
+    float reach = pickup_reach;
+    uint32_t word;
+    memcpy(&word, &reach, 4);
+    MEM_W(0x8, (gpr)MEM_W(0xB8, object)) = word;
+}
+
+// The ice spell (0x5CE). The spell scroll sends the player the item it uses (dll210_1DDC, message 0x80002), and only
+// the projectile (0x2D) is aimed: the player goes into the spell aim (state 0x3A, dll210_18EAC), and any other spell is
+// only selected. With no target held, the aim then selects the projectile (dll210_6DD8 with 0x2D, at 0x190B8 and
+// 0x19224) and holding A casts the selected spell; for 0x5CE that is the ice blast (dll210_1DC48, 0x19708), which
+// nothing reaches. So the ice spell, which alone puts out a DRLavaControl, can't be cast.
+static bool ice_aim = false;
+
+// us.toml's hook in the player's messages (dll210_1DDC 0x1EF0), before it compares the item the scroll uses, in $t6,
+// with the projectile: the ice spell is aimed as the projectile is, and remembered for the aim.
+extern "C" void dino_ice_spell_use(uint8_t* rdram, recomp_context* ctx) {
+    if (!restored()) {
+        return;
+    }
+    ice_aim = (uint16_t)ctx->r14 == ice_spell;
+    if (ice_aim) {
+        ctx->r14 = 0x2D;
+    }
+}
+
+// us.toml's hooks in the spell aim (dll210_18EAC 0x190B8 and 0x19224), before it selects the projectile ($a2): the
+// ice spell instead, when the scroll used it.
+extern "C" void dino_ice_spell_aim(uint8_t* rdram, recomp_context* ctx) {
+    if (restored() && ice_aim) {
+        ctx->r6 = ice_spell;
+    }
+}
+
 // us.toml's hook in WARP_ENTRY (func_8004D1D4) once it has read entry 0x20(sp) of ROM file 30 into the buffer at
 // 0x1C(sp), as krazoa.cpp's: the door's two entries.
 extern "C" void dino_dragon_rock_warp_entry(uint8_t* rdram, recomp_context* ctx) {
@@ -264,6 +326,80 @@ extern "C" void dino_dragon_rock_warp_entry(uint8_t* rdram, recomp_context* ctx)
             memcpy(&MEM_W(0x8, entry), &d.z, 4);
             MEM_W(0xC, entry) = d.layer;
         }
+    }
+}
+
+// In the arena while its fight is on, magic below a fifth of the most the player holds is filled: the ice spell, which
+// alone puts out a DRLavaControl, costs a point a shot (dll277 0x0080), a DRLavaControl takes 15 hits, about 20 shots
+// as it plays, and with three of them and the most 25, no magic to be had on Dragon Rock and none coming back on its
+// own, the fight can't be won. The dragon's fight a layer up fills it each update (dll707 0x105C), with the player's
+// export 14 (dll210_1CEFC), which plays a sound each time; this fills it with the same call, seldom enough that the
+// sound marks it.
+static void fill_magic(uint8_t* rdram, recomp_context* ctx, gpr player) {
+    gpr stats = (gpr)MEM_W(0x34C, (gpr)MEM_W(0xB8, player));
+    if (stats == 0) {
+        return;
+    }
+    int magic = MEM_H(0x4, stats);
+    int most = MEM_H(0x6, stats);
+    if (magic * 5 >= most) {
+        return;
+    }
+    gpr exports = (gpr)MEM_W(0x0, (gpr)MEM_W(0x68, player));
+    ctx->r4 = player;
+    ctx->r5 = most - magic;
+    call(rdram, ctx, MEM_W(0x3C, exports));
+    if (logging) {
+        fprintf(stderr, "dragon: the arena fills magic from %d to %d\n", magic, most);
+    }
+}
+
+// The arena's DR_EarthWarrior (dll713), shackled (its setup's +0x19 is 1), starts with 1 health (+0xA56 of its state,
+// 0x03B8), loses one to each Skeetla's bite (0x30C0) and dies below -20 (0x5DE, the fight lost). The arena's
+// DR_Creators send their Skeetlas at him from as soon as the arena loads, as the player comes to its door, and the
+// bites start about 35 s later, before the player can have put out a DRLavaControl: so 21 bites, about 45 s of them,
+// are all the fight has, and the Skeetlas that chase the player from the door's DR_Creators follow her in. The game
+// keeps him alive by feeding: item 0xC1 given him adds 12 (0x0974), as his export 20 does (0x3444), but nothing on
+// Dragon Rock gives that item and nothing calls that export. So, as a fed item would, 12 is added once his health is
+// down to -10: once in a fight, and once more for each DRLavaControl put out (0x789), so a player who stops putting
+// them out still loses him.
+constexpr int warrior_fed_at = -10;
+constexpr int warrior_feed = 12;
+constexpr int lava_controls_out = 0x789;
+
+// us.toml's hook at the start of dll713's update (0x0408): a0 the object.
+extern "C" void dino_earth_warrior(uint8_t* rdram, recomp_context* ctx) {
+    if (!restored()) {
+        return;
+    }
+    gpr warrior = ctx->r4;
+    gpr setup = (gpr)MEM_W(0x4C, warrior);
+    gpr state = (gpr)MEM_W(0xB8, warrior);
+    if (setup == 0 || state == 0 || MEM_B(0x19, setup) != 1) {
+        return;
+    }
+    // A fight's feeds: a warrior that hasn't updated for a while has been unloaded, and the next is a new fight (a long
+    // pause counts as one too, which can only feed him more).
+    using clock = std::chrono::steady_clock;
+    static clock::time_point last_update;
+    static int fed = 0;
+    clock::time_point now = clock::now();
+    if (now - last_update > std::chrono::seconds(2)) {
+        fed = 0;
+    }
+    last_update = now;
+    int health = (int16_t)MEM_H(0xA56, state);
+    if (health > warrior_fed_at || health < -20) {
+        return;
+    }
+    Calls calls(ctx);
+    if (get(rdram, ctx, arena_fight_won) || fed > get(rdram, ctx, lava_controls_out)) {
+        return;
+    }
+    MEM_H(0xA56, state) = health + warrior_feed;
+    fed++;
+    if (logging) {
+        fprintf(stderr, "dragon: the warrior is fed, health %d to %d\n", health, health + warrior_feed);
     }
 }
 
@@ -295,6 +431,9 @@ extern "C" int dino_dragon_rock_door(uint8_t* rdram, recomp_context* ctx) {
     int layer = MEM_B(0, (gpr)player_layer);
     int warp = -1;
     if (layer == -1 && arena.holds(x, y, z)) {
+        if (!get(rdram, ctx, arena_fight_won)) {
+            fill_magic(rdram, ctx, player);
+        }
         if (get(rdram, ctx, arena_won) && !beaten(rdram, ctx)) {
             warp = into_room;
         }
