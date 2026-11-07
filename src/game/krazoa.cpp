@@ -300,7 +300,7 @@ namespace {
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
         { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
         { 45, 4860.0f, 0.0f, 23358.0f, Setting::Palace },
-        { 46, 4730.0f, 973.0f, 23358.0f, Setting::Palace },
+        { 46, 4620.0f, 960.0f, 23358.0f, Setting::Palace },
     };
 
     // A change to one placement in a map's object list, found by its map, object id and unique id (+0x14).
@@ -419,6 +419,9 @@ namespace {
         call(rdram, ctx, new_placement);
         gpr p = ctx->r2;
         MEM_B(2, p) = size / 4;
+        // Flag 2 (+4): the object loop (func_8004A800, 0x8004A94C) never frees it as out of range. The palace's are made
+        // once as it loads, and the text blocks were freed while the player was in another wing, never to come back.
+        MEM_B(4, p) = map == palace ? 2 : 0;
         memcpy(&MEM_W(0x8, p), &x, 4);
         memcpy(&MEM_W(0xC, p), &y, 4);
         memcpy(&MEM_W(0x10, p), &z, 4);
