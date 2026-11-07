@@ -619,7 +619,7 @@ text = '{ void dino_krazoa_map_loaded(uint8_t*, recomp_context*); dino_krazoa_ma
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
-text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); }'
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
 # whether their spirit is released by 0x366, a bit nothing sets: they ask CC's (0x221) and WG's (0x222) released bits
@@ -765,3 +765,20 @@ text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_upd
 func = "dll708_0290"
 before_vram = 0x9028DA9C
 text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_update(rdram, ctx)) return; }'
+
+# The Desert Force Point (src/game/force_point.cpp): GP_LevelControl's BIT_SET(0x5F3, 1) (dll547 0xC8), and DFPLift1's
+# two reads of how far it travels (dll641 0x444, 0x528).
+[[patches.hook]]
+func = "dll547_0018"
+before_vram = 0x9021DB44
+text = '{ void dino_force_point_golden_plains(uint8_t*, recomp_context*); dino_force_point_golden_plains(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll641_009C"
+before_vram = 0x90259204
+text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_point_lift(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll641_009C"
+before_vram = 0x902592E8
+text = '{ void dino_force_point_lift(uint8_t*, recomp_context*); dino_force_point_lift(rdram, ctx); }'
