@@ -581,7 +581,14 @@ func = "dll780_011C"
 before_vram = 0x902C9938
 text = '{ void dino_wc_beacon(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_beacon(rdram, &c); }'
 
-# BOSS TRex's arena (patches/boss_trex.c says what it fixes), with BOSS TRex on Restored (src/game/boss_trex.cpp).
+# BOSS TRex's arena (patches/boss_trex.c says what each fixes). A floor switch's update (dll703_00A4, the switch in
+# $a0) counts a player standing on its pad with dino_trex_switch first.
+[[patches.hook]]
+func = "dll703_00A4"
+before_vram = 0x90289920
+text = '{ void dino_trex_switch(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_switch(rdram, &c); }'
+
+# With BOSS TRex on Restored (src/game/boss_trex.cpp):
 # The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
 # and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call.
 [[patches.instruction]]

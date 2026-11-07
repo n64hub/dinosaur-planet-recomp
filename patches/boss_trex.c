@@ -23,3 +23,43 @@ void dino_trex_beaten(void) {
     func_80014670(RETURN_WARP_BIT, 1);
     func_80014670(PLAYER_DOOR_BIT, 1);
 }
+
+// What a patch reads of an object: its position in its map and its hit data (obj+0x58), whose +0x10F counts what
+// touches it this frame.
+typedef struct {
+    u8 pad[0xC];
+    f32 x, y, z;
+    u8 pad2[0x58 - 0x18];
+    u8* hits;
+} Object;
+
+extern Object* func_80023914(void);                    // the player
+extern void func_80026184(Object* object, Object* by); // adds a contact to the object's hit data
+
+#define SWITCH_RADIUS 28.0f
+#define SWITCH_HEIGHT 20.0f
+
+// The arena's floor switches (KT_RexFloorSwit, dll703, eight, two at the ends of each corridor) charge their
+// corridor's laser wall while the player stands on one: its update (dll703 0x298-0x2B8) keeps a count of 5 frames
+// while its hit data has a contact (+0x10F) and its side is live, and charges the corridor's bit (0x56A-0x56D) a step
+// each 10 frames of it, to 15, when the wall fires; a frame without one sets the bit back to 0 (0x6BC-0x6D4). The
+// player's only contact is its floor check (dll27_214C), from the surface it stands on. But the switch's model has its
+// collision mesh off its drawing: its top is the square 9 to 47 from its place in x and z, 5 up, with a slope to 0 and
+// 56 on each side, so it lies 28 north-east of the pad drawn round the switch's place, and a player standing on the
+// pad stands on the floor beside it and never charges it (the floor check under her found the map's floor alone).
+// Here a player standing on the pad as it is drawn, within 28 of its place, is a contact, at the start of the
+// switch's update (the hook at dll703_00A4's start); the floor check adds none twice.
+void dino_trex_switch(Object* floor_switch) {
+    Object* player = func_80023914();
+    f32 dx, dy, dz;
+
+    if (player == 0 || floor_switch->hits == 0) {
+        return;
+    }
+    dx = player->x - floor_switch->x;
+    dy = player->y - floor_switch->y;
+    dz = player->z - floor_switch->z;
+    if (dx * dx + dz * dz <= SWITCH_RADIUS * SWITCH_RADIUS && dy > -SWITCH_HEIGHT && dy < SWITCH_HEIGHT) {
+        func_80026184(floor_switch, player);
+    }
+}
