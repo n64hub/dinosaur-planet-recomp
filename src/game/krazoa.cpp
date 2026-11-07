@@ -614,9 +614,9 @@ extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
     }
     // EC's Transporter (extras[0]) stands once both stones are in the TRex statues' sockets, the task list's "used Sun
     // and Moon Stones to open shrine": Walled City's act 2 loads the sockets (dll785), and each sets its done bit at
-    // its sequence's event 1 (0x202 the sun's, 0x243 the moon's, dll785_0634). It is placed already shown: one placed
-    // hidden and shown while the map stays loaded never takes A. Without that act (Third SpellStone on Original) it
-    // stands once the Moon Stone is picked up (0x264), from the moon temple.
+    // its sequence's event 1 (0x202 the sun's, 0x243 the moon's, dll785_0634). It is placed once the sun's is set and
+    // shows at the moon's, which the moon's socket takes either first or second. Without that act (Third SpellStone on
+    // Original) it stands once the Moon Stone is picked up (0x264), from the moon temple.
     Extra& ec = extras[0];
     if (!ec.placed) {
         bool sockets = dino::third_stone_restored();
