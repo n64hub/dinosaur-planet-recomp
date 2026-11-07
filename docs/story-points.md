@@ -188,6 +188,14 @@ create, `func_800213EC`, passes what it made to `func_80021A84` with no test, so
 memory crashes there, under the MagicPlant (dll290) or SHBirchTree (dll520) that asked for it, as all of them on did
 with what the title holds still held (src/game/story.cpp lets go of it).
 
+A place in Cape Claw's walled part needs a bit too. A VisAnimator (354) hides the shapes of its groups in its block
+while its bit is clear, and TriggerPlanes toggle those bits as the player crosses them (action 0x12, with 0x8000 on
+the bit). In map 29, 0x2C0 shows the tablet room and the rooms around it, 0x2C1 the rooms north of them and 0x2B4 the
+sea and the east tunnel. The planes that toggle 0x2C0 are in the hall west of the room (uid 41FC0) and the tunnel east
+of it (352FB), so a player who walks in sees the room (played, both). `--place` crosses neither, and draws night sky
+over black with the objects floating, so a test there needs the bit: `--story before-cc-shrine --place 4400,-7,17600
+--bits 2c0`. Warp entries 71 and 72 land in the room and set it themselves (`src/game/krazoa.cpp`).
+
 ## CloudRunner Fortress
 
 Tasks 56 to 68, played from `before-cloudrunner` on the desktop build a link at a time, each started with `--place`
