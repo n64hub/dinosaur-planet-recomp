@@ -750,6 +750,19 @@ func = "dll445_0628"
 before_vram = 0x901DDE00
 text = '{ void dino_moonseeds_meteor(uint8_t*, recomp_context*); dino_moonseeds_meteor(rdram, ctx); }'
 
+# The Pointback mother's second egg (src/game/diamond_bay.cpp, whose header has the evidence): DBPointMum reading
+# her current step's flags (dll658 0x800), which on Restored sets act 2's first step (0x3FF) as Sabre comes near her,
+# and DB_FlameSwitch's update (dll689_0130), which on Restored rises once that step has set its unread +0x20 bit.
+[[patches.hook]]
+func = "dll658_0720"
+before_vram = 0x9026507C
+text = '{ void dino_diamond_bay_mother_step(uint8_t*, recomp_context*); dino_diamond_bay_mother_step(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll689_0130"
+before_vram = 0x9027EC5C
+text = '{ void dino_diamond_bay_flame_switch(uint8_t*, recomp_context*); dino_diamond_bay_flame_switch(rdram, ctx); }'
+
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330

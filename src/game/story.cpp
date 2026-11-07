@@ -33,8 +33,10 @@ namespace {
     constexpr int32_t dll29_handle = 0x8008C9F4; // the pointer the game keeps to its loaded dll29
     // dll7, the sky and the time of day: its export 9 sets the time (f12, in seconds of a day of 86400, taken modulo a
     // day; dll7 0xEA0-0xF18), which it keeps at +0xC0 of its environment and copies into the save each frame
-    // (dll29's export 38, dll7 0xBEC), and export 8 says night from 21:00 to 5:00 (75600 and 18000, dll7 0xDF4).
+    // (dll29's export 38, dll7 0xBEC), export 4 writes it to the float its $a0 points at (dll7 0xCDC), and export 8
+    // says night from 21:00 to 5:00 (75600 and 18000, dll7 0xDF4).
     constexpr int32_t dll7_handle = 0x8008C980;
+    constexpr int dll7_get_time = 4;
     constexpr int dll7_set_time = 9;
     constexpr int32_t save_pointer = 0x800AE2A0; // the save in dll29's bss, which func_80014670 writes to
     constexpr int32_t set_bit = 0x80014670;
@@ -531,8 +533,24 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     ctx->f12.fl = fx;
     ctx->f14.fl = fz;
     call(rdram, ctx, map_at);
-    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy,
-        fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats), (int16_t)MEM_H(6, stats));
+    int32_t map = (int32_t)ctx->r2;
+    // The time of day, in hours (-1 with no sky loaded).
+    float hours = -1.0f;
+    int32_t sky = word(rdram, dll7_handle);
+    if (sky != 0) {
+        gpr sp = ctx->r29;
+        ctx->r29 -= 0x20;
+        ctx->r4 = ctx->r29 + 0x10;
+        MEM_W(0x10, ctx->r29) = 0;
+        call(rdram, ctx, word(rdram, word(rdram, sky) + 4 + 4 * dll7_get_time));
+        uint32_t t = MEM_W(0x10, ctx->r29);
+        memcpy(&hours, &t, 4);
+        hours /= 3600.0f;
+        ctx->r29 = sp;
+    }
+    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d, %.2f h\n", seconds, map, fx,
+        fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats),
+        (int16_t)MEM_H(6, stats), hours);
     // DINO_REPORT_OBJECT=<object id hex>: where each drawn object of that id is too, for an enemy a script times by.
     static const char* report_object = getenv("DINO_REPORT_OBJECT");
     if (report_object == nullptr) {
