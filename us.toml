@@ -543,13 +543,13 @@ func = "dll502_0D74"
 before_vram = 0x901FFD58
 text = '{ if (MEM_BU(0x136, ctx->r16) == 2) ctx->r8 = 2; }'
 
-# Tricky's run to his mother (patches/swapstone_hollow.c says what starts it): SHseqobject's update (dll309_0124), for an
-# object whose setup waits on bit 0xC3 (its setup, +0x4C of $a0, holds the bit at +0x1A), asks dino_tricky_run whether
-# the player has come.
+# Tricky's run to his mother (patches/swapstone_hollow.c says what starts it): with Tricky's Run on Restored
+# (src/game/swapstone_hollow.cpp), SHseqobject's update (dll309_0124), for an object whose setup waits on bit 0xC3 (its
+# setup, +0x4C of $a0, holds the bit at +0x1A), asks dino_tricky_run whether the player has come.
 [[patches.hook]]
 func = "dll309_0124"
 before_vram = 0x9017AC40
-text = '{ if ((int16_t)MEM_H(0x1A, MEM_W(0x4C, ctx->r4)) == 0xC3) { void dino_tricky_run(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_tricky_run(rdram, &c); } }'
+text = '{ int dino_tricky_run_restored(void); if ((int16_t)MEM_H(0x1A, MEM_W(0x4C, ctx->r4)) == 0xC3 && dino_tricky_run_restored()) { void dino_tricky_run(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_tricky_run(rdram, &c); } }'
 
 # The SwapStone (SHswapstone, dll515) answers only while bit 0x887 says the player is in its zone, and TriggerPlane
 # 40b79 (map 7, local 2388,-633,1592) keeps that bit with action 0x12 mode 2, arg 0x8887: it flips it on each crossing.
@@ -750,23 +750,23 @@ before_vram = 0x80047330
 text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); void dino_walled_city_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); dino_walled_city_frame(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
-# whether their spirit is released by 0x366, a bit nothing sets: they ask CC's (0x221) and WG's (0x222) released bits
-# (addiu $a0, $zero, 0x366 -> 0x221 at 0x1544, 0x222 at 0x17D4). Neither act is reached without the Krazoa shrines'
-# ways in.
+# whether their spirit is released by 0x366, a bit nothing sets: on Restored they ask CC's (0x221) and WG's (0x222)
+# released bits, $a0 as the call to GET_BIT takes it (0x1548, 0x17D8). Neither act is reached without the Krazoa
+# shrines' ways in.
 [[patches.hook]]
 func = "dll607_025C"
 before_vram = 0x90243044
 text = '{ void dino_krazoa_warlock(uint8_t*, recomp_context*); dino_krazoa_warlock(rdram, ctx); }'
 
-[[patches.instruction]]
+[[patches.hook]]
 func = "dll607_14FC"
-vram = 0x902442F0
-value = 0x24040221
+before_vram = 0x902442F4
+text = '{ int dino_krazoa_shrines_restored(void); if (dino_krazoa_shrines_restored()) ctx->r4 = 0x221; }'
 
-[[patches.instruction]]
+[[patches.hook]]
 func = "dll607_1788"
-vram = 0x90244580
-value = 0x24040222
+before_vram = 0x90244584
+text = '{ int dino_krazoa_shrines_restored(void); if (dino_krazoa_shrines_restored()) ctx->r4 = 0x222; }'
 
 # WL_seqpoint's release events (dll611), before the player's export 0xA0 takes back WG's mask (0x778) and CC's (0x8D4).
 [[patches.hook]]
@@ -818,17 +818,17 @@ text = '{ void dino_krazoa_palace_door(uint8_t*, recomp_context*); dino_krazoa_p
 
 # Cape Claw's shrine (dll486): its test is one SabreBaddie, which CCSH_ObjCreator (dll487) spawns with kill bit 0x1E7,
 # as Discovery Falls' creator does. State 2 waited for 0x5B2 instead, a bit nothing in the ROM sets, so the test never
-# ended: it reads 0x1E7, and its reset clears 0x1E7 (addiu $a0, $zero, 0x5B2 -> 0x1E7 at 0x7C0 and 0x998). The shrine
-# isn't reached without the Krazoa shrines' ways in.
-[[patches.instruction]]
+# ended: on Restored it reads 0x1E7, and its reset clears 0x1E7, $a0 as the calls to GET_BIT (0x7C4) and SET_BIT
+# (0x99C) take it. The shrine isn't reached without the Krazoa shrines' ways in.
+[[patches.hook]]
 func = "dll486_01EC"
-vram = 0x901F5E1C
-value = 0x240401E7
+before_vram = 0x901F5E20
+text = '{ int dino_krazoa_shrines_restored(void); if (dino_krazoa_shrines_restored()) ctx->r4 = 0x1E7; }'
 
-[[patches.instruction]]
+[[patches.hook]]
 func = "dll486_01EC"
-vram = 0x901F5FF4
-value = 0x240401E7
+before_vram = 0x901F5FF8
+text = '{ int dino_krazoa_shrines_restored(void); if (dino_krazoa_shrines_restored()) ctx->r4 = 0x1E7; }'
 
 # Golden Plains' fly baddie (dll475) shoots by making an object from a placement record it zeroes and never gives an
 # id, so each shot asked for object 0, the player (Sabre's definition, dll210): a second player where the fly baddie

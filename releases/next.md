@@ -18,3 +18,7 @@
 - Third SpellStone on Restored: the Volcano Force Point now opens its second path and takes the third SpellStone,
   placing it gives the moonseeds Krystal plants in Moon Mountain Pass, and Walled City shows its Sun and Moon Stones
   once the third spirit is released. In the prototype both places stayed as on the first visit.
+- Every restoration now has its own setting, and Original plays the prototype as it was left there: Tricky's Run is a
+  new setting for Tricky's run to his mother in SwapStone Hollow, Cape Claw's shrine test is now under Krazoa
+  Shrines, and that setting's Finished is now called Restored (a saved Finished reads as Restored). Crash fixes stay
+  on with either value.

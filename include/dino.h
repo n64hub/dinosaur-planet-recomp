@@ -43,6 +43,8 @@ namespace dino {
     void add_mouse_buttons(uint16_t* buttons);
     // Which way the camera looked at its last tick, on the ground (x, z), false before its first.
     bool camera_forward(float* x, float* z);
+    // SwapStone Hollow's Tricky's Run setting (swapstone_hollow.cpp).
+    void add_swapstone_hollow_options(recomp::config::Config& general);
     // The Krazoa shrines' and Cape Claw's Krazoa tablets' settings (krazoa.cpp).
     void add_krazoa_options(recomp::config::Config& general);
     // Drakor's fight's end setting (drakor.cpp).
