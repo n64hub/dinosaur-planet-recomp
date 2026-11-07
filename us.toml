@@ -258,6 +258,27 @@ func = "func_8004D470"
 vram = 0x8004D484
 value = 0x34048FC0
 
+# Too few map block slots: func_80041E84 allocates the loaded blocks' table for 40 (pointers 0xA0 bytes at 0x800B96B4,
+# ids 0x50 at 0x800B96BC, use counts 0x28 at 0x800B96C4), and func_80049024 takes a free slot or else the next one past
+# the used count (the byte at 0x800B96B8) with no test against 40. Every other user counts to that byte. Dragon Rock -
+# Top's east end, on layer 0 beside the Kamerian Dragon's room, holds 43 blocks at once: the slots past 40 went over the
+# heap blocks after the table, and the next block freed there read a pointer of garbage (func_80048C24) and crashed. The
+# table is 80 slots (addiu $a0, $zero, 0xA0 -> 0x140, 0x50 -> 0xA0, 0x28 -> 0x50).
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EAC
+value = 0x24040140
+
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EC4
+value = 0x240400A0
+
+[[patches.instruction]]
+func = "func_80041E84"
+vram = 0x80041EDC
+value = 0x24040050
+
 # Item pickups: a pickup (dll272) taken with A gives dll3 the object the player's pickup sequence holds up (dll3_9E58,
 # from +6 of the block at its def's +0x18) and plays the player's pickup (state 0x2A), whose end starts the player's
 # sequence 0 (dll210_16220), the one whose event hands the item over. That sequence's VariableObject (object 0x443)
@@ -597,11 +618,12 @@ text = "{ void dino_camera_turn(uint8_t*, recomp_context*); dino_camera_turn(rdr
 # --warp (src/main/main.cpp, development): func_800145AC runs once a pass of the main thread's loop, and at its start
 # asks whether a warp is due; if one is, it calls the game's warp, func_8004D1D4 (the entry's index, then 0 for no
 # fade), as the game's own warps do, and goes on with the registers it had. --story (src/game/story.cpp) starts its
-# point from the same place, before any warp.
+# point from the same place, before any warp. With no --warp due it asks Dragon Rock's way into the Kamerian Dragon's
+# room and out (src/game/dragon_rock.cpp), whose warp fades.
 [[patches.hook]]
 func = "func_800145AC"
 before_vram = 0x800145AC
-text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int w = dino_warp_due(); if (w >= 0) { ctx->r4 = w; ctx->r5 = 0; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
+text = '{ void dino_story_pass(uint8_t*, recomp_context*); int dino_warp_due(void); recomp_context saved = *ctx; dino_story_pass(rdram, ctx); *ctx = saved; int dino_dragon_rock_door(uint8_t*, recomp_context*); int w = dino_warp_due(); int fade = 0; if (w < 0) { w = dino_dragon_rock_door(rdram, ctx); *ctx = saved; fade = 1; } if (w >= 0) { ctx->r4 = w; ctx->r5 = fade; func_8004D1D4(rdram, ctx); *ctx = saved; } }'
 
 # --watch-bits (src/game/story.cpp, development): func_80014670 sets the bit in $a0 to the value in $a1, and at its start
 # says so when the bit is watched.
@@ -611,12 +633,12 @@ before_vram = 0x80014670
 text = '{ void dino_bit_setting(uint8_t*, recomp_context*); dino_bit_setting(rdram, ctx); }'
 
 # The Krazoa shrines (src/game/krazoa.cpp, whose header has the evidence): WARP_ENTRY once it has read an entry of the
-# warp table into its buffer, the end of func_80045BF4 once a map is loaded, and func_80046BC8 once the loaded maps'
+# warp table into its buffer (Dragon Rock's two entries too, src/game/dragon_rock.cpp), the end of func_80045BF4 once a map is loaded, and func_80046BC8 once the loaded maps'
 # objects are placed.
 [[patches.hook]]
 func = "func_8004D1D4"
 before_vram = 0x8004D208
-text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); dino_krazoa_warp_entry(rdram, ctx); }'
+text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); void dino_dragon_rock_warp_entry(uint8_t*, recomp_context*); dino_krazoa_warp_entry(rdram, ctx); dino_dragon_rock_warp_entry(rdram, ctx); }'
 
 [[patches.hook]]
 func = "func_80045BF4"
