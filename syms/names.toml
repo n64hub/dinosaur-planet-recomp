@@ -137,6 +137,22 @@ dll = 210
 index = 11
 name = "let_go"  # (player, 0): drops what it carries (src/game/krazoa.cpp)
 
+# CloudRunner Fortress (src/game/cloudrunner.cpp, docs/story-points.md).
+[[export]]
+dll = 212
+index = 24
+name = "finds_babies"  # Kyte's state +0x1C8 & 0x200000, which nothing sets; CFCloudBaby (dll373) asks it
+[[field]]
+of = "state"
+dll = 373
+offset = 0xAC
+name = "baby_state"  # 5 found, facing Kyte; 0xC rescued
+[[field]]
+of = "setup"
+dll = 373
+offset = 0x22
+name = "rescued_bit"
+
 # Every object (src/game/objects.cpp, krazoa.cpp, dragon_rock.cpp).
 [[field]]
 of = "obj"
@@ -333,3 +349,27 @@ name = "trex_way_back"  # the arena's WarpPoint (dll275) to warp 91
 [[bit]]
 bit = 0x83B
 name = "third_spellstone_carried"
+[[bit]]
+bit = 0x40
+name = "sharpclaw_disguise"  # the spell; CFPrisonGuard (dll375) lets Krystal by while it is cast
+[[bit]]
+bit = 0x44
+name = "prison_key"
+[[bit]]
+bit = 0x4D
+name = "uncle_cage_open"  # CFPrisonUncle (dll376) sets 0x50 from it as the dungeon loads
+[[bit]]
+bit = 0x50
+name = "uncle_freed"  # CFPrisonGuard lets Krystal by
+[[bit]]
+bit = 0x60
+name = "power_item"  # Bonehead's gift in the dungeon; CFPowerLock takes it for 0x5F
+[[bit]]
+bit = 0x57
+name = "fortress_power_on"
+[[bit]]
+bit = 0x901
+name = "babies_rescued"  # counted by CFCloudBaby (dll373)
+[[bit]]
+bit = 0x8D1
+name = "kyte_gold_perch"  # PerchObject (dll718)'s curve's +0x32 bit, set by Kyte's message 5
