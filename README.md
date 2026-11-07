@@ -107,6 +107,10 @@ Fixed:
   once it is placed, and Walled City its second once the third spirit is released. And the moonseeds Krystal plants
   in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives Sabre four, one for
   each of the pass's receptacles.
+- CloudRunner Fortress's courtyard roof (Wind Bridge on Restored): its barrels stand west of the treasure shaft, and
+  the shaft's wind, which holds an empty-handed player at the corridor's height, dropped one carrying a barrel to the
+  bottom, so no barrel reached the courtyard and its roof, which three of them blow, kept Kyte shut in. The wind now
+  holds a player carrying a barrel too, and with Treasure Lift on Restored it lowers only an empty-handed one.
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
@@ -165,6 +169,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Baby CloudRunners** (General): Restored has Kyte find CloudRunner Fortress's hidden baby CloudRunners once she
   is near one, so it comes out to be rescued. Original is the prototype as it was left: the babies waiting for her
   never come out.
+- **Wind Bridge** (General): Restored has the wind over CloudRunner Fortress's treasure shaft hold a player carrying a
+  barrel, as it holds one empty-handed, so the barrels reach the courtyard and blow its roof. Original is the
+  prototype as it was left: carrying one, she falls to the shaft's bottom, and the roof can't be blown.
 - **Krazoa Palace** (General): Restored places Krazoa Palace's doors, consoles, text blocks and red Krazoa, so its
   four wings are played in turn and the red Krazoa sends the player on to Drakor. Original is the prototype as it was
   left: the palace's rooms stand empty and lead nowhere.

@@ -163,6 +163,10 @@ name = "set_character"  # 1 Krystal, 0 Sabre
 dll = 210
 index = 11
 name = "let_go"  # (player, 0): drops what it carries (src/game/krazoa.cpp)
+[[export]]
+dll = 210
+index = 58
+name = "wind_push"  # (player, speed): stores it at its state+0x808, read by BA38 (src/game/cloudrunner_barrels.cpp)
 
 # CloudRunner Fortress (src/game/cloudrunner.cpp, docs/story-points.md).
 [[export]]
@@ -214,6 +218,16 @@ of = "state"
 dll = 210
 offset = 0x868
 name = "held"  # what the player carries
+[[field]]
+of = "state"
+dll = 210
+offset = 0x808
+name = "wind"  # the wind's push, dll210.58 (src/game/cloudrunner_barrels.cpp)
+[[field]]
+of = "state"
+dll = 210
+offset = 0x870
+name = "held_on"  # set each frame by what it carries while it holds on (src/game/cloudrunner_barrels.cpp)
 [[field]]
 of = "state"
 dll = 210
@@ -335,6 +349,18 @@ name = "kp_magic_done"
 [[bit]]
 bit = 0x912
 name = "transporter_tutorial"  # dll334 shows its first-use text while it is clear
+[[bit]]
+bit = 0x30D
+name = "cf_treasure_wind"  # CFTreasWindLift blows (src/game/cloudrunner.cpp)
+[[bit]]
+bit = 0x8C8
+name = "cf_treasure_wind_down"  # (src/game/cloudrunner.cpp)
+[[bit]]
+bit = 0x900
+name = "cf_roof_hits"  # CFBlastedRoof's count of barrels (src/game/cloudrunner_barrels.cpp)
+[[bit]]
+bit = 0x2E1
+name = "cf_roof_blown"  # (src/game/cloudrunner_barrels.cpp)
 [[bit]]
 bit = 0x572
 name = "trex_round"  # BOSS TRex: dll702 sets it to its count of hits and fast laps; odd turns every floor switch off
