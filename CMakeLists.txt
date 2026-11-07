@@ -219,7 +219,6 @@ target_sources(DinosaurPlanet PRIVATE
     ${CMAKE_SOURCE_DIR}/src/game/cartridge.cpp
     ${CMAKE_SOURCE_DIR}/src/game/widescreen.cpp
     ${CMAKE_SOURCE_DIR}/src/game/camera.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/swapstone_hollow.cpp
     ${CMAKE_SOURCE_DIR}/src/game/krazoa.cpp
     ${CMAKE_SOURCE_DIR}/src/game/drakor.cpp
     ${CMAKE_SOURCE_DIR}/src/game/dragon_rock.cpp

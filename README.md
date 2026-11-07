@@ -65,10 +65,9 @@ Fixed:
   who stood still won as its answer time ran out. Two of the fixes are always on: the pad the player arrives on in
   Moon Mountain Pass's shrine, which sent a player who stepped back on it nowhere, and Golden Plains' fly baddie,
   whose every shot made a second player who took the camera.
-- SwapStone Hollow's Tricky's run to his mother, the Queen Earthwalker (Tricky's Run on Restored): it never started.
-  With no Tricky beside Sabre it would have crashed, which is fixed on either setting.
-- SwapStone Hollow's SwapStone could stop answering in its own corner of the hollow, and answer only outside it,
-  after a trip through the Swap Store or the SwapStone's warp.
+- SwapStone Hollow: Tricky's run to his mother, the Queen Earthwalker, would have crashed with no Tricky beside Sabre.
+  And the SwapStone could stop answering in its own corner of the hollow, and answer only outside it, after a trip
+  through the Swap Store or the SwapStone's warp.
 - Cape Claw's Krazoa tablets (Krazoa Tablets on Restored): the third tablet, which the prototype never placed, is
   found where the sand worm fell, and the tablet room's last puzzle, which led nowhere, opens a Transporter to Krazoa
   Palace.
@@ -138,13 +137,10 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Mouse Sensitivity** (General): how far the mouse turns the camera, with left click B and right click Z. 0% is no
   mouse, as on a console, and leaves the pointer free.
 - **Invert Camera Y** (General): moving the mouse or the right stick up looks down.
-- **Tricky's Run** (General): Restored has Tricky run to his mother in SwapStone Hollow as the player comes near, the
-  run the Queen Earthwalker's clue asks the player to watch. Original is the prototype as it was left: he never runs.
 - **Krazoa Shrines** (General): Restored makes all eight Krazoa shrines reachable and playable, has Cape Claw's test
   end once its baddie is beaten, and gives each spirit its release at Warlock Mountain, from what the prototype's own
   maps and code hold. Original is the prototype as it was left: three shrines are reached from the world, Cape Claw's
-  test never ends, and three spirits have nowhere to go. A Finished saved before the setting was renamed reads as
-  Restored.
+  test never ends, and three spirits have nowhere to go.
 - **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
   tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
   tablet is nowhere, and the puzzle's end leads nowhere.

@@ -138,6 +138,7 @@ namespace {
         Restored,
         OptionCount
     };
+    // A value saved under a key not here, as the Finished that Restored was called, loads as the default, Restored.
     const std::vector<recomp::config::ConfigOptionEnumOption> krazoa_shrines_options = {
         { KrazoaShrines::Original, "Original" },
         { KrazoaShrines::Restored, "Restored" },

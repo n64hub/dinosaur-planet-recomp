@@ -21,7 +21,6 @@ void dino::init_config() {
     general_options.has_mouse_sensitivity = false;
     recomp::config::Config& general = recompui::config::create_general_tab(general_options);
     dino::add_camera_options(general);
-    dino::add_swapstone_hollow_options(general);
     dino::add_krazoa_options(general);
     dino::add_drakor_options(general);
     dino::add_dragon_rock_options(general);
