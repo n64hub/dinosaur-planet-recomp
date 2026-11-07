@@ -140,7 +140,8 @@ signatures). Only a change to how it finds functions needs it again.
 
 `tools/dino.py` reads the game's code from the ROM in names, for working out what it does: `dis` prints one function
 with its registers, GOT loads, DLL calls and bits named from `syms/names.toml`, `calls` every call to a function, an
-export or a bit with its arguments. Its header says how; it needs the rabbitizer spimdisasm installs.
+export or a bit with its arguments, `map` a map's placements, `def` an object def and `warp` the warp table. Its
+header says how; it needs the rabbitizer spimdisasm installs.
 
 ## License
 
