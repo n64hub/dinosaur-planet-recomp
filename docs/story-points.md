@@ -503,6 +503,8 @@ played:
   loaded the front end and gave no stone. With BOSS TRex on Restored it gives 0x83B and opens the player's door and
   the WarpPoint (0x81C) back to warp 91 (`patches/boss_trex.c`). `DINO_REPORT_OBJECT=3D9` with `--report` reports
   where the TRex is and its act, and `sync act 3D9 <act>` in an `--input` script waits for one.
+  `tools/boss_trex_input.txt` is the `--input` script that wins the fight and walks out to the WarpPoint, from
+  `--story before-walled-city,90` with `DINO_REPORT_OBJECT=3D9`; its comments say how each round is timed.
 
 The task list has more here than the ROM:
 
