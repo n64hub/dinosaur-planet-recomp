@@ -84,6 +84,7 @@
 //   the tunnel east of it, so a player who walks in has it set (played, both) and it is saved. Warp entries 71 and 72
 //   land inside with no plane crossed, so they set it, which changes nothing for a player who walked in.
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -388,6 +389,24 @@ namespace {
         { 3, kp_red_krazoa, 9140.0f, 0.0f, 23040.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, Setting::Palace, 0, false },
         { 3, warp_point, 9140.0f, 0.0f, 23040.0f, { 0, 0xFF, 44, 0, 1, 2, 0x18, 0xFF, 0x06, 0xAA, 0, 0 }, 0,
             Setting::Palace, 0, false },
+        // The palace's doors: no bits and no sequence (+0x1C), so dll307 leaves them be; their yaw at +0x1F. The last
+        // door's four leaves are at its centre, each with its roll at +0x1A, which dll307 doesn't read.
+        { 3, kp_section_door, 5757.0f, 95.0f, 21440.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_section_door, 8638.0f, 0.0f, 24957.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_section_door, 5754.0f, 63.0f, 25280.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_section_door, 8641.0f, 127.0f, 21750.0f, { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_last_door, 10190.0f, 85.0f, 23040.0f, { 0xFF, 0xFF, 0x00, 0, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_last_door, 10190.0f, 85.0f, 23040.0f, { 0xFF, 0xFF, 0x40, 0, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_last_door, 10190.0f, 85.0f, 23040.0f, { 0xFF, 0xFF, 0x80, 0, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
+        { 3, kp_last_door, 10190.0f, 85.0f, 23040.0f, { 0xFF, 0xFF, 0xC0, 0, 0, 0, 0xFF, 0x40, 0, 0x40, 0xFF, 0xFF },
+            0, Setting::Palace, 0, false },
     };
 
     void place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
@@ -740,8 +759,12 @@ extern "C" void dino_krazoa_tablet_bits(uint8_t*, recomp_context* ctx) {
     }
 }
 
-// us.toml's hook in the text block's update (dll654 0x314), on dll1's export 7's answer: whether the item it asks for
-// (0x7BF) was used. Nothing gives that item, so a palace text block goes off with the player standing at it.
+// us.toml's hook in the text block's update (dll654 0x314), on the answer of the call at 0x30C (export 0x20 of the
+// DLL at 0x8008C994, with 0x7BF): whether the item it asks for was used. A text block asks that of any player who
+// stands at it (0x800348A0, 0x270) and plays its sequence (+0x19) on yes, then sets its done bit (+0x1E). 0x7BF is
+// Desert Force Point's own: its controller sets it (dll638 0xF58) and DFP's first block needs it (map 21 @uid 405DE
+// +0x20), so a player who comes to the palace another way may not have it, and a palace block also goes off with
+// the player standing at it.
 extern "C" void dino_krazoa_palace_textblock(uint8_t* rdram, recomp_context* ctx) {
     int32_t block = word(rdram, (int32_t)ctx->r29 + 0x28);
     int object = MEM_H(0, (gpr)word(rdram, block + 0x4C));
@@ -769,5 +792,85 @@ extern "C" void dino_krazoa_palace_textblock(uint8_t* rdram, recomp_context* ctx
         if (logging) {
             fprintf(stderr, "krazoa: palace text block 0x%X goes off\n", object);
         }
+    }
+}
+
+namespace {
+    // A palace door, found by where it was placed, and the bit that opens it. A section door shuts and opens by its
+    // model's own animation, 1.0 shut and 0 open (func_80023D30(object, 0, progress, 0)). The last door is four
+    // leaves of one model in an iris, each turned by its roll (+4) and moved out along `out` as it opens.
+    struct PalaceDoor {
+        float x, y, z;
+        int bit;
+        int16_t roll;     // a leaf's, from +0x1A
+        float out_x, out_y, out_z;
+        int32_t object; // as last seen, so a door made again starts where its bit says
+        float shut;     // 1 shut, 0 open
+    };
+
+    constexpr int32_t set_animation = 0x80023D30;
+    constexpr int32_t ticks = 0x8008C958; // the frame's length in ticks, a float (dll654 0x284)
+    constexpr float door_ticks = 90.0f;   // a door opens in 1.5 s
+    constexpr float leaf_travel = 100.0f;
+
+    PalaceDoor palace_doors[] = {
+        { 5757.0f, 95.0f, 21440.0f, tablets_done },
+        { 8638.0f, 0.0f, 24957.0f, 0x6A7 },
+        { 5754.0f, 63.0f, 25280.0f, 0x6A8 },
+        { 8641.0f, 127.0f, 21750.0f, 0x6A9 },
+        { 10190.0f, 85.0f, 23040.0f, 0x6A7, 0, 0.0f, 1.0f, 0.0f },
+        { 10190.0f, 85.0f, 23040.0f, 0x6A8, 0x4000, 0.0f, 0.0f, 1.0f },
+        { 10190.0f, 85.0f, 23040.0f, 0x6A9, (int16_t)0x8000, 0.0f, -1.0f, 0.0f },
+        { 10190.0f, 85.0f, 23040.0f, 0x6AA, (int16_t)0xC000, 0.0f, 0.0f, -1.0f },
+    };
+
+    float word_float(uint8_t* rdram, int32_t address) {
+        int32_t w = word(rdram, address);
+        float f;
+        memcpy(&f, &w, 4);
+        return f;
+    }
+}
+
+// us.toml's hook in dll307's update (0x1E4, $a0 the door): a palace door is posed from its bit each frame.
+extern "C" void dino_krazoa_palace_door(uint8_t* rdram, recomp_context* ctx) {
+    int32_t door = (int32_t)ctx->r4;
+    int32_t setup = word(rdram, door + 0x4C);
+    int object = MEM_H(0, (gpr)setup);
+    if ((object != kp_section_door && object != kp_last_door) || !palace_restored()) {
+        return;
+    }
+    float x = word_float(rdram, setup + 0x8), y = word_float(rdram, setup + 0xC), z = word_float(rdram, setup + 0x10);
+    for (PalaceDoor& d : palace_doors) {
+        if (d.x != x || d.y != y || d.z != z || (object == kp_last_door && MEM_H(0x1A, (gpr)setup) != d.roll)) {
+            continue;
+        }
+        Calls calls(rdram, ctx);
+        float target = get(rdram, ctx, d.bit) ? 0.0f : 1.0f;
+        if (d.object != door) {
+            d.object = door;
+            d.shut = target;
+        }
+        float step = word_float(rdram, ticks) / door_ticks;
+        d.shut = target < d.shut ? std::max(target, d.shut - step) : std::min(target, d.shut + step);
+        if (object == kp_section_door) {
+            float shut = d.shut;
+            int32_t bits;
+            memcpy(&bits, &shut, 4);
+            ctx->r4 = door;
+            ctx->r5 = 0;
+            ctx->r6 = bits;
+            ctx->r7 = 0;
+            call(rdram, ctx, set_animation);
+        }
+        else {
+            float open = (1.0f - d.shut) * leaf_travel;
+            float lx = d.x + d.out_x * open, ly = d.y + d.out_y * open, lz = d.z + d.out_z * open;
+            MEM_H(4, (gpr)door) = d.roll;
+            memcpy(&MEM_W(0xC, (gpr)door), &lx, 4);
+            memcpy(&MEM_W(0x10, (gpr)door), &ly, 4);
+            memcpy(&MEM_W(0x14, (gpr)door), &lz, 4);
+        }
+        return;
     }
 }
