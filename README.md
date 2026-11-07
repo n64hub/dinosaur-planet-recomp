@@ -77,6 +77,15 @@ Fixed:
   runs out and leaves the fourth SpellStone in Krystal's hands, and stays gone. Nothing led to its room: the room is
   the Skeetla arena at the bottom of Dragon Rock on the level's next layer, and the arena, once won, now leads into
   it, and the SpellStone, once picked up, back out.
+- Dragon Rock's Skeetla arena (Kamerian Dragon on Restored): it couldn't be won. The ice spell on the top's west, the
+  only spell that puts out the arena's three lava controls, couldn't be picked up or cast, and putting the three out
+  takes about three times the magic Krystal holds, with none to be had on Dragon Rock. And the Earth Warrior the
+  Skeetlas eat lived through less of the fight than it takes, with nothing on Dragon Rock to feed him. The ice spell
+  is now picked up and cast from the spell scroll as the projectile is, and while the fight is on the arena fills
+  Krystal's magic, as the dragon's fight below fills it, and feeds the warrior as his food would, more often the
+  more of the lava controls are out.
+- Dragon Rock's bottom: a wall that the top's earth call pad opens stood again once the player came down the stairs
+  from the top's east end, shutting the way to the Skeetla arena.
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
   the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
   was. The prototype started the fight again after his fall, so the game never ended.
@@ -124,8 +133,6 @@ Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
 - The rest of the story, played from a new game to its ending, and whatever stops a player there.
-- Dragon Rock's bottom: the way from the portal's landing, or from the top's east end, to the Skeetla arena, and the
-  arena's win, which the way into the Kamerian Dragon's room waits for.
 
 ## The ROM
 
@@ -156,10 +163,12 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
   tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
   tablet is nowhere, and the puzzle's end leads nowhere.
-- **Kamerian Dragon** (General): Restored has the Skeetla arena at the bottom of Dragon Rock, once won, lead into the
-  Kamerian Dragon's room, and the dragon die once its health runs out and leave the fourth SpellStone for the Desert
-  Force Point, which leads back out. Original is the prototype as it was left: nothing leads to the room, the fight
-  never ends, and the fourth SpellStone is nowhere.
+- **Kamerian Dragon** (General): Restored lets Krystal pick up and cast the ice spell on Dragon Rock's top, fills her
+  magic and feeds the Earth Warrior in the Skeetla arena at its bottom while the fight there is on, has the arena,
+  once won, lead into the Kamerian Dragon's room, and the dragon die once its health runs out and leave the fourth
+  SpellStone for the Desert Force Point, which leads back out. Original is the prototype as it was left: the ice
+  spell can't be taken or cast, the arena can't be won, nothing leads to the room, the fight never ends, and the
+  fourth SpellStone is nowhere.
 - **Desert Force Point** (General): Restored leaves the second SpellStone's place empty until the player places the
   stone, and adds a lift up to the duct that leads there, in the corridor behind the round door. Original is the
   prototype as it was left: Golden Plains fills the place, and nothing leads up to it.

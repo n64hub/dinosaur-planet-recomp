@@ -916,6 +916,45 @@ func = "dll708_0290"
 before_vram = 0x9028DA9C
 text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_update(rdram, ctx)) return; }'
 
+# A HitAnimator whose change to its block's hit lines is lost when the block loads again (src/game/hit_animator.cpp):
+# dll353's update.
+[[patches.hook]]
+func = "dll353_0160"
+before_vram = 0x90197BFC
+text = '{ void dino_hit_animator(uint8_t*, recomp_context*); dino_hit_animator(rdram, ctx); }'
+
+# The ice spell's pickup on Dragon Rock's top, which reaches less far than the player comes (src/game/dragon_rock.cpp):
+# dll272's update, the pickup's.
+[[patches.hook]]
+func = "dll272_0430"
+before_vram = 0x90160A98
+text = '{ void dino_ice_spell_pickup(uint8_t*, recomp_context*); dino_ice_spell_pickup(rdram, ctx); }'
+
+# The ice spell, which alone puts out the Skeetla arena's DRLavaControls (src/game/dragon_rock.cpp): the player's
+# message from the spell scroll (dll210_1DDC 0x1EF0), which aims only the projectile, and the spell aim (dll210_18EAC),
+# which with no target selects the projectile (at 0x190B8 and 0x19224).
+[[patches.hook]]
+func = "dll210_1DDC"
+before_vram = 0x900E9CF0
+text = '{ void dino_ice_spell_use(uint8_t*, recomp_context*); dino_ice_spell_use(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll210_18EAC"
+before_vram = 0x90100EB8
+text = '{ void dino_ice_spell_aim(uint8_t*, recomp_context*); dino_ice_spell_aim(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll210_18EAC"
+before_vram = 0x90101024
+text = '{ void dino_ice_spell_aim(uint8_t*, recomp_context*); dino_ice_spell_aim(rdram, ctx); }'
+
+# The Skeetla arena's DR_EarthWarrior, fed as the item nothing on Dragon Rock gives would feed him
+# (src/game/dragon_rock.cpp): dll713's update.
+[[patches.hook]]
+func = "dll713_0408"
+before_vram = 0x902978FC
+text = '{ void dino_earth_warrior(uint8_t*, recomp_context*); dino_earth_warrior(rdram, ctx); }'
+
 # The Desert Force Point (src/game/force_point.cpp): GP_LevelControl's BIT_SET(0x5F3, 1) (dll547 0xC8), and DFPLift1's
 # two reads of how far it travels (dll641 0x444, 0x528).
 [[patches.hook]]
