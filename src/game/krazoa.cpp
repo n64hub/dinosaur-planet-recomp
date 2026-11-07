@@ -114,9 +114,16 @@
 //   collision stays where it was placed whatever its animation, so an open one is put under the floor.
 // - The red Krazoa, once 0x6AA is set, sends a player who walks up to it to warp entry 44 (empty), filled at BOSS
 //   Drakor's setuppoint (map 44): nothing in the ROM leads to the fight (docs/story-points.md).
-// - The object loop (func_8004A800) frees an object placed by code once the player is out of its range unless its
-//   placement's flag 2 (+4) is set (0x8004A94C), and the palace's are made once, as it loads: a text block was freed
-//   while the player was in another wing and never made again (played). The palace's are placed with flag 2.
+//
+// Every object this file places (extras, below) is made once, as its map loads, and is in no map's object list, so
+// nothing makes it again until that map loads again. The object loop (func_8004A800) frees an object with no flag in
+// its placement (+4) once the camera is out of its range (func_8004B190 0x8004B40C-0x8004B478), the placement's +6
+// times 8 (func_80021450 0x800215B8) plus 40, and an extra's +6 is 0. Played with no flag: Warlock Mountain's release
+// seqpoints in acts 8 and 9 and Cape Claw's third tablet were freed within 2 s of being placed, the player 1500 away,
+// and a palace text block while the player was in another wing; the Transporters stayed. Each is placed with flag 1,
+// as the palace's own KP_Transporters are (@0644, @0668): the loop keeps it however far the player goes (0x8004B1D8)
+// and frees it with its map (func_8004AEFC), which is when this file places it again (played: none freed, in each of
+// their maps). Flag 2 takes it out of the loop altogether (0x8004A950), its map's unloading included.
 
 #include <algorithm>
 #include <cstdint>
@@ -380,6 +387,7 @@ namespace {
         Setting setting;
         int needs;          // a bit it waits for while its map is loaded, or 0
         bool placed;
+        uint32_t setup;     // its placement while it stands, for DINO_LOG_KRAZOA
     };
 
     // Transporters: yaw 0, own entry, destination, then dll334's 0x1E radius and its show bit, as GP's pad.
@@ -446,7 +454,8 @@ namespace {
             0, Setting::Palace, 0, false },
     };
 
-    void place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
+    // Returns its placement.
+    gpr place(uint8_t* rdram, recomp_context* ctx, int map, int object, float x, float y, float z, const uint8_t* params) {
         // dll214 reads +0x24 too (its create, 0x70), so its actors get the 0x28 bytes the ROM's have.
         int size = object == kp_red_krazoa ? 0x28 : 0x24;
         ctx->r4 = size;
@@ -454,9 +463,8 @@ namespace {
         call(rdram, ctx, new_placement);
         gpr p = ctx->r2;
         MEM_B(2, p) = size / 4;
-        // Flag 2 (+4): the object loop (func_8004A800, 0x8004A94C) never frees it as out of range. The palace's are made
-        // once as it loads, and the text blocks were freed while the player was in another wing, never to come back.
-        MEM_B(4, p) = map == palace ? 2 : 0;
+        // Flag 1 (+4): kept while its map is loaded, however far the player goes (the header says why).
+        MEM_B(4, p) = 1;
         memcpy(&MEM_W(0x8, p), &x, 4);
         memcpy(&MEM_W(0xC, p), &y, 4);
         memcpy(&MEM_W(0x10, p), &z, 4);
@@ -472,6 +480,22 @@ namespace {
         if (logging) {
             fprintf(stderr, "krazoa: placed object 0x%X in map %d at %.0f %.0f %.0f\n", object, map, x, y, z);
         }
+        return p;
+    }
+
+    constexpr int32_t objects = 0x800B1920;      // the objects that stand, an array
+    constexpr int32_t object_count = 0x800B1924;
+
+    // Whether an object of that id stands with that placement (+0x4C).
+    bool standing(uint8_t* rdram, int object, uint32_t setup) {
+        int32_t all = word(rdram, objects);
+        for (int32_t i = 0; all != 0 && i < word(rdram, object_count); i++) {
+            int32_t o = word(rdram, all + 4 * i);
+            if (o != 0 && (uint32_t)word(rdram, o + 0x4C) == setup && MEM_H(0x46, (gpr)o) == object) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -590,12 +614,18 @@ extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
     for (Extra& e : extras) {
         if (word(rdram, map_structs + 4 * e.map) == 0) {
             e.placed = false;
+            e.setup = 0;
         }
         else if (!e.placed && on(e.setting) && (e.needs == 0 || get(rdram, ctx, e.needs))) {
             e.placed = true;
             if (e.act == 0 || warlock_act_now(rdram, ctx) == e.act) {
-                place(rdram, ctx, e.map, e.object, e.x, e.y, e.z, e.params);
+                e.setup = (uint32_t)place(rdram, ctx, e.map, e.object, e.x, e.y, e.z, e.params);
             }
+        }
+        else if (logging && e.setup != 0 && !standing(rdram, e.object, e.setup)) {
+            fprintf(stderr, "krazoa: object 0x%X in map %d at %.0f %.0f %.0f was freed with its map loaded\n", e.object,
+                e.map, e.x, e.y, e.z);
+            e.setup = 0;
         }
     }
 }
