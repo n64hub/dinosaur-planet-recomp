@@ -23,6 +23,7 @@ void dino::init_config() {
     dino::add_camera_options(general);
     dino::add_krazoa_options(general);
     dino::add_drakor_options(general);
+    dino::add_dragon_rock_options(general);
     recompui::config::create_controls_tab();
     recompui::config::create_graphics_tab();
     recompui::config::create_sound_tab();

@@ -21,8 +21,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   (`src/main/register_overlays.cpp`), the DLLs' loading (`src/game/dlls.cpp`), the natives the patches call
   (`src/game/recomp_api.cpp`), the libultra functions the runtime lacks (`src/game/libultra.cpp`), the HUD's and the
   clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
-  Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), Drakor's end (`src/game/drakor.cpp`), the settings, and
-  on Windows a stack trace on a crash (`src/main/crash_trace.cpp`).
+  Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the Kamerian Dragon's end
+  (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), the settings, and on Windows a stack trace on a
+  crash (`src/main/crash_trace.cpp`).
 - `lib/`: upstream `rt64`, `N64ModernRuntime` and `RecompFrontend` at the commits N64Recomp-browser's web forks are
   built on, and `N64Recomp-browser` at a release tag. The web support every recomp's page shares is developed and
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
@@ -97,6 +98,10 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   of what the ROM holds, and Original leaves them as the console plays them (`src/game/krazoa.cpp`'s header has the
   order, the bits and the evidence). Its Krazoa Tablets setting, Restored by default, does the same for Cape Claw's
   tablet room: the third tablet and the way on to Krazoa Palace.
+- **The Kamerian Dragon.** Under Dragon Rock (map 53) the fight is built and can't be won: its health runs out and
+  nothing reads it, and nothing gives the fourth SpellStone (0x7A8) that the Desert Force Point's other place takes.
+  The General tab's Kamerian Dragon setting, Restored by default, has it die there and leave that stone, and Original
+  leaves the fight endless (`src/game/dragon_rock.cpp`'s header has the evidence).
 - **Drakor's end.** The last fight (map 44) is won in the ROM as it is: a hit lets the Kamerian Diamond go, and the
   player who reaches it in the room below plays Drakor's fall, sequence 1 (0x7AE). Nothing followed it; the General
   tab's Ending setting, Restored by default, goes back to the title at its end as the game's own menus do, and Original
@@ -112,8 +117,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   warp table, `DINO_LOG_DLLS=1` prints each DLL as it loads and unloads, `DINO_LOG_CUTS=1` each camera cut and object
   jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
   `src/game/krazoa.cpp` places, each spirit it gives and has taken back and each event of Golden Plains' shrine,
-  `DINO_LOG_DRAKOR=1` the end of Drakor's fall, and `DINO_CHECK_HEAP=1` each block of the game's heaps written past
-  its end, with the tag of what asked for it (`src/game/heap.cpp`).
+  `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
+  `DINO_DRAGON_HEALTH=<n>` starts its fight with n health, and `DINO_CHECK_HEAP=1` each block of the game's heaps
+  written past its end, with the tag of what asked for it (`src/game/heap.cpp`).
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the
   game's bits, the character and the place set as the save would have them, in memory and with nothing written to
   Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place

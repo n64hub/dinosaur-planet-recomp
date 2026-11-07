@@ -221,6 +221,7 @@ target_sources(DinosaurPlanet PRIVATE
     ${CMAKE_SOURCE_DIR}/src/game/camera.cpp
     ${CMAKE_SOURCE_DIR}/src/game/krazoa.cpp
     ${CMAKE_SOURCE_DIR}/src/game/drakor.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/dragon_rock.cpp
 )
 if (DINO_PATCHES)
     target_sources(DinosaurPlanet PRIVATE ${CMAKE_SOURCE_DIR}/src/main/register_patches.cpp)

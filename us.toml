@@ -748,3 +748,20 @@ text = '{ void dino_krazoa_gp_event(uint8_t*, recomp_context*); dino_krazoa_gp_e
 func = "dll309_0124"
 before_vram = 0x9017AC20
 text = '{ void dino_drakor_sequence(uint8_t*, recomp_context*); dino_drakor_sequence(rdram, ctx); }'
+
+# The Kamerian Dragon (src/game/dragon_rock.cpp, whose header has the evidence): KamerianBoss's update once it has stored
+# its health less one (dll707 0x1BB8), and the starts of its and the Nurse's updates (dll707 0x0FC4, dll708 0x0290).
+[[patches.hook]]
+func = "dll707_0FC4"
+before_vram = 0x9028D0E4
+text = '{ void dino_dragon_health(uint8_t*, recomp_context*); dino_dragon_health(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll707_0FC4"
+before_vram = 0x9028C4F0
+text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_update(rdram, ctx)) return; }'
+
+[[patches.hook]]
+func = "dll708_0290"
+before_vram = 0x9028DA9C
+text = '{ int dino_dragon_update(uint8_t*, recomp_context*); if (dino_dragon_update(rdram, ctx)) return; }'

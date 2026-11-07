@@ -80,18 +80,22 @@ file 19, each task's name and clue), which says when the player swaps.
   in, carrying CloudRunner's SpellStone. Its warp, 31, stands under the sand: a start there falls and is put back.
 - `before-walled-city`: Sabre in Walled City (warp 91), with the second SpellStone placed.
 - `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone.
-- `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits and three SpellStones
-  placed.
+- `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits, three SpellStones
+  placed and Golden Plains' portal spell (0x5BD, its PortalSpell, dll272), which DR_SupPortal on the top opens to.
+- `after-dragon-rock`: Krystal in Golden Plains (its setuppoint 0), carrying the fourth SpellStone (0x7A8) that the
+  Kamerian Dragon leaves with Kamerian Dragon on Restored, for the Desert Force Point's other place.
 - `before-drakor`: the same, at BOSS Drakor's setuppoint (map 44), which no warp entry reaches.
 
 The later SpellStones are told by the SpellPlace that takes each: a placement's +0x1E is its placed bit and +0x20 the
 bit of the stone carried, as VFP_SpellPlace (637) takes the first as 0x877 and 0x123. CloudRunner's, won in its race
-(CRSpellstone in map 43 holds 0x49F), is carried as 0x2E8 to the Desert Force Point (DFP_SpellPlace in map 21,
-placed 0x5F3). Walled City's is carried as 0x83B to the Volcano Force Point's second place (0x878). The Desert Force
-Point's other place (0x5F4) holds 0x7A8 at +0x20, but 0x7A8 is no stone: it is a target block's landing, and the
-place takes a stone used from the item menu by the force point's act (Golden Plains and the Desert Force Point).
-(Curves' params hold the low halves of other curves' uids, not bits.) A start in a cell no map fills loads nothing (the player falls and is put back, forever):
-Dragon Rock's own setuppoint 0 is in one, so `before-dragon-rock` starts at its setuppoint 2.
+(CRSpellstone in map 43 holds 0x49F), is carried as 0x2E8 to the Desert Force Point (DFP_SpellPlace in map 21, placed
+0x5F3). Walled City's is carried as 0x83B to the Volcano Force Point's second place (0x878). The Desert Force Point's
+other place (0x5F4) holds 0x7A8 at +0x20, but 0x7A8 is no stone: it is a target block's landing, and the place takes a
+stone used from the item menu by the force point's act (Golden Plains and the Desert Force Point). (Curves' params
+hold the low halves of other curves' uids, not bits.) With Kamerian Dragon on Restored the Kamerian Dragon leaves a
+stone that sets 0x7A8 (The story after the first SpellStone, below). A start in a cell no map fills loads nothing (the
+player falls and is put back, forever): Dragon Rock's own setuppoint 0 is in one, so `before-dragon-rock` starts at
+its setuppoint 2.
 
 ## The story after the first SpellStone
 
@@ -114,8 +118,25 @@ only to its tasks up to 39, so the rest is told by the levels' own objects. In i
 Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
 
 - Dragon Rock - Top (map 2) and - Bottom (52), and BOSS Kamerian Dragon (53), placed in full. Their cells join Willow
-  Grove's at layer 0, so they are reached on foot; no code warps there by number. DR_SupPortal (754) on the top warps
-  to the bottom (warp 88). The Kamerian Dragon's room boots and fights: its acid takes the player's health.
+  Grove's at layer 0, so they are reached on foot; no code warps there by number. The top's ProjectileSpell (dll272)
+  gives the projectile spell (0x5CE). Its DR_SupPortal (754) is hidden once 0x776 is set (which only HitAnimator 353
+  beside it reads); with the player's spell the portal spell (0x5BD, from Golden Plains) it plays its sequence, and
+  its trigger plane sets 0x783, on which it warps to the bottom (warp 88). In a run from `before-dragon-rock` the
+  portal loaded only once in four minutes, and 0x783 set by hand without it warps nowhere, so what loads it is not
+  known yet. The bottom and the dragon's room share a grid cell, and the room's floor (y -1805) is the bottom's east
+  end's.
+- BOSS Kamerian Dragon (53): KamerianBoss (dll707) and the Nurse (708). The fight is built and can't be won: each hit
+  in its last stage lowers its health (10 at the start), nothing reads it, and at 0 it wraps and the fight goes on.
+  Nothing anywhere gives the fourth SpellStone (0x7A8), which the Desert Force Point's other place takes. Dragon Rock
+  is the one place the task list's story doesn't reach that has a boss, and the fourth SpellStone the one thing the
+  story still lacks, so Kamerian Dragon on Restored, the default, has the dragon die at 0 and leave that SpellStone in
+  the player's hands (that it gives the fourth is read from the story's shape, not from the ROM); Original plays as
+  the console does (`src/game/dragon_rock.cpp` has the stages and the evidence). Played from `before-dragon-rock`
+  with `--place 1925,-1805,-5965 --bits 5ce` and an `--input` that every 10 s opens the spell scroll (C-left), takes
+  the projectile spell into aim view (A), pitches up a little more each time and fires (A): the stages set at 31 s
+  and 35 s and a hit lowered its health at 51 s. With `DINO_DRAGON_HEALTH=1` that hit killed it: 0x7A8 set at 51.9 s, and the dragon
+  and the Nurse were gone. The Nurse knocks the player about, into the pit beside the dragon too (y -1993), and a
+  KamSwitch (285) hit by the projectile raises a KamColumn (709) out of it.
 - BOSS Drakor (44): the fight is built and is won, but nothing followed the win. No warp entry and no map of the story
   reaches it: its cells touch no other map's, and the only code that starts it is dll70, the prototype's own
   development warp menu (`func_800141A4(44, ...)`). Drakor (697) starts with 24 health (+0x348, set by dll33's
