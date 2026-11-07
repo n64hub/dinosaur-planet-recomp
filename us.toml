@@ -556,6 +556,18 @@ func = "dll216_02C0"
 before_vram = 0x9011CBBC
 text = "{ int32_t bit = (int16_t)MEM_H(0x39C, ctx->r17); if (ctx->r2 != 0 && bit != -1) { gpr v0 = ctx->r2; ctx->r4 = bit; func_800147EC(rdram, ctx); if (ctx->r2 != 0) goto L_9011CDC0; ctx->r2 = v0; } }"
 
+# A scene that moves the player: dll3 holds the player (+0xB0 bit 0x1000) and its update stops. Its collision (dll27.5)
+# keeps where it last stood, and the update's first pass after the scene sweeps from there, before the player's own
+# release (dll210_60A8, by dll210_7260) resets it a pass later, so whatever stands between the two stops the player
+# there: BOSS TRex's intro walks Sabre in from the warp, the door (KT_RexDoorPlaye, z -9810) shuts behind her at the
+# scene's start, and as the scene ended the sweep put her back on the far side of it, 38 units short of the door, shut
+# out of the arena for good. Here dll210_7260 runs at that pass, before dll27.3 to dll27.5 (the player in $s2, the state
+# in $s1), so the collision starts where the scene left the player.
+[[patches.hook]]
+func = "dll210_0934"
+before_vram = 0x900E8EE0
+text = "{ if (MEM_HU(0xB0, ctx->r18) & 0x1000) { recomp_context c = *ctx; c.r4 = ctx->r18; c.r5 = ctx->r17; dll210_7260(rdram, &c); } }"
+
 # Walled City (patches/walled_city.c says what each fixes). A pressure switch's add (dll781_05DC, the switch in $a0,
 # what stands on it in $a1) is done by dino_wc_switch_add in its place.
 [[patches.hook]]
@@ -569,13 +581,7 @@ func = "dll780_011C"
 before_vram = 0x902C9938
 text = '{ void dino_wc_beacon(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_wc_beacon(rdram, &c); }'
 
-# BOSS TRex's arena (patches/boss_trex.c says what each fixes), with BOSS TRex on Restored (src/game/boss_trex.cpp).
-# A laser wall's update (dll704_0090, the wall in $a0) asks dino_trex_wall whether its corridor is charged.
-[[patches.hook]]
-func = "dll704_0090"
-before_vram = 0x9028A518
-text = '{ int dino_trex_restored(void); void dino_trex_wall(uint8_t*, recomp_context*); if (dino_trex_restored()) { recomp_context c = *ctx; dino_trex_wall(rdram, &c); } }'
-
+# BOSS TRex's arena (patches/boss_trex.c says what it fixes), with BOSS TRex on Restored (src/game/boss_trex.cpp).
 # The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
 # and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call.
 [[patches.instruction]]
