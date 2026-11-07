@@ -73,6 +73,9 @@ name = "map_at"  # the map at a position: x in f12, z in f14
 vram = 0x80045BF4
 name = "load_map"  # src/game/krazoa.cpp
 [[addr]]
+vram = 0x8004A800
+name = "object_loop"  # updates the loaded maps' objects, freeing one out of range unless its placement's flag 2
+[[addr]]
 vram = 0x8004D1D4
 name = "warp_entry"  # reads the warp table, ROM file 30
 [[addr]]
@@ -267,3 +270,21 @@ name = "spirit_3"
 [[bit]]
 bit = 0x318
 name = "spirit_4"
+[[bit]]
+bit = 0x52B
+name = "tablet_room_solved"  # Krazoa Tablets on Restored (src/game/krazoa.cpp)
+[[bit]]
+bit = 0x6A7
+name = "kp_fire_done"  # Krazoa Palace on Restored: its wings' text blocks, in order
+[[bit]]
+bit = 0x6A8
+name = "kp_earth_done"
+[[bit]]
+bit = 0x6A9
+name = "kp_water_done"
+[[bit]]
+bit = 0x6AA
+name = "kp_magic_done"
+[[bit]]
+bit = 0x912
+name = "transporter_tutorial"  # dll334 shows its first-use text while it is clear

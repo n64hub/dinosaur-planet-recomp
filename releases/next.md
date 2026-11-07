@@ -2,3 +2,6 @@
   room for.
 - Kamerian Dragon on Restored: the Skeetla arena at the bottom of Dragon Rock, once won, leads into the Kamerian
   Dragon's room, which nothing led to, and the fourth SpellStone, once picked up, leads back out to the arena.
+- Krazoa Palace on Restored: the palace's four wings each have a door, a console and a text block, played in turn
+  from Cape Claw's tablet room, and the last door they open leads to the red Krazoa, who sends the player on to
+  Drakor. The prototype built the rooms and left them empty.

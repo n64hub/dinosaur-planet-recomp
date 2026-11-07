@@ -704,6 +704,19 @@ func = "dll458_0018"
 before_vram = 0x901E4334
 text = '{ void dino_krazoa_tablet_bits(uint8_t*, recomp_context*); dino_krazoa_tablet_bits(rdram, ctx); }'
 
+# Krazoa Palace: its text blocks ask for Desert Force Point's 0x7BF, so dll654's update (0x314) also lets a player
+# who stands at one set it off.
+[[patches.hook]]
+func = "dll654_01D0"
+before_vram = 0x90260ED0
+text = '{ void dino_krazoa_palace_textblock(uint8_t*, recomp_context*); dino_krazoa_palace_textblock(rdram, ctx); }'
+
+# Krazoa Palace: its doors (dll307, placed with no bits) are posed from the wings' bits in the door's update.
+[[patches.hook]]
+func = "dll307_01C8"
+before_vram = 0x90179DD0
+text = '{ void dino_krazoa_palace_door(uint8_t*, recomp_context*); dino_krazoa_palace_door(rdram, ctx); }'
+
 # Cape Claw's shrine (dll486): its test is one SabreBaddie, which CCSH_ObjCreator (dll487) spawns with kill bit 0x1E7,
 # as Discovery Falls' creator does. State 2 waited for 0x5B2 instead, a bit nothing in the ROM sets, so the test never
 # ended: it reads 0x1E7, and its reset clears 0x1E7 (addiu $a0, $zero, 0x5B2 -> 0x1E7 at 0x7C0 and 0x998). The shrine
