@@ -305,9 +305,11 @@ static void stop_at_walls(uint8_t* rdram, recomp_context* ctx, gpr state, gpr fo
 }
 
 // $a0 is the camera mode's state; dll2's $gp is set, its GOT's 0xC entry being the address of its bss.
+int dino_steer_camera_yaw = 0; // TEMP
 extern "C" void dino_camera_turn(uint8_t* rdram, recomp_context* ctx) {
     bool on = general_option_is(free_camera, (uint32_t)FreeCamera::On);
     recompinput::set_right_analog_suppressed(on);
+    dino_steer_camera_yaw = (int)(int16_t)MEM_H(0, ctx->r4); // TEMP
     gpr state = ctx->r4;
     gpr focus = (gpr)MEM_W(0xA0, state);
     gpr bss = (gpr)MEM_W(0xC, ctx->r28);

@@ -2,6 +2,7 @@
 // render context. The natives the patches call are recomp_api.cpp, the settings config.cpp.
 
 #include <cstdio>
+#include <cmath>
 #include <cstring>
 #include <cassert>
 #include <vector>
@@ -507,6 +508,14 @@ static void take_web_options() {
 
 void watch_writes_arm(uint8_t* rdram);
 
+struct SteerStep { char kind; float x, z, r; uint32_t buttons; };
+static std::vector<SteerStep> steer_steps;
+static volatile float steer_px = 0, steer_pz = 0;
+static volatile int steer_yaw = 0;
+static volatile bool steer_seen = false;
+static volatile int steer_watch = -1;
+static volatile int steer_bit_value = 0;
+
 extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     watch_writes_arm(rdram);
 #ifdef __EMSCRIPTEN__
@@ -514,6 +523,11 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
 #endif
     double now = script_seconds();
     dino::story_timed_bits(rdram, ctx, now);
+    if (!steer_steps.empty()) {
+        float px, pz; int yaw;
+        if (dino::story_player(rdram, ctx, &px, &pz, &yaw)) { steer_px = px; steer_pz = pz; steer_yaw = yaw; steer_seen = true; }
+        if (steer_watch >= 0) steer_bit_value = dino::story_bit(rdram, ctx, steer_watch);
+    }
     static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;
     if (check_heap) {
         dino::heap_check(rdram, now);
@@ -529,6 +543,73 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     }
 }
 
+// TEMP (scratch, not to land as is): DINO_STEER=<file>, a closed-loop script: wait <s> | goto <x> <z> [r] | press <hex> | hold <hex> <s>
+extern int dino_steer_camera_yaw;
+static size_t steer_at = 0;
+static double steer_since = -1.0;
+
+static void load_steer(const char* path) {
+    FILE* f = fopen(path, "r");
+    if (!f) { fprintf(stderr, "steer: can't open %s\n", path); return; }
+    char line[128];
+    while (fgets(line, sizeof(line), f)) {
+        SteerStep s{}; float a = 0, b = 0, c = 40; unsigned h = 0;
+        if (sscanf(line, "wait %f", &a) == 1) { s.kind = 'w'; s.r = a; }
+        else if (sscanf(line, "goto %f %f %f", &a, &b, &c) >= 2) { s.kind = 'g'; s.x = a; s.z = b; s.r = c; }
+        else if (sscanf(line, "face %f %f", &a, &b) == 2) { s.kind = 'f'; s.x = a; s.z = b; s.r = 0.3f; }
+        else if (sscanf(line, "until %x", &h) == 1) { s.kind = 'u'; s.buttons = h; }
+        else if (strncmp(line, "loop", 4) == 0) { s.kind = 'l'; }
+        else if (sscanf(line, "press %x", &h) == 1) { s.kind = 'p'; s.buttons = h; s.r = 0.15f; }
+        else if (sscanf(line, "hold %x %f", &h, &a) == 2) { s.kind = 'p'; s.buttons = h; s.r = a; }
+        else continue;
+        steer_steps.push_back(s);
+    }
+    fclose(f);
+}
+
+static void steer_input(uint16_t* buttons, float* x, float* y) {
+    static const float sign = getenv("DINO_STEER_SIGN") ? (float)atof(getenv("DINO_STEER_SIGN")) : -1.0f;
+    if (steer_at >= steer_steps.size() || !steer_seen) return;
+    double now = script_seconds();
+    const SteerStep& s = steer_steps[steer_at];
+    if (steer_since < 0) {
+        steer_since = now;
+        fprintf(stderr, "steer: %.1f step %d '%c' from %.0f %.0f\n", now, (int)steer_at, s.kind, steer_px, steer_pz);
+    }
+    double t = now - steer_since;
+    bool done = false;
+    *buttons = 0; *x = 0; *y = 0;
+    static size_t loop_from = 0;
+    if (s.kind == 'u') { steer_watch = (int)s.buttons; steer_bit_value = 0; loop_from = steer_at + 1; done = true; }
+    else if (s.kind == 'l') {
+        if (steer_bit_value == 0) { steer_at = loop_from; steer_since = -1.0; return; }
+        done = true;
+    }
+    else if (s.kind == 'w') done = t >= s.r;
+    else if (s.kind == 'p') { if (t < s.r) *buttons = (uint16_t)s.buttons; done = t >= s.r + 0.25; }
+    else if (s.kind == 'f') {
+        float dx = s.x - steer_px, dz = s.z - steer_pz;
+        float err = atan2f(-dx, -dz) * 32768.0f / 3.14159265f - (float)(0x8000 - dino_steer_camera_yaw);
+        float e = err * 3.14159265f / 32768.0f;
+        if (t < s.r) { *x = sign * 24.0f * sinf(e); *y = 24.0f * cosf(e); }
+        done = t >= s.r + 0.3;
+    }
+    else {
+        float dx = s.x - steer_px, dz = s.z - steer_pz;
+        if (dx * dx + dz * dz < s.r * s.r) done = true;
+        else if (t > 30.0) { fprintf(stderr, "steer: gave up at %.0f %.0f\n", steer_px, steer_pz); done = true; }
+        else {
+            float want = atan2f(-dx, -dz) * 32768.0f / 3.14159265f;
+            float err = want - (float)(0x8000 - dino_steer_camera_yaw);
+            while (err > 32768.0f) err -= 65536.0f;
+            while (err < -32768.0f) err += 65536.0f;
+            float e = err * 3.14159265f / 32768.0f;
+            *x = sign * 70.0f * sinf(e);
+            *y = 70.0f * cosf(e);
+        }
+    }
+    if (done) { steer_at++; steer_since = -1.0; }
+}
 static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out, float* y_out) {
     bool ret = recompinput::profiles::get_n64_input(player_index, buttons_out, x_out, y_out);
     if (player_index == 0) {
@@ -548,6 +629,10 @@ static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out,
                 ret = true;
             }
         }
+    }
+    if (!steer_steps.empty() && player_index == 0) {
+        steer_input(buttons_out, x_out, y_out);
+        ret = true;
     }
     return ret;
 }
@@ -611,6 +696,9 @@ int main(int argc, char** argv) {
         else if (strcmp(argv[i], "--boot-after") == 0 && i + 1 < argc) {
             autoboot = true;
             autoboot_after = atof(argv[++i]);
+        }
+        else if (strcmp(argv[i], "--steer") == 0 && i + 1 < argc) {
+            load_steer(argv[++i]);
         }
         else if (strcmp(argv[i], "--input") == 0 && i + 1 < argc) {
             load_input_script(argv[++i]);

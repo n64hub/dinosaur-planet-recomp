@@ -25,6 +25,8 @@ namespace dino {
     void story_start(uint8_t* rdram, recomp_context* ctx);
     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
     void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
+    int story_bit(uint8_t* rdram, recomp_context* ctx, int bit);
+    bool story_player(uint8_t* rdram, recomp_context* ctx, float* x, float* z, int* yaw);
     // DINO_CHECK_HEAP (heap.cpp, development).
     void heap_check(uint8_t* rdram, double seconds);
 

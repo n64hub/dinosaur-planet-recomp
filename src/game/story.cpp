@@ -12,6 +12,8 @@
 // retry restores. func_800142F0 is the
 // rolling demo, not a new game.
 
+#include <cmath>
+#include <cstdlib>
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
@@ -345,6 +347,30 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
     fprintf(stderr, "--story: started %s, %d bits, at warp %d\n", point.name, (int)(point.bits.size() + extra_bits.size()), chosen_warp);
 }
 
+// TEMP: a bit, for the local closed-loop steer.
+int dino::story_bit(uint8_t* rdram, recomp_context* ctx, int bit) {
+    ctx->r4 = bit;
+    call(rdram, ctx, get_bit);
+    return (int)ctx->r2;
+}
+
+// TEMP: the player's position and facing, for the local closed-loop steer.
+bool dino::story_player(uint8_t* rdram, recomp_context* ctx, float* x, float* z, int* yaw) {
+    if (word(rdram, save_pointer) == 0) {
+        return false;
+    }
+    call(rdram, ctx, player_object);
+    int32_t object = (int32_t)ctx->r2;
+    if (object == 0) {
+        return false;
+    }
+    uint32_t ux = MEM_W(0x18, (gpr)object), uz = MEM_W(0x20, (gpr)object);
+    memcpy(x, &ux, 4);
+    memcpy(z, &uz, 4);
+    *yaw = (int)(int16_t)MEM_H(0, (gpr)object);
+    return true;
+}
+
 // Once a second, what an unattended run needs to tell where the player is and whether the player lives.
 void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     int32_t save = word(rdram, save_pointer);
@@ -368,4 +394,23 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     ctx->f14.fl = fz;
     call(rdram, ctx, map_at);
     fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats));
+    if (getenv("DINO_LOG_CARRY")) {
+        gpr ps = MEM_W(0xB8, (gpr)object);
+        fprintf(stderr, "carry: player held 0x%X +870=%d +8A9=%d\n", (unsigned)MEM_W(0x868, ps), MEM_BU(0x870, ps), MEM_BU(0x8A9, ps));
+        fprintf(stderr, "carrystate: 3C0=%X 3C4=%X 350=%X A0=%X A2=%X vx=%X vy=%X vz=%X 54=%X B0=%X\n", (unsigned)MEM_W(0x3C0, ps), (unsigned)MEM_W(0x3C4, ps), (unsigned)MEM_W(0x350, ps), (unsigned)MEM_H(0xA0, (gpr)object) & 0xFFFF, (unsigned)MEM_H(0xA2, (gpr)object) & 0xFFFF, (unsigned)MEM_W(0x24, (gpr)object), (unsigned)MEM_W(0x28, (gpr)object), (unsigned)MEM_W(0x2C, (gpr)object), (unsigned)MEM_W(0x54, (gpr)object), (unsigned)MEM_H(0xB0, (gpr)object) & 0xFFFF);
+        gpr lists = (gpr)(int32_t)0x800B28B0 + 2 * 0x12;
+        int32_t first = MEM_H(0, lists), last = MEM_H(2, lists);
+        for (int32_t i = first; i < last; i++) {
+            gpr o = MEM_W(4 * i, (gpr)(int32_t)0x800B2938);
+            gpr st = MEM_W(0xB8, o);
+            uint32_t ox = MEM_W(0x18, o), oy = MEM_W(0x1C, o), oz = MEM_W(0x20, o);
+            float a, b, c;
+            memcpy(&a, &ox, 4); memcpy(&b, &oy, 4); memcpy(&c, &oz, 4);
+            float d = sqrtf((a - fx) * (a - fx) + (b - fy) * (b - fy) + (c - fz) * (c - fz));
+            if (d < 400) {
+                fprintf(stderr, "carry: obj 0x%X id 0x%X at %.0f %.0f %.0f d=%.0f AF=%02X E0=%d D4=%d st5=%d st6=%d st7=%02X 11=%d 12=%d 13=%d 3C=%02X 3D=%02X 3E=%02X\n", (unsigned)o, MEM_H(0x46, o) & 0xFFFF, a, b, c, d,
+                    MEM_BU(0xAF, o), (int)MEM_W(0xE0, o), MEM_BU(0xD4, o), MEM_BU(5, st), MEM_BU(6, st), MEM_BU(7, st), MEM_BU(0x11, st), MEM_BU(0x12, st), MEM_BU(0x13, st), MEM_BU(0x3C, st), MEM_BU(0x3D, st), MEM_BU(0x3E, st));
+            }
+        }
+    }
 }
