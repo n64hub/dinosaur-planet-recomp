@@ -588,6 +588,13 @@ func = "dll703_00A4"
 before_vram = 0x90289920
 text = '{ void dino_trex_switch(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_switch(rdram, &c); }'
 
+# The TRex's path step (dll702_0FE4, the TRex in $a0, its path data in $a1) starts with its fraction in its speed's
+# range (dino_trex_path), or a corner can skip the next corridor.
+[[patches.hook]]
+func = "dll702_0FE4"
+before_vram = 0x90286938
+text = '{ void dino_trex_path(uint8_t*, recomp_context*); recomp_context c = *ctx; dino_trex_path(rdram, &c); }'
+
 # With BOSS TRex on Restored (src/game/boss_trex.cpp):
 # The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
 # and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call.

@@ -63,3 +63,33 @@ void dino_trex_switch(Object* floor_switch) {
         func_80026184(floor_switch, player);
     }
 }
+
+// The TRex runs the ring on a path of four corridors (dll702's path data, D_3F40 in the DLL): +0x8 is how far along
+// its corridor it is, 0 to 1, +0xFA's bits 1-2 the corridor and bit 0 the way round, and +0xFC its speed (0 for a
+// lap, 1 for a charge, 2 for the fast lap after a hit, dll702_3828). Its step (dll702_0FE4) moves the fraction on,
+// and once it leaves the speed's range (dll702's data: from {0, 0.025, 0.025} at D_3E50 to {1, 0.975, 0.975} at
+// D_3E5C) moves to the next corridor, holds the fraction at the range's end and returns 1, so the state calls the
+// corner (dll702_3160), which sets the fraction from where the TRex stands on the new corridor (dll702_0C74), about 0
+// (or about 1 the other way round). At speed 0 that is in range; at speeds 1 and 2 it can be under 0.025 (over 0.975),
+// so the next step leaves the range at once and skips that corridor too, and the TRex goes round its corners in place:
+// after the first hit it never reaches the end of its fast lap, where the hit counts (bit 0x572) and the next round's
+// floor switches come on (dll701 0x254-0x434). Here the fraction is brought into the speed's range before each step
+// (the hook at dll702_0FE4's start), as the step itself leaves it.
+typedef struct {
+    u8 pad[0x8];
+    f32 fraction;
+    u8 pad2[0xFA - 0xC];
+    u16 flags;
+    u8 speed;
+} TrexPath;
+
+void dino_trex_path(Object* trex, TrexPath* path) {
+    f32 min = path->speed != 0 ? 0.025f : 0.0f;
+    f32 max = path->speed != 0 ? 0.975f : 1.0f;
+
+    if (path->fraction < min) {
+        path->fraction = min;
+    } else if (path->fraction > max) {
+        path->fraction = max;
+    }
+}
