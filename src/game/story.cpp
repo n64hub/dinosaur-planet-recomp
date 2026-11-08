@@ -604,11 +604,12 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
         if (other == 0 || (int16_t)MEM_H(0x46, other) != oid) {
             continue;
         }
-        uint32_t ox = MEM_W(0x18, other), oz = MEM_W(0x20, other);
+        uint32_t ox = MEM_W(0x18, other), oy = MEM_W(0x1C, other), oz = MEM_W(0x20, other);
         memcpy(&fx, &ox, 4);
+        memcpy(&fy, &oy, 4);
         memcpy(&fz, &oz, 4);
         gpr state = (gpr)MEM_W(0xB8, other);
-        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f act %d use 0x%02X%s\n", seconds, oid, fx, fz,
+        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f %.0f act %d use 0x%02X%s\n", seconds, oid, fx, fy, fz,
             state != 0 ? (int16_t)MEM_H(0x26C, state) : -1, MEM_BU(0xAF, other),
             MEM_BU(0x36, other) == 0 ? " unseen" : "");
         // Its focus point, where A uses it: the player within 4 x the reach byte of it, across the ground and 100 up or
