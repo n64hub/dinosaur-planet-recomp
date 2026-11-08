@@ -33,7 +33,7 @@ namespace dino {
     bool story_object_near(uint8_t* rdram, int oid, float x, float z, float reach);
     // --input's sync act: whether a drawn object of that id is in that act of its state machine.
     bool story_object_act(uint8_t* rdram, int oid, int act);
-    // --input's sync state: whether a drawn object of that id within reach of (x, z) has that value in a byte of its state.
+    // --input's sync state: whether an object of that id within reach of (x, z) has that value in a byte of its state.
     bool story_object_state(uint8_t* rdram, int oid, float x, float z, float reach, int offset, int mask, int value);
     // DINO_CHECK_HEAP (heap.cpp, development).
     void heap_check(uint8_t* rdram, double seconds);

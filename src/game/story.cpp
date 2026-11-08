@@ -521,14 +521,14 @@ bool dino::story_object_act(uint8_t* rdram, int oid, int act) {
     return false;
 }
 
-// --input's sync state lines: whether a drawn object of that id within reach of (x, z) holds that value, under that mask,
-// in the byte at that offset of its state (obj+0xB8): a timed hazard's phase, such as a laser's beam (dll788, +0x34
-// nonzero while it is live).
+// --input's sync state lines: whether an object of that id within reach of (x, z), drawn or not (a laser's +0x36 is
+// 0), holds that value, under that mask, in the byte at that offset of its state (obj+0xB8): a timed hazard's phase,
+// such as a laser's beam (dll788, +0x34 nonzero while it is live).
 bool dino::story_object_state(uint8_t* rdram, int oid, float x, float z, float reach, int offset, int mask, int value) {
     gpr all = (gpr)MEM_W(0, (gpr)objects);
     for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
         gpr object = MEM_W(i * 4, all);
-        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid) {
             continue;
         }
         uint32_t wx = MEM_W(0x18, object), wz = MEM_W(0x20, object);
