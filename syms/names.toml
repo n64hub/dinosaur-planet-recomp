@@ -487,6 +487,24 @@ name = "dr_arena_fight_won"  # dll713 once 0x789 is 3 and no Skeetla is left; DR
 [[bit]]
 bit = 0x609
 name = "dr_arena_won"
+[[bit]]
+bit = 0x380
+name = "meat"  # the food bag's meat: meatPickup (#B), from the arena gallery's Crates 0x40C16 and 0x40C17
+[[bit]]
+bit = 0x164
+name = "food_bag_shown"  # dll1's first C-right menu, Krystal's bags; WL_LevelControl (dll607 0x0194) in act 6
+[[bit]]
+bit = 0x5FD
+name = "dr_nice_sharpy_fed"  # DR_NiceSharpy (dll739) given 0x380 or 0x381; DR_Seqobj 0x339C4 sets 0x5FE
+[[bit]]
+bit = 0x5FE
+name = "dr_shackles_open"  # DR_Shackle (dll747); dll713 0x0670 sets 0x654 on it while his health is above 0
+[[bit]]
+bit = 0x654
+name = "dr_warrior_unshackled"  # dll713 0x0670 on 0x5FE, while his health is above 0; DR_Seqobj 0x348DC reads it
+[[bit]]
+bit = 0x655
+name = "dr_warrior_freed"  # DR_Seqobj 0x348DC on 0x654, with sequence 0xC; dll713 then skips the win's check (0x0508)
 [[export]]
 dll = 210
 index = 14
