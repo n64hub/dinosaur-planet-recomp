@@ -11,11 +11,14 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
 ```
 
 - `--story <point>[@<seconds>][,<warp>]` starts from that point, 2 s after the game's first controller read unless
-  told, at the point's own place or at that entry of the warp table.
+  told, at the point's own place or at that entry of the warp table, as a warp there has it: an entry a setting fills
+  (docs/restored-content.md, The warp entries the restorations take) starts at its filled place.
 - `--place <x>,<y>,<z>[,<layer>[,<facing>]]` starts there instead, for a place the warp table has no entry for, facing
   a 16-bit angle (0, the default, faces -z).
 - `--bits <hex>[=<value>][@<seconds>],...` sets more of the game's bits at the start, after the point's own, or one
   given a time when the `--input` clock reaches it: what a test's own object sets, for a test a script can't play.
+- `--time <hour>[@<seconds>]` sets the time of day once there is a player in a level, or once the `--input` clock
+  reaches that time: night is 21 to 5 (The third SpellStone and the moonseeds).
 - `--report` prints a line a second, from the start or from the game's first pass without `--story`: the clock, the map
   number, the position, the health and the magic. A run's `--story:` line says what started.
 - `--watch-bits <hex>,...` prints a `bits:` line each time the game sets one of those bits, with the clock, the value
@@ -72,8 +75,8 @@ file 19, each task's name and clue), which says when the player swaps.
   Queen not met yet and no white mushroom collected.
 - `after-first-spellstone`: Sabre at the Volcano Force Point (warp 81), the first spirit won and the first SpellStone
   placed.
-- `before-sand-worm`: Krystal in Cape Claw, on the sand at the map's setuppoint beside the worm. The warp table has no
-  entry in Cape Claw.
+- `before-sand-worm`: Krystal in Cape Claw, on the sand at the map's setuppoint beside the worm. The ROM's warp table
+  has no entry in Cape Claw.
 - `before-df-shrine`, Krystal (warp 36); `before-db-shrine`, Sabre (38); `before-mm-shrine`, Krystal (43);
   `before-ec-shrine`, Sabre (40): the four shrines the task list orders, each with the spirits before it.
 - `before-gp-shrine` (42), `before-nw-shrine` (37), `before-cc-shrine` (41), `before-wg-shrine` (39): Krystal with all
@@ -552,18 +555,27 @@ to 2 (`--story new-game,88 --bits 5dc=7`): DR_Creator (738) sends Skeetlas (615)
 Besides its groups, each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets,
 numbered by the u16 at +0x1F90 + 2 × map in dll29's data: 0x4FE the Volcano Force Point (4), 0x3EE Diamond Bay (35),
 0xE6 Walled City (13). A new game puts every map in act 1 (dll29 0x300-0x334), and the object loader
-(`func_8004B4A0`) skips a placement whose byte +3 has bit act - 1 set (byte +5 for acts 9 to 16), so a map holds
+(`func_8004B4A0`) skips a placement whose byte +3 has bit act - 1 set (byte +5's bit 16 - act for acts 9 to 16, and
+`tools/dino.py map <map> --act <act>` lists what loads), so a map holds
 other objects in each act. A level's control object sets its act, or a sequence does (dll3's event 0x1D, the act of
 the map the playing object is in), and ROM file 13 holds one such event, which sets act 3.
 
 `src/game/acts.cpp` moves two maps' acts with the story, at each map load (the header has the evidence), and
-`DINO_LOG_ACTS=1` prints each act it moves:
+`DINO_LOG_ACTS=1` prints each act it moves or leaves:
 
 - The Volcano Force Point: act 2 while Walled City's SpellStone is carried (0x83B), 3 once it is placed (0x878). Its
   second SpellPlace, the podium that takes the stone for the second path, the door switch and the round door load
   in act 2 only, and VFP_LevelControl (619) set the map to act 1 in its constructor, whatever the story, so nothing
   of act 2 or 3 ever played. Its act 3 sets 0x63C, which moves Diamond Bay on to act 3 (DBlevelControl, 663: 1 and
   one each for 0x4E9, 0x63C and 0x63D).
+- The Volcano Force Point's act 11 is the Queen Earthwalker's: she sets it before each warp to entry 81 (0x486, then
+  0x487), and only it loads the two SHseqobjects that play her cutscenes (30afa, done bit 0x484; 30afc, 0x485) and a
+  WarpPoint, without the level's podium, SpellPlaces and puzzles. It is left while a visit is to play, and once both
+  have played the map's next load moves it on, as VFP_LevelControl would, which neither visit loads. Played from
+  `--story swapstone-hollow --bits b0=4,c2=5,452=450` (the Queen beside warp 15, chased with A pressed): both
+  cutscenes on Original and Restored (0x484 at 44.5 s, 0x485 at 65.9 s, then step 7), and on Restored warp 81 after
+  them with the first SpellStone (0x123) loaded act 1, whose podium beside the entry took the stone (0x514 at 5.5 s,
+  from `--story swapstone-hollow,81 --bits 4fe=11,484,485,486,487,b0=7,123`). On Original that warp finds act 11.
 - Walled City: act 2 once Moon Mountain Pass's spirit is released (0x317), when the task list sends Sabre back for
   the Sun and Moon Stones. The stones beside the boss door, the sockets on the TRex statues that take them, and
   WCLevelControl's (779) bits that open the Sun and Moon temples are act 2's only; the RedEye teeth are act 1's.
@@ -598,10 +610,39 @@ inventory with it selected, and A uses it on what is in reach (`--input` lines `
   Diamond Bay goes to act 3. That was three runs of four (4.2 s, on Third
   SpellStone's Restored): in the other, nothing was set in 48 s, and why is not known.
 
-Not played from here: the second egg given to the Pointback's mother (talking to her plays her act-2 sequence, and
-a script's inventory stays on the SpellStone, above the egg), the log of task 84 (no ThornTail sells one, as for
-the first), the meteor of task 94 (MMP_moonrock, 445, three of them into MMP_gyservent's vents, 446, which sets
-0x89B at three), the night the Moon Stone shows in, and the statues' sockets taking the stones.
+Played from here on the desktop build, each from the one before it but where a `--place` or `--bits` start is named:
+
+- The second egg (Diamond Bay, act 2): Sabre at the mother's head, the far side from the way in, talks to her (A),
+  which plays her sequence 3 and sets 0x3FF; DB_FlameSwitch rises with it, Tricky's flame from beside it lights it
+  (0x3D9), the bridge rises, the light beams carry Sabre to the egg (0x86D as A takes it), and the egg used on her
+  from the items menu sets 0x39E (`src/game/diamond_bay.cpp` has the steps and what stopped each).
+- The meteor (task 94): the three MMP_moonrock carried into vents 3, 4 and 6 count 0x88C to 3 and set 0x89B, and
+  with 0x803 the meteor's sequence plays (0x804).
+- The night: the sun temple's inner rooms played through (0x2B0, 0x2F8, 0x2D1, 0x2D4) give the Sun Stone (0x201).
+  In the moon temple at 22:00, with what its push blocks and symbol set already set (`--bits 813,25d,829,244`), the
+  Moon Stone shows and is taken (0x264). Each temple's bridge of light holds Sabre (`src/game/temples.cpp`).
+- The sockets: from the chamber under the statues (`--place -8000,-1080,-7400`), the Sun Stone used on the sun
+  statue's socket (-7908,-1102,-7220) sets 0x202 and the Moon Stone on the moon's (-8091,-1102,-7219, by way of
+  -7990,-7380 and -8088,-7285) 0x243. The sockets take an item from 48 units. The chamber's bats take the target
+  from a socket, so a script uses the stone again until the bit is set. With both, EC's Transporter stands at
+  (-7939,-1123,-7441); its tutorial hint (0x912) holds the player still the first time, and A on it about 20 s after
+  the stones sends Sabre to the EC shrine (map 33, entry 40).
+- The test of skill: TriggerPlane a2b in the shrine's corridor sets 0x592, the ECSH_Creators' enemies come, and
+  beating them sets 0x593 to 0x595; with 0x595, crossing z -14008 sets 0x596 and the door opens. On the ring,
+  ECSH_Shrine (dll469, 1619 at 14077,44,-14551) plays three rounds (its +0x1B 3, 4 and 5) of six cups (ECSH_Cup,
+  dll470): each round draws a cup (+0x1A), shuffles (+0x17 phases 6, 8, 2, 1, 0, 4) and waits about 16 s in phase 5
+  for the player to stand within 30 of a cup, whose index is its +0x23. A player who stands among the cups as they
+  shuffle stops them for good, so a script stands in the middle until phase 5 and then walks to the cup
+  (`--input`'s `chase 1BF 10 match 23 1B9 1A`). The third right pick sets 0x128, the win gives the spirit (mask 8)
+  and 0xFD, and Sabre is back on Warlock Mountain's pad, where its act 5 sets 0x142 (`src/game/krazoa.cpp`).
+
+Not played from here: the moon temple's push blocks by night (0x811 to 4, then 0x813, the door, 0x25D) and its moon
+symbol in the first person view (C-up, 21:23 to 22:38, 0x829); the moonseed planted (Krystal at the receptacle 41a5c has
+it as the camera's target, +0x110, within its reach, but the item menu her C-right opens holds the spell book, the
+forcefield, the flame and Kyte, and no moonseed, though 0x86A is 4), and so the seed grown at night; the walk from
+Warlock Mountain's pad to EC's release (WL_seqpoint 2983 at 13929,-117,1106, mode 2 on 0x142): the pad's walkway east
+along z 2960, past the crates and two GuardClaws to (13700,3320), meets a fallen column (WMfallencol, 13743,-292,3090)
+across the way north, with WL_LaserBeam's beams beyond it; and task 84's log (no ThornTail sells one, as for the first).
 
 ## The shrines
 
@@ -751,9 +792,12 @@ game's own code warps to some of them (dll 408 to 26, SHswapstone to 86). Each e
 `--story new-game,<index>`, played 15 s with no story state and looked at. "Boots" is alive and drawn, with the player
 on a floor and no crash; it says nothing about what the level needs further in.
 
-- 0, 68: 0 lies in no map's cells, and 68 in the Swap Store's. A running game drops the player through nothing and
-  restores them to the last safe place, and a run started there has none: `--story new-game,0` crashes on a null
-  pointer in dll210 at about 9 s, and 68 the same. Not usable as the ROM has them.
+- 0, 68: each is a Transporter's own spot in a map the world grid gives no cell, 0 map 20's (an older Krazoa Shrine,
+  its pad sending to 14) and 68 map 36's (the EarthWalker Temple, an older layout of Walled City's temples, its pad
+  sending to 40, ECShrine, whose pad sends back to 68). In world units 0 lies in no map's cells, and 68 in the Swap
+  Store's. A running game drops the player through nothing and restores them to the last safe place, and a run
+  started there has none: `--story new-game,0` crashes on a null pointer in dll210 at about 9 s, and 68 the same on
+  Original. Krazoa Shrines on Restored fills 68 at EC's pad in Walled City (`src/game/krazoa.cpp`).
 - 2, 26: NewIceMt1 (map 23), layer 2, the same room. Boots into the story scene a real New Game then `--warp 26`
   plays, in the snow, and dll 408 (IMIceMountain) warps to 26 itself. `--story new-game,26`, `--story new-game,2` and
   `--story new-game` then `--warp 26` each played 60 s alive. No named point starts here.
@@ -780,7 +824,10 @@ on a floor and no crash; it says nothing about what the level needs further in.
 - 91: Walled City (13). Boots, in a corridor.
 - 95: Northern Wastes (10). Boots.
 
-Cape Claw has no entry: `before-sand-worm` and `--place` go there.
+Cape Claw has no entry: `before-sand-worm` and `--place` go there. On Krazoa Shrines' Restored, 77 is filled at Cape
+Claw's setuppoint 7 by its west entrance (1457, 156, 16940), which its act 9 loads, where Warlock Mountain's sequence
+0x12 sends the player after Willow Grove's release: it sets Cape Claw's act 9 (0xEE), 0x367, whose WM_WarpPoint
+(radius 0) warps the player to 77 at once, and 0x368, and clears 0x366 (docs/restored-content.md).
 
 ## Choices
 

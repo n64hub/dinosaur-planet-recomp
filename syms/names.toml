@@ -587,3 +587,9 @@ name = "walled_city_gate"
 [[bit]]
 bit = 0x82E
 name = "third_spellstone_won"  # not yet active: the King turns it into 0x83B
+[[bit]]
+bit = 0x366
+name = "after_shrines"  # Warlock Mountain's seqpoint 30055 plays sequence 0x12 on it (src/game/krazoa.cpp)
+[[bit]]
+bit = 0x367
+name = "cape_claw_warp_shown"  # sequence 0x12 sets it; it shows WM_WarpPoint 3008c, to entry 77
