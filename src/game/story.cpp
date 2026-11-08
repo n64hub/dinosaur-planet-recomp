@@ -42,6 +42,7 @@ namespace {
     constexpr int32_t set_bit = 0x80014670;
     constexpr int32_t get_bit = 0x800147EC;
     constexpr int32_t player_object = 0x80023914;
+    constexpr int32_t angle_to = 0x800160E0;
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
     constexpr int32_t current_menu = 0x800A7D84;
@@ -415,9 +416,18 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. With sphere other than -1,
 // toward that hit sphere of the object instead: its model instance's (+0x7C, the one at +0xAD) spheres at +0x24, 16
 // bytes each with x, y and z at +4, from the world's origin. 0 within reach. False with
-// no player, no camera or no such object.
+// no player, no camera or no such object. With ride (a ride line), the stick of a player on a vehicle that turns by
+// stick x and goes by stick y (CloudRunner's race's CRSnowBike, dll732): the turn its own riders' is (dll732 0x3DAC),
+// the angle from the way she goes to the target (func_800160E0's of her place less the target's), negated, full at
+// 45 degrees: the way she goes is her facing (+0x0), or the way she moved over the last 0.2 s when faster than 20
+// units a second, since the bike slides and by its facing a turn onto a line ends 30 degrees off it. The throttle is
+// full, eased to 0.3 in a turn of more than 45 degrees, whose circle at full throttle is wider than the bike bay's
+// mouth, or toward a place of more than 15 within 300 units, where it would circle it for good, and to 0.4 within 150
+// units of a place, so a turn there is made (toward an object it stays full: a ram needs the speed). A bike no nearer
+// its target in 3 s (pinned on a rise, or sliding along a wall in a turn it can't make) turns at full lock for 1.2 s
+// and comes round.
 bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
-    float* stick_x, float* stick_y) {
+    bool ride, float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
     *stick_y = 0.0f;
     float fx, fz;
@@ -474,6 +484,72 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
     float dx = to_x - x, dz = to_z - z;
     float distance = std::sqrt(dx * dx + dz * dz);
     if (distance <= reach) {
+        return true;
+    }
+    if (ride) {
+        // The bike slides, so faster than 20 units a second it steers by the way it moves over the last 0.2 s, not
+        // the way it faces: by its facing, a turn onto a line ends heading 30 degrees off it.
+        static double moved_at = -1.0;
+        static float moved_x, moved_z, moving_x, moving_z;
+        double now = dino_script_seconds();
+        if (now - moved_at > 0.5) {
+            moving_x = moving_z = 0.0f;
+            moved_at = now;
+            moved_x = x;
+            moved_z = z;
+        }
+        else if (now - moved_at >= 0.2) {
+            moving_x = (x - moved_x) / (float)(now - moved_at);
+            moving_z = (z - moved_z) / (float)(now - moved_at);
+            moved_at = now;
+            moved_x = x;
+            moved_z = z;
+        }
+        int32_t facing = MEM_HU(0x0, player);
+        if (moving_x * moving_x + moving_z * moving_z > 20.0f * 20.0f) {
+            ctx->f12.fl = -moving_x;
+            ctx->f14.fl = -moving_z;
+            call(rdram, ctx, angle_to);
+            facing = (int32_t)ctx->r2 & 0xFFFF;
+        }
+        ctx->f12.fl = -dx;
+        ctx->f14.fl = -dz;
+        call(rdram, ctx, angle_to);
+        int32_t turn = ((int32_t)ctx->r2 & 0xFFFF) - facing;
+        if (turn > 0x8000) {
+            turn -= 0x10000;
+        }
+        else if (turn < -0x8000) {
+            turn += 0x10000;
+        }
+        // No 10 units nearer the target in 3 s of riding toward it: stalled, pinned or sliding along a wall in a
+        // turn it can't make. For 1.2 s it turns at full lock, each time the other way.
+        static double anchor_at = -1.0, last_at = -1.0, escape_until = -1.0;
+        static float anchor_distance;
+        static int anchor_oid;
+        static float anchor_to_x, anchor_to_z;
+        static float escape_side = 1.0f;
+        bool same_target = oid == anchor_oid && (oid != -1 || (to_x == anchor_to_x && to_z == anchor_to_z));
+        if (now - last_at > 0.5 || now < escape_until || !same_target || distance < anchor_distance - 10.0f) {
+            anchor_at = now;
+            anchor_distance = distance;
+            anchor_oid = oid;
+            anchor_to_x = to_x;
+            anchor_to_z = to_z;
+        }
+        else if (now - anchor_at > 3.0) {
+            escape_until = now + 1.2;
+            escape_side = -escape_side;
+        }
+        last_at = now;
+        if (now < escape_until) {
+            *stick_x = escape_side;
+            *stick_y = 1.0f;
+            return true;
+        }
+        *stick_x = std::fmax(-1.0f, std::fmin(1.0f, -(float)turn / (float)0x2000));
+        *stick_y = std::abs(turn) > 0x2000 || (oid == -1 && distance < 300.0f && std::abs(turn) > 0xAAA) ? 0.3f :
+            oid == -1 && distance < 150.0f ? 0.4f : 1.0f;
         return true;
     }
     dx /= distance;

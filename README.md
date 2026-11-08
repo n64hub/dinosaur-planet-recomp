@@ -95,8 +95,8 @@ Fixed:
   the force point's floor to the duct that reaches the place. Golden Plains now leaves the place to the player, and a
   second of the force point's own lifts stands in the corridor behind the round door, under the duct.
 - CloudRunner Fortress's treasure lift (Treasure Lift on Restored): past the blasted wall the wind lift only ever
-  blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below and
-  the way to the race couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
+  blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below
+  couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
   turn it back for the way up.
 - CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
   found the ones waiting for her, so they never came out to be rescued. Kyte now finds a baby once she is near it, and
@@ -121,6 +121,9 @@ Fixed:
   the shaft's wind, which holds an empty-handed player at the corridor's height, dropped one carrying a barrel to the
   bottom, so no barrel reached the courtyard and its roof, which three of them blow, kept Kyte shut in. The wind now
   holds a player carrying a barrel too, and with Treasure Lift on Restored it lowers only an empty-handed one.
+- CloudRunner's snow race: the race's start launches the bike out of the bay where the SnowClaw stands, and at the
+  recomp's frame rate the edge back into it stopped the bike dead, so the SnowClaw couldn't be rammed and the race
+  couldn't be won. The bike now rides over it as it does at 20 frames a second.
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.

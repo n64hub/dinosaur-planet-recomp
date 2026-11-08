@@ -1044,6 +1044,14 @@ func = "dll210_AE34"
 before_vram = 0x900F2D28
 text = '{ int dino_carried_in_wind(uint8_t*, uint32_t); if (dino_carried_in_wind(rdram, (uint32_t)ctx->r3)) { ctx->r2 = 0x4A; goto L_900F32B4; } }'
 
+# CloudRunner's race (src/game/cloudrunner_race.cpp, whose header has the evidence): CRSnowBike's wall test, before
+# it transforms each of its five points (dll732 0x3C08, the point's height in $a2), so a frame of fewer than 3 ticks
+# tests where one of 3 does.
+[[patches.hook]]
+func = "dll732_3AF8"
+before_vram = 0x902AB16C
+text = '{ void dino_snow_bike_wall_point(uint8_t*, recomp_context*); dino_snow_bike_wall_point(rdram, ctx); }'
+
 # CloudRunner Fortress's baby CloudRunners (src/game/cloudrunner.cpp): CFCloudBaby's test for Kyte (dll373 0x2050) after
 # her export 24 answers, the same answer asked again by a found baby (0x0924), and its update (0x01A0) for the log.
 [[patches.hook]]
