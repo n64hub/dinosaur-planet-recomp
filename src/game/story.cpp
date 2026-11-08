@@ -1,4 +1,4 @@
-// --story, --place, --bits and --time (development, src/main/main.cpp reads them): start a run from a chosen point of
+// --story, --place, --bits, --time and --sidekick (development, src/main/main.cpp reads them): start a run from a chosen point of
 // the story, for what a warp can't set. --watch-bits says each time the game sets a bit, for what a test changes. docs/story-points.md lists the points and what each bit is, with its evidence from
 // the ROM.
 //
@@ -44,6 +44,8 @@ namespace {
     constexpr int32_t set_bit = 0x80014670;
     constexpr int32_t get_bit = 0x800147EC;
     constexpr int32_t player_object = 0x80023914;
+    constexpr int32_t sidekick_object = 0x8002394C;
+    constexpr int32_t spawn_sidekick = 0x80023894;
     constexpr int32_t angle_to = 0x800160E0;
     constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int32_t set_paused = 0x8001440C;
@@ -199,6 +201,7 @@ namespace {
     bool time_due = false;
     float time_hours = 0.0f;
     double time_at = 0.0;
+    int sidekick_type = 0; // --sidekick's object id, 0 with none
     int chosen_warp = -1;
     std::vector<int> watched_bits;
     bool watch_all_bits = false;
@@ -365,6 +368,45 @@ void dino::story_timed_time(uint8_t* rdram, recomp_context* ctx, double seconds)
     fprintf(stderr, "--time: %.2f h at %.1f s\n", time_hours, seconds);
 }
 
+// --sidekick kyte|tricky: whenever there is a player in a level and no sidekick out, one at the player, as the
+// sideloads a level puts where a sidekick joins do (dll269: func_80023894 with the sideload, which takes its place and
+// its setup's +0x18 and +0x19, the bit that lets the sidekick out, 0x2C5). For a test of a sidekick's command where a
+// run can't walk one from its sideload, since a --place start has none.
+void dino::story_set_sidekick(const char* name) {
+    sidekick_type = strcmp(name, "kyte") == 0 ? 0x25 : strcmp(name, "tricky") == 0 ? 0x24 : 0;
+}
+
+void dino::story_timed_sidekick(uint8_t* rdram, recomp_context* ctx, double seconds) {
+    if (sidekick_type == 0 || word(rdram, save_pointer) == 0) {
+        return;
+    }
+    call(rdram, ctx, player_object);
+    gpr player = ctx->r2;
+    call(rdram, ctx, sidekick_object);
+    if (player == 0 || ctx->r2 != 0) {
+        return;
+    }
+    // A sideload of the game's own shape under the stack: the object's place at +0x18, its setup at +0x4C.
+    gpr sp = ctx->r29;
+    ctx->r29 -= 0x100;
+    gpr sideload = ctx->r29 + 0x40, setup = ctx->r29 + 0xA0;
+    for (int i = 0; i < 0x60; i += 4) {
+        MEM_W(i, sideload) = 0;
+        MEM_W(i, setup) = 0;
+    }
+    for (int i = 0x18; i <= 0x20; i += 4) {
+        MEM_W(i, sideload) = MEM_W(i, player);
+    }
+    MEM_W(0x4C, sideload) = (int32_t)setup;
+    MEM_B(0x18, setup) = 0x02;
+    MEM_B(0x19, setup) = (int8_t)0xC5;
+    ctx->r4 = sideload;
+    ctx->r5 = sidekick_type;
+    call(rdram, ctx, spawn_sidekick);
+    ctx->r29 = sp;
+    fprintf(stderr, "--sidekick: 0x%X at %.1f s\n", sidekick_type, seconds);
+}
+
 void dino::story_set_warp(int index) {
     chosen_warp = index;
 }
@@ -381,6 +423,7 @@ void dino::story_forget() {
     timed_bits.clear();
     place_given = false;
     time_due = false;
+    sidekick_type = 0;
 }
 
 void dino::story_start(uint8_t* rdram, recomp_context* ctx) {

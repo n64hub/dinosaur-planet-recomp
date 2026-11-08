@@ -15,7 +15,7 @@ namespace dino {
     void register_overlays();
     void register_patches();
 
-    // --story, --place, --bits, --report and --watch-bits (story.cpp, development).
+    // --story, --place, --bits, --report, --watch-bits, --time and --sidekick (story.cpp, development).
     bool story_choose(const char* name);
     void story_add_bits(const char* list);
     void story_watch_bits(const char* list);
@@ -27,6 +27,8 @@ namespace dino {
     void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
     void story_set_time(const char* arg);
     void story_timed_time(uint8_t* rdram, recomp_context* ctx, double seconds);
+    void story_set_sidekick(const char* name);
+    void story_timed_sidekick(uint8_t* rdram, recomp_context* ctx, double seconds);
     bool story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
         bool ride, float* stick_x, float* stick_y, int match = -1, int match_oid = 0, int match_from = 0);
     // --input's sync near: whether a drawn object of that id is within reach of (x, z).

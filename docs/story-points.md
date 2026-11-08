@@ -19,6 +19,8 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
   given a time when the `--input` clock reaches it: what a test's own object sets, for a test a script can't play.
 - `--time <hour>[@<seconds>]` sets the time of day once there is a player in a level, or once the `--input` clock
   reaches that time: night is 21 to 5 (The third SpellStone and the moonseeds).
+- `--sidekick kyte|tricky` brings one out at the player whenever none is, as a level's sideloads (269) do where a
+  sidekick joins: a `--place` start far from one has none, and a sidekick's command needs one.
 - `--report` prints a line a second, from the start or from the game's first pass without `--story`: the clock, the map
   number, the position, the health and the magic. A run's `--story:` line says what started.
 - `--watch-bits <hex>,...` prints a `bits:` line each time the game sets one of those bits, with the clock, the value
@@ -429,9 +431,9 @@ the race (43) at (-20, 29) on layer -2.
   the five never come out. Found, it faces Kyte, and A within its reach rescues it: 0x901 counts it, its bit (0x24F to
   0x253) is set, and it flies to its golden perch (0x2FC to 0x300). Fixed (Baby CloudRunners on Restored,
   `src/game/cloudrunner.cpp`): Kyte finds a baby while she is within 400 of it. Kyte is loaded by the sideload objects
-  (269), so a `--place` far from one has her nowhere. Played: 236A, from `--place -10428,1895,18659,0 --bits
-  43,458=7340032`, found with Kyte 240 away, rescued (0x901, 0x250) and on its perch (0x2FD); 29FA, on a ledge 300
-  above the corridor, found with Kyte 382 away and held out while she stays near.
+  (269), so a `--place` far from one has her nowhere (`--sidekick kyte` brings her). Played: 236A, from `--place
+  -10428,1895,18659,0 --bits 43,458=7340032`, found with Kyte 240 away, rescued (0x901, 0x250) and on its perch (0x2FD);
+  29FA, on a ledge 300 above the corridor, found with Kyte 382 away and held out while she stays near.
 - The gold. Each rescued baby's perch bit is one of 0x2FC to 0x300, and CFLevelControl (400) sets 0x4BE (Bonehead's
   state 10) from 0x8D1 and 0x300. 0x8D1 is the +0x32 bit of the curve (429D9, at (-12672, 2239, 18806)) that
   PerchObject (718, 429D8) above CFKyteGoldPerch sends Kyte to: with Kyte out and Krystal within 134 of it, Kyte's
@@ -635,9 +637,21 @@ inventory with it selected, and A uses it on what is in reach (`--input` lines `
   moonseeds then (0x86A, which nothing in the ROM raises). The SpellPlace's seqpoint (630 @1380) holds 0x878 as
   both its trigger and its done bit, so by its code its sequence, the only one that sets 0x63C (sequence 1032), never
   plays; VFP_LevelControl's act 3 sets it instead.
-- The moonseeds: each of Moon Mountain Pass's four MMP_mseedrecept (722) takes one used beside it, lowers 0x86A and
-  sets its planted bit (0x868 for the one at -7692,1006,15565, in the pass's group 6). What grows it is Kyte's
-  flame (0x46E) at night.
+- The moonseeds: each of Moon Mountain Pass's four MMP_mseedrecept (722, groups 2, 3, 4 and 6) takes one used on it,
+  lowers 0x86A and sets its planted bit (0x868 for the one at -7692,1006,15565, in group 6). Krystal's inventory (dll1's
+  list 0) shows the moonseed while 0x86A is above 0, and A uses it on the receptacle only while she faces it and has it
+  as her target (dll722 0x2CC, its use flag 1 and dll1's export 7 on 0x86A). At night (dll7's export 8, 21 to 5) a
+  planted receptacle waits for Kyte: in her reach with her out, it offers her command 4 (use flag 4), her flame, the
+  second row of the scroll C-down opens, and that command sets 0x46E, Kyte's curve, to its setup's +0x1A (0xAD for
+  41a5c), the curve that takes her to it (0x6A0-0x6F0). Her flame takes it to its state 3 and sets 0x85A (export 7,
+  dll722_0D40), the trigger of the MMP_seqobject beside it (419CC, sequence 10), which grows MMP_moonseedbus and
+  MMP_moonseedvin (0x853, 0x855, then 0x852, 0x854) and sets 0x85B. The vine climbs from the receptacle's hollow to a
+  ledge at y 1099 east of it (-7650,15571), which drops into the canyon that the pass's Transporter (warp 73) opens on.
+  Each of the other three receptacles has its own bush, vine and sequence (0x856, 0x864, 0x858), and its own curve for
+  Kyte (0xAC, 0xAE, 0xAA). Kyte comes out of the pass's sideloads, and its TriggerPlanes move her from curve to curve
+  after Krystal (0x46E 164 to 166 as she walks, their action 0x1C).
+- The test of fear: the pass's Transporter (2BA7, at warp 73, setup `0049 2b00`) sends Krystal to MMShrine (map 32,
+  warp 43) by A, about 20 s after an arrival, as EC's does, with or without the meteor's bits (0x803, 0x804).
 - Walled City in act 2 loads the Sun and Moon Stones (WCSunStone, 272), the TRex statues' sockets (785) and its
   level control's act 2 (779).
 - The volcano in act 3 (`--story before-third-stone,81 --bits 878,500=1024`, group 10 holding VFP_LevelControl):
@@ -651,6 +665,16 @@ Played from here on the desktop build, each from the one before it but where a `
   which plays her sequence 3 and sets 0x3FF; DB_FlameSwitch rises with it, Tricky's flame from beside it lights it
   (0x3D9), the bridge rises, the light beams carry Sabre to the egg (0x86D as A takes it), and the egg used on her
   from the items menu sets 0x39E (`src/game/diamond_bay.cpp` has the steps and what stopped each).
+- The moonseed (tasks 92 and 93): on Restored, at night, from the receptacle's hollow (`--story before-dragon-rock
+  --place -7725,1030,15565,0 --bits 86A=4,42e=64 --time 22 --sidekick kyte`): Krystal faces the receptacle 41a5c (a `to`
+  line at strength 0.5), A, C-right twice (the food bag is the first row), A plants a moonseed (0x86A 4 to 3, 0x868);
+  C-down twice and A send Kyte's flame (0x46E 0xAD), and 9 s later the seed grows (0x85A, 0x85B, the bush and the vine).
+  Krystal climbs the vine with the stick up (acts 27 and 28) to the ledge above, and steps off it east into the canyon.
+  A walk to the receptacle with Kyte from a sideload was not found: the canyon's slope up to that ledge is a drop the
+  other way, a walk from warp 73 stops at its foot (-7389,924,15535), and one from the pass's west setuppoint (41324,
+  -8629,1028,15874) at the moon rock's ledge (-8131,1066,15569).
+- The test of fear's way in: from warp 73 (`--bits 42e=385`), A on the pass's Transporter 24 s in lands Krystal in
+  MMShrine (map 32) 16 s later. The test itself is the shrine's (The shrines).
 - The meteor (task 94): the three MMP_moonrock carried into vents 3, 4 and 6 count 0x88C to 3 and set 0x89B, and
   with 0x803 the meteor's sequence plays (0x804).
 - The night: the sun temple's inner rooms played through (0x2B0, 0x2F8, 0x2D1, 0x2D4) give the Sun Stone (0x201).
@@ -672,9 +696,8 @@ Played from here on the desktop build, each from the one before it but where a `
   and 0xFD, and Sabre is back on Warlock Mountain's pad, where its act 5 sets 0x142 (`src/game/krazoa.cpp`).
 
 Not played from here: the moon temple's push blocks by night (0x811 to 4, then 0x813, the door, 0x25D) and its moon
-symbol in the first person view (C-up, 21:23 to 22:38, 0x829); the moonseed planted (Krystal at the receptacle 41a5c has
-it as the camera's target, +0x110, within its reach, but the item menu her C-right opens holds the spell book, the
-forcefield, the flame and Kyte, and no moonseed, though 0x86A is 4), and so the seed grown at night; the walk from
+symbol in the first person view (C-up, 21:23 to 22:38, 0x829); a walk into the moonseed's hollow from where a
+player can be with Kyte, and the other three receptacles' seeds; the walk from
 Warlock Mountain's pad to EC's release (WL_seqpoint 2983 at 13929,-117,1106, mode 2 on 0x142): the pad's walkway east
 along z 2960, past the crates and two GuardClaws to (13700,3320), meets a fallen column (WMfallencol, 13743,-292,3090)
 across the way north, with WL_LaserBeam's beams beyond it; and task 84's log (no ThornTail sells one, as for the first).
