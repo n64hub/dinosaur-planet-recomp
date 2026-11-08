@@ -386,7 +386,8 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // wider than the bike bay's mouth, or toward a place of more than 15 within 300 units, where it would circle it for
 // good, and to 0.4 within 150 units of a place, so a turn there is made (toward an object it stays full: a ram needs
 // the speed). Backing off a wall moves the bike next to nothing, so a script's places lead around them, and a bike
-// stalled for 2 s (at the foot of the rise into the bay, come to slowly) turns at full lock for 1.2 s and comes round.
+// no nearer its target in 3 s (pinned at the foot of the rise into the bay, or sliding along a wall in a turn it
+// can't make) turns at full lock for 1.2 s and comes round.
 bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
     bool ride, float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
@@ -459,20 +460,25 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
         else if (turn < -0x8000) {
             turn += 0x10000;
         }
-        // Moved under 4 units in 2 s of riding: stalled. For 1.2 s it turns at full lock, each time the other way.
+        // No 10 units nearer the target in 3 s of riding toward it: stalled, pinned or sliding along a wall in a
+        // turn it can't make. For 1.2 s it turns at full lock, each time the other way.
         static double anchor_at = -1.0, last_at = -1.0, escape_until = -1.0;
-        static float anchor_x, anchor_z;
+        static float anchor_distance;
+        static int anchor_oid;
+        static float anchor_to_x, anchor_to_z;
         static float escape_side = 1.0f;
         double now = dino_script_seconds();
-        if (now - last_at > 0.5 || std::abs(x - anchor_x) + std::abs(z - anchor_z) > 4.0f) {
+        bool same_target = oid == anchor_oid && (oid != -1 || (to_x == anchor_to_x && to_z == anchor_to_z));
+        if (now - last_at > 0.5 || now < escape_until || !same_target || distance < anchor_distance - 10.0f) {
             anchor_at = now;
-            anchor_x = x;
-            anchor_z = z;
+            anchor_distance = distance;
+            anchor_oid = oid;
+            anchor_to_x = to_x;
+            anchor_to_z = to_z;
         }
-        else if (now - anchor_at > 2.0 && now >= escape_until) {
+        else if (now - anchor_at > 3.0) {
             escape_until = now + 1.2;
             escape_side = -escape_side;
-            anchor_at = now;
         }
         last_at = now;
         if (now < escape_until) {

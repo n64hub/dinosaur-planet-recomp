@@ -94,8 +94,8 @@ Fixed:
   the force point's floor to the duct that reaches the place. Golden Plains now leaves the place to the player, and a
   second of the force point's own lifts stands in the corridor behind the round door, under the duct.
 - CloudRunner Fortress's treasure lift (Treasure Lift on Restored): past the blasted wall the wind lift only ever
-  blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below and
-  the way to the race couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
+  blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below
+  couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
   turn it back for the way up.
 - CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
   found the ones waiting for her, so they never came out to be rescued. Kyte now finds a baby once she is near it, and
