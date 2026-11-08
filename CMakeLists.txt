@@ -227,6 +227,7 @@ target_sources(DinosaurPlanet PRIVATE
     ${CMAKE_SOURCE_DIR}/src/game/force_point.cpp
     ${CMAKE_SOURCE_DIR}/src/game/cloudrunner.cpp
     ${CMAKE_SOURCE_DIR}/src/game/cloudrunner_barrels.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/cloudrunner_race.cpp
     ${CMAKE_SOURCE_DIR}/src/game/boss_trex.cpp
     ${CMAKE_SOURCE_DIR}/src/game/acts.cpp
     ${CMAKE_SOURCE_DIR}/src/game/moonseeds.cpp

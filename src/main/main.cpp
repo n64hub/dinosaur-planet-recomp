@@ -371,13 +371,15 @@ static std::string game_thread_name(const OSThread* t) {
 // id (or with a number after the reach, toward that hit sphere of it: a boss hurt only in its head), each until
 // within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
+// "ride to <x> <z> [reach]" and "ride <object id hex> [reach]" do the same for a player on a vehicle that turns by
+// stick x and goes by stick y (story_steer's ride), until within reach (0, never, by default).
 struct ScriptedInput {
     double at;
     uint32_t buttons;
     float x, y;
     float camera_x, camera_y;
     int part;
-    bool steer;
+    bool steer, ride;
     int oid, sphere;
     float to_x, to_z, reach;
 };
@@ -508,6 +510,21 @@ static void load_input_script(const char* path) {
             if (in.reach <= 0.0f) {
                 in.reach = 30.0f;
             }
+            in.part = input_parts - 1;
+            input_script.push_back(in);
+        }
+        else if (line[0] != '#' && sscanf(line, "%lf %x ride to %f %f %f", &in.at, &in.buttons, &in.to_x, &in.to_z, &in.reach) >= 4) {
+            in.steer = true;
+            in.ride = true;
+            in.oid = -1;
+            in.sphere = -1;
+            in.part = input_parts - 1;
+            input_script.push_back(in);
+        }
+        else if (line[0] != '#' && sscanf(line, "%lf %x ride %x %f", &in.at, &in.buttons, &in.oid, &in.reach) >= 3) {
+            in.steer = true;
+            in.ride = true;
+            in.sphere = -1;
             in.part = input_parts - 1;
             input_script.push_back(in);
         }
@@ -669,7 +686,7 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     double now = script_seconds();
     if (const ScriptedInput* in = steering) {
         float x, y;
-        dino::story_steer(rdram, ctx, in->oid, in->sphere, in->to_x, in->to_z, in->reach, &x, &y);
+        dino::story_steer(rdram, ctx, in->oid, in->sphere, in->to_x, in->to_z, in->reach, in->ride, &x, &y);
         steer_stick_x = x;
         steer_stick_y = y;
     }

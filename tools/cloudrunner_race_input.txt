@@ -1,0 +1,114 @@
+# CloudRunner's race won, from --story before-cloudrunner --place -13460,1262,18866,-2,0 --bits 4a3=7,4a0,4ba (beside
+# CRSnowBike). A mounts the bike (0x49D), pressed each second until it does, since a busy host boots late. The start
+# then launches it west over the bay's bank into a pocket below it; the way back in is east over the pocket's edge at
+# z 18935, taken head on from the pocket's west end: a bike that comes at it aslant slides along it. Then rams on
+# CRSnowClaw (389), each a second of full back stick and a ride at the claw, until the fifth drops the SpellStone by the
+# claw and the bike picks it up (0x2E8): a ram with the turns back past the stone's place, as a player would ride it,
+# took 11-14 s and ran out of fuel. Then the player stands still for the stone's scene, 0x49A and sequence 0x18, which
+# ends with 0x49F. `ride` lines steer the bike (main.cpp's --input, story.cpp's story_steer).
+0 0 0 0
+5 8000 0 0
+5.3 0 0 0
+6 8000 0 0
+6.3 0 0 0
+7 8000 0 0
+7.3 0 0 0
+8 8000 0 0
+8.3 0 0 0
+9 8000 0 0
+9.3 0 0 0
+10 8000 0 0
+10.3 0 0 0
+11 8000 0 0
+11.3 0 0 0
+12 8000 0 0
+12.3 0 0 0
+13 8000 0 0
+13.3 0 0 0
+14 8000 0 0
+14.3 0 0 0
+15 8000 0 0
+15.3 0 0 0
+16 8000 0 0
+16.3 0 0 0
+17 8000 0 0
+17.3 0 0 0
+18 8000 0 0
+18.3 0 0 0
+19 8000 0 0
+19.3 0 0 0
+20 8000 0 0
+20.3 0 0 0
+21 8000 0 0
+21.3 0 0 0
+22 8000 0 0
+22.3 0 0 0
+23 8000 0 0
+23.3 0 0 0
+24 8000 0 0
+24.3 0 0 0
+25 8000 0 0
+25.3 0 0 0
+26 8000 0 0
+26.3 0 0 0
+27 8000 0 0
+27.3 0 0 0
+28 8000 0 0
+28.3 0 0 0
+29 8000 0 0
+29.3 0 0 0
+30 8000 0 0
+30.3 0 0 0
+sync 49d
+8 0 ride to -13760 19060 40
+sync near 1F -13760 19060 60
+0 0 ride to -13845 19000 30
+sync near 1F -13845 19000 45
+0 0 ride to -13790 18935 25
+sync near 1F -13790 18935 35
+0 0 ride to -13300 18930 80
+sync near 1F -13300 18930 100
+0 0 ride 389
+sync near 1F -13165 18760 75
+0 0 0 -1
+1 0 ride 389
+2.5 0 0 -1
+3.5 0 ride 389
+5 0 0 -1
+6 0 ride 389
+7.5 0 0 -1
+8.5 0 ride 389
+10 0 0 -1
+11 0 ride 389
+12.5 0 0 -1
+13.5 0 ride 389
+15 0 0 -1
+16 0 ride 389
+17.5 0 0 -1
+18.5 0 ride 389
+20 0 0 -1
+21 0 ride 389
+22.5 0 0 -1
+23.5 0 ride 389
+25 0 0 -1
+26 0 ride 389
+27.5 0 0 -1
+28.5 0 ride 389
+30 0 0 -1
+31 0 ride 389
+32.5 0 0 -1
+33.5 0 ride 389
+35 0 0 -1
+36 0 ride 389
+37.5 0 0 -1
+38.5 0 ride 389
+40 0 0 -1
+41 0 ride 389
+42.5 0 0 -1
+43.5 0 ride 389
+45 0 0 -1
+46 0 ride 389
+47.5 0 0 -1
+48.5 0 ride 389
+sync 2e8
+0 0 0 0

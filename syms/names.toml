@@ -91,6 +91,9 @@ name = "warp_entry"  # reads the warp table, ROM file 30
 vram = 0x8005D410
 name = "set_video_mode"
 [[addr]]
+vram = 0x8008C950
+name = "frame_ticks"  # a byte: the frame's length in ticks, 2 at 30 fps (src/game/cloudrunner_race.cpp)
+[[addr]]
 vram = 0x80092A70
 name = "world_origin_x"  # src/game/interpolation.cpp
 [[addr]]
@@ -183,6 +186,32 @@ of = "setup"
 dll = 373
 offset = 0x22
 name = "rescued_bit"
+
+# CloudRunner Fortress's snow race, map 43 (docs/story-points.md, tools/cloudrunner_race_input.txt).
+[[export]]
+dll = 730
+index = 7
+name = "drop"  # CRSpellstone: (stone, 2) as CRSnowClaw falls at its fifth ram, within 500 of it
+[[field]]
+of = "state"
+dll = 729
+offset = 0x4
+name = "race_state"  # CRCloudRace: 2 waiting for the rider, 3 the race, 4 won, waiting for 0x49F
+[[field]]
+of = "state"
+dll = 728
+offset = 0x34
+name = "rams_left"  # CRSnowClaw: from 4 down, one a ram (at most every 20 frames); it falls below 0
+[[field]]
+of = "state"
+dll = 732
+offset = 0x3F0
+name = "ridden"  # CRSnowBike: 2 while the player rides it, when its hit box rams (type 0x14) faster than 2
+[[field]]
+of = "state"
+dll = 732
+offset = 0x330
+name = "wall_points"  # CRSnowBike: its wall test's five points as last frame left them (src/game/cloudrunner_race.cpp)
 
 # Every object (src/game/objects.cpp, krazoa.cpp, dragon_rock.cpp).
 [[field]]
@@ -491,6 +520,24 @@ name = "hit_animator_flags"  # 1 the lines' state with the bit clear, 4 that it 
 dll = 713
 index = 20
 name = "feed"  # (warrior, 1): adds 12 to his health, as item 0xC1 given him does; nothing calls it
+[[bit]]
+bit = 0x49D
+name = "snow_bike_ridden"  # CRSnowBike mounted, with 0x497; CRCloudRace clears both as the race is won
+[[bit]]
+bit = 0x497
+name = "snow_race_running"
+[[bit]]
+bit = 0x499
+name = "snow_race_lost"  # the bike's fuel run out (dll732 0x0DB4)
+[[bit]]
+bit = 0x49A
+name = "snow_race_won"  # set ~12 s after 0x2E8, as the stone's scene ends: no call in code sets it
+[[bit]]
+bit = 0x49F
+name = "snow_race_scene_done"  # set by map 43's CFseqobject 30CCA as sequence 0x18 ends
+[[bit]]
+bit = 0x4BF
+name = "race_pool_drained"  # map 12's XYZAnimator 32DDB, once the pool over the way to the race drains on 0x4BE
 [[bit]]
 bit = 0x245
 name = "tricky_flame"  # lets his scroll's command 4 through (dll211); DIMSnowHorn1 1a5e's talk sets it (dll712 0x2470)
