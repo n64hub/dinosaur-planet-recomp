@@ -20,8 +20,10 @@
 //   release (@1C0C). Sequence 0x12's event (dll611 0x630) is the only code that sets Cape Claw's act 9 (map 0x1D), and
 //   it sets 0x367 and 0x368 and clears 0x366. 0x367 shows a WM_WarpPoint (dll275, @1D58: +0x1A where it sends, +0x1D
 //   its mode, +0x1E its radius in 4s) to entry 77, empty in ROM file 30: in mode 2 a radius of 0 skips the distance
-//   (0x3E0), so it warps the moment 0x367 is set, wherever the player is. Cape Claw's act 9 loads act 2's objects and
-//   adds one setuppoint (map 29 uid E7B), by its west entrance.
+//   (0x3E0), so it warps the moment 0x367 is set, wherever the player is. Cape Claw's act 9 loads act 8's placements
+//   but 28 of its curves (dll324), none of its own and no trigger that sets an act, so Cape Claw stays in it. By its
+//   west entrance it loads setuppoint 7 (map 29 @08F0, +0x18 0x0107); the one beside it (@0000, uid E7B) loads only in
+//   acts 12, 13, 15 and 16, which nothing sets.
 // - A WL_seqpoint (dll611, object 0x25F: +0x18 yaw, +0x19 mode, +0x1A radius, +0x1C its sequence, +0x1E trigger bit,
 //   +0x20 done bit) at each spirit's site plays the release when the player walks in with its trigger bit set (mode 2),
 //   or clear, setting it (mode 3). The sequence's last event takes the mask back and sets the released bits (dll611
@@ -68,8 +70,8 @@
 //   0x12 clears it, so it could not keep a second visit from giving the spirit again. The done bits of MM's, EC's, CC's
 //   and WG's seqpoints become their released bits.
 // - After the shrines: WG's release, taking its mask back in act 7, sets 0x366, so sequence 0x12 plays, sets Cape
-//   Claw's act 9 and warps the player to 77. Its seqpoint's done bit becomes 0x367, and entry 77 is filled at Cape Claw's
-//   act 9 setuppoint.
+//   Claw's act 9 and warps the player to 77. Its seqpoint's done bit becomes 0x367, and entry 77 is filled at the
+//   setuppoint by Cape Claw's west entrance that act 9 loads.
 // - Cape Claw's test (dll486) waited for 0x5B2, a bit nothing sets, where its one SabreBaddie's kill bit is 0x1E7: it
 //   reads and resets 0x1E7 (us.toml).
 //
@@ -343,7 +345,8 @@ namespace {
     };
 
     // Each entry is a place the map it is in holds, in world units (a map's placement + 640 times its world grid cell,
-    // ROM file 21). 70 is entry 31, GP's pad itself. 71 is the setuppoint by Cape Claw's receptacles (map 29 @22C8).
+    // ROM file 21). 70 is entry 31, GP's pad itself. 71 is the setuppoint by Cape Claw's receptacles (map 29 @22C8), 77
+    // setuppoint 7 by its west entrance (map 29 @08F0).
     // 68, the ROM's EC pad's own entry (in map 36's units, header), moves with the pad to the setuppoint between Walled
     // City's two stones (map 13 @0800). 67 is setuppoint 1 by Willow Grove's sundial (map 37 @003C). 65 is the
     // setuppoint in the snow where Northern Wastes is entered (map 10 @00B0). 72 is the tablet room's Transporter, east
@@ -355,7 +358,7 @@ namespace {
         { 70, -833.3f, 208.0f, 13285.5f, Setting::Shrines },
         { 71, 4200.3f, -7.1f, 17613.1f, Setting::Shrines, tablet_area },
         { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets, tablet_area },
-        { 77, 1389.0f, 159.0f, 16954.0f, Setting::Shrines },
+        { 77, 1456.6f, 156.1f, 16939.9f, Setting::Shrines },
         { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
         { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
