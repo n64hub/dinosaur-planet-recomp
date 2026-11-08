@@ -237,6 +237,14 @@ func = "func_80022F94"
 before_vram = 0x80022F94
 text = "{ void dino_object_freed(uint8_t*, uint32_t); dino_object_freed(rdram, (uint32_t)ctx->r4); }"
 
+# An object id with no def: func_80022AA4 reads before its tables for index -1, and Walled City's object 0x336 before
+# each temple's gap, made again as a fall into the moon temple's pit loads the city, crashed (src/game/objects.cpp).
+# An index outside the tables gets no def, and the object isn't made.
+[[patches.hook]]
+func = "func_80022AA4"
+before_vram = 0x80022AA4
+text = "{ int dino_def_missing(uint8_t*, recomp_context*); if (dino_def_missing(rdram, ctx)) return; }"
+
 # An effect drawn after its object is freed: dll13's draw reads the freed object's parent and that parent's first
 # halfword, and a parent word that isn't an address read outside memory (src/game/objects.cpp). It is taken for none.
 [[patches.hook]]
