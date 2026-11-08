@@ -73,8 +73,8 @@ file 19, each task's name and clue), which says when the player swaps.
   Queen not met yet and no white mushroom collected.
 - `after-first-spellstone`: Sabre at the Volcano Force Point (warp 81), the first spirit won and the first SpellStone
   placed.
-- `before-sand-worm`: Krystal in Cape Claw, on the sand at the map's setuppoint beside the worm. The warp table has no
-  entry in Cape Claw.
+- `before-sand-worm`: Krystal in Cape Claw, on the sand at the map's setuppoint beside the worm. The ROM's warp table
+  has no entry in Cape Claw.
 - `before-df-shrine`, Krystal (warp 36); `before-db-shrine`, Sabre (38); `before-mm-shrine`, Krystal (43);
   `before-ec-shrine`, Sabre (40): the four shrines the task list orders, each with the spirits before it.
 - `before-gp-shrine` (42), `before-nw-shrine` (37), `before-cc-shrine` (41), `before-wg-shrine` (39): Krystal with all
@@ -778,7 +778,10 @@ on a floor and no crash; it says nothing about what the level needs further in.
 - 91: Walled City (13). Boots, in a corridor.
 - 95: Northern Wastes (10). Boots.
 
-Cape Claw has no entry: `before-sand-worm` and `--place` go there.
+Cape Claw has no entry: `before-sand-worm` and `--place` go there. On Krazoa Shrines' Restored, 77 is filled at Cape
+Claw's act 9 setuppoint (1389, 159, 16954), where Warlock Mountain's sequence 0x12 sends the player after Willow
+Grove's release: it sets Cape Claw's act 9 (0xEE), 0x367, whose WM_WarpPoint (radius 0) warps the player to 77 at once,
+and 0x368, and clears 0x366 (docs/restored-content.md).
 
 ## Choices
 

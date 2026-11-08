@@ -16,6 +16,12 @@
 // - WL_LevelControl (dll607) gives the act's mask on arrival unless its release is done (its update dispatches acts 1
 //   to 7 at 0x298, `sltiu 8`): acts 6 and 7 read 0x366 for that (0x1544, 0x17D4), a bit nothing sets, so they gave CC's
 //   and WG's spirits again on every visit. Acts 8 and 9 have no handler.
+// - 0x366 is the trigger of a mode 1 seqpoint (@1D34, sequence 0x12, done bit 0) placed in act 7 only, beside WG's
+//   release (@1C0C). Sequence 0x12's event (dll611 0x630) is the only code that sets Cape Claw's act 9 (map 0x1D), and
+//   it sets 0x367 and 0x368 and clears 0x366. 0x367 shows a WM_WarpPoint (dll275, @1D58: +0x1A where it sends, +0x1D
+//   its mode, +0x1E its radius in 4s) to entry 77, empty in ROM file 30: in mode 2 a radius of 0 skips the distance
+//   (0x3E0), so it warps the moment 0x367 is set, wherever the player is. Cape Claw's act 9 loads act 2's objects and
+//   adds one setuppoint (map 29 uid E7B), by its west entrance.
 // - A WL_seqpoint (dll611, object 0x25F: +0x18 yaw, +0x19 mode, +0x1A radius, +0x1C its sequence, +0x1E trigger bit,
 //   +0x20 done bit) at each spirit's site plays the release when the player walks in with its trigger bit set (mode 2),
 //   or clear, setting it (mode 3). The sequence's last event takes the mask back and sets the released bits (dll611
@@ -58,8 +64,12 @@
 //   seqpoint there: GP's at CC's site, playing CC's sequence, NW's at WG's, playing WG's, with the mask the sequence
 //   takes back made 0x10 or 0x80. Their trigger bits, which a mode 3 seqpoint sets the frame its sequence starts, are
 //   0x21E and 0x220, which ROM file 55 has saved between the other released bits and nothing uses, and acts 8 and 9
-//   read them as released. Acts 6 and 7 read CC's and WG's released bits. The done bits of MM's, EC's, CC's
+//   read them as released. Acts 6 and 7 read CC's and WG's released bits: 0x366 is set for one release and sequence
+//   0x12 clears it, so it could not keep a second visit from giving the spirit again. The done bits of MM's, EC's, CC's
 //   and WG's seqpoints become their released bits.
+// - After the shrines: WG's release, taking its mask back in act 7, sets 0x366, so sequence 0x12 plays, sets Cape
+//   Claw's act 9 and warps the player to 77. Its seqpoint's done bit becomes 0x367, and entry 77 is filled at Cape Claw's
+//   act 9 setuppoint.
 // - Cape Claw's test (dll486) waited for 0x5B2, a bit nothing sets, where its one SabreBaddie's kill bit is 0x1E7: it
 //   reads and resets 0x1E7 (us.toml).
 //
@@ -226,6 +236,7 @@ namespace {
 
     constexpr int transporter = 0xEC;
     constexpr int seqpoint = 0x25F;
+    constexpr int after_shrines = 0x366;      // the trigger of Warlock Mountain's sequence 0x12 (seqpoint @1D34)
     constexpr int tablet_pickup = 0x2ED;
 
     constexpr int increment_bit = 0x80014930; // (bit): adds one to its value
@@ -344,6 +355,7 @@ namespace {
         { 70, -833.3f, 208.0f, 13285.5f, Setting::Shrines },
         { 71, 4200.3f, -7.1f, 17613.1f, Setting::Shrines, tablet_area },
         { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets, tablet_area },
+        { 77, 1389.0f, 159.0f, 16954.0f, Setting::Shrines },
         { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
         { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
@@ -379,6 +391,7 @@ namespace {
         { 11, seqpoint, 0x2983, 0x20, 2, 0x318, false }, // EC's, @0FC0
         { 11, seqpoint, 0x2AC7, 0x20, 2, 0x221, false }, // CC's, @1570
         { 11, seqpoint, 0x003C, 0x20, 2, 0x222, false }, // WG's, @1C0C
+        { 11, seqpoint, 0x30055, 0x20, 2, 0x367, false }, // sequence 0x12's, @1D34
         { 11, 0x15D, 0x2AB7, 0x3, 1, 0xDF & ~0x80, false }, // CC's column, @1358: also act 8
         { 11, 0x15D, 0x002C, 0x5, 1, 0xE4 & ~0x80, false }, // WG's column, @1AB0: also act 9
     };
@@ -683,8 +696,9 @@ extern "C" void dino_krazoa_warlock(uint8_t* rdram, recomp_context* ctx) {
 }
 
 // us.toml's hooks in WL_seqpoint's release events (dll611), before the player's export 0xA0 takes CC's mask (0x8D4)
-// and WG's (0x778) back: GP's and NW's releases play those sequences.
-extern "C" void dino_krazoa_release_mask(uint8_t*, recomp_context* ctx) {
+// and WG's (0x778) back: GP's and NW's releases play those sequences, and WG's in act 7 sets 0x366, which plays
+// sequence 0x12 (seqpoint @1D34).
+extern "C" void dino_krazoa_release_mask(uint8_t* rdram, recomp_context* ctx) {
     if (warlock_act == 8) {
         ctx->r5 = 0x10;
     }
@@ -693,6 +707,10 @@ extern "C" void dino_krazoa_release_mask(uint8_t*, recomp_context* ctx) {
     }
     if (logging) {
         fprintf(stderr, "krazoa: act %d release takes mask 0x%X\n", warlock_act, (int)ctx->r5);
+    }
+    if (warlock_act == 7 && shrines_restored()) {
+        Calls calls(rdram, ctx);
+        set(rdram, ctx, after_shrines, 1);
     }
 }
 
