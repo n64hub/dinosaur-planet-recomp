@@ -49,3 +49,9 @@
   once both stones are in the TRex statues' sockets. In the prototype none of them could be reached.
 - Diamond Bay's light beams to the Pointback's egg no longer drop Sabre between them, and Walled City's temples'
   bridges of light hold the player.
+- Dragon Rock's bottom no longer crashes as the Skeetla arena unloads once the sharpclaw on its gallery is fed, when
+  more of the level is freed at once than the game kept room for.
+- Dragon Rock's Earth Warrior can be freed: the lever's scene after the sharpclaw on the arena's gallery is fed meat
+  left Krystal falling into the void, which took it all back. She is now put back on the gallery.
+- Kamerian Dragon on Restored: the way into the dragon's room is now the arena's north wall once the arena is won,
+  not the win itself, so the Earth Warrior can still be freed after the fight.

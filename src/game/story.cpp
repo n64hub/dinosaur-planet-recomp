@@ -152,6 +152,10 @@ namespace {
     // The fourth, which the Kamerian Dragon leaves with Kamerian Dragon on Restored (dragon_rock.cpp), is carried as
     // 0x7A8 to the Desert Force Point's other place (0x5F4).
     const Bits fourth_stone_carried = { { 0x7A8, 1 } };
+    // Krystal's food bag, the C-right menu's entry that opens her bags (dll1's first menu, its entries shown by 0x163,
+    // 0x164 and 0x165): WL_LevelControl (dll607 0x0194) sets 0x164 as Warlock Mountain loads in act 6, Cape Claw's
+    // spirit carried back, and nothing sets the other two. Dragon Rock's Earth Warrior is freed with meat from it.
+    const Bits food_bag = { { 0x164, 1 } };
 
     // BOSS Drakor (map 44) is in no way of the story's (docs/story-points.md, The story after the first SpellStone):
     // its setuppoint, at grid cell (7, 8).
@@ -184,9 +188,10 @@ namespace {
             to_second_stone + second_stone + portal_spell + tricky_commands + darkice_flame },
         { "before-third-stone", sabre, 66, {},
             to_second_stone + second_stone + portal_spell + tricky_commands + darkice_flame + third_stone_carried },
-        { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
+        { "before-dragon-rock", krystal, -1, dragon_rock_place,
+            four_spirits + second_stone + portal_spell + third_stone + food_bag },
         { "after-dragon-rock", krystal, -1, golden_plains_place,
-            four_spirits + second_stone + portal_spell + third_stone + fourth_stone_carried },
+            four_spirits + second_stone + portal_spell + third_stone + food_bag + fourth_stone_carried },
         { "before-drakor", krystal, -1, drakor_place, four_spirits + second_stone + portal_spell + third_stone },
     };
 
