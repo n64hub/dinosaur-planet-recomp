@@ -36,6 +36,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   documented there; `tools/build_n64recomp.sh` and `CMakeLists.txt` apply its `patches/` to the other three, and
   `CMakeLists.txt` then this game's own changes to them (`runtime-patches/`, its README lists them).
 - `docs/web.md`: the web page.
+- `docs/restored-content.md`: every fix sorted into crashes, what the ROM shows and the choices made where it says
+  nothing, each choice with what it touches and what else the ROM offers. A restoration's PR adds its lines there,
+  and a choice is checked against it first: one the ROM answers is a clash, fixed the ROM's way.
 - Comments beside the code, for how and why: each file's header. Read the header of the file you change and update
   it in the same commit.
 
