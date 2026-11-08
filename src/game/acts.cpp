@@ -5,8 +5,9 @@
 // Walled City's 0xE6, Diamond Bay's 0x3EE: the u16 at +0x1F90 + 2 * map in dll29's data). A new game puts every map
 // in act 1 (dll29 0x300-0x334), and the object loader (func_8004B4A0) skips a placement whose byte +3 has bit act - 1
 // set (byte +5 for acts 9 to 16). Sequences set the act of the map the playing object is in (dll3's event 0x1D, at
-// 0x6DF0: a word act << 16 | 0x746 of ROM file 13), and the one such event in all of file 13 sets act 3. Nothing else
-// sets the two acts this file moves:
+// 0x6DF0: a word act << 16 | 0x746 of ROM file 13), and the one such event in all of file 13 sets act 3. Of the code
+// that sets a map's act by its number (`tools/dino.py calls dll29.16`), only the Queen Earthwalker names map 4 or 13
+// (below), and the rest set their own map's act or another's. The two acts this file moves:
 // - Volcano Force Point (map 4). Its second SpellPlace (@15B8, VFP_SpellPlace dll637: placed bit 0x878, carried 0x83B),
 //   the podium that takes the third SpellStone for the second path (VFP_PodiumPoint @0D5C, which sets 0x515), its
 //   seqpoint (@1380, holding 0x878), the door switch (@0D14) and the round door (@2B90) load in act 2 only, and the
@@ -15,6 +16,14 @@
 //   activated) and its act 3 (0x69C: 0x4E9 and 0x63C, which moves Diamond Bay on to act 3, the Pointback's second
 //   egg in DBPointMum dll658 0xC0 and the stealer worms) never run. Here the act is 2 while the third SpellStone is
 //   carried (0x83B) and 3 once it is placed (0x878), both at the map's load and in that constructor.
+//   Act 11 is the Queen Earthwalker's: in SwapStone Hollow she sets map 4 to it before each of her two warps there
+//   (SHqueenearthwal dll507_04F8+0xb8 and +0x118, then 0x486 or 0x487 and warp entry 81), and only act 11 loads the
+//   two SHseqobjects that play those visits (30afa, played once 0x484 is set; 30afc, once 0x485 is) and the WarpPoint
+//   beside entry 81, without the level's statues, doors, puzzles and SpellPlaces. Neither visit loads
+//   VFP_LevelControl (group 10), the only object that puts the act back to 1, so on Original the map stays in act 11
+//   after them: warp 81 with the first SpellStone carried (0x123) finds no SpellPlace. Here act 11 is left to the
+//   game while a visit is to play (0x486 without 0x484, or 0x487 without 0x485), and once both are spent the map
+//   loads in the story's act, as that constructor would have it. Any other act outside 1 to 3 is left alone.
 // - Walled City (map 13). Its Sun and Moon Stones beside the boss door and the sockets on the TRex statues that take
 //   them (WCSunStone dll272 and dll785, group 4) load in act 2 only, where the RedEye teeth and their sockets load in
 //   act 1 only, and only in act 2 does WCLevelControl (dll779 0x1928) turn the block puzzles' counts into the bits
@@ -43,6 +52,12 @@ namespace {
     constexpr int third_stone_carried = 0x83B;
     constexpr int third_stone_placed = 0x878;
     constexpr int third_spirit_released = 0x317;
+
+    constexpr int queen_act = 11;
+    constexpr int queen_first_visit = 0x486;
+    constexpr int queen_first_visit_played = 0x484;
+    constexpr int queen_second_visit = 0x487;
+    constexpr int queen_second_visit_played = 0x485;
 
     const std::string third_stone = "third_stone";
 
@@ -91,9 +106,19 @@ namespace {
         call(rdram, ctx, dll29_export(rdram, 16));
     }
 
-    // The act the story has the map in, from the one it is in.
+    // Whether one of the Queen Earthwalker's visits to the volcano is still to play.
+    bool queen_visit_pending(uint8_t* rdram, recomp_context* ctx) {
+        return (get(rdram, ctx, queen_first_visit) && !get(rdram, ctx, queen_first_visit_played)) ||
+            (get(rdram, ctx, queen_second_visit) && !get(rdram, ctx, queen_second_visit_played));
+    }
+
+    // The act the story has the map in, from the one it is in: the volcano's from acts 1 to 3, and from the Queen's
+    // act 11 once her visits are spent.
     int story_act(uint8_t* rdram, recomp_context* ctx, int map, int act) {
         if (map == volcano_force_point) {
+            if (act == queen_act ? queen_visit_pending(rdram, ctx) : act < 1 || act > 3) {
+                return act;
+            }
             if (get(rdram, ctx, third_stone_placed)) {
                 return 3;
             }
@@ -149,9 +174,10 @@ extern "C" void dino_acts_map_loaded(uint8_t* rdram, recomp_context* ctx) {
     int story = story_act(rdram, ctx, map, act);
     if (story != act) {
         set_act(rdram, ctx, map, story);
-        if (logging) {
-            fprintf(stderr, "acts: map %d from act %d to %d\n", map, act, story);
-        }
+    }
+    if (logging) {
+        fprintf(stderr, story != act ? "acts: map %d from act %d to %d\n" : "acts: map %d stays in act %d\n", map, act,
+            story);
     }
 }
 
