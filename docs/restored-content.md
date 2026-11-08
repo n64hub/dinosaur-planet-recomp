@@ -248,8 +248,9 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 ### Open
 
 Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the
-moon temple's push blocks by night and its symbol's moonlight; the moonseed planted (the item menu Krystal opens at a
-receptacle holds no moonseed, though 0x86A is 4) and grown by Kyte's flame at night; the walk from Warlock Mountain's
+moon temple's push blocks by night and its symbol's moonlight; the walk into the moonseed's hollow with Kyte (planted
+and grown there, the ROM's own code needs no fix: the moonseed is used facing the receptacle, and Kyte's flame is her
+scroll's second row at night); the walk from Warlock Mountain's
 pad to EC's release (WL_seqpoint 2983, on 0x142), which a fallen column (WMfallencol, dll331) blocks.
 
 ## 3. Choices
