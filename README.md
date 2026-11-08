@@ -44,7 +44,8 @@ and none has been played by a human, so report one that falls short.
 A fix that restores, adding or finishing what the prototype doesn't have (a warp entry filled, an object placed, a
 bit nothing set now set, a scene or win that never came), is behind a General setting, Restored by default, whose
 Original plays the prototype as the ROM has it there. A fix of a crash, or of a plain bug in what the prototype has,
-is always on: an Original that crashes is no use to anybody.
+is always on: an Original that crashes is no use to anybody. `docs/restored-content.md` sorts every fix by what shows
+it: the crashes, what the ROM itself shows was meant, and the choices made where the ROM says nothing.
 
 Fixed:
 
