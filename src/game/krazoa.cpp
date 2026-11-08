@@ -26,13 +26,19 @@
 //
 // What Restored changes:
 // - Ways in. ROM file 30's warp table has empty entries where the shrines' own Transporters send the player back: 65
-//   (NW), 67 (WG), 68 (EC), 70 (GP) and 71 (CC); WARP_ENTRY (func_8004D1D4) gets them filled. Golden Plains has its
-//   pad (map 9 @03F0, own entry 31) pointed at the empty entry 32: it goes to GP's shrine (42). The others get a
-//   Transporter (object 0xEC, dll334: +0x19 its own entry, +0x1A where it sends, +0x20 the bit that shows it) beside
-//   the place in their area the ROM ties to the shrine: EC's between Walled City's Sun and Moon stones, which open the
-//   shrine in the older layout of map 36, a map with no place in the world grid; CC's by Cape Claw's three Krazoa
-//   tablet receptacles; WG's by Willow Grove's sundial; NW's where Northern Wastes is entered. Each shows once the
-//   spirit before it in the act order is released, EC's once the Moon Stone is placed.
+//   (NW), 67 (WG), 70 (GP) and 71 (CC); WARP_ENTRY (func_8004D1D4) gets them filled. Golden Plains has its pad (map 9
+//   @03F0, own entry 31) pointed at the empty entry 32: it goes to GP's shrine (42). The others get a Transporter
+//   (object 0xEC, dll334: +0x19 its own entry, +0x1A where it sends, +0x20 the bit that shows it) beside the place in
+//   their area the ROM ties to the shrine: EC's between Walled City's Sun and Moon stones; CC's by Cape Claw's three
+//   Krazoa tablet receptacles; WG's by Willow Grove's sundial; NW's where Northern Wastes is entered. Each shows once
+//   the spirit before it in the act order is released, EC's once the Moon Stone is placed.
+// - EC's is the ROM's own pad, moved. Map 36, the EarthWalker Temple, an older layout of Walled City's temples (its
+//   Sun and Moon stones, dial, bridge and aperture, in older placement formats), places a Transporter (@00C7) at
+//   (319, -371, -959), own entry 68, to 40, ECShrine's, whose pad sends back to 68: entry 68 holds that spot. The
+//   world grid (ROM file 21) gives map 36 no cell, so in world units 68 falls in the Swap Store's cells (map 51) with
+//   no floor there. Entry 0 is the same: map 20, an older Krazoa Shrine with no cell, has its Transporter at 0's
+//   (486, 56, 1125). Walled City (map 13), which replaced map 36, has no Transporter: Restored stands map 36's there
+//   and fills 68 where it stands.
 // - Golden Plains' shrine exit (map 34 @06A0) went to DB's pad (66), a copy of DB's map, and in its mode 0 it sent
 //   the player out on the way to the shrine: it goes to GP's pad (70), and only once the shrine is won.
 // - Willow Grove: its state 3 (dll488 0x8FC) gave the spirit only while 0x1D1, the torch puzzle's bit, was clear, and
@@ -327,10 +333,10 @@ namespace {
 
     // Each entry is a place the map it is in holds, in world units (a map's placement + 640 times its world grid cell,
     // ROM file 21). 70 is entry 31, GP's pad itself. 71 is the setuppoint by Cape Claw's receptacles (map 29 @22C8).
-    // 68 is the setuppoint between Walled City's two stones (map 13 @0800). 67 is setuppoint 1 by Willow Grove's
-    // sundial (map 37 @003C). 65 is the setuppoint in the snow where Northern Wastes is entered (map 10 @00B0).
-    // 72 is the tablet room's Transporter, east of the receptacles. 93 and 94 are Krazoa Palace's west and east
-    // KP_Transporters (map 3 @0668, @0644).
+    // 68, the ROM's EC pad's own entry (in map 36's units, header), moves with the pad to the setuppoint between Walled
+    // City's two stones (map 13 @0800). 67 is setuppoint 1 by Willow Grove's sundial (map 37 @003C). 65 is the
+    // setuppoint in the snow where Northern Wastes is entered (map 10 @00B0). 72 is the tablet room's Transporter, east
+    // of the receptacles. 93 and 94 are Krazoa Palace's west and east KP_Transporters (map 3 @0668, @0644).
     const WarpEntry warp_entries[] = {
         { 65, -3932.0f, -110.7f, -361.2f, Setting::Shrines },
         { 67, -4523.2f, -1316.0f, -4004.5f, Setting::Shrines },
