@@ -362,7 +362,7 @@ static std::string game_thread_name(const OSThread* t) {
 // hex>" waits instead for the bit's next set to a value other than 0 once the part before it has started, for a bit the
 // game sets again and again (a fight's round, a counter), and "sync near <object id hex> <x> <z> <reach>" for a drawn
 // object of that id to come within reach of that place once the part before has started (an enemy that runs a path,
-// for a press timed to where it is), and "sync act <object id hex> <act>" for a drawn object of that id to be in that
+// for a press timed to where it is; 0 for the player, as a script waits for a walk's end), and "sync act <object id hex> <act>" for a drawn object of that id to be in that
 // act of its state machine (dll18's, state +0x26C: an enemy's attack or pause, which then runs as long as its
 // animation does), and "sync state <object id hex> <x> <z> <reach> <offset hex> <mask hex> <value hex>" for a drawn
 // object of that id within reach of that place to hold that value under the mask in that byte of its state (obj+0xB8: a

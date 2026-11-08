@@ -484,12 +484,13 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
 }
 
 // --input's sync near lines (src/main/main.cpp): whether a drawn object of that id (as story_steer chases) stands
-// within reach of (x, z) on the ground.
+// within reach of (x, z) on the ground. Object id 0 is the player's (what a WCFloorTile, dll791, takes as standing on
+// it), drawn or not.
 bool dino::story_object_near(uint8_t* rdram, int oid, float x, float z, float reach) {
     gpr all = (gpr)MEM_W(0, (gpr)objects);
     for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
         gpr object = MEM_W(i * 4, all);
-        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || (oid != 0 && MEM_BU(0x36, object) == 0)) {
             continue;
         }
         uint32_t wx = MEM_W(0x18, object), wz = MEM_W(0x20, object);
