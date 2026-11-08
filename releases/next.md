@@ -36,3 +36,5 @@
   arena fills Krystal's magic and feeds the Earth Warrior while its fight is on.
 - Dragon Rock's bottom: the way from the stairs to the Skeetla arena no longer shuts once the player comes down from
   the top's east end.
+- CloudRunner's snow race: the bike rides back over the edge into the bay where the SnowClaw waits, so the race can
+  be won. At the frame rate the recomp holds, that edge stopped it dead every time.

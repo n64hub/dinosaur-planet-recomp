@@ -346,11 +346,20 @@ the race (43) at (-20, 29) on layer -2.
   500 units of it; the race is lost when the fuel runs out (732 0x0DB4, CRFuelTank adds 3000), not to time; stick Y is
   the throttle and B the one button read. The stone's scene plays, and as it ends, about 12 s after 0x2E8, the game
   sets 0x49A, though no call in code does (`dino.py calls bit 0x49a` finds only Bonehead's read); map 43's CFseqobject
-  30CCA plays sequence 0x18 on it, a CloudRunner over the treasure, which sets 0x49F. Played to the win: the stone at
-  43 s, 0x49A at 55 s, 0x49F at 69 s. The start launches the bike west out of the bay's mouth, over a bank whose back
-  face it can't climb, so the way back in is the launch's own line, east along z 18940, between the bank and a pillar.
-  `tools/cloudrunner_race_input.txt` is the `--input` script that wins it, from `--story before-cloudrunner --place
-  -13460,1262,18866,-2,0 --bits 4a3=7,4a0,4ba`, steering the bike with `ride` lines (main.cpp).
+  30CCA plays sequence 0x18 on it, a CloudRunner over the treasure, which sets 0x49F. The start's sequence (CFseqobject
+  30c35, 0x206) launches the bike west out of the bay, over its bank into a pocket below it (x -13860 to -13665), and
+  CRSnowClaw (389, at -13165, 18760) stands in the bay, so the way back in is east over the pocket's edge, which the
+  launch crossed going down. The course of 31 checkpoints and 13 CRFuelTanks runs west and north of it. At the recomp's
+  30 fps that edge stopped the bike dead wherever it came at it (tens of plays): CRSnowBike's wall test sees it only in
+  a frame of fewer than 3 ticks, and a 30 fps frame is 2. Fixed, always on (`src/game/cloudrunner_race.cpp`, whose
+  header has the code behind it): a short frame's wall test is made as one of 3's. Even so a bike that comes at the edge
+  aslant slides along it, so it is taken head on, from the pocket's west end at z 18935. The rams are quickest backing
+  off a second and riding at the claw again, and the fifth drops the stone by the claw, where the bike picks it up: a
+  ram with a turn back past the stone's place (-13416, 18825) took 11-14 s, and two of six plays so ran out of fuel
+  before the fifth. `tools/cloudrunner_race_input.txt` is the `--input` script that wins it, from `--story
+  before-cloudrunner --place -13460,1262,18866,-2,0 --bits 4a3=7,4a0,4ba`, steering the bike with `ride` lines
+  (main.cpp). Played four times, four wins: in the bay at 22-23 s, the stone at 42.5-45.1 s, 0x49A 9.7 s after it and
+  0x49F at 65.4-68.1 s.
 - Bonehead, CFGuardian (369) in map 43, keeps its state in the field 0x4B and starts from it: 6 with the power on
   (0x57), 9 with 0x43, 10 with 0x4BE (which needs 0x8D1 and 0x300), 12 with 0x4C1. At 12, 0x4B7 plays its sequence
   11 and with 0x49A moves it to 13; at 13 the SpellStone used on it from the item menu sets 0x4AB, its sequence sets

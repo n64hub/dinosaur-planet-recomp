@@ -91,6 +91,9 @@ name = "warp_entry"  # reads the warp table, ROM file 30
 vram = 0x8005D410
 name = "set_video_mode"
 [[addr]]
+vram = 0x8008C950
+name = "frame_ticks"  # a byte: the frame's length in ticks, 2 at 30 fps (src/game/cloudrunner_race.cpp)
+[[addr]]
 vram = 0x80092A70
 name = "world_origin_x"  # src/game/interpolation.cpp
 [[addr]]
@@ -204,6 +207,11 @@ of = "state"
 dll = 732
 offset = 0x3F0
 name = "ridden"  # CRSnowBike: 2 while the player rides it, when its hit box rams (type 0x14) faster than 2
+[[field]]
+of = "state"
+dll = 732
+offset = 0x330
+name = "wall_points"  # CRSnowBike: its wall test's five points as last frame left them (src/game/cloudrunner_race.cpp)
 
 # Every object (src/game/objects.cpp, krazoa.cpp, dragon_rock.cpp).
 [[field]]

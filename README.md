@@ -121,6 +121,9 @@ Fixed:
   the shaft's wind, which holds an empty-handed player at the corridor's height, dropped one carrying a barrel to the
   bottom, so no barrel reached the courtyard and its roof, which three of them blow, kept Kyte shut in. The wind now
   holds a player carrying a barrel too, and with Treasure Lift on Restored it lowers only an empty-handed one.
+- CloudRunner's snow race: the race's start launches the bike out of the bay where the SnowClaw stands, and at the
+  recomp's frame rate the edge back into it stopped the bike dead, so the SnowClaw couldn't be rammed and the race
+  couldn't be won. The bike now rides over it as it does at 20 frames a second.
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.

@@ -72,6 +72,13 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   `patches/boss_trex.c`; PR 39).
 - Dragon Rock's bottom: a HitAnimator's wall stood again as the player came down the stairs (us.toml, dll353_0160,
   `src/game/hit_animator.cpp`; PR 45).
+- CloudRunner's race: at the recomp's 30 fps the snow bike couldn't ride back over the edge into the bay where
+  CRSnowClaw stands, so the race couldn't be won. Its wall test sees that edge only in a frame of fewer than 3 ticks,
+  and a 30 fps frame is 2; a short frame is now tested as one of 3 (us.toml, dll732_3AF8,
+  `src/game/cloudrunner_race.cpp`; PR 48). The console's frame rate in the race isn't known: 3 ticks, 20 fps, is the
+  fastest that lets the bike over. The race itself sets everything it needs (0x49A comes about 12 s after 0x2E8 with
+  no code call, and seqobject 30cca's sequence 0x18 then sets 0x49F), and is reached by the pool on 0x4BE, so it
+  needs 0x8D1 and 0x300.
 
 ### Tricky's Run
 
@@ -319,9 +326,6 @@ ROM's way. "(?)" marks a reading not checked in full.
 
 - **The Earth Warrior freed**: DR_NiceSharpy (0x5FD) wants item 0x380 or 0x381, which nothing gives, and TriggerPlane
   0x33F78 in the arena would set 0x5FD, but its only action's flags never run. Not restored: the Warrior stays shackled.
-- **The race won** (CloudRunner's race, on a branch): no game change. 0x49A is set about 12 s after 0x2E8 with no
-  code call, and seqobject 30cca's sequence 0x18 then sets 0x49F; the race is reached by the pool on 0x4BE, so it needs
-  0x8D1 and 0x300.
 - **The third SpellStone's links** (on a branch): the meteor's 0x89B also sets 0x803 (seqobject 412AF's trigger,
   which nothing sets; HitAnimator 4267A reads 0x89B); DB_FlameSwitch takes its unread +0x20 (0x3FF) for 0x83E and a
   flame blast in its column counts as a hit of 0x1A; the moon symbol reaches 210 (the lift's top is 200.25 from it);

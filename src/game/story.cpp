@@ -381,13 +381,14 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // bytes each with x, y and z at +4, from the world's origin. 0 within reach. False with
 // no player, no camera or no such object. With ride (a ride line), the stick of a player on a vehicle that turns by
 // stick x and goes by stick y (CloudRunner's race's CRSnowBike, dll732): the turn its own riders' is (dll732 0x3DAC),
-// the angle from her facing (+0x0) to the target (func_800160E0's of her place less the target's), negated, full at
-// 65 * 32, and the throttle full, eased to 0.3 in a turn of more than 45 degrees, whose circle at full throttle is
-// wider than the bike bay's mouth, or toward a place of more than 15 within 300 units, where it would circle it for
-// good, and to 0.4 within 150 units of a place, so a turn there is made (toward an object it stays full: a ram needs
-// the speed). Backing off a wall moves the bike next to nothing, so a script's places lead around them, and a bike
-// no nearer its target in 3 s (pinned at the foot of the rise into the bay, or sliding along a wall in a turn it
-// can't make) turns at full lock for 1.2 s and comes round.
+// the angle from the way she goes to the target (func_800160E0's of her place less the target's), negated, full at
+// 45 degrees: the way she goes is her facing (+0x0), or the way she moved over the last 0.2 s when faster than 20
+// units a second, since the bike slides and by its facing a turn onto a line ends 30 degrees off it. The throttle is
+// full, eased to 0.3 in a turn of more than 45 degrees, whose circle at full throttle is wider than the bike bay's
+// mouth, or toward a place of more than 15 within 300 units, where it would circle it for good, and to 0.4 within 150
+// units of a place, so a turn there is made (toward an object it stays full: a ram needs the speed). A bike no nearer
+// its target in 3 s (pinned on a rise, or sliding along a wall in a turn it can't make) turns at full lock for 1.2 s
+// and comes round.
 bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
     bool ride, float* stick_x, float* stick_y) {
     *stick_x = 0.0f;
