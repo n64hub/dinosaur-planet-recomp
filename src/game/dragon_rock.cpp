@@ -35,10 +35,13 @@
 //   in map 43 has already set by then.
 //
 // What Restored changes:
-// - The way in and out: in the arena on layer -1 once 0x609 is set and the dragon isn't beaten, the player is warped
-//   by entry 89, filled with the room's setuppoint (uid 0x3534A); in the room 3 s after the stone is picked up, by entry
-//   84, filled with the arena's middle (TriggerPlane uid 0x33F78), on layer -1. The main thread's loop asks each pass
-//   (us.toml's hook on func_800145AC), and the warp fades as the game's own do. The same hook fills the arena's magic.
+// - The way in and out: at the arena's north wall on layer -1, under the room's entrance, once 0x609 is set and the
+//   dragon isn't beaten, the player is warped by entry 89, filled with the room's setuppoint (uid 0x3534A); in the room
+//   3 s after the stone is picked up, by entry 84, filled with the arena's middle (TriggerPlane uid 0x33F78), on layer
+//   -1. The main thread's loop asks each pass (us.toml's hook on func_800145AC), and the warp fades as the game's own
+//   do. The same hook fills the arena's magic. The way in waits for the wall, not the win, because the ROM frees the
+//   Earth Warrior after the win: DR_EarthWarrior reads the win (0x628) only while he is shackled (dll713 0x0508), and
+//   0x5FD, which frees him, is DR_NiceSharpy's on the gallery above, fed meat from the gallery's crates.
 // - The health's store (0x1BB8): at 0 the dragon is beaten. A CRSpellstone is placed at the player, its +0x1E 0x7A8
 //   and +0x20 0x5F4 (the stone placed at the Desert Force Point), and picked up there at once.
 // - The dragon's and the Nurse's updates: once it is beaten (0x7A8 or 0x5F4 set, so on every later visit too) each is
@@ -50,6 +53,10 @@
 //   (below), so its three DRLavaControls can be put out.
 // - The arena's DR_EarthWarrior: fed as the item nothing on Dragon Rock gives would feed him, once in the fight and
 //   once more for each DRLavaControl put out (below).
+//
+// Always on, a plain bug: the gallery's lever. The scene 0x5FD plays (DR_Seqobj 0x339C4's sequence 2) leaves the player
+// past the gallery's east end, with nothing under her, and the void's respawn takes the freeing back. The door's hook
+// catches her as she falls there and holds her where she gave the meat until the gallery is loaded again.
 
 #include <chrono>
 #include <cstdint>
@@ -87,6 +94,7 @@ namespace {
     constexpr int32_t new_placement = 0x800233F4; // (size, object id): a zeroed placement record
     constexpr int32_t spawn_object = 0x800213EC;  // (placement, 5, map, -1, [sp+0x10] parent): the object
     constexpr int32_t leave_hit_list = 0x80022274;
+    constexpr int32_t map_at = 0x80044810; // the map at a position: x in f12, z in f14
     constexpr int dragon_map = 53;
     constexpr int dragon_object = 0x4D9;
     constexpr int spellstone = 0x390;
@@ -182,6 +190,16 @@ namespace {
     // 0) over the same ground.
     const Box arena = { 1300.0f, 2500.0f, -1900.0f, -1700.0f, -6750.0f, -5900.0f };
     const Box room = { 1280.0f, 2560.0f, -2100.0f, -1600.0f, -7040.0f, -5700.0f };
+    // The arena's north wall, under the room's entrance: map 53's TriggerPlane 0x41AF3 at (2009, -1769, -5955), which
+    // sets 0x4D7 for the KD_Sequences as the player comes in from the north. The arena's wall there stands at about z
+    // -6120, at the top of the floor's slope up to y -1735.
+    const Box north_wall = { 1860.0f, 2160.0f, -1900.0f, -1700.0f, -6160.0f, -5900.0f };
+    // Past the gallery's east end, where nothing is under it down to the void: DR_Seqobj 0x339C4's sequence 2, the
+    // lever pulled once DR_NiceSharpy is fed, ends with the player at (2446, -1610, -6731) and its camera outside the
+    // walls, and she falls from there into the void, whose respawn takes back the bits since the arena's door (0x380,
+    // 0x5FD, 0x5FE, 0x654). Caught here, she is held where she gave the meat, in front of DR_NiceSharpy.
+    const Box under_gallery = { 2400.0f, 2500.0f, -3000.0f, -1650.0f, -6780.0f, -6690.0f };
+    const float gallery_give[3] = { 2369.0f, -1610.0f, -6794.0f };
 
     // The two warp entries, empty in ROM file 30: the room's setuppoint (map 53 @0000), and the arena where the
     // bottom's TriggerPlane 33F78 stands. +0xC and +0xE hold -1 for layer -1, as entry 88's do.
@@ -404,20 +422,10 @@ extern "C" void dino_earth_warrior(uint8_t* rdram, recomp_context* ctx) {
 }
 
 // us.toml's hook at the start of func_800145AC, once a pass of the main thread's loop: the warp the door takes now, or
-// -1. In the arena once it is won and the dragon isn't, into the room; in the room 3 s after the SpellStone is
-// picked up, back to the arena.
+// -1. At the arena's north wall once the arena is won and the dragon isn't, into the room; in the room 3 s after the
+// SpellStone is picked up, back to the arena. Before that, with either value, the player is caught past the gallery's
+// east end.
 extern "C" int dino_dragon_rock_door(uint8_t* rdram, recomp_context* ctx) {
-    if (!restored()) {
-        return -1;
-    }
-    using clock = std::chrono::steady_clock;
-    static clock::time_point quiet_until; // a warp's fade takes a while: nothing more until it is done
-    static clock::time_point carried_at;
-    static bool carried = false;
-    clock::time_point now = clock::now();
-    if (now < quiet_until) {
-        return -1;
-    }
     Calls calls(ctx);
     call(rdram, ctx, player_object);
     gpr player = ctx->r2;
@@ -429,12 +437,60 @@ extern "C" int dino_dragon_rock_door(uint8_t* rdram, recomp_context* ctx) {
     memcpy(&y, &MEM_W(0x1C, player), 4);
     memcpy(&z, &MEM_W(0x20, player), 4);
     int layer = MEM_B(0, (gpr)player_layer);
+    // Caught, she is held at the gallery until the cells the game loads around the camera hold it again (func_80044810,
+    // the map at a place, is -1 outside them), and half a second more for its blocks: the scene's camera took them
+    // away, and the gallery under her was not there yet either.
+    using clock = std::chrono::steady_clock;
+    static bool held = false;
+    static clock::time_point held_since, gallery_since;
+    clock::time_point now = clock::now();
+    if (layer == -1 && under_gallery.holds(x, y, z) && !held) {
+        held = true;
+        held_since = now;
+        gallery_since = clock::time_point::max();
+        if (logging) {
+            fprintf(stderr, "dragon: caught past the gallery at %.0f %.0f %.0f\n", x, y, z);
+        }
+    }
+    if (held) {
+        for (int i = 0; i < 3; i++) {
+            memcpy(&MEM_W(0xC + 4 * i, player), &gallery_give[i], 4);
+            memcpy(&MEM_W(0x18 + 4 * i, player), &gallery_give[i], 4);
+            MEM_W(0x24 + 4 * i, player) = 0; // her speed
+        }
+        ctx->f12.fl = gallery_give[0];
+        ctx->f14.fl = gallery_give[2];
+        call(rdram, ctx, map_at);
+        if ((int32_t)ctx->r2 == -1) {
+            gallery_since = clock::time_point::max();
+        }
+        else if (gallery_since == clock::time_point::max()) {
+            gallery_since = now;
+        }
+        if ((gallery_since != clock::time_point::max() && now - gallery_since >= std::chrono::milliseconds(500)) ||
+            now - held_since >= std::chrono::seconds(10)) {
+            held = false;
+            if (logging) {
+                fprintf(stderr, "dragon: let go on the gallery\n");
+            }
+        }
+        return -1;
+    }
+    if (!restored()) {
+        return -1;
+    }
+    static clock::time_point quiet_until; // a warp's fade takes a while: nothing more until it is done
+    static clock::time_point carried_at;
+    static bool carried = false;
+    if (now < quiet_until) {
+        return -1;
+    }
     int warp = -1;
     if (layer == -1 && arena.holds(x, y, z)) {
         if (!get(rdram, ctx, arena_fight_won)) {
             fill_magic(rdram, ctx, player);
         }
-        if (get(rdram, ctx, arena_won) && !beaten(rdram, ctx)) {
+        if (north_wall.holds(x, y, z) && get(rdram, ctx, arena_won) && !beaten(rdram, ctx)) {
             warp = into_room;
         }
     }
