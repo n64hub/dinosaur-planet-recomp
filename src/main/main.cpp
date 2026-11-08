@@ -613,14 +613,15 @@ extern "C" int dino_warp_due() {
 // (every DINO_REPORT_EVERY seconds with it set, for a quick move such as a jump). The same
 // hook as --warp's, so this runs on the game's main thread too. --watch-bits <hex>,...|all prints a line each time the
 // game sets one of those bits, or with all each time a bit changes (story.cpp). With DINO_CHECK_HEAP set, each pass
-// checks the game's heaps for a block written past its end (heap.cpp).
+// checks the game's heaps for a block written past its end (heap.cpp). --sidekick kyte|tricky brings one out at the
+// player whenever none is (story.cpp).
 static bool story_due = false;
 static double story_at = 2.0;
 static double story_reported = -1.0;
 static const double story_report_every = std::getenv("DINO_REPORT_EVERY") ? std::atof(std::getenv("DINO_REPORT_EVERY")) : 1.0;
 
 // The development options a run can also be given after it starts (--warp, --story, --place, --report, --bits,
-// --watch-bits, --time): true with the one at argv[i] taken, i moved past its value.
+// --watch-bits, --time, --sidekick): true with the one at argv[i] taken, i moved past its value.
 static bool dev_option(int argc, char** argv, int& i) {
     if (strcmp(argv[i], "--warp") == 0 && i + 1 < argc) {
         for (const char* p = argv[++i]; p != nullptr; p = strchr(p, ',') ? strchr(p, ',') + 1 : nullptr) {
@@ -656,6 +657,9 @@ static bool dev_option(int argc, char** argv, int& i) {
     }
     else if (strcmp(argv[i], "--time") == 0 && i + 1 < argc) {
         dino::story_set_time(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--sidekick") == 0 && i + 1 < argc) {
+        dino::story_set_sidekick(argv[++i]);
     }
     else {
         return false;
@@ -728,6 +732,7 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     }
     dino::story_timed_bits(rdram, ctx, now);
     dino::story_timed_time(rdram, ctx, now);
+    dino::story_timed_sidekick(rdram, ctx, now);
     static const bool check_heap = getenv("DINO_CHECK_HEAP") != nullptr;
     if (check_heap) {
         dino::heap_check(rdram, now);
