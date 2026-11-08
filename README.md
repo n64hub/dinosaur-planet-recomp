@@ -55,8 +55,10 @@ Fixed:
   of the place it was found, which the game freed in the player's hands, Dragon Rock's fight with the Skeetlas,
   which after a minute or two drew more than the game had made room for and wrote over the models, Dragon Rock's
   top at its east end, where more of the level is loaded at once than the game kept room for, a swing
-  pressed on the very frame the player comes back after a death, before the staff or sword was made, and Golden
-  Plains' portable hole spell, whose pickup made a new player every frame until the game ran out of memory.
+  pressed on the very frame the player comes back after a death, before the staff or sword was made, Golden
+  Plains' portable hole spell, whose pickup made a new player every frame until the game ran out of memory, and a
+  fall into the pit in either of Walled City's temples, which loads the city again and made an object the game no
+  longer has.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
