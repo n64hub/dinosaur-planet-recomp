@@ -24,6 +24,16 @@
 // its object is freed reads what the freed memory holds, and a word there that isn't an address read outside memory
 // and crashed, about a second into the Desert Force Point's place's sequence (0x373) on some plays of it. The draw now
 // takes a parent outside the game's memory for none.
+//
+// An object's def: func_80022AA4 takes a def's index, from the table at D_800B1908 by the object id (func_80021450,
+// func_800212F4), and gives the def it loaded from ROM file 66, counting who holds it in a byte each (D_800B1904). It
+// tests the index only against the number of defs (D_800B18F0), signed, and an object id whose def was taken out of
+// the game has -1 there, so it reads the byte and the word before its tables: with the byte not 0 it gives that word,
+// and with it 0 it loads a def from the offsets before file 66's own. Walled City places object 0x336, which has none,
+// before each temple's gap (uids 41afc and 41b35): its first load made nothing of it, and the load
+// a fall into the moon temple's pit plays read a byte of 0 and made the placement from what it loaded, and crashed in
+// func_80026AB8 reading the table at that def's +0x24. An index outside the tables now gets 0, which both callers take
+// for an object with no def and make nothing of.
 
 #include <cstdio>
 #include <cstdlib>
@@ -36,6 +46,8 @@ namespace {
     // Each object list's start and end (two halfwords each) in the table of list entries; list 0 is the player.
     constexpr int32_t object_lists = (int32_t)0x800B28B0;
     constexpr int32_t object_list_entries = (int32_t)0x800B2938;
+    // The number of object defs, which func_80022AA4 tests a def's index against.
+    constexpr int32_t def_count = (int32_t)0x800B18F0;
 }
 
 // func_80022F94, about to free the object at $a0: a player that holds it lets go of it, as dll210's drop (its export
@@ -100,4 +112,15 @@ extern "C" void dino_effect_parent(uint8_t* rdram, recomp_context* ctx) {
             (uint32_t)ctx->r19, parent, (uint16_t)MEM_H(0x44, ctx->r19), (uint16_t)MEM_H(0x46, ctx->r19));
     }
     ctx->r2 = 0;
+}
+
+// func_80022AA4, about to give the def of index $a0: an index outside its tables (-1, an object id with no def) gets
+// 0, as a def that couldn't be loaded does.
+extern "C" int dino_def_missing(uint8_t* rdram, recomp_context* ctx) {
+    int32_t index = (int32_t)ctx->r4;
+    if (index >= 0 && index < MEM_W(0, def_count)) {
+        return 0;
+    }
+    ctx->r2 = 0;
+    return 1;
 }

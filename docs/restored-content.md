@@ -48,10 +48,12 @@ Always on, so each setting's Original has them too.
 - Walled City's pressure switches writing past their list (us.toml, dll781_05DC, `patches/walled_city.c`; PR 39).
 - CloudRunner Fortress's slide doors set up with no player, as a save made with the upper level open (0x458's group
   4) loads: the door starts shut (us.toml, dll393_0018; PR 49).
+- An object id with no def, made from its placement: Walled City's object 0x336 before each temple's gap, made again
+  as a fall into the pit loads the city, read before the def tables (us.toml, func_80022AA4, `src/game/objects.cpp`;
+  PR 55).
 
 Open:
 
-- Falling into Walled City's moon temple's pit, which crashes making the player's side food bag.
 - The skeletons' hits.
 
 ## 2. Restored from what the ROM shows
