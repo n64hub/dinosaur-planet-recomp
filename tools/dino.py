@@ -31,8 +31,10 @@ kept across calls):
 `map` (ROM files 31, 32, 33 and 21) prints a map's cell, the cells it spans and its group field (dll29's data
 +0xF0), then a count of each def it places, or with a filter (or --all) one line each: uid, def name, object id, DLL,
 group (when flag 0x10 makes it one), flags, position, world position (local + the cell * 640), and the words of its
-setup from +0x18, named from syms/names.toml where they are. `def` takes a name, an object id or dll<n>. `warp`
-names the maps whose cells and layer hold an entry, and each call to func_8004D1D4 that warps there.
+setup from +0x18, named from syms/names.toml where they are, and `act<n>` for the acts it loads in when not all 16
+(+3 the mask of acts 1-8, +5 of 9-16, a bit set skipping one). `--act N` keeps those that load in act N, and
+`--only-act N` those that load in it and no other. `def` takes a name, an object id or dll<n>. `warp` names the
+maps whose cells and layer hold an entry, and each call to func_8004D1D4 that warps there.
 
 What it reads of the whole ROM (the handles, each function's argument kinds, every call site) is kept in
 build/dino/<the ROM's md5>/, written the first time and read after; nothing from the ROM goes in git.
@@ -1022,7 +1024,7 @@ def show_map(game, a):
                     abs(w[1] - near[1]) > (near[2] if len(near) > 2 else 300):
                 continue
         picked.append((off, r, name, dll, flags, group))
-    filtered = a.name or a.group is not None or a.dll is not None or a.uid or near or a.act is not None or         a.only_act is not None
+    filtered = a.name or a.group is not None or a.dll is not None or a.uid or near or a.act is not None or a.only_act is not None
     if not (filtered or a.all):
         # A summary: each def, how many, in which groups.
         seen = {}
