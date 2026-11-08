@@ -16,6 +16,12 @@
 // - WL_LevelControl (dll607) gives the act's mask on arrival unless its release is done (its update dispatches acts 1
 //   to 7 at 0x298, `sltiu 8`): acts 6 and 7 read 0x366 for that (0x1544, 0x17D4), a bit nothing sets, so they gave CC's
 //   and WG's spirits again on every visit. Acts 8 and 9 have no handler.
+// - 0x366 is the trigger of a mode 1 seqpoint (@1D34, sequence 0x12, done bit 0) placed in act 7 only, beside WG's
+//   release (@1C0C). Sequence 0x12's event (dll611 0x630) is the only code that sets Cape Claw's act 9 (map 0x1D), and
+//   it sets 0x367 and 0x368 and clears 0x366. 0x367 shows a WM_WarpPoint (dll275, @1D58: +0x1A where it sends, +0x1D
+//   its mode, +0x1E its radius in 4s) to entry 77, empty in ROM file 30: in mode 2 a radius of 0 skips the distance
+//   (0x3E0), so it warps the moment 0x367 is set, wherever the player is. Cape Claw's act 9 loads act 2's objects and
+//   adds one setuppoint (map 29 uid E7B), by its west entrance.
 // - A WL_seqpoint (dll611, object 0x25F: +0x18 yaw, +0x19 mode, +0x1A radius, +0x1C its sequence, +0x1E trigger bit,
 //   +0x20 done bit) at each spirit's site plays the release when the player walks in with its trigger bit set (mode 2),
 //   or clear, setting it (mode 3). The sequence's last event takes the mask back and sets the released bits (dll611
@@ -26,13 +32,19 @@
 //
 // What Restored changes:
 // - Ways in. ROM file 30's warp table has empty entries where the shrines' own Transporters send the player back: 65
-//   (NW), 67 (WG), 68 (EC), 70 (GP) and 71 (CC); WARP_ENTRY (func_8004D1D4) gets them filled. Golden Plains has its
-//   pad (map 9 @03F0, own entry 31) pointed at the empty entry 32: it goes to GP's shrine (42). The others get a
-//   Transporter (object 0xEC, dll334: +0x19 its own entry, +0x1A where it sends, +0x20 the bit that shows it) beside
-//   the place in their area the ROM ties to the shrine: EC's between Walled City's Sun and Moon stones, which open the
-//   shrine in the older layout of map 36, a map with no place in the world grid; CC's by Cape Claw's three Krazoa
-//   tablet receptacles; WG's by Willow Grove's sundial; NW's where Northern Wastes is entered. Each shows once the
-//   spirit before it in the act order is released, EC's once the Moon Stone is placed.
+//   (NW), 67 (WG), 70 (GP) and 71 (CC); WARP_ENTRY (func_8004D1D4) gets them filled. Golden Plains has its pad (map 9
+//   @03F0, own entry 31) pointed at the empty entry 32: it goes to GP's shrine (42). The others get a Transporter
+//   (object 0xEC, dll334: +0x19 its own entry, +0x1A where it sends, +0x20 the bit that shows it) beside the place in
+//   their area the ROM ties to the shrine: EC's between Walled City's Sun and Moon stones; CC's by Cape Claw's three
+//   Krazoa tablet receptacles; WG's by Willow Grove's sundial; NW's where Northern Wastes is entered. Each shows once
+//   the spirit before it in the act order is released, EC's once the Moon Stone is placed.
+// - EC's is the ROM's own pad, moved. Map 36, the EarthWalker Temple, an older layout of Walled City's temples (its
+//   Sun and Moon stones, dial, bridge and aperture, in older placement formats), places a Transporter (@00C7) at
+//   (319, -371, -959), own entry 68, to 40, ECShrine's, whose pad sends back to 68: entry 68 holds that spot. The
+//   world grid (ROM file 21) gives map 36 no cell, so in world units 68 falls in the Swap Store's cells (map 51) with
+//   no floor there. Entry 0 is the same: map 20, an older Krazoa Shrine with no cell, has its Transporter at 0's
+//   (486, 56, 1125). Walled City (map 13), which replaced map 36, has no Transporter: Restored stands map 36's there
+//   and fills 68 where it stands.
 // - Golden Plains' shrine exit (map 34 @06A0) went to DB's pad (66), a copy of DB's map, and in its mode 0 it sent
 //   the player out on the way to the shrine: it goes to GP's pad (70), and only once the shrine is won.
 // - Willow Grove: its state 3 (dll488 0x8FC) gave the spirit only while 0x1D1, the torch puzzle's bit, was clear, and
@@ -52,8 +64,12 @@
 //   seqpoint there: GP's at CC's site, playing CC's sequence, NW's at WG's, playing WG's, with the mask the sequence
 //   takes back made 0x10 or 0x80. Their trigger bits, which a mode 3 seqpoint sets the frame its sequence starts, are
 //   0x21E and 0x220, which ROM file 55 has saved between the other released bits and nothing uses, and acts 8 and 9
-//   read them as released. Acts 6 and 7 read CC's and WG's released bits. The done bits of MM's, EC's, CC's
+//   read them as released. Acts 6 and 7 read CC's and WG's released bits: 0x366 is set for one release and sequence
+//   0x12 clears it, so it could not keep a second visit from giving the spirit again. The done bits of MM's, EC's, CC's
 //   and WG's seqpoints become their released bits.
+// - After the shrines: WG's release, taking its mask back in act 7, sets 0x366, so sequence 0x12 plays, sets Cape
+//   Claw's act 9 and warps the player to 77. Its seqpoint's done bit becomes 0x367, and entry 77 is filled at Cape Claw's
+//   act 9 setuppoint.
 // - Cape Claw's test (dll486) waited for 0x5B2, a bit nothing sets, where its one SabreBaddie's kill bit is 0x1E7: it
 //   reads and resets 0x1E7 (us.toml).
 //
@@ -220,6 +236,7 @@ namespace {
 
     constexpr int transporter = 0xEC;
     constexpr int seqpoint = 0x25F;
+    constexpr int after_shrines = 0x366;      // the trigger of Warlock Mountain's sequence 0x12 (seqpoint @1D34)
     constexpr int tablet_pickup = 0x2ED;
 
     constexpr int increment_bit = 0x80014930; // (bit): adds one to its value
@@ -327,10 +344,10 @@ namespace {
 
     // Each entry is a place the map it is in holds, in world units (a map's placement + 640 times its world grid cell,
     // ROM file 21). 70 is entry 31, GP's pad itself. 71 is the setuppoint by Cape Claw's receptacles (map 29 @22C8).
-    // 68 is the setuppoint between Walled City's two stones (map 13 @0800). 67 is setuppoint 1 by Willow Grove's
-    // sundial (map 37 @003C). 65 is the setuppoint in the snow where Northern Wastes is entered (map 10 @00B0).
-    // 72 is the tablet room's Transporter, east of the receptacles. 93 and 94 are Krazoa Palace's west and east
-    // KP_Transporters (map 3 @0668, @0644).
+    // 68, the ROM's EC pad's own entry (in map 36's units, header), moves with the pad to the setuppoint between Walled
+    // City's two stones (map 13 @0800). 67 is setuppoint 1 by Willow Grove's sundial (map 37 @003C). 65 is the
+    // setuppoint in the snow where Northern Wastes is entered (map 10 @00B0). 72 is the tablet room's Transporter, east
+    // of the receptacles. 93 and 94 are Krazoa Palace's west and east KP_Transporters (map 3 @0668, @0644).
     const WarpEntry warp_entries[] = {
         { 65, -3932.0f, -110.7f, -361.2f, Setting::Shrines },
         { 67, -4523.2f, -1316.0f, -4004.5f, Setting::Shrines },
@@ -338,6 +355,7 @@ namespace {
         { 70, -833.3f, 208.0f, 13285.5f, Setting::Shrines },
         { 71, 4200.3f, -7.1f, 17613.1f, Setting::Shrines, tablet_area },
         { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets, tablet_area },
+        { 77, 1389.0f, 159.0f, 16954.0f, Setting::Shrines },
         { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
         { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
@@ -373,6 +391,7 @@ namespace {
         { 11, seqpoint, 0x2983, 0x20, 2, 0x318, false }, // EC's, @0FC0
         { 11, seqpoint, 0x2AC7, 0x20, 2, 0x221, false }, // CC's, @1570
         { 11, seqpoint, 0x003C, 0x20, 2, 0x222, false }, // WG's, @1C0C
+        { 11, seqpoint, 0x30055, 0x20, 2, 0x367, false }, // sequence 0x12's, @1D34
         { 11, 0x15D, 0x2AB7, 0x3, 1, 0xDF & ~0x80, false }, // CC's column, @1358: also act 8
         { 11, 0x15D, 0x002C, 0x5, 1, 0xE4 & ~0x80, false }, // WG's column, @1AB0: also act 9
     };
@@ -677,8 +696,9 @@ extern "C" void dino_krazoa_warlock(uint8_t* rdram, recomp_context* ctx) {
 }
 
 // us.toml's hooks in WL_seqpoint's release events (dll611), before the player's export 0xA0 takes CC's mask (0x8D4)
-// and WG's (0x778) back: GP's and NW's releases play those sequences.
-extern "C" void dino_krazoa_release_mask(uint8_t*, recomp_context* ctx) {
+// and WG's (0x778) back: GP's and NW's releases play those sequences, and WG's in act 7 sets 0x366, which plays
+// sequence 0x12 (seqpoint @1D34).
+extern "C" void dino_krazoa_release_mask(uint8_t* rdram, recomp_context* ctx) {
     if (warlock_act == 8) {
         ctx->r5 = 0x10;
     }
@@ -687,6 +707,10 @@ extern "C" void dino_krazoa_release_mask(uint8_t*, recomp_context* ctx) {
     }
     if (logging) {
         fprintf(stderr, "krazoa: act %d release takes mask 0x%X\n", warlock_act, (int)ctx->r5);
+    }
+    if (warlock_act == 7 && shrines_restored()) {
+        Calls calls(rdram, ctx);
+        set(rdram, ctx, after_shrines, 1);
     }
 }
 

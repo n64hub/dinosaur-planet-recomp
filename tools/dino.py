@@ -31,8 +31,10 @@ kept across calls):
 `map` (ROM files 31, 32, 33 and 21) prints a map's cell, the cells it spans and its group field (dll29's data
 +0xF0), then a count of each def it places, or with a filter (or --all) one line each: uid, def name, object id, DLL,
 group (when flag 0x10 makes it one), flags, position, world position (local + the cell * 640), and the words of its
-setup from +0x18, named from syms/names.toml where they are. `def` takes a name, an object id or dll<n>. `warp`
-names the maps whose cells and layer hold an entry, and each call to func_8004D1D4 that warps there.
+setup from +0x18, named from syms/names.toml where they are, and `act<n>` for the acts it loads in when not all 16
+(+3 the mask of acts 1-8, +5 of 9-16, a bit set skipping one). `--act N` keeps those that load in act N, and
+`--only-act N` those that load in it and no other. `def` takes a name, an object id or dll<n>. `warp` names the
+maps whose cells and layer hold an entry, and each call to func_8004D1D4 that warps there.
 
 What it reads of the whole ROM (the handles, each function's argument kinds, every call site) is kept in
 build/dino/<the ROM's md5>/, written the first time and read after; nothing from the ROM goes in git.
@@ -950,6 +952,24 @@ def map_header(game, m):
     return s + f"  group field {mp['field']:#x}"
 
 
+def placement_acts(r):
+    """The acts a placement loads in: func_8004B4A0 skips it in act n while bit n - 1 of +3 (acts 1-8) or of +5
+    (acts 9-16) is set."""
+    mask = r[3] | r[5] << 8
+    return [n for n in range(1, 17) if not mask >> (n - 1) & 1]
+
+
+def fmt_acts(acts):
+    runs, i = [], 0
+    while i < len(acts):
+        j = i
+        while j + 1 < len(acts) and acts[j + 1] == acts[j] + 1:
+            j += 1
+        runs.append(f"{acts[i]}" if i == j else f"{acts[i]}-{acts[j]}")
+        i = j + 1
+    return ",".join(runs) or "none"
+
+
 def placement_line(game, m, off, r, fields):
     obj, _, _, flags, _, group = struct.unpack_from(">HBBBBB", r, 0)
     x, y, z = struct.unpack_from(">3f", r, 8)
@@ -958,6 +978,9 @@ def placement_line(game, m, off, r, fields):
     name, dll = game.defs[d] if d >= 0 else ("?", 0)
     w = game.world(m, x, z)
     s = f"{uid:x} {name} #{obj:X} dll{dll}" + (f" g{group}" if flags & 0x10 else "") + f" fl{flags:02x}"
+    acts = placement_acts(r)
+    if len(acts) < 16:
+        s += f" act{fmt_acts(acts)}"
     s += f" ({x:.0f}, {y:.0f}, {z:.0f})" + (f" w({w[0]:.0f}, {w[1]:.0f})" if w else "")
     if fields:
         words = [struct.unpack_from(">H", r, o)[0] for o in range(0x18, len(r) - 1, 2)]
@@ -970,14 +993,6 @@ def placement_line(game, m, off, r, fields):
         if named:
             s += "  +18: " + " ".join(named)
     return s
-
-
-def loads_in(r, act):
-    """Whether the object loader (func_8004B4A0) places this record in a map's act: byte +3's bit act - 1 set skips it
-    in acts 1 to 8, byte +5's bit 16 - act in acts 9 to 16; act 0 places all."""
-    if act == 0:
-        return True
-    return not ((r[3] >> (act - 1)) & 1 if act < 9 else (r[5] >> (16 - act)) & 1)
 
 
 def show_map(game, a):
@@ -998,7 +1013,9 @@ def show_map(game, a):
             continue
         if a.uid and struct.unpack_from(">I", r, 0x14)[0] != int(a.uid, 16):
             continue
-        if a.act is not None and not loads_in(r, a.act):
+        if a.act is not None and a.act not in placement_acts(r):
+            continue
+        if a.only_act is not None and placement_acts(r) != [a.only_act]:
             continue
         if near:
             x, _, z = struct.unpack_from(">3f", r, 8)
@@ -1007,7 +1024,7 @@ def show_map(game, a):
                     abs(w[1] - near[1]) > (near[2] if len(near) > 2 else 300):
                 continue
         picked.append((off, r, name, dll, flags, group))
-    filtered = a.name or a.group is not None or a.dll is not None or a.uid or near or a.act is not None
+    filtered = a.name or a.group is not None or a.dll is not None or a.uid or near or a.act is not None or a.only_act is not None
     if not (filtered or a.all):
         # A summary: each def, how many, in which groups.
         seen = {}
@@ -1213,8 +1230,9 @@ def main():
     m.add_argument("--name", help="placements whose def's name holds this")
     m.add_argument("--group", type=int)
     m.add_argument("--dll", type=int)
-    m.add_argument("--act", type=int, help="placements the object loader places in the map's act n")
     m.add_argument("--uid")
+    m.add_argument("--act", type=int, help="placements that load in this act")
+    m.add_argument("--only-act", type=int, help="placements that load in this act and no other")
     m.add_argument("--near", help="x,z[,r]: placements within r (300) of a world position")
     o = sub.add_parser("def", help="an object def: its DLL, object ids, where it is placed and its record")
     o.add_argument("spec", help="a name (or part), an object id (0x1A3 or #1A3), or dll<n>")

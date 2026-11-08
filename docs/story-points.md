@@ -11,7 +11,8 @@ DinosaurPlanet --boot --story new-game --place 3620,-265,16205,0
 ```
 
 - `--story <point>[@<seconds>][,<warp>]` starts from that point, 2 s after the game's first controller read unless
-  told, at the point's own place or at that entry of the warp table.
+  told, at the point's own place or at that entry of the warp table, as a warp there has it: an entry a setting fills
+  (docs/restored-content.md, The warp entries the restorations take) starts at its filled place.
 - `--place <x>,<y>,<z>[,<layer>[,<facing>]]` starts there instead, for a place the warp table has no entry for, facing
   a 16-bit angle (0, the default, faces -z).
 - `--bits <hex>[=<value>][@<seconds>],...` sets more of the game's bits at the start, after the point's own, or one
@@ -72,8 +73,8 @@ file 19, each task's name and clue), which says when the player swaps.
   Queen not met yet and no white mushroom collected.
 - `after-first-spellstone`: Sabre at the Volcano Force Point (warp 81), the first spirit won and the first SpellStone
   placed.
-- `before-sand-worm`: Krystal in Cape Claw, on the sand at the map's setuppoint beside the worm. The warp table has no
-  entry in Cape Claw.
+- `before-sand-worm`: Krystal in Cape Claw, on the sand at the map's setuppoint beside the worm. The ROM's warp table
+  has no entry in Cape Claw.
 - `before-df-shrine`, Krystal (warp 36); `before-db-shrine`, Sabre (38); `before-mm-shrine`, Krystal (43);
   `before-ec-shrine`, Sabre (40): the four shrines the task list orders, each with the spirits before it.
 - `before-gp-shrine` (42), `before-nw-shrine` (37), `before-cc-shrine` (41), `before-wg-shrine` (39): Krystal with all
@@ -745,9 +746,12 @@ game's own code warps to some of them (dll 408 to 26, SHswapstone to 86). Each e
 `--story new-game,<index>`, played 15 s with no story state and looked at. "Boots" is alive and drawn, with the player
 on a floor and no crash; it says nothing about what the level needs further in.
 
-- 0, 68: 0 lies in no map's cells, and 68 in the Swap Store's. A running game drops the player through nothing and
-  restores them to the last safe place, and a run started there has none: `--story new-game,0` crashes on a null
-  pointer in dll210 at about 9 s, and 68 the same. Not usable as the ROM has them.
+- 0, 68: each is a Transporter's own spot in a map the world grid gives no cell, 0 map 20's (an older Krazoa Shrine,
+  its pad sending to 14) and 68 map 36's (the EarthWalker Temple, an older layout of Walled City's temples, its pad
+  sending to 40, ECShrine, whose pad sends back to 68). In world units 0 lies in no map's cells, and 68 in the Swap
+  Store's. A running game drops the player through nothing and restores them to the last safe place, and a run
+  started there has none: `--story new-game,0` crashes on a null pointer in dll210 at about 9 s, and 68 the same on
+  Original. Krazoa Shrines on Restored fills 68 at EC's pad in Walled City (`src/game/krazoa.cpp`).
 - 2, 26: NewIceMt1 (map 23), layer 2, the same room. Boots into the story scene a real New Game then `--warp 26`
   plays, in the snow, and dll 408 (IMIceMountain) warps to 26 itself. `--story new-game,26`, `--story new-game,2` and
   `--story new-game` then `--warp 26` each played 60 s alive. No named point starts here.
@@ -774,7 +778,10 @@ on a floor and no crash; it says nothing about what the level needs further in.
 - 91: Walled City (13). Boots, in a corridor.
 - 95: Northern Wastes (10). Boots.
 
-Cape Claw has no entry: `before-sand-worm` and `--place` go there.
+Cape Claw has no entry: `before-sand-worm` and `--place` go there. On Krazoa Shrines' Restored, 77 is filled at Cape
+Claw's act 9 setuppoint (1389, 159, 16954), where Warlock Mountain's sequence 0x12 sends the player after Willow
+Grove's release: it sets Cape Claw's act 9 (0xEE), 0x367, whose WM_WarpPoint (radius 0) warps the player to 77 at once,
+and 0x368, and clears 0x366 (docs/restored-content.md).
 
 ## Choices
 

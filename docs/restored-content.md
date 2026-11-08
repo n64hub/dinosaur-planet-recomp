@@ -46,10 +46,11 @@ Always on, so each setting's Original has them too.
 - More than 40 map blocks at once at Dragon Rock's top's east end (us.toml, func_80041E84; PR 36).
 - An item's scene started again every frame, crashing in dll3_8900 (us.toml, dll210_16220; PR 39).
 - Walled City's pressure switches writing past their list (us.toml, dll781_05DC, `patches/walled_city.c`; PR 39).
+- CloudRunner Fortress's slide doors set up with no player, as a save made with the upper level open (0x458's group
+  4) loads: the door starts shut (us.toml, dll393_0018; PR 49).
 
 Open:
 
-- CFMainSlideDoor (dll393) when CloudRunner Fortress's group 4 loads with no player.
 - Falling into Walled City's moon temple's pit, which crashes making the player's side food bag.
 - The skeletons' hits.
 
@@ -90,18 +91,29 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Krazoa Shrines
 
-`src/game/krazoa.cpp`, its header the evidence; PRs 15, 17, 40 and 42.
+`src/game/krazoa.cpp`, its header the evidence; PRs 15, 17, 40, 42 and 51.
 
 - Each shrine's win sets Warlock Mountain's act and gives a spirit mask, and WL_seqpoint plays each release: the
   prototype's own way, followed for all eight.
 - The shrines' own Transporters send the player back to warp entries 65 (NW), 67 (WG), 68 (EC), 70 (GP) and 71 (CC),
   which are filled (their places are choices, part 3).
+- EC's way in is the ROM's own pad: map 36, the EarthWalker Temple, an older layout of Walled City's temples with no
+  cell in the world grid, places a Transporter (@00C7, own entry 68, to 40) at (319, -371, -959), and entry 68 holds
+  that spot in map 36's units, which in world units fall in the Swap Store's cells (map 51) with no floor. Entry 0 is
+  map 20's Transporter, an older Krazoa Shrine with no cell, the same way. Walled City (map 13), which replaced map
+  36, has none, so Restored stands that pad there, own entry 68, and fills 68 where it stands (where, part 3).
 - Bugs in the shrines' code: MM's, EC's, CC's and WG's release seqpoints all have done bit 0, so the first stopped
   the other three; Walled City's shell game won for a player who stood still (PR 17) and asked for Diamond Bay's mask;
   Golden Plains' "already passed" read Moon Mountain Pass's 0x12A; Willow Grove's torches light themselves and set
   0x1D1, which took the spirit away, and its win set no act 7; Golden Plains' exit went to Diamond Bay's pad.
 - Cape Claw's test waited for 0x5B2, which nothing sets; it reads its one SabreBaddie's kill bit 0x1E7, as Discovery
   Falls' (dll433) reads its baddie's.
+- After the shrines (PR 51): Warlock Mountain's act 7, WG's, places WL_seqpoint 30055 beside WG's release, playing
+  sequence 0x12 once 0x366 is set (mode 1), and acts 6 and 7 count 0x366 as the release done. Sequence 0x12 is the
+  only code that sets Cape Claw's act 9 (dll611 0x664), and it sets 0x367, which shows WM_WarpPoint 3008c to entry 77,
+  and in its mode 2 a radius of 0 warps at once, at any distance (dll275 0x3E0). Nothing sets 0x366: WG's release does
+  (part 3). 30055's done bit was bit 0, shared, and is 0x367. Cape Claw's act 9 holds act 2's objects and one
+  setuppoint of its own, e7b, by its west entrance: entry 77 is filled there.
 
 ### Krazoa Tablets
 
@@ -226,16 +238,23 @@ ROM's way. "(?)" marks a reading not checked in full.
   where Northern Wastes is entered (NW, 0x21E, ours); Golden Plains' pad (map 9, own entry 31) sent to the empty entry
   32, which goes to GP's shrine (42). The return entries are filled
   with those places: 65 NW, 67 WG, 68 EC, 70 GP, 71 CC. Cascade: CC's lands in the tablet room (0x2C0). The ROM
-  offers: a WarpPoint 33514 to 65 on 0x5C2 and one 32857 to 67 (?). **Clash:** entry 68 is not empty: it holds
-  (319, -371, -959), in the Swap Store's cells, and EC's own Transporter sends there.
+  offers: a WarpPoint 33514 to 65 on 0x5C2 and one 32857 to 67 (?). EC's pad and its entry 68 are the ROM's (part 2),
+  and where it stands in Walled City and what shows it are ours: map 36 shows its pad always (+0x20 0xFFFF), on its
+  temple's axis over the aperture symbol (@22AF), a place Walled City's two temples have no one match for.
 - **Golden Plains' and Northern Wastes' spirits** (Krazoa Shrines): masks 0x10 and 0x80, which nothing gives; acts 8
   and 9 at Warlock Mountain give them, raise the column, and place release seqpoints at CC's and WG's sites playing
   CC's and WG's sequences; their trigger bits 0x21E and 0x220 have no ROM setter or getter. Cascade: CC's sequence
-  sets 0x221, 0x31C-0x31E, 0x1CF and 0x227 again (?). The ROM offers: WL_seqpoint 30055 (below).
-- **Acts 6 and 7's release check** (Krazoa Shrines): they read CC's and WG's released bits in place of 0x366, which
-  nothing sets to 1 (dll611 clears it, dll607 reads it). **Clash (?):** 0x366 is the trigger of WL_seqpoint 30055,
-  whose sequence 0x12 sets Cape Claw (map 29) to act 9 (dll611 0x664) and sets 0x367 and 0x368, and 0x367 shows
-  WM_WarpPoint 3008c, which sends to the empty entry 77: the ROM's own way on after the shrines, unbuilt.
+  sets 0x221, 0x31C-0x31E, 0x1CF and 0x227 again (?). The ROM offers: nothing, 30055 being WG's act's (part 2).
+- **Acts 6 and 7's release check** (Krazoa Shrines): they read CC's and WG's released bits in place of 0x366. Under
+  the ROM's route (part 2) 0x366 is set for WG's release only, and sequence 0x12 clears it, so it couldn't keep a
+  second visit from giving CC's or WG's spirit again; acts 2-5 each read their own released bit.
+- **Who sets 0x366** (Krazoa Shrines): WG's release, as it takes the mask back in act 7. 0x366: no ROM setter; dll607
+  reads it in acts 6 and 7, dll611 clears it. 30055 is placed in act 7 alone of acts 1-8, beside WG's release (and in
+  act 9, which loads every act's). Cascade: Cape Claw's act 9 (0xEE), 0x367, 0x368. The ROM offers: CC's release, the
+  other act that reads 0x366, or GP's and NW's, ours, in acts 8 and 9, beside none of which 30055 stands.
+- **Entry 77** (Krazoa Shrines): Cape Claw's setuppoint e7b, (1389, 159, 16954), the one place act 9 adds. Cascade:
+  act 9's TriggerSetups set Cape Claw's act 1 (30dfb, 3001c) and TriggerPlane 30ec4 act 2, so the visit hands Cape
+  Claw back to its earlier acts. The ROM offers: the tablet room, Krazoa Palace or Drakor, none tied to act 9.
 - **Warlock Mountain's bits each visit** (Krazoa Shrines): act 5 sets 0x142, EC's release trigger (no ROM setter),
   act 7 sets 0x1D1, WG's. The ROM offers nothing else.
 - **"Already won"** (Krazoa Shrines): Golden Plains' as act 8 or later, Willow Grove's as act 7 or later.
@@ -247,7 +266,8 @@ ROM's way. "(?)" marks a reading not checked in full.
   placement, which shows a Transporter in the room, own entry 72, sending to 94. Cascade: Krazoa Palace's fire door
   opens on 0x52B, so the palace needs Krazoa Tablets. The ROM offers: Warlock Mountain's WM_WarpPoint 2ac6 sends to 72
   once 0x31E (CC's release) is set, so the ROM sends a player from Warlock Mountain to whatever 72 holds, now the
-  tablet room; Cape Claw's act 9 from 0x366 (above).
+  tablet room. Entry 77 (above) arrives in Cape Claw too, by its west entrance, so it doesn't stand in for the room's
+  Transporter, which the palace route goes on from.
 - **Krazoa Palace's shaft** (Krazoa Palace): a Transporter pair down the shaft from the high hall to the hub, entries
   45 and 46, both empty, with no ROM sender. The ROM offers: setuppoints 1 (4534, 960, 23412) and 7 (5731, 0, 23358).
 - **Krazoa Palace's wings** (Krazoa Palace): which wing is which element (fire north-west, earth south-east, water
@@ -258,7 +278,8 @@ ROM's way. "(?)" marks a reading not checked in full.
   evidence (?).
 - **The red Krazoa** (Krazoa Palace): walked up to within 100 once 0x6AA is set, sends the player to entry 44, empty,
   filled at BOSS Drakor's setuppoint. KP_RedKrazoa is dll214, a sequence's actor only, and KP_AnimKrazoa is unplaced.
-  The ROM offers: entry 77 (above); WM_BossDrakor and WMKrazoa actors hint at a Warlock Mountain scene (?).
+  The ROM offers: WM_BossDrakor and WMKrazoa actors hint at a Warlock Mountain scene (?); entry 77 is Cape
+  Claw's (above).
 - **The fourth SpellStone** (Kamerian Dragon): the dragon dies at 0 health and leaves a CRSpellstone (0x7A8, then 0x5F4
   once placed), and it and the Nurse stay gone. 0x7A8: no ROM setter; read by DFP SpellPlace 40323, seqpoint 4031e,
   target block 401bb and FXEmits. Cascade: 0x5F4 drives SwapStone Circle's meter blocks 32fcd and 32ff7, and
@@ -340,17 +361,18 @@ ROM's way. "(?)" marks a reading not checked in full.
 
 ## The warp entries the restorations take
 
-Every one was empty in ROM file 30 but 68.
+Every one was empty in ROM file 30 but 68, which holds where EC's pad stood in a map the world no longer places.
 
 - 32: Golden Plains' pad sends there, to Golden Plains' shrine (Krazoa Shrines).
 - 44: BOSS Drakor's setuppoint, from the red Krazoa (Krazoa Palace).
 - 45, 46: Krazoa Palace's shaft, the bottom pad and the west Transporter (Krazoa Palace).
-- 65, 67, 68, 70, 71: where the NW, WG, EC, GP and CC shrines send the player back (Krazoa Shrines). 68 overwrites
-  the ROM's place.
+- 65, 67, 68, 70, 71: where the NW, WG, EC, GP and CC shrines send the player back (Krazoa Shrines). 68 is the
+  ROM's EC pad's own entry, filled where that pad stands now (part 2).
 - 72: the tablet room's Transporter's own (Krazoa Tablets), which Warlock Mountain's WM_WarpPoint 2ac6 also sends to.
+- 77: Cape Claw's act 9 setuppoint, from Warlock Mountain's WM_WarpPoint 3008c after sequence 0x12 (Krazoa Shrines).
 - 84: back from the Kamerian Dragon's room to the arena; 89: into the room (Kamerian Dragon).
 - 93, 94: Krazoa Palace's west and east Transporters (Krazoa Tablets).
 
 The ROM's own entries the restorations use as they are: 90 and 91 (BOSS TRex in and out), 81 (the volcano), 73 (Moon
-Mountain Pass, the MM shrine's pad). Still empty: 1, 3, 4, 7-11, 13, 16-24, 27, 28, 33, 47, 62, 69, 74, 75, 77, 79
-and 83, 77 the one Warlock Mountain's WM_WarpPoint 3008c sends to.
+Mountain Pass, the MM shrine's pad). Still empty: 1, 3, 4, 7-11, 13, 16-24, 27, 28, 33, 47, 62, 69, 74, 75, 79
+and 83.

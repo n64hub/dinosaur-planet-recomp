@@ -38,3 +38,6 @@
   the top's east end.
 - CloudRunner's snow race: the bike rides back over the edge into the bay where the SnowClaw waits, so the race can
   be won. At the frame rate the recomp holds, that edge stopped it dead every time.
+- CloudRunner Fortress: a save made once the fortress's upper level is open no longer crashes as it loads.
+- Krazoa Shrines on Restored: once Willow Grove's spirit is released, Warlock Mountain plays its scene after the
+  shrines and sends Krystal on to Cape Claw, as the prototype built it and never set off.
