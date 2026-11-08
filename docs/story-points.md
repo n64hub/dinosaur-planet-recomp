@@ -274,9 +274,10 @@ group 0 holds the SwapStone and the vine doors, 1 the Queen Earthwalker, 5 the f
 the white mushrooms by the river and in the grove, so `--story swapstone-hollow --place ... --bits 452=450` has 1, 6,
 7 and 8 on, enough for the Queen, Tricky and the mushrooms. Groups 0 and 5 with those (`452=483`), or all of them at
 once (`452=65535`), load and play too, at warp 15 and beside the Magic Plant (`--place -7750,-716,-1207`). The object
-create, `func_800213EC`, passes what it made to `func_80021A84` with no test, so a create that fails for want of
-memory crashes there, under the MagicPlant (dll290) or SHBirchTree (dll520) that asked for it, as all of them on did
-with what the title holds still held (src/game/story.cpp lets go of it).
+create, `func_800213EC`, passes what it made to `func_80021A84` with no test, so a create that failed for want of
+memory crashed there, under the MagicPlant (dll290) or SHBirchTree (dll520) that asked for it, as all of them on did
+with what the title holds still held (src/game/story.cpp lets go of it). us.toml's hook on `func_80021A84` now returns
+for no object, and the create returns 0.
 
 A place in Cape Claw's walled part needs a bit too. A VisAnimator (354) hides the shapes of its groups in its block
 while its bit is clear, and TriggerPlanes toggle those bits as the player crosses them (action 0x12, with 0x8000 on
@@ -384,8 +385,9 @@ one asked for. In an `--input` script, standing at the object: A, C-right, A.
 Left to play: 29FA's rescue (no way up to its ledge found), the babies 29B3, map 30's and map 15's (from the master
 chest), Kyte landing at the gold perch (she stays by the sideload that loaded her, so 0x8D1, 0x4BE and 0x4C1 are read,
 not played), the way from the caves to the race and the race won. Read from the ROM, nothing sets 0x4B7, 0x4B8
-(CFGuardian's sequence at 0x1D5C), 0x49A or 0x4DC, and Krystal makes no hit of type 0xF, which the ProjectileSwitches by
-the main door take, but by the two ZBombs there.
+(CFGuardian's sequence at 0x1D5C) or 0x49A, and Krystal makes no hit of type 0xF, which the ProjectileSwitches by the
+main door take, but by the two ZBombs there. 0x4DC is TriggerPlane 31a68's, at (-9917, 1445, 18272), set on one
+crossing and cleared on the other, and CFLevelControl turns it into 0x4DD, whose sequence sets 0x4DE.
 
 ## Golden Plains and the Desert Force Point
 
@@ -724,9 +726,9 @@ game's own code warps to some of them (dll 408 to 26, SHswapstone to 86). Each e
 `--story new-game,<index>`, played 15 s with no story state and looked at. "Boots" is alive and drawn, with the player
 on a floor and no crash; it says nothing about what the level needs further in.
 
-- 0, 68: no map holds these places. A running game drops the player through nothing and restores them to the last
-  safe place, and a run started there has none: `--story new-game,0` crashes on a null pointer in dll210 at about 9 s,
-  and 68 the same. Not usable.
+- 0, 68: 0 lies in no map's cells, and 68 in the Swap Store's. A running game drops the player through nothing and
+  restores them to the last safe place, and a run started there has none: `--story new-game,0` crashes on a null
+  pointer in dll210 at about 9 s, and 68 the same. Not usable as the ROM has them.
 - 2, 26: NewIceMt1 (map 23), layer 2, the same room. Boots into the story scene a real New Game then `--warp 26`
   plays, in the snow, and dll 408 (IMIceMountain) warps to 26 itself. `--story new-game,26`, `--story new-game,2` and
   `--story new-game` then `--warp 26` each played 60 s alive. No named point starts here.
@@ -757,9 +759,5 @@ Cape Claw has no entry: `before-sand-worm` and `--place` go there.
 
 ## Choices
 
-Where the task list asks for more than the ROM gives, and the ROM has its own source for a bit, that source is used
-and nothing of ours stands beside it. A stand-in is ours only where the ROM gives nothing.
-
-- Tricky's flame (0x245): DarkIce Mines' SnowHorn teaches it once the SnowClaw guarding it is beaten (DarkIce Mines'
-  SnowHorn and Tricky's flame). The Queen in Walled City gives nothing, on Restored and Original alike, and
-  `before-walled-city` carries 0x172, 0x245 and 0x27 as DarkIce Mines leaves them.
+Where the ROM says nothing and a restoration had to choose, the choice is in docs/restored-content.md, with every other
+fix sorted by what shows it.
