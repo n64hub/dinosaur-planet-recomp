@@ -547,18 +547,27 @@ to 2 (`--story new-game,88 --bits 5dc=7`): DR_Creator (738) sends Skeetlas (615)
 Besides its groups, each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets,
 numbered by the u16 at +0x1F90 + 2 × map in dll29's data: 0x4FE the Volcano Force Point (4), 0x3EE Diamond Bay (35),
 0xE6 Walled City (13). A new game puts every map in act 1 (dll29 0x300-0x334), and the object loader
-(`func_8004B4A0`) skips a placement whose byte +3 has bit act - 1 set (byte +5 for acts 9 to 16), so a map holds
+(`func_8004B4A0`) skips a placement whose byte +3 has bit act - 1 set (byte +5's bit 16 - act for acts 9 to 16, and
+`tools/dino.py map <map> --act <act>` lists what loads), so a map holds
 other objects in each act. A level's control object sets its act, or a sequence does (dll3's event 0x1D, the act of
 the map the playing object is in), and ROM file 13 holds one such event, which sets act 3.
 
 `src/game/acts.cpp` moves two maps' acts with the story, at each map load (the header has the evidence), and
-`DINO_LOG_ACTS=1` prints each act it moves:
+`DINO_LOG_ACTS=1` prints each act it moves or leaves:
 
 - The Volcano Force Point: act 2 while Walled City's SpellStone is carried (0x83B), 3 once it is placed (0x878). Its
   second SpellPlace, the podium that takes the stone for the second path, the door switch and the round door load
   in act 2 only, and VFP_LevelControl (619) set the map to act 1 in its constructor, whatever the story, so nothing
   of act 2 or 3 ever played. Its act 3 sets 0x63C, which moves Diamond Bay on to act 3 (DBlevelControl, 663: 1 and
   one each for 0x4E9, 0x63C and 0x63D).
+- The Volcano Force Point's act 11 is the Queen Earthwalker's: she sets it before each warp to entry 81 (0x486, then
+  0x487), and only it loads the two SHseqobjects that play her cutscenes (30afa, done bit 0x484; 30afc, 0x485) and a
+  WarpPoint, without the level's podium, SpellPlaces and puzzles. It is left while a visit is to play, and once both
+  have played the map's next load moves it on, as VFP_LevelControl would, which neither visit loads. Played from
+  `--story swapstone-hollow --bits b0=4,c2=5,452=450` (the Queen beside warp 15, chased with A pressed): both
+  cutscenes on Original and Restored (0x484 at 44.5 s, 0x485 at 65.9 s, then step 7), and on Restored warp 81 after
+  them with the first SpellStone (0x123) loaded act 1, whose podium beside the entry took the stone (0x514 at 5.5 s,
+  from `--story swapstone-hollow,81 --bits 4fe=11,484,485,486,487,b0=7,123`). On Original that warp finds act 11.
 - Walled City: act 2 once Moon Mountain Pass's spirit is released (0x317), when the task list sends Sabre back for
   the Sun and Moon Stones. The stones beside the boss door, the sockets on the TRex statues that take them, and
   WCLevelControl's (779) bits that open the Sun and Moon temples are act 2's only; the RedEye teeth are act 1's.

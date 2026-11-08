@@ -953,10 +953,9 @@ def map_header(game, m):
 
 
 def placement_acts(r):
-    """The acts a placement loads in: func_8004B4A0 skips it in act n while bit n - 1 of +3 (acts 1-8) or of +5
-    (acts 9-16) is set."""
-    mask = r[3] | r[5] << 8
-    return [n for n in range(1, 17) if not mask >> (n - 1) & 1]
+    """The acts a placement loads in: func_8004B4A0 skips it in act n while bit n - 1 of +3 is set (acts 1-8), or bit
+    16 - n of +5 (acts 9-16: 8004B510-8004B524, the shift 16 - act)."""
+    return [n for n in range(1, 17) if not (r[3] >> (n - 1) if n < 9 else r[5] >> (16 - n)) & 1]
 
 
 def fmt_acts(acts):

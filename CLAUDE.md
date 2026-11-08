@@ -167,7 +167,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
   `src/game/krazoa.cpp` places and any of them freed while its map is loaded, each spirit it gives and has taken
   back and each event of Golden Plains' shrine,
-  `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves,
+  `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves or leaves,
   `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
   `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on,
   `DINO_LOG_WALLED_CITY=1` each object `src/game/walled_city.cpp` places and each step of the chase, the gate and the
