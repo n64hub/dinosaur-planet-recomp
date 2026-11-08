@@ -484,13 +484,25 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
 }
 
 // --input's sync near lines (src/main/main.cpp): whether a drawn object of that id (as story_steer chases) stands
-// within reach of (x, z) on the ground. Object id 0 is the player's (what a WCFloorTile, dll791, takes as standing on
-// it), drawn or not.
-bool dino::story_object_near(uint8_t* rdram, int oid, float x, float z, float reach) {
+// within reach of (x, z) on the ground. 0 is the player, whichever character plays (Sabre's object id is 0, Krystal's
+// is not), drawn or not.
+bool dino::story_object_near(uint8_t* rdram, recomp_context* ctx, int oid, float x, float z, float reach) {
+    if (oid == 0) {
+        call(rdram, ctx, player_object);
+        gpr player = (gpr)(int32_t)ctx->r2;
+        if (player == 0) {
+            return false;
+        }
+        uint32_t wx = MEM_W(0x18, player), wz = MEM_W(0x20, player);
+        float px, pz;
+        memcpy(&px, &wx, 4);
+        memcpy(&pz, &wz, 4);
+        return (px - x) * (px - x) + (pz - z) * (pz - z) <= reach * reach;
+    }
     gpr all = (gpr)MEM_W(0, (gpr)objects);
     for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
         gpr object = MEM_W(i * 4, all);
-        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || (oid != 0 && MEM_BU(0x36, object) == 0)) {
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
             continue;
         }
         uint32_t wx = MEM_W(0x18, object), wz = MEM_W(0x20, object);

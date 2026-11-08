@@ -693,7 +693,7 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     for (int i = 1; i < input_parts; i++) {
         const InputPart& part = input_part[i];
         if (input_part_waits(i) &&
-            (part.kind == SyncKind::Near ? dino::story_object_near(rdram, part.bit, part.x, part.z, part.reach) :
+            (part.kind == SyncKind::Near ? dino::story_object_near(rdram, ctx, part.bit, part.x, part.z, part.reach) :
              part.kind == SyncKind::Act ? dino::story_object_act(rdram, part.bit, part.act) :
              part.kind == SyncKind::State && dino::story_object_state(rdram, part.bit, part.x, part.z, part.reach,
                  part.offset, part.mask, part.value))) {
