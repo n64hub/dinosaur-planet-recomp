@@ -948,12 +948,23 @@ func = "dll210_18EAC"
 before_vram = 0x90101024
 text = '{ void dino_ice_spell_aim(uint8_t*, recomp_context*); dino_ice_spell_aim(rdram, ctx); }'
 
-# The Skeetla arena's DR_EarthWarrior, fed as the item nothing on Dragon Rock gives would feed him
-# (src/game/dragon_rock.cpp): dll713's update.
+# The Skeetla arena's DR_EarthWarrior fed the blue mushrooms by the arena (src/game/dragon_rock.cpp): Krystal's item
+# table, where dll1 reads it for C-right (dll1_3718, whether the menu opens, and dll1_325C, its list), and dll713's
+# update as it makes him untargetable while the fight is on.
+[[patches.hook]]
+func = "dll1_3718"
+before_vram = 0x90003798
+text = '{ void dino_item_table(uint8_t*, recomp_context*); dino_item_table(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll1_325C"
+before_vram = 0x900032DC
+text = '{ void dino_item_table(uint8_t*, recomp_context*); dino_item_table(rdram, ctx); }'
+
 [[patches.hook]]
 func = "dll713_0408"
-before_vram = 0x902978FC
-text = '{ void dino_earth_warrior(uint8_t*, recomp_context*); dino_earth_warrior(rdram, ctx); }'
+before_vram = 0x90297A34
+text = '{ void dino_earth_warrior_target(uint8_t*, recomp_context*); dino_earth_warrior_target(rdram, ctx); }'
 
 # The Desert Force Point (src/game/force_point.cpp): GP_LevelControl's BIT_SET(0x5F3, 1) (dll547 0xC8), and DFPLift1's
 # two reads of how far it travels (dll641 0x444, 0x528).

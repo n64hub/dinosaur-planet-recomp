@@ -180,10 +180,16 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   than 21 Skeetlas are about, and faster with each control out; the bites start about 35 s after it loads. The door's
   two DR_Creators (kind 1, group 3, on from TriggerPlane 0x33E61 at 577, -6121 to the door) send Skeetlas at the
   player, which follow her in and knock her about. Each ice blast that hits a Skeetla kills it, and the fight is won
-  only once none is left, the door's too. Item 0xC1 given him adds 12 (0x0974), as his export 20 does, but nothing
-  on Dragon Rock gives it and nothing calls the export, so the fight has about 45 s of bites, which in a run from the
-  top run out before the third control. With Kamerian Dragon on Restored he is fed 12 once his health is down to -10,
-  once in a fight and once more for each control put out, so a player who stops putting them out still loses him.
+  only once none is left, the door's too. Item 0xC1 used on him adds 12 (0x0974), as his export 20 does, which
+  SHbluemushroom (dll502 0x0698) calls as he walks onto one, and the bottom places four blue mushrooms (dll502, model
+  0) by the arena's east side, at about 2260, -6200. Each is picked up with A once it can be picked out: one at rest
+  (state 0) has +0xAF bit 3 set, and only its state 9, now and then, clears it. Each raises 0xC1, and the first plays
+  text sequence 0x169 (0x911). But only Sabre's item menu (dll1's table at +0x2E4) lists 0xC1, not Krystal's
+  (+0x128); the Warrior's update sets his own +0xAF bit 3 while the fight is on (0x0540), so he can't be picked out,
+  and he walks onto none until he is freed (0x655). So the fight has about 45 s of bites, which in a run from the
+  top run out before the third control. With Kamerian Dragon on Restored Krystal's menu lists 0xC1, and he can be
+  picked out while she carries one: by him C-right, then A, gives it, 12 health and about 4 s of eating, in which
+  he can't be picked out again. From then on he is bitten about every 2 s, so each one buys about 24 s.
   The controls nearest him go last: 0x5DA, then 0x5D8, then 0x5D9, then the blast on the Skeetlas left. The
   Warrior is freed by 0x5FD (DR_NiceSharpy, 739, given item 0x380 or 0x381, which item not known yet: sequence 2 sets
   0x5FE, which frees the DR_Shackles, 0x654, sequence 0xC and 0x655). The TriggerPlane 0x33F78 in the middle of the

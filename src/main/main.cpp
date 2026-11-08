@@ -367,9 +367,9 @@ static std::string game_thread_name(const OSThread* t) {
 // animation does). Between lines "choose", "or" and "end" are ways, each starting with a sync line: the way whose
 // first sync comes first plays, the others never start, and what follows "end" goes on from that way's last part (an
 // enemy that comes either way round). A choose holds no other. In place of x y,
-// "to <x> <z>" walks the player toward that place and "chase <object id hex> [reach]" toward the nearest object of that
-// id (or with a number after the reach, toward that hit sphere of it: a boss hurt only in its head), each until
-// within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
+// "to <x> <z> [reach]" walks the player toward that place and "chase <object id hex> [reach]" toward the nearest
+// object of that id (or with a number after the reach, toward that hit sphere of it: a boss hurt only in its head),
+// each until within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
 // "ride to <x> <z> [reach]" and "ride <object id hex> [reach]" do the same for a player on a vehicle that turns by
 // stick x and goes by stick y (story_steer's ride), until within reach (0, never, by default).
@@ -495,10 +495,12 @@ static void load_input_script(const char* path) {
             afters = 1;
             input_parts++;
         }
-        else if (line[0] != '#' && sscanf(line, "%lf %x to %f %f", &in.at, &in.buttons, &in.to_x, &in.to_z) == 4) {
+        else if (line[0] != '#' && sscanf(line, "%lf %x to %f %f %f", &in.at, &in.buttons, &in.to_x, &in.to_z, &in.reach) >= 4) {
             in.steer = true;
             in.oid = -1;
-            in.reach = 20.0f;
+            if (sscanf(line, "%*f %*x to %*f %*f %f", &in.reach) != 1 || in.reach <= 0.0f) {
+                in.reach = 20.0f;
+            }
             in.part = input_parts - 1;
             input_script.push_back(in);
         }
