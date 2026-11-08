@@ -28,6 +28,8 @@
 extern "C" uint32_t dino_rom_word(uint32_t offset);
 extern "C" double dino_script_seconds();
 extern "C" void dino_input_bit_set(int bit, int value);
+extern "C" void dino_krazoa_warp_entry(uint8_t* rdram, recomp_context* ctx);
+extern "C" void dino_dragon_rock_warp_entry(uint8_t* rdram, recomp_context* ctx);
 
 namespace {
     constexpr int32_t dll29_handle = 0x8008C9F4; // the pointer the game keeps to its loaded dll29
@@ -201,12 +203,26 @@ namespace {
         call(rdram, ctx, word(rdram, table + 4 + 4 * export_index));
     }
 
-    Place warp_entry(int index) {
-        uint32_t entry = warp_table_rom + 16 * index;
-        uint32_t words[3] = { dino_rom_word(entry), dino_rom_word(entry + 4), dino_rom_word(entry + 8) };
+    // An entry as WARP_ENTRY (func_8004D1D4) has it: ROM file 30's 16 bytes in a buffer under the stack, given to the
+    // hooks us.toml runs once the game has read one (the buffer at 0x1C(sp), the index at 0x20(sp)), so an entry a
+    // setting fills starts at its filled place, as a warp there does, and not at the ROM's.
+    Place warp_entry(uint8_t* rdram, recomp_context* ctx, int index) {
+        gpr sp = ctx->r29;
+        ctx->r29 -= 0x40;
+        gpr entry = ctx->r29 + 0x28;
+        for (int i = 0; i < 4; i++) {
+            MEM_W(4 * i, entry) = (int32_t)dino_rom_word(warp_table_rom + 16 * index + 4 * i);
+        }
+        MEM_W(0x1C, ctx->r29) = (int32_t)entry;
+        MEM_W(0x20, ctx->r29) = index;
+        dino_krazoa_warp_entry(rdram, ctx);
+        dino_dragon_rock_warp_entry(rdram, ctx);
         Place place;
-        memcpy(&place, words, sizeof(words));
-        place.layer = (int32_t)dino_rom_word(entry + 12);
+        memcpy(&place.x, &MEM_W(0x0, entry), 4);
+        memcpy(&place.y, &MEM_W(0x4, entry), 4);
+        memcpy(&place.z, &MEM_W(0x8, entry), 4);
+        place.layer = MEM_W(0xC, entry);
+        ctx->r29 = sp;
         return place;
     }
 
@@ -363,7 +379,7 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
         store_place(rdram, ctx, given_place);
     }
     else if (chosen_warp != no_place) {
-        store_place(rdram, ctx, chosen_warp >= 0 ? warp_entry(chosen_warp) : point.place);
+        store_place(rdram, ctx, chosen_warp >= 0 ? warp_entry(rdram, ctx, chosen_warp) : point.place);
     }
     ctx->r4 = 1;
     call(rdram, ctx, play_flag_2000);
