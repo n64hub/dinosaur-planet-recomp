@@ -332,14 +332,15 @@ ROM's way. "(?)" marks a reading not checked in full.
   casts the projectile.
 - **The arena's magic** (Kamerian Dragon): filled while the fight is on once it is below a fifth, as the dragon's fight
   fills it. The ROM offers: nothing; the two Crates by the arena (40c16, 40c17) hold meat, for the Warrior (part 2).
-- **The Earth Warrior's food** (Kamerian Dragon): the four blue mushrooms by the arena (map 52, uids 348d8 to 348db, at
-  about (2260, -1740, -6200)) are picked up and given him from the item menu as the ROM has it, with two blocks out
-  of the way: Krystal's menu (dll1's table at +0x128, read by dll1_3718 and dll1_325C) gets the 0xC1 entry of Sabre's
-  (+0x2E4), the only one that lists it, and his update's untargetable bit (+0xAF bit 3, set at 0x0540 while the fight
-  is on) stays clear while she carries one. 0xC1: SHbluemushroom (dll502) raises it, DR_EarthWarrior (dll713) reads
-  and lowers it, Tricky (dll211) lowers it. Cascade: none (the Warrior's health, which the arena's win needs him
-  alive for). The ROM offers: his export 20 adds 12 as he walks onto a mushroom (dll502 0x0698), but he walks only
-  once freed (0x655), and freed he is still bitten.
+- **The Earth Warrior's food** (Kamerian Dragon): Dragon Rock's blue mushrooms, four by the arena (map 52, uids 348d8
+  to 348db, at about (2260, -1740, -6200)) and seven on the top (map 2, 34885 to 34887 and 40091 to 40094), are picked
+  up and given him from the item menu as the ROM has it, with two blocks out of the way: Krystal's menu (dll1's table
+  at +0x128, read by dll1_3718 and dll1_325C) gets the 0xC1 entry of Sabre's (+0x2E4), the only one that lists it, and
+  his update's untargetable bit (+0xAF bit 3, set at 0x0540 while the fight is on) stays clear while she carries one.
+  0xC1: SHbluemushroom (dll502) raises it, DR_EarthWarrior (dll713) reads and lowers it, Tricky (dll211) lowers it.
+  Cascade: none (the Warrior's health, which the arena's win needs above -20 and his freeing after it above 0, 0x654).
+  The ROM offers: his export 20 adds 12 as he walks onto a mushroom (dll502 0x0698), but he walks only once freed
+  (0x655), and freed he is still bitten.
 - **The ending** (Ending): back to the title by dll67's way after 15 quiet updates, the save as it was. The ROM offers:
   the TRex's defeat loads the front end the same way (dll702); no credits or text.
 - **The force point's second lift** (Desert Force Point): a second DFPLift1 under the stub at (-275, 9280), its top at

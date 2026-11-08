@@ -84,7 +84,7 @@ Fixed:
 - Dragon Rock's Skeetla arena (Kamerian Dragon on Restored): it couldn't be won. The ice spell on the top's west, the
   only spell that puts out the arena's three lava controls, couldn't be picked up or cast, and putting the three out
   takes about three times the magic Krystal holds, with none to be had on Dragon Rock. And the Earth Warrior the
-  Skeetlas eat lived through less of the fight than it takes, and the blue mushrooms by the arena that feed him
+  Skeetlas eat lived through less of the fight than it takes, and the blue mushrooms on Dragon Rock that feed him
   couldn't be given him: Krystal's items don't list them, and he can't be picked out while the fight is on. The ice
   spell is now picked up and cast from the spell scroll as the projectile is, and while the fight is on the arena
   fills Krystal's magic, as the dragon's fight below fills it, and she gives the warrior the mushrooms from her items.
@@ -183,9 +183,8 @@ Each option a modern port adds has a value that plays as the console does. The d
   tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
   tablet is nowhere, and the puzzle's end leads nowhere.
 - **Kamerian Dragon** (General): Restored lets Krystal pick up and cast the ice spell on Dragon Rock's top, fills her
-  magic while the fight in the Skeetla arena at its bottom is on, lets her give the Earth Warrior there the blue
-  mushrooms by the arena from her items, has the arena,
-  once won, lead into the Kamerian Dragon's room, and the dragon die once its health runs out and leave the fourth
+  magic while the fight in the Skeetla arena at its bottom is on, lets her give the Earth Warrior there Dragon Rock's
+  blue mushrooms from her items, has the arena, once won, lead into the Kamerian Dragon's room, and the dragon die once its health runs out and leave the fourth
   SpellStone for the Desert Force Point, which leads back out. Original is the prototype as it was left: the ice
   spell can't be taken or cast, the arena can't be won, nothing leads to the room, the fight never ends, and the
   fourth SpellStone is nowhere.

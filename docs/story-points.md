@@ -184,16 +184,24 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   two DR_Creators (kind 1, group 3, on from TriggerPlane 0x33E61 at 577, -6121 to the door) send Skeetlas at the
   player, which follow her in and knock her about. Each ice blast that hits a Skeetla kills it, and the fight is won
   only once none is left, the door's too. Item 0xC1 used on him adds 12 (0x0974), as his export 20 does, which
-  SHbluemushroom (dll502 0x0698) calls as he walks onto one, and the bottom places four blue mushrooms (dll502, model
-  0) by the arena's east side, at about 2260, -6200. Each is picked up with A once it can be picked out: one at rest
-  (state 0) has +0xAF bit 3 set, and only its state 9, now and then, clears it. Each raises 0xC1, and the first plays
-  text sequence 0x169 (0x911). But only Sabre's item menu (dll1's table at +0x2E4) lists 0xC1, not Krystal's
-  (+0x128); the Warrior's update sets his own +0xAF bit 3 while the fight is on (0x0540), so he can't be picked out,
-  and he walks onto none until he is freed (0x655). So the fight has about 45 s of bites, which in a run from the
-  top run out before the third control. With Kamerian Dragon on Restored Krystal's menu lists 0xC1, and he can be
-  picked out while she carries one: by him C-right, then A, gives it, 12 health and about 4 s of eating, in which
-  he can't be picked out again. From then on he is bitten about every 2 s, so each one buys about 24 s.
-  The controls nearest him go last: 0x5DA, then 0x5D8, then 0x5D9, then the blast on the Skeetlas left.
+  SHbluemushroom (dll502 0x0698) calls as he walks onto one. Dragon Rock places eleven blue mushrooms (dll502, model 0):
+  four by the arena's east side, at about 2260, -6200, and on the top three south of the start (34885 to 34887, about
+  -3480, -5350) and four by its east end (40091 to 40094, about -390, -6850). One of each of the top's groups (34887, 40093)
+  runs from the player once she is within its setup's +0x19 (49 and 80) and the others stand still. Each is picked up
+  with A once it can be picked out: one at rest (state 0) has +0xAF bit 3 set, and only its state 9, now and then,
+  clears it, so A pressed each second beside one takes it within about 6 s; A pressed on the move, with none in reach,
+  has her creep (her act 55) after the one in view, slower than it runs. Each raises 0xC1, and the first plays text
+  sequence 0x169 (0x911). But only Sabre's item menu (dll1's table at +0x2E4) lists 0xC1, not Krystal's (+0x128); the
+  Warrior's update sets his own +0xAF bit 3 while the fight is on (0x0540), so he can't be picked out, and he walks
+  onto none until he is freed (0x655). So the fight has about 45 s of bites, which in a run from the top run out
+  before the third control. With Kamerian Dragon on Restored Krystal's menu lists 0xC1 first, and he can be picked out
+  while she carries one: C-right, then A, from where A uses him (his focus point, about 1580, -6104, south of him)
+  gives it, 12 health and about 4 s of eating, in which he can't be picked out again. From 30 units further south a
+  Skeetla nearer her is picked out in his place, and in a full arena ten tries running failed there; on the focus
+  point each give landed within five. The C-right menu keeps its place between opens and C-right pressed while it is
+  open rolls it on, so with her food bag (0x164) in it a try that leaves it open rolls the next one onto the bag: B
+  twice before each shuts it. From then on he is bitten about every 2 s, so each one buys about 24 s. The controls
+  nearest him go last: 0x5DA, then 0x5D8, then 0x5D9, then the blast on the Skeetlas left.
 - The Warrior is freed by 0x5FD, which DR_NiceSharpy (739, uid 0x33EB2, on the gallery above the arena's east end at
   2413, -6793) sets when it is given item 0x380 or 0x381 (its 0x07B4 reads dll210's export 74, and calls export
   75 with 1). 0x380 is meat: the two Crates beside it (0x40C16 and 0x40C17, about 2059 to 2479, -6800), broken with

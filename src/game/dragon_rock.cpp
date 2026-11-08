@@ -384,7 +384,7 @@ static void fill_magic(uint8_t* rdram, recomp_context* ctx, gpr player) {
 // - Krystal's item menu doesn't list 0xC1. dll1's C-right lists the items of one of two tables, Krystal's (object
 //   0x1F) or Sabre's (0x5C4-0x624), and 0xC1 is in Sabre's only (Tricky eats them, dll211), so the mushrooms she picks
 //   up can't be chosen. Her table is given, where dll1 reads it (dll1_3718, whether the menu opens, and dll1_325C, its
-//   list), as a copy with Sabre's 0xC1 entry after her own.
+//   list), as a copy with Sabre's 0xC1 entry before her own, so the menu opens on it rather than on her bags.
 // - He can't be targeted while it is on: until it is won (0x628), his update sets +0xAF bit 3 each frame (0x0530),
 //   which keeps the targeting from placing his focus point (func_80036438) and so from marking him used (dll2 0xE58).
 //   While the player holds a mushroom it is left clear.
@@ -451,9 +451,9 @@ extern "C" void dino_item_table(uint8_t* rdram, recomp_context* ctx) {
     }
     for (int w = 0; w < item_entry / 4; w++) {
         for (int i = 0; i < count; i++) {
-            MEM_W(i * item_entry + w * 4, copy) = MEM_W(i * item_entry + w * 4, table);
+            MEM_W((i + 1) * item_entry + w * 4, copy) = MEM_W(i * item_entry + w * 4, table);
         }
-        MEM_W(count * item_entry + w * 4, copy) = MEM_W(mushroom * item_entry + w * 4, next);
+        MEM_W(w * 4, copy) = MEM_W(mushroom * item_entry + w * 4, next);
         MEM_W((count + 1) * item_entry + w * 4, copy) = MEM_W(count * item_entry + w * 4, table);
     }
     ctx->r4 = copy;
