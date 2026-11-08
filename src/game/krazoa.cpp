@@ -399,9 +399,11 @@ namespace {
         { 11, 0x15D, 0x2AB7, 0x3, 1, 0xDF & ~0x80, false }, // CC's column, @1358: also act 8
         { 11, 0x15D, 0x002C, 0x5, 1, 0xE4 & ~0x80, false }, // WG's column, @1AB0: also act 9
         // The fallen column (WMfallencol, @1A44) lies across the way north from the pad in acts 5-13, and nothing
-        // moves it (dll331 only turns it), so in act 5 it shuts off all EC's course: the lasers, checkpoint 57, the
-        // guards and seqpoints 296b, 2973 and 297b to the release, 2983. It is left out of act 5 only.
-        { 11, 0x2BB, 0x0011, 0x3, 1, 0x0F | 0x10, false },
+        // moves it (dll331 only turns it). In act 5 it shuts off all EC's course (the lasers, checkpoint 57, the
+        // guards, seqpoints 296b, 2973 and 297b, the release 2983), and in acts 7 and 9 WG's column (@1AB0), which
+        // stands where 2973 does. It is left out of acts 5, 7 and 9: act 6's and 8's way, CC's column, is west of it.
+        { 11, 0x2BB, 0x0011, 0x3, 1, 0x0F | 0x10 | 0x40, false },
+        { 11, 0x2BB, 0x0011, 0x5, 1, 0x04 | 0x80, false },
     };
 
     // An object placed by this file while its map is loaded: the map frees it when it unloads (+0xAC, func_8004A800).
