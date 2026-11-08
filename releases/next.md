@@ -38,3 +38,9 @@
   the top's east end.
 - CloudRunner's snow race: the bike rides back over the edge into the bay where the SnowClaw waits, so the race can
   be won. At the frame rate the recomp holds, that edge stopped it dead every time.
+- Third SpellStone on Restored: talking to the Pointback mother in Diamond Bay raises her flame switch, so Tricky's
+  flame lights it and the bridge to her second egg rises; three rocks in Moon Mountain Pass's vents move the meteor;
+  the moon symbol in Walled City's moon temple takes the moonlight from the lift's top; and EC's Transporter stands
+  once both stones are in the TRex statues' sockets. In the prototype none of them could be reached.
+- Diamond Bay's light beams to the Pointback's egg no longer drop Sabre between them, and Walled City's temples'
+  bridges of light hold the player.

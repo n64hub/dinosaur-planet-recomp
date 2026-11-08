@@ -14,7 +14,7 @@
 // it is carried) sits on a rock over the river, reached by the bridge DBbridgeanim (dll678, 415CA) raises on 0x3D9:
 // each light beam (DBlgtbeam, dll677, 415C8, 415C9, 415CD, 415CE) sets 0x82B to its number as Sabre stands on it, which
 // shows the next for 350 ticks, and Sabre leaps from one to the next by himself at a walk (a run goes over the edge).
-// Three things stop it on Original:
+// Three things stop it (the first two on Original only):
 //
 // - DB_FlameSwitch (dll689, 41818, group 8) sets 0x3D9 when Tricky's flame (a hit of type 0x1A) lights it (0x1C8-0x1E0),
 //   but it stands 250 units (+0x1C) below where it works, and disabled, until 0x83E is set (0x8C-0x104, read once at
@@ -27,7 +27,7 @@
 //   z by the sine, with no absolute value, against 22.5: for a beam whose cosine or sine is negative, one of the two
 //   always passes, so beams 2 and 3 (yaw 0x7100) take Sabre anywhere within about 60 on z and 15 on y as on them.
 //   A leap from beam 3 to 4 falls through that and sets 0x82B to 2, which steps the bridge back and takes beam 4 from
-//   under him. On Restored both are taken without their sign.
+//   under him. A plain bug, so always: both are taken without their sign.
 
 #include <cmath>
 #include <cstdint>
@@ -124,10 +124,8 @@ extern "C" void dino_diamond_bay_flame_switch_hit(uint8_t* rdram, recomp_context
     }
 }
 
-// us.toml's hooks at DBlgtbeam's two multiplies (dll677_1164 0x1EC and 0x27C), the cosine or sine of its yaw in $f0. On
-// Restored it is taken without its sign, so the test is a box round the beam.
+// us.toml's hooks at DBlgtbeam's two multiplies (dll677_1164 0x1EC and 0x27C), the cosine or sine of its yaw in $f0,
+// taken without its sign, so the test is a box round the beam.
 extern "C" void dino_diamond_bay_beam_reach(uint8_t* rdram, recomp_context* ctx) {
-    if (dino::third_stone_restored()) {
-        ctx->f0.fl = std::fabs(ctx->f0.fl);
-    }
+    ctx->f0.fl = std::fabs(ctx->f0.fl);
 }

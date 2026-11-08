@@ -20,9 +20,9 @@
 // the floor test (func_80053750 0x8005390C) collides with the model its definition names for that, slot 2 (0x3CB, flat
 // at its height, 102 wide and 383 long). But its export 5 (dll790_04B8) returns 0x400 with the setup's model index
 // (+0x19) at bit 11, which has func_80021450 (0x800216E4-0x8002174C) load that model alone, the one it draws: slot 2
-// stays empty, the floor test passes it over, and the player falls through into the pit. On Restored the export
-// returns 0, as the moon lift's (dll786) does, so that all three of its models load; the bridge's init still draws the
-// one its setup names (obj+0xAD).
+// stays empty, the floor test passes it over, and the player falls through into the pit. A plain bug, so always: the
+// export returns 0, as the moon lift's (dll786) does, so that all three of its models load; the bridge's init still
+// draws the one its setup names (obj+0xAD).
 
 #include <cstdint>
 
@@ -43,7 +43,5 @@ extern "C" void dino_temples_symbol_reach(uint8_t* rdram, recomp_context* ctx) {
 
 // us.toml's hook at the end of WCTempleBridge's export 5 (dll790_04B8 0x4E4), the models to load in $v0.
 extern "C" void dino_temples_bridge_models(uint8_t* rdram, recomp_context* ctx) {
-    if (dino::third_stone_restored()) {
-        ctx->r2 = 0;
-    }
+    ctx->r2 = 0;
 }

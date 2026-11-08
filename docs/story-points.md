@@ -594,10 +594,39 @@ inventory with it selected, and A uses it on what is in reach (`--input` lines `
   Diamond Bay goes to act 3. That was three runs of four (4.2 s, on Third
   SpellStone's Restored): in the other, nothing was set in 48 s, and why is not known.
 
-Not played from here: the second egg given to the Pointback's mother (talking to her plays her act-2 sequence, and
-a script's inventory stays on the SpellStone, above the egg), the log of task 84 (no ThornTail sells one, as for
-the first), the meteor of task 94 (MMP_moonrock, 445, three of them into MMP_gyservent's vents, 446, which sets
-0x89B at three), the night the Moon Stone shows in, and the statues' sockets taking the stones.
+Played from here on the desktop build, each from the one before it but where a `--place` or `--bits` start is named:
+
+- The second egg (Diamond Bay, act 2): Sabre at the mother's head, the far side from the way in, talks to her (A),
+  which plays her sequence 3 and sets 0x3FF; DB_FlameSwitch rises with it, Tricky's flame from beside it lights it
+  (0x3D9), the bridge rises, the light beams carry Sabre to the egg (0x86D as A takes it), and the egg used on her
+  from the items menu sets 0x39E (`src/game/diamond_bay.cpp` has the steps and what stopped each).
+- The meteor (task 94): the three MMP_moonrock carried into vents 3, 4 and 6 count 0x88C to 3 and set 0x89B, and
+  with 0x803 the meteor's sequence plays (0x804).
+- The night: the sun temple's inner rooms played through (0x2B0, 0x2F8, 0x2D1, 0x2D4) give the Sun Stone (0x201).
+  In the moon temple at 22:00, with what its push blocks and symbol set already set (`--bits 813,25d,829,244`), the
+  Moon Stone shows and is taken (0x264). Each temple's bridge of light holds Sabre (`src/game/temples.cpp`).
+- The sockets: from the chamber under the statues (`--place -8000,-1080,-7400`), the Sun Stone used on the sun
+  statue's socket (-7908,-1102,-7220) sets 0x202 and the Moon Stone on the moon's (-8091,-1102,-7219, by way of
+  -7990,-7380 and -8088,-7285) 0x243. The sockets take an item from 48 units. The chamber's bats take the target
+  from a socket, so a script uses the stone again until the bit is set. With both, EC's Transporter stands at
+  (-7939,-1123,-7441); its tutorial hint (0x912) holds the player still the first time, and A on it about 20 s after
+  the stones sends Sabre to the EC shrine (map 33, entry 40).
+- The test of skill: TriggerPlane a2b in the shrine's corridor sets 0x592, the ECSH_Creators' enemies come, and
+  beating them sets 0x593 to 0x595; with 0x595, crossing z -14008 sets 0x596 and the door opens. On the ring,
+  ECSH_Shrine (dll469, 1619 at 14077,44,-14551) plays three rounds (its +0x1B 3, 4 and 5) of six cups (ECSH_Cup,
+  dll470): each round draws a cup (+0x1A), shuffles (+0x17 phases 6, 8, 2, 1, 0, 4) and waits about 16 s in phase 5
+  for the player to stand within 30 of a cup, whose index is its +0x23. A player who stands among the cups as they
+  shuffle stops them for good, so a script stands in the middle until phase 5 and then walks to the cup
+  (`--input`'s `chase 1BF 10 match 23 1B9 1A`). The third right pick sets 0x128, the win gives the spirit (mask 8)
+  and 0xFD, and Sabre is back on Warlock Mountain's pad, where its act 5 sets 0x142 (`src/game/krazoa.cpp`).
+
+Not played from here: the moon temple's push blocks by night (0x811 to 4, then 0x813, the door, 0x25D) and its moon
+symbol in the first person view (C-up, 21:23 to 22:38, 0x829); the moonseed planted (Krystal at the receptacle 41a5c has
+it as the camera's target, +0x110, within its reach, but the item menu her C-right opens holds the spell book, the
+forcefield, the flame and Kyte, and no moonseed, though 0x86A is 4), and so the seed grown at night; the walk from
+Warlock Mountain's pad to EC's release (WL_seqpoint 2983 at 13929,-117,1106, mode 2 on 0x142): the pad's walkway east
+along z 2960, past the crates and two GuardClaws to (13700,3320), meets a fallen column (WMfallencol, 13743,-292,3090)
+across the way north, with WL_LaserBeam's beams beyond it; and task 84's log (no ThornTail sells one, as for the first).
 
 ## The shrines
 

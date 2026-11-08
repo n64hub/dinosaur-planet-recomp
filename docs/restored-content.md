@@ -79,6 +79,12 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   fastest that lets the bike over. The race itself sets everything it needs (0x49A comes about 12 s after 0x2E8 with
   no code call, and seqobject 30cca's sequence 0x18 then sets 0x49F), and is reached by the pool on 0x4BE, so it
   needs 0x8D1 and 0x300.
+- Diamond Bay: DBlgtbeam's test of Sabre on a beam (dll677_1164) took the cosine and sine of its yaw with their sign,
+  so beams 2 and 3 took him from about 60 off and a leap from 3 to 4 stepped the bridge back from under him; both are
+  taken without their sign (us.toml, `src/game/diamond_bay.cpp`; PR 49).
+- Walled City: the temples' bridges of light (WCTempleBridge, dll790) loaded only the model they draw, so the floor
+  test found no floor in the slot it reads and the player fell through; their export 5 returns 0, as the moon lift's
+  does, and all three models load (us.toml, `src/game/temples.cpp`; PR 49).
 
 ### Tricky's Run
 
@@ -184,7 +190,8 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Third SpellStone
 
-`src/game/acts.cpp`, `src/game/moonseeds.cpp`; PR 25.
+`src/game/acts.cpp`, `src/game/moonseeds.cpp`; PR 25. `src/game/diamond_bay.cpp`, `src/game/temples.cpp`,
+`src/game/krazoa.cpp`; PR 49.
 
 - The Volcano Force Point's act 2 holds a second SpellPlace that takes Walled City's stone (carried 0x83B, placed
   0x878), its podium, door switch and round door, and VFP_LevelControl set act 1 in its constructor whatever the
@@ -193,6 +200,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 - Walled City's act 2 holds the Sun and Moon Stones, the statues' sockets and the temples' bits; no code in the ROM
   sets Walled City's act. When it moves is a choice (part 3).
 - The moonseeds (0x86A) are counted down by each MMP_mseedrecept and raised by nothing. Where they come from is a
+  choice (part 3).
+- DB_FlameSwitch (dll689) stands 250 below where it works, disabled, until 0x83E, which nothing sets; its setup's
+  +0x20 holds 0x3FF, the bit the Pointback mother's act-2 talk sets, which its code never reads. Restored takes that
+  bit for 0x83E, and the switch rises as its load would have raised it (PR 49). How Tricky's flame reaches it is a
   choice (part 3).
 
 ### Walled City
@@ -207,7 +218,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Open
 
-The third SpellStone's links, on a branch: DBlgtbeam's sign bug taken without its sign.
+Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the
+moon temple's push blocks by night and its symbol's moonlight; the moonseed planted (the item menu Krystal opens at a
+receptacle holds no moonseed, though 0x86A is 4) and grown by Kyte's flame at night; the walk from Warlock Mountain's
+pad to EC's release (WL_seqpoint 2983, on 0x142), which a fallen column (WMfallencol, dll331) blocks.
 
 ## 3. Choices
 
@@ -307,6 +321,23 @@ ROM's way. "(?)" marks a reading not checked in full.
   is Sabre's, with the clue "SEARCH IN DARK, WET PLACES", a talker says "Moonseeds grow in dark damp places.", the
   pickup MMP_moonseed has a def and is placed nowhere, and WM_MoonSeedMoun ("MoonSeed Mound") is Warlock Mountain's.
   So the ROM has them found, not given, and doesn't say where.
+- **The meteor's trigger** (Third SpellStone): the three rocks in vents 3, 4 and 6 (0x89B, dll445_0628) set 0x803
+  too, the trigger of the meteor's MMP_seqobject 412AF (sequence 5, done bit 0x804). 0x803: no code, placement or
+  event of ROM file 13 names it. 0x89B: dll445 sets it, HitAnimator 4267A (map animation 7) reads it. Cascade: the
+  way to the test of fear's entrance. The ROM offers nothing else (PR 49).
+- **Tricky's flame on the flame switch** (Third SpellStone): a flameblast (object 0x4F0) within 40 on x and z of the
+  risen DB_FlameSwitch counts as its hit of type 0x1A. Tricky breathes from curve 418C9 at his own height, about 140
+  below the risen switch's hit sphere. Cascade: 0x3D9, the bridge (DBbridgeanim 415CA) and the beams to the egg
+  (0x86D, 0x39E). The ROM offers: no code call names 0x3D9 (the switch holds it in its setup), and no other
+  flame reaches the switch's height (?) (PR 49).
+- **The moon symbol's reach** (Third SpellStone): 210 in place of its setup's 200 (WCApertureSymbo, dll787_00FC); the
+  lift's top stands 200.25 from it. Cascade: 0x829, the moon in the ring and 0x244, then the Moon Stone (0x264). The
+  ROM offers: no code call names 0x829 (the symbol holds it in its setup), and the lift's top is the only floor of
+  type 0x21 by it (?) (PR 49).
+- **EC's Transporter by the sockets** (Krazoa Shrines, Third SpellStone): placed on 0x202 and shown on 0x243, the
+  sockets' done bits (dll785_0634), the task list's "used Sun and Moon Stones to open shrine"; on Third SpellStone's
+  Original, where the sockets never load, 0x264 as before. Cascade: the shrine (map 33, entry 40) and its return to
+  68 (above). The ROM offers: map 36's older layout, where the stones open the shrine (PR 49).
 - **The Queen in Walled City** (Walled City): at (-8330, -733, -4720), in the corridor outside the gate; met (0x80A,
   no ROM setter or getter) with Sabre within 150 and Tricky within 400. The ROM offers: task 75's clue "CHECK AGAIN
   WHERE TRICKY'S MOTHER ONCE STOOD", where she stood in SwapStone Hollow (SHqueenearthwal 120e, at -8656, -835,
@@ -326,10 +357,6 @@ ROM's way. "(?)" marks a reading not checked in full.
 
 - **The Earth Warrior freed**: DR_NiceSharpy (0x5FD) wants item 0x380 or 0x381, which nothing gives, and TriggerPlane
   0x33F78 in the arena would set 0x5FD, but its only action's flags never run. Not restored: the Warrior stays shackled.
-- **The third SpellStone's links** (on a branch): the meteor's 0x89B also sets 0x803 (seqobject 412AF's trigger,
-  which nothing sets; HitAnimator 4267A reads 0x89B); DB_FlameSwitch takes its unread +0x20 (0x3FF) for 0x83E and a
-  flame blast in its column counts as a hit of 0x1A; the moon symbol reaches 210 (the lift's top is 200.25 from it);
-  the EC Transporter shows on 0x202 and 0x243 (0x264 on Original).
 - **CloudRunner Fortress's gold and Bonehead**: 0x8D1 is set from curve 429d9's +0x32 as Kyte lands at the gold perch
   (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300. 0x4B7 (dll369 reads and clears it,
   TriggerPlane 30e8c clears it) and 0x4B8 (dll519, dll400 read it) have no setter. 0x4DC is set and cleared by
