@@ -50,7 +50,7 @@ Always on, so each setting's Original has them too.
   4) loads: the door starts shut (us.toml, dll393_0018; PR 49).
 - An object id with no def, made from its placement: Walled City's object 0x336 before each temple's gap, made again
   as a fall into the pit loads the city, read before the def tables (us.toml, func_80022AA4, `src/game/objects.cpp`;
-  PR NN).
+  PR 55).
 
 Open:
 
