@@ -745,7 +745,8 @@ text = "{ void dino_camera_turn(uint8_t*, recomp_context*); dino_camera_turn(rdr
 # asks whether a warp is due; if one is, it calls the game's warp, func_8004D1D4 (the entry's index, then 0 for no
 # fade), as the game's own warps do, and goes on with the registers it had. --story (src/game/story.cpp) starts its
 # point from the same place, before any warp. With no --warp due it asks Dragon Rock's way into the Kamerian Dragon's
-# room and out (src/game/dragon_rock.cpp), whose warp fades.
+# room and out (src/game/dragon_rock.cpp), whose warp fades, and which first catches a player fallen past the arena's
+# gallery.
 [[patches.hook]]
 func = "func_800145AC"
 before_vram = 0x800145AC

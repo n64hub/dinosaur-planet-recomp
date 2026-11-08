@@ -79,8 +79,8 @@ Fixed:
 - The Kamerian Dragon under Dragon Rock (Kamerian Dragon on Restored): its health ran out and the fight went on, and
   the fourth SpellStone, which the Desert Force Point's second place takes, was nowhere. It now dies once its health
   runs out and leaves the fourth SpellStone in Krystal's hands, and stays gone. Nothing led to its room: the room is
-  the Skeetla arena at the bottom of Dragon Rock on the level's next layer, and the arena, once won, now leads into
-  it, and the SpellStone, once picked up, back out.
+  the Skeetla arena at the bottom of Dragon Rock on the level's next layer, and the arena's north wall, once the
+  arena is won, now leads into it, and the SpellStone, once picked up, back out.
 - Dragon Rock's Skeetla arena (Kamerian Dragon on Restored): it couldn't be won. The ice spell on the top's west, the
   only spell that puts out the arena's three lava controls, couldn't be picked up or cast, and putting the three out
   takes about three times the magic Krystal holds, with none to be had on Dragon Rock. And the Earth Warrior the
@@ -90,6 +90,10 @@ Fixed:
   more of the lava controls are out.
 - Dragon Rock's bottom: a wall that the top's earth call pad opens stood again once the player came down the stairs
   from the top's east end, shutting the way to the Skeetla arena.
+- Dragon Rock's Earth Warrior couldn't be freed: the meat from the crates on the arena's gallery, given to the
+  sharpclaw beside them, pulls the lever that opens his shackles, but its scene left Krystal falling into the void,
+  and the respawn took it all back. She is now put back on the gallery, and walking to the arena's south side frees
+  him.
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
   the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
   was. The prototype started the fight again after his fall, so the game never ended.

@@ -90,6 +90,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 - Walled City: the temples' bridges of light (WCTempleBridge, dll790) loaded only the model they draw, so the floor
   test found no floor in the slot it reads and the player fell through; their export 5 returns 0, as the moon lift's
   does, and all three models load (us.toml, `src/game/temples.cpp`; PR 54).
+- Dragon Rock's bottom: the lever's scene, which feeding DR_NiceSharpy plays (DR_Seqobj 0x339C4's sequence 2), left
+  the player past the gallery's east end with nothing under her, and the void's respawn took back the meat, 0x5FD,
+  0x5FE and 0x654, so the Earth Warrior couldn't be freed; she is caught as she falls there and held where she gave
+  the meat until the gallery is loaded again (us.toml's hook on func_800145AC, `src/game/dragon_rock.cpp`; PR 56).
 
 ### Tricky's Run
 
@@ -159,13 +163,14 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   every side. The scroll aims only the projectile, so the ice blast is never reached.
 - The arena's three DRLavaControls go out only to the ice spell's hit, and need about three times the magic Krystal
   holds, with none on Dragon Rock: the refill is a choice (part 3).
-- The Earth Warrior is freed the ROM's way, with nothing restored: the two Crates on the gallery above the arena's
-  east end (40c16, 40c17), broken with the staff, drop meat (meatPickup, 0x380), and the meat given from Krystal's
-  food bag to DR_NiceSharpy (dll739) beside them sets 0x5FD. DR_Seqobj 0x339C4 then sets 0x5FE, the shackles open,
-  and DR_EarthWarrior, with his health above 0, sets 0x654, plays sequence 0xC and sets 0x655. The food bag shows on
-  0x164, which WL_LevelControl (dll607) sets as Warlock Mountain loads in act 6, Cape Claw's spirit carried back.
-  Freed, he no longer reads the win (0x628, dll713 0x0508), so the ROM frees him after it, and the room's door waits
-  for him (part 3).
+- The Earth Warrior is freed the ROM's way, with nothing restored but the lever's fall (plain bugs, above): the two
+  Crates on the gallery above the arena's east end (40c16, 40c17), broken with the staff, drop meat (meatPickup,
+  0x380), and the meat given from Krystal's food bag to DR_NiceSharpy (dll739) beside them sets 0x5FD. DR_Seqobj
+  0x339C4 then plays the lever's scene and sets 0x5FE, the shackles open, and DR_EarthWarrior, with his health above
+  0, sets 0x654. DR_Seqobj 0x348DC, at the arena's south side, loads only with the player within 112 of it, and on
+  0x654 plays sequence 0xC and sets 0x655. The food bag shows on 0x164, which WL_LevelControl (dll607) sets as
+  Warlock Mountain loads in act 6, Cape Claw's spirit carried back. Freed, he no longer reads the win (0x628, dll713
+  0x0508), so the ROM frees him after it, and the room's door waits for him (part 3).
 
 ### Ending
 

@@ -198,11 +198,24 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   bit), A opens them, C-right twice rolls to the food bag (0x387, icon 0x2EF), A opens it, and A on the meat gives it
   to what she faces. Only 0x164 has a setter, WL_LevelControl (dll607 0x0194) as Warlock Mountain loads in act 6,
   which Cape Claw's shrine won sets (dll486 0x0C44), and `before-dragon-rock` and `after-dragon-rock` set it. Then
-  DR_Seqobj 0x339C4 (group 1, on from the door's trigger) sets 0x5FE, which opens the DR_Shackles (747), and his
-  update (dll713 0x0670), while his health is above 0, sets 0x654, plays sequence 0xC and sets 0x655. Freed (his
-  state's +0xA58 bit 0x20) he no longer reads the win (0x628, 0x0508): the ROM frees him after the arena is won, and
-  needs him fed for it. The TriggerPlane 0x33F78 in the middle of the arena would set 0x5FD, but its only action's
-  flags (0x04, repeat, without 0x01, forward) never run.
+  DR_Seqobj 0x339C4 (group 1, on from the door's trigger) plays sequence 2, the lever pulled, and sets 0x5FE, which
+  opens the DR_Shackles (747), and his update (dll713 0x0670), while his health is above 0, sets 0x654. The lever's
+  scene looks from outside the walls, at no blocks, and ends with the player at (2446, -1610, -6731), past the
+  gallery's east end over nothing: she fell into the void, whose respawn by the door reloads the bits as they were
+  there, the meat, 0x5FD, 0x5FE and 0x654 gone. Always on, she is caught as she falls there and held where she gave
+  the meat until the cells loaded around the camera (func_80044810) hold the gallery again, and half a second more
+  for its blocks (`src/game/dragon_rock.cpp`): put back at once, she fell through the gallery too. From the gallery
+  she drops into the arena. DR_Seqobj 0x348DC (no
+  group, flags 0x04: it loads with the player within its +6 byte, 14, times 8, so 112, of it) stands at (1563,
+  -1782, -6188) on the arena's south side, and on 0x654 plays sequence 0xC and sets 0x655. Freed (his state's
+  +0xA58 bit 0x20) he no longer reads the win (0x628, 0x0508): the ROM frees him after the arena is won, and needs
+  him fed for it. The TriggerPlane 0x33F78 in the middle of the arena would set 0x5FD, but its only action's flags
+  (0x04, repeat, without 0x01, forward) never run.
+- Played from `before-dragon-rock` with `--place 750,-1620,-6440,-1 --bits 5ce,5d8,5d9,5da` (the controls out, no
+  Skeetlas, his health at 1) and an `--input` that walks the gallery's route, breaks the crates, takes the meat and
+  gives it: the meat at 66 s (0x380), 0x5FD and 0x5FE at 91 s, the scene's end and the catch at 100 s with 0x654,
+  the gallery loaded again within a second, and from the gallery down into the arena and to 0x348DC, 0x655 at 115 s,
+  her health untouched. Without the catch the void's respawn took the bits back and 0x655 never came.
 - Played from `before-dragon-rock` with `--place 750,-1620,-6440,-1 --bits 5ce`, past the door's DR_Creators' trigger,
   and an `--input` that walks to the door, then to each control from its north and casts the ice: the door's
   sequence at 14 s (0x5FA), the controls out at 54 s (0x5DA), 66 s (0x5D8) and 81 s (0x5D9), the fight won (0x628,
@@ -217,11 +230,13 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
 - The arena and the dragon's room share the world cell (2, -8) and their ground: the room is the arena on layer 0,
   its KamColumns' pits where the arena's DRLavaControls stand. Nothing in the ROM leads into the room: no warp entry
   lies in it, and its entrance, a TriggerPlane at its north (0x41AF3, which sets 0x4D7 for its KD_Sequences), faces
-  cells with no blocks, where the player falls and is put back. With Kamerian Dragon on Restored, the arena once won
-  (0x609) leads into the room by the empty warp entry 89, and the fourth SpellStone, 3 s after it is picked up, back
-  to the arena by the empty entry 84 (`src/game/dragon_rock.cpp`). Played from `before-dragon-rock` with `--place
-  1659,-1822,-6121,-1 --bits 5dc=7,609`: the warp into the room came at once, and with `7a8@20` added, the warp back
-  to the arena at 23 s, where she stayed.
+  cells with no blocks, where the player falls and is put back. With Kamerian Dragon on Restored, the arena's north
+  wall under that entrance (x 1860 to 2160, z -6160 on, where the floor slopes up to the wall at about -6120) leads
+  into the room by the empty warp entry 89 once the arena is won (0x609), and the fourth SpellStone, 3 s after it is
+  picked up, back to the arena by the empty entry 84 (`src/game/dragon_rock.cpp`). At the wall, not at the win, so
+  the Warrior can be freed after it. Played from `before-dragon-rock` with `--place 1659,-1822,-6121,-1 --bits
+  5dc=7,628,609` and an `--input` that walks to (2009, -6300) and north: the warp into the room from (2003, -1739,
+  -6160). In the room, with `7a8@20`, the warp back to the arena came at 23 s, where she stayed.
 - BOSS Kamerian Dragon (53): KamerianBoss (dll707) and the Nurse (708). The fight is built and can't be won: each hit
   in its last stage lowers its health (10 at the start), nothing reads it, and at 0 it wraps and the fight goes on.
   Nothing anywhere gives the fourth SpellStone (0x7A8), which the Desert Force Point's other place takes. Dragon Rock
