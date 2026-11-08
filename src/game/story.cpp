@@ -449,7 +449,31 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
         return true;
     }
     if (ride) {
+        // The bike slides, so faster than 20 units a second it steers by the way it moves over the last 0.2 s, not
+        // the way it faces: by its facing, a turn onto a line ends heading 30 degrees off it.
+        static double moved_at = -1.0;
+        static float moved_x, moved_z, moving_x, moving_z;
+        double now = dino_script_seconds();
+        if (now - moved_at > 0.5) {
+            moving_x = moving_z = 0.0f;
+            moved_at = now;
+            moved_x = x;
+            moved_z = z;
+        }
+        else if (now - moved_at >= 0.2) {
+            moving_x = (x - moved_x) / (float)(now - moved_at);
+            moving_z = (z - moved_z) / (float)(now - moved_at);
+            moved_at = now;
+            moved_x = x;
+            moved_z = z;
+        }
         int32_t facing = MEM_HU(0x0, player);
+        if (moving_x * moving_x + moving_z * moving_z > 20.0f * 20.0f) {
+            ctx->f12.fl = -moving_x;
+            ctx->f14.fl = -moving_z;
+            call(rdram, ctx, angle_to);
+            facing = (int32_t)ctx->r2 & 0xFFFF;
+        }
         ctx->f12.fl = -dx;
         ctx->f14.fl = -dz;
         call(rdram, ctx, angle_to);
@@ -467,7 +491,6 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
         static int anchor_oid;
         static float anchor_to_x, anchor_to_z;
         static float escape_side = 1.0f;
-        double now = dino_script_seconds();
         bool same_target = oid == anchor_oid && (oid != -1 || (to_x == anchor_to_x && to_z == anchor_to_z));
         if (now - last_at > 0.5 || now < escape_until || !same_target || distance < anchor_distance - 10.0f) {
             anchor_at = now;
@@ -486,7 +509,7 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
             *stick_y = 1.0f;
             return true;
         }
-        *stick_x = std::fmax(-1.0f, std::fmin(1.0f, -(float)turn / (65.0f * 32.0f)));
+        *stick_x = std::fmax(-1.0f, std::fmin(1.0f, -(float)turn / (float)0x2000));
         *stick_y = std::abs(turn) > 0x2000 || (oid == -1 && distance < 300.0f && std::abs(turn) > 0xAAA) ? 0.3f :
             oid == -1 && distance < 150.0f ? 0.4f : 1.0f;
         return true;
