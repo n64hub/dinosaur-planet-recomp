@@ -425,9 +425,11 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // mouth, or toward a place of more than 15 within 300 units, where it would circle it for good, and to 0.4 within 150
 // units of a place, so a turn there is made (toward an object it stays full: a ram needs the speed). A bike no nearer
 // its target in 3 s (pinned on a rise, or sliding along a wall in a turn it can't make) turns at full lock for 1.2 s
-// and comes round.
+// and comes round. With match other than -1, only toward an object whose state byte at that offset (obj+0xB8) holds
+// what the first object of id match_oid holds at match_from: the cup of ECSH_Shrine's shell game (dll470's index at
+// +0x23) that hides what the shrine drew (dll469's +0x1A).
 bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
-    bool ride, float* stick_x, float* stick_y) {
+    bool ride, float* stick_x, float* stick_y, int match, int match_oid, int match_from) {
     *stick_x = 0.0f;
     *stick_y = 0.0f;
     float fx, fz;
@@ -449,9 +451,24 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
     if (oid != -1) {
         float best = -1.0f;
         gpr all = (gpr)MEM_W(0, (gpr)objects);
+        int wanted = -1;
+        for (int i = 0; match != -1 && wanted == -1 && all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+            gpr object = MEM_W(i * 4, all);
+            gpr state = object != 0 && (int16_t)MEM_H(0x46, object) == match_oid ? (gpr)MEM_W(0xB8, object) : 0;
+            if (state != 0) {
+                wanted = MEM_BU(match_from, state);
+            }
+        }
+        if (match != -1 && wanted == -1) {
+            return false;
+        }
         for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
             gpr object = MEM_W(i * 4, all);
             if (object == 0 || object == player || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+                continue;
+            }
+            gpr state = match != -1 ? (gpr)MEM_W(0xB8, object) : 0;
+            if (match != -1 && (state == 0 || MEM_BU(match, state) != wanted)) {
                 continue;
             }
             float ox, oz;

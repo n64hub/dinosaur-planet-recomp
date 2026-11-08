@@ -371,7 +371,9 @@ static std::string game_thread_name(const OSThread* t) {
 // enemy that comes either way round). A choose holds no other. In place of x y, "to <x> <z> [strength]" walks the
 // player toward that place, the stick that far over (1 by default: a walk slow enough to leap a gap, where a run goes
 // over its edge), and "chase <object id hex> [reach]" toward the nearest object of that
-// id (or with a number after the reach, toward that hit sphere of it: a boss hurt only in its head), each until
+// id (or with a number after the reach, toward that hit sphere of it: a boss hurt only in its head; or after the reach
+// "match <offset hex> <object id hex> <offset hex>", toward the one whose state byte at the first offset holds what
+// the first object of the other id holds at the second: a shell game's cup that hides the ball), each until
 // within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
 // "ride to <x> <z> [reach]" and "ride <object id hex> [reach]" do the same for a player on a vehicle that turns by
@@ -386,6 +388,7 @@ struct ScriptedInput {
     int oid, sphere;
     float to_x, to_z, reach;
     float strength;
+    int match = -1, match_oid = 0, match_from = 0;
 };
 static std::vector<ScriptedInput> input_script;
 // The steering line being played (to or chase), and the stick the last pass worked out for it.
@@ -516,6 +519,9 @@ static void load_input_script(const char* path) {
             in.steer = true;
             if (sscanf(line, "%*f %*x chase %*x %*f %d", &in.sphere) != 1) {
                 in.sphere = -1;
+            }
+            if (sscanf(line, "%*f %*x chase %*x %*f match %x %x %x", &in.match, &in.match_oid, &in.match_from) != 3) {
+                in.match = -1;
             }
             in.strength = 1.0f;
             if (in.reach <= 0.0f) {
@@ -705,7 +711,8 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     double now = script_seconds();
     if (const ScriptedInput* in = steering) {
         float x, y;
-        dino::story_steer(rdram, ctx, in->oid, in->sphere, in->to_x, in->to_z, in->reach, in->ride, &x, &y);
+        dino::story_steer(rdram, ctx, in->oid, in->sphere, in->to_x, in->to_z, in->reach, in->ride, &x, &y, in->match, in->match_oid,
+            in->match_from);
         steer_stick_x = x * in->strength;
         steer_stick_y = y * in->strength;
     }
