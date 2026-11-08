@@ -196,7 +196,7 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Third SpellStone
 
-`src/game/acts.cpp`, `src/game/moonseeds.cpp`; PR 25.
+`src/game/acts.cpp`, `src/game/moonseeds.cpp`; PRs 25 and 52.
 
 - The Volcano Force Point's act 2 holds a second SpellPlace that takes Walled City's stone (carried 0x83B, placed
   0x878), its podium, door switch and round door, and VFP_LevelControl set act 1 in its constructor whatever the
@@ -318,8 +318,11 @@ ROM's way. "(?)" marks a reading not checked in full.
   `acts.cpp` moving to act 2 on 0x83B goes round in a circle.
 - **The volcano's acts** (Third SpellStone): act 2 on 0x83B, act 3 on 0x878. Cascade: act 3's timer sets 0x63C
   (Diamond Bay's act 3) and 0x83C; act 2 sets 0x22B, the first stone's, again. The ROM offers: no TriggerPlane act
-  command in maps 4 or 13. **Clash, a bug of ours:** the Queen Earthwalker sets the volcano to act 11 before her two
-  cutscene warps there (dll507_04F8, after 0x486 and 0x487), and `acts.cpp`, at each map load, makes it act 1 again.
+  command in maps 4 or 13. **Clash, a bug of ours, fixed (PR 52):** the Queen Earthwalker sets the volcano to act 11
+  before her two cutscene warps there (dll507_04F8, after 0x486 and 0x487), and `acts.cpp` made it act 1 again at the
+  map's load, so neither cutscene played. It now leaves act 11 while a visit is to play (0x486 without 0x484, 0x487
+  without 0x485), and once both are spent moves it on as at any load: neither visit loads VFP_LevelControl, the ROM's
+  only way back to act 1, so on Original warp 81 after them finds act 11, with no podium or SpellPlace.
 - **Walled City's act 2** (Third SpellStone): from 0x317, Moon Mountain Pass's spirit (dll611 sets it; dll519, dll607
   read it). Cascade: act 2 loads WCSunStone, the sockets (0x25A, 0x25B, 0x202, 0x243) and the temples (0x812, 0x813),
   and drops act 1's teeth. The ROM offers: nothing sets Walled City's act.
