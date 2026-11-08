@@ -112,8 +112,9 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   sequence 0x12 once 0x366 is set (mode 1), and acts 6 and 7 count 0x366 as the release done. Sequence 0x12 is the
   only code that sets Cape Claw's act 9 (dll611 0x664), and it sets 0x367, which shows WM_WarpPoint 3008c to entry 77,
   and in its mode 2 a radius of 0 warps at once, at any distance (dll275 0x3E0). Nothing sets 0x366: WG's release does
-  (part 3). 30055's done bit was bit 0, shared, and is 0x367. Cape Claw's act 9 holds act 2's objects and one
-  setuppoint of its own, e7b, by its west entrance: entry 77 is filled there.
+  (part 3). 30055's done bit was bit 0, shared, and is 0x367. Cape Claw's act 9 loads act 8's placements less 28 of
+  its curves, none of its own and no trigger that sets an act: entry 77 is filled at setuppoint 7, by its west
+  entrance, which act 9 loads.
 
 ### Krazoa Tablets
 
@@ -249,12 +250,16 @@ ROM's way. "(?)" marks a reading not checked in full.
   the ROM's route (part 2) 0x366 is set for WG's release only, and sequence 0x12 clears it, so it couldn't keep a
   second visit from giving CC's or WG's spirit again; acts 2-5 each read their own released bit.
 - **Who sets 0x366** (Krazoa Shrines): WG's release, as it takes the mask back in act 7. 0x366: no ROM setter; dll607
-  reads it in acts 6 and 7, dll611 clears it. 30055 is placed in act 7 alone of acts 1-8, beside WG's release (and in
-  act 9, which loads every act's). Cascade: Cape Claw's act 9 (0xEE), 0x367, 0x368. The ROM offers: CC's release, the
-  other act that reads 0x366, or GP's and NW's, ours, in acts 8 and 9, beside none of which 30055 stands.
-- **Entry 77** (Krazoa Shrines): Cape Claw's setuppoint e7b, (1389, 159, 16954), the one place act 9 adds. Cascade:
-  act 9's TriggerSetups set Cape Claw's act 1 (30dfb, 3001c) and TriggerPlane 30ec4 act 2, so the visit hands Cape
-  Claw back to its earlier acts. The ROM offers: the tablet room, Krazoa Palace or Drakor, none tied to act 9.
+  reads it in acts 6 and 7, dll611 clears it. 30055 loads in act 7 alone of acts 1-11, beside WG's release. Cascade:
+  Cape Claw's act 9 (0xEE), 0x367, 0x368. The ROM offers: CC's release, the other act that reads 0x366, or GP's and
+  NW's, ours, in acts 8 and 9, beside none of which 30055 stands.
+- **Entry 77** (Krazoa Shrines): Cape Claw's setuppoint 7 (@08F0), (1457, 156, 16940), by its west entrance, which
+  act 9 loads. Act 9 adds no placement of its own: it loads act 8's less 28 of its curves, and setuppoint e7b, 68 to
+  the west, loads only in acts 12, 13, 15 and 16. Cascade: no trigger act 9 loads sets an act (TriggerSetups 30dfb and
+  3001c, to act 1, and TriggerPlane 30ec4, to act 2, are acts 12 and up's), so Cape Claw stays in act 9, which holds
+  none of the tablet room's receptacles and set tablets (acts 2 and 3) or its lights (CCkrazoabright, 1 to 3), as acts
+  4 to 8 hold none: Cape Claw after the tablet room (Open). The ROM offers: the tablet room, Krazoa Palace or Drakor,
+  none tied to act 9.
 - **Warlock Mountain's bits each visit** (Krazoa Shrines): act 5 sets 0x142, EC's release trigger (no ROM setter),
   act 7 sets 0x1D1, WG's. The ROM offers nothing else.
 - **"Already won"** (Krazoa Shrines): Golden Plains' as act 8 or later, Willow Grove's as act 7 or later.
@@ -348,6 +353,11 @@ ROM's way. "(?)" marks a reading not checked in full.
 
 ### Open
 
+- **Cape Claw's act 9 before the tablet room** (Krazoa Shrines, Krazoa Tablets): sequence 0x12 sets Cape Claw's act
+  9 at WG's release, and Cape Claw stays in it (Entry 77), so a player who comes to WG's release with the tablet room
+  unsolved finds no receptacles there, and 0x52B, the palace's fire door, can't be set (?). The ROM's acts put the
+  room first (acts 4 to 9 are Cape Claw after it), and nothing makes a player solve it before WG's shrine. Nothing
+  built.
 - **The Earth Warrior freed**: DR_NiceSharpy (0x5FD) wants item 0x380 or 0x381, which nothing gives, and TriggerPlane
   0x33F78 in the arena would set 0x5FD, but its only action's flags never run. Not restored: the Warrior stays shackled.
 - **The third SpellStone's links** (on a branch): the meteor's 0x89B also sets 0x803 (seqobject 412AF's trigger,
@@ -372,7 +382,8 @@ Every one was empty in ROM file 30 but 68, which holds where EC's pad stood in a
 - 65, 67, 68, 70, 71: where the NW, WG, EC, GP and CC shrines send the player back (Krazoa Shrines). 68 is the
   ROM's EC pad's own entry, filled where that pad stands now (part 2).
 - 72: the tablet room's Transporter's own (Krazoa Tablets), which Warlock Mountain's WM_WarpPoint 2ac6 also sends to.
-- 77: Cape Claw's act 9 setuppoint, from Warlock Mountain's WM_WarpPoint 3008c after sequence 0x12 (Krazoa Shrines).
+- 77: Cape Claw's setuppoint 7 by its west entrance, which act 9 loads, from Warlock Mountain's WM_WarpPoint 3008c
+  after sequence 0x12 (Krazoa Shrines).
 - 84: back from the Kamerian Dragon's room to the arena; 89: into the room (Kamerian Dragon).
 - 93, 94: Krazoa Palace's west and east Transporters (Krazoa Tablets).
 
