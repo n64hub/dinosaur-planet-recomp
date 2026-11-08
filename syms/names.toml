@@ -493,7 +493,35 @@ index = 20
 name = "feed"  # (warrior, 1): adds 12 to his health, as item 0xC1 given him does; nothing calls it
 [[bit]]
 bit = 0x245
-name = "tricky_flame"  # lets his scroll's command 4 through (dll211); DIMSnowHorn1 sets it behind 0x172, never set
+name = "tricky_flame"  # lets his scroll's command 4 through (dll211); DIMSnowHorn1 1a5e's talk sets it (dll712 0x2470)
+[[bit]]
+bit = 0x172
+name = "dim_snowclaw_beaten"  # the SnowClaw by DIMSnowHorn1 1a5e (uid 1602) beaten: its setup +0x18
+[[bit]]
+bit = 0x27
+name = "dim_snowhorn_taught_flame"  # DIMSnowHorn1 1a5e's first talk, with 0x245; its act 6 from then
+[[bit]]
+bit = 0x28
+name = "dim_snowhorn_fed_root"  # DIMSnowHorn1 1a5e given an Alpine Root (act 6, sequence 2); its act 7 from then
+[[bit]]
+bit = 0x16F
+name = "dim_snowhorn_fed_roots"  # DIMSnowHorn1 1a5e given the second root (act 7, sequence 4); its act 8 from then
+[[bit]]
+bit = 0x170
+name = "alpine_roots"  # the Alpine Roots carried (DIMAlpineRoots' setup +0x2C), which the SnowHorn takes
+[[bit]]
+bit = 0xF3
+name = "dim_shackled_snowhorn_freed"  # DIMSeqObject 1a5b's sequence, once the shackle opens (0x2A)
+[[field]]
+of = "setup"
+dll = 712
+offset = 0x19
+name = "snowhorn_index"  # which of map 19's SnowHorns, the act its picker (0x1D68) starts: 1 is 1a5e's
+[[field]]
+of = "setup"
+dll = 215
+offset = 0x18
+name = "beaten_bit"  # set to 1 as it is beaten (0x49E4), from dll33.21's copy at its state +0x39C
 [[bit]]
 bit = 0x7FB
 name = "king_talked"  # A with the King (WCKingEarthWalk, dll774) plays his sequence
