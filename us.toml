@@ -211,6 +211,17 @@ func = "dll501_00A8"
 before_vram = 0x901FEE88
 text = "{ if (ctx->r7 == 0) { MEM_B(0, ctx->r16) = 3; goto L_901FEEB0; } }"
 
+# CloudRunner Fortress's slide doors (dll393: CFMainSlideDoor, group 4 of 0x458, the upper level, and CFSlideDoor1,
+# groups 17 and 18) start open with the player within 130 of them: their setup, dll393_0018, measures from the player
+# (player_object) with no test. 0x458 is saved (bank 3), and a save loaded (dll63_0220) starts the world like a story
+# start (dll29's start_world), which builds the map's objects before Krystal, so a save made with the upper level open
+# crashed as it loaded. The door's update (dll393_0268) tests for no player and takes it as one out of reach: so does
+# its setup, which then starts shut (state 0, the store its 130 test makes).
+[[patches.hook]]
+func = "dll393_0018"
+before_vram = 0x901B8728
+text = "{ if (ctx->r2 == 0) { MEM_B(0, MEM_W(0x24, ctx->r29)) = 0; goto L_901B8764; } }"
+
 # The other DLLs that use func_8002394C's sidekick with no test reach that use only while one is out, so they have no
 # hook. The perches' query 1 (PerchObject dll718_03A0, RestPerch dll726_0410) is asked by Kyte (dll212) about herself.
 # CCvines (dll719) reads it in the state Kyte's own call to its export 7 starts. SC_lightfoot (dll516_1B8C) commands it

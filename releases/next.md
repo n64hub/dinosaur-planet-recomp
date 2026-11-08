@@ -38,3 +38,4 @@
   the top's east end.
 - CloudRunner's snow race: the bike rides back over the edge into the bay where the SnowClaw waits, so the race can
   be won. At the frame rate the recomp holds, that edge stopped it dead every time.
+- CloudRunner Fortress: a save made once the fortress's upper level is open no longer crashes as it loads.
