@@ -187,10 +187,22 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   on Dragon Rock gives it and nothing calls the export, so the fight has about 45 s of bites, which in a run from the
   top run out before the third control. With Kamerian Dragon on Restored he is fed 12 once his health is down to -10,
   once in a fight and once more for each control put out, so a player who stops putting them out still loses him.
-  The controls nearest him go last: 0x5DA, then 0x5D8, then 0x5D9, then the blast on the Skeetlas left. The
-  Warrior is freed by 0x5FD (DR_NiceSharpy, 739, given item 0x380 or 0x381, which item not known yet: sequence 2 sets
-  0x5FE, which frees the DR_Shackles, 0x654, sequence 0xC and 0x655). The TriggerPlane 0x33F78 in the middle of the
-  arena would set 0x5FD, but its only action's flags (0x04, repeat, without 0x01, forward) never run.
+  The controls nearest him go last: 0x5DA, then 0x5D8, then 0x5D9, then the blast on the Skeetlas left.
+- The Warrior is freed by 0x5FD, which DR_NiceSharpy (739, uid 0x33EB2, on the gallery above the arena's east end at
+  2413, -6793) sets when it is given item 0x380 or 0x381 (its 0x07B4 reads dll210's export 74, and calls export
+  75 with 1). 0x380 is meat: the two Crates beside it (0x40C16 and 0x40C17, about 2059 to 2479, -6800), broken with
+  the staff, each drop a meatPickup (object 0xB), which A takes into the food bag. The gallery is the arena's own
+  layer: from the door (1410, -6634) by (1491, -6670), (1548, -6700), (1623, -6753), (1694, -6791) and (2000, -6800).
+  The bag is given from the C-right menu, Krystal's first (dll1, the player's object 0x1F), with the staff put away
+  (the give is tested in dll210_BA38, her idle state): C-right shows her bags (0x163, 0x164 and 0x165, each its own
+  bit), A opens them, C-right twice rolls to the food bag (0x387, icon 0x2EF), A opens it, and A on the meat gives it
+  to what she faces. Only 0x164 has a setter, WL_LevelControl (dll607 0x0194) as Warlock Mountain loads in act 6,
+  which Cape Claw's shrine won sets (dll486 0x0C44), and `before-dragon-rock` and `after-dragon-rock` set it. Then
+  DR_Seqobj 0x339C4 (group 1, on from the door's trigger) sets 0x5FE, which opens the DR_Shackles (747), and his
+  update (dll713 0x0670), while his health is above 0, sets 0x654, plays sequence 0xC and sets 0x655. Freed (his
+  state's +0xA58 bit 0x20) he no longer reads the win (0x628, 0x0508): the ROM frees him after the arena is won, and
+  needs him fed for it. The TriggerPlane 0x33F78 in the middle of the arena would set 0x5FD, but its only action's
+  flags (0x04, repeat, without 0x01, forward) never run.
 - Played from `before-dragon-rock` with `--place 750,-1620,-6440,-1 --bits 5ce`, past the door's DR_Creators' trigger,
   and an `--input` that walks to the door, then to each control from its north and casts the ice: the door's
   sequence at 14 s (0x5FA), the controls out at 54 s (0x5DA), 66 s (0x5D8) and 81 s (0x5D9), the fight won (0x628,

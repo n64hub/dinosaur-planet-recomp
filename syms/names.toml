@@ -498,10 +498,13 @@ bit = 0x5FD
 name = "dr_nice_sharpy_fed"  # DR_NiceSharpy (dll739) given 0x380 or 0x381; DR_Seqobj 0x339C4 sets 0x5FE
 [[bit]]
 bit = 0x5FE
-name = "dr_shackles_open"  # DR_Shackle (dll747); dll713 0x0670 turns it into 0x654, sequence 0xC and 0x655
+name = "dr_shackles_open"  # DR_Shackle (dll747); dll713 0x0670 sets 0x654 on it while his health is above 0
+[[bit]]
+bit = 0x654
+name = "dr_warrior_unshackled"  # dll713 0x0670 on 0x5FE, while his health is above 0; DR_Seqobj 0x348DC reads it
 [[bit]]
 bit = 0x655
-name = "dr_warrior_freed"  # dll713, once his health is above 0; then he skips the win's check (0x0508)
+name = "dr_warrior_freed"  # DR_Seqobj 0x348DC on 0x654, with sequence 0xC; dll713 then skips the win's check (0x0508)
 [[export]]
 dll = 210
 index = 14

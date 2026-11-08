@@ -310,6 +310,24 @@ func = "func_80041E84"
 vram = 0x80041EDC
 value = 0x24040050
 
+# Too few late frees: func_800175D4 adds a free to the 420 entries from 0x800B0A78 with no test, and Dragon Rock -
+# Bottom's arena unloading after the Earth Warrior is freed went past them, over the loaded models' table, and the next
+# model freed crashed in func_80018A00. What doesn't fit waits in src/game/heap.cpp, counted down as the game's are.
+[[patches.hook]]
+func = "func_800175D4"
+before_vram = 0x800175D4
+text = "{ int dino_late_free(uint8_t*, recomp_context*); if (dino_late_free(rdram, ctx)) return; }"
+
+[[patches.hook]]
+func = "func_80017344"
+before_vram = 0x80017344
+text = "{ void dino_late_frees_counted(uint8_t*, recomp_context*); dino_late_frees_counted(rdram, ctx); }"
+
+[[patches.hook]]
+func = "func_80017254"
+before_vram = 0x80017254
+text = "{ void dino_late_frees_mode(uint8_t*, recomp_context*); dino_late_frees_mode(rdram, ctx); }"
+
 # Item pickups: a pickup (dll272) taken with A gives dll3 the object the player's pickup sequence holds up (dll3_9E58,
 # from +6 of the block at its def's +0x18) and plays the player's pickup (state 0x2A), whose end starts the player's
 # sequence 0 (dll210_16220), the one whose event hands the item over. That sequence's VariableObject (object 0x443)

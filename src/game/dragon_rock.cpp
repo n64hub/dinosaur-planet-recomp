@@ -42,6 +42,9 @@
 //   do. The same hook fills the arena's magic. The way in waits for the wall, not the win, because the ROM frees the
 //   Earth Warrior after the win: DR_EarthWarrior reads the win (0x628) only while he is shackled (dll713 0x0508), and
 //   0x5FD, which frees him, is DR_NiceSharpy's on the gallery above, fed meat from the gallery's crates.
+// - The gallery's lever: the scene 0x5FD plays (DR_Seqobj 0x339C4's sequence 2) leaves the player past the gallery's
+//   east end, with nothing under her, and the void's respawn takes the freeing back. The same hook catches her below
+//   the arena's floor there and puts her back where she gave the meat.
 // - The health's store (0x1BB8): at 0 the dragon is beaten. A CRSpellstone is placed at the player, its +0x1E 0x7A8
 //   and +0x20 0x5F4 (the stone placed at the Desert Force Point), and picked up there at once.
 // - The dragon's and the Nurse's updates: once it is beaten (0x7A8 or 0x5F4 set, so on every later visit too) each is
@@ -186,8 +189,15 @@ namespace {
     const Box arena = { 1300.0f, 2500.0f, -1900.0f, -1700.0f, -6750.0f, -5900.0f };
     const Box room = { 1280.0f, 2560.0f, -2100.0f, -1600.0f, -7040.0f, -5700.0f };
     // The arena's north wall, under the room's entrance: map 53's TriggerPlane 0x41AF3 at (2009, -1769, -5955), which
-    // sets 0x4D7 for the KD_Sequences as the player comes in from the north.
-    const Box north_wall = { 1860.0f, 2160.0f, -1900.0f, -1700.0f, -6060.0f, -5900.0f };
+    // sets 0x4D7 for the KD_Sequences as the player comes in from the north. The arena's wall there stands at about z
+    // -6120, at the top of the floor's slope up to y -1735.
+    const Box north_wall = { 1860.0f, 2160.0f, -1900.0f, -1700.0f, -6160.0f, -5900.0f };
+    // Past the gallery's east end, where nothing is under it down to the void: DR_Seqobj 0x339C4's sequence 2, the
+    // lever pulled once DR_NiceSharpy is fed, ends with the player at (2446, -1610, -6731) and its camera outside the
+    // walls, and she falls from there into the void, whose respawn takes back the bits since the arena's door (0x380,
+    // 0x5FD, 0x5FE, 0x654). Caught here, she is put back where she gave the meat, in front of DR_NiceSharpy.
+    const Box under_gallery = { 2400.0f, 2500.0f, -3000.0f, -1650.0f, -6780.0f, -6690.0f };
+    const float gallery_give[3] = { 2369.0f, -1610.0f, -6794.0f };
 
     // The two warp entries, empty in ROM file 30: the room's setuppoint (map 53 @0000), and the arena where the
     // bottom's TriggerPlane 33F78 stands. +0xC and +0xE hold -1 for layer -1, as entry 88's do.
@@ -436,7 +446,17 @@ extern "C" int dino_dragon_rock_door(uint8_t* rdram, recomp_context* ctx) {
     memcpy(&z, &MEM_W(0x20, player), 4);
     int layer = MEM_B(0, (gpr)player_layer);
     int warp = -1;
-    if (layer == -1 && arena.holds(x, y, z)) {
+    if (layer == -1 && under_gallery.holds(x, y, z)) {
+        for (int i = 0; i < 3; i++) {
+            memcpy(&MEM_W(0xC + 4 * i, player), &gallery_give[i], 4);
+            memcpy(&MEM_W(0x18 + 4 * i, player), &gallery_give[i], 4);
+            MEM_W(0x24 + 4 * i, player) = 0; // her speed
+        }
+        if (logging) {
+            fprintf(stderr, "dragon: caught under the gallery at %.0f %.0f %.0f\n", x, y, z);
+        }
+    }
+    else if (layer == -1 && arena.holds(x, y, z)) {
         if (!get(rdram, ctx, arena_fight_won)) {
             fill_magic(rdram, ctx, player);
         }

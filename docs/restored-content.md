@@ -48,6 +48,8 @@ Always on, so each setting's Original has them too.
 - Walled City's pressure switches writing past their list (us.toml, dll781_05DC, `patches/walled_city.c`; PR 39).
 - CloudRunner Fortress's slide doors set up with no player, as a save made with the upper level open (0x458's group
   4) loads: the door starts shut (us.toml, dll393_0018; PR 49).
+- More than 420 late frees in a frame, writing over the loaded models' table, as Dragon Rock's arena unloads after
+  the Earth Warrior is freed (us.toml, func_800175D4, `src/game/heap.cpp`; PR 55).
 
 Open:
 
@@ -155,6 +157,13 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   every side. The scroll aims only the projectile, so the ice blast is never reached.
 - The arena's three DRLavaControls go out only to the ice spell's hit, and need about three times the magic Krystal
   holds, with none on Dragon Rock: the refill is a choice (part 3).
+- The Earth Warrior is freed the ROM's way, with nothing restored: the two Crates on the gallery above the arena's
+  east end (40c16, 40c17), broken with the staff, drop meat (meatPickup, 0x380), and the meat given from Krystal's
+  food bag to DR_NiceSharpy (dll739) beside them sets 0x5FD. DR_Seqobj 0x339C4 then sets 0x5FE, the shackles open,
+  and DR_EarthWarrior, with his health above 0, sets 0x654, plays sequence 0xC and sets 0x655. The food bag shows on
+  0x164, which WL_LevelControl (dll607) sets as Warlock Mountain loads in act 6, Cape Claw's spirit carried back.
+  Freed, he no longer reads the win (0x628, dll713 0x0508), so the ROM frees him after it, and the room's door waits
+  for him (part 3).
 
 ### Ending
 
@@ -304,13 +313,14 @@ ROM's way. "(?)" marks a reading not checked in full.
   target block 401bb and FXEmits. Cascade: 0x5F4 drives SwapStone Circle's meter blocks 32fcd and 32ff7, and
   `after-dragon-rock` carries it. The ROM offers: a CRSpellstone (35335) in Golden Plains' group 3 with no bits (?);
   four KD_Sequences nothing triggers (?); DFP_TargetBlock 401bb's chain, half unreachable, whose end is 0x7A8.
-- **The dragon's room's door** (Kamerian Dragon): the arena once won (0x609) warps into the room by entry 89, and the
-  stone, 3 s after it is picked up, back by entry 84; both empty, no ROM sender. The ROM offers: entry 83, empty too;
-  the room's own entrance plane (0x41AF3) faces cells with no blocks.
+- **The dragon's room's door** (Kamerian Dragon): the arena's north wall, under the room's own entrance plane
+  (0x41AF3), warps into the room by entry 89 once the arena is won (0x609), and the stone, 3 s after it is picked up,
+  back by entry 84; both empty, no ROM sender. At the wall, not at the win, so the Warrior can still be freed after
+  it (part 2). The ROM offers: entry 83, empty too; the entrance plane faces cells with no blocks.
 - **The ice spell** (Kamerian Dragon): A reaches 24 in place of 16, and the scroll's aim casts the ice blast as it
   casts the projectile.
 - **The arena's magic** (Kamerian Dragon): filled while the fight is on once it is below a fifth, as the dragon's fight
-  fills it. The ROM offers: two Crates (40c16, 40c17) by the arena, contents not read (?).
+  fills it. The ROM offers: nothing; the two Crates by the arena (40c16, 40c17) hold meat, for the Warrior (part 2).
 - **The Earth Warrior's food** (Kamerian Dragon): fed 12 once his health is down to -10, once in the fight and once per
   control out. 0xC1: DR_EarthWarrior (dll713) reads and lowers it, Tricky (dll211) lowers it. **Clash:**
   SHbluemushroom (dll502) gives item 0xC1, and Dragon Rock's bottom places four by the arena (map 52, uids 348d8 to
@@ -389,8 +399,6 @@ ROM's way. "(?)" marks a reading not checked in full.
   unsolved finds no receptacles there, and 0x52B, the palace's fire door, can't be set (?). The ROM's acts put the
   room first (acts 4 to 9 are Cape Claw after it), and nothing makes a player solve it before WG's shrine. Nothing
   built.
-- **The Earth Warrior freed**: DR_NiceSharpy (0x5FD) wants item 0x380 or 0x381, which nothing gives, and TriggerPlane
-  0x33F78 in the arena would set 0x5FD, but its only action's flags never run. Not restored: the Warrior stays shackled.
 - **CloudRunner Fortress's gold and Bonehead**: 0x8D1 is set from curve 429d9's +0x32 as Kyte lands at the gold perch
   (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300. 0x4B7 (dll369 reads and clears it,
   TriggerPlane 30e8c clears it) and 0x4B8 (dll519, dll400 read it) have no setter. 0x4DC is set and cleared by
