@@ -972,6 +972,14 @@ def placement_line(game, m, off, r, fields):
     return s
 
 
+def loads_in(r, act):
+    """Whether the object loader (func_8004B4A0) places this record in a map's act: byte +3's bit act - 1 set skips it
+    in acts 1 to 8, byte +5's bit 16 - act in acts 9 to 16; act 0 places all."""
+    if act == 0:
+        return True
+    return not ((r[3] >> (act - 1)) & 1 if act < 9 else (r[5] >> (16 - act)) & 1)
+
+
 def show_map(game, a):
     m = find_map(game, a.map)
     print(map_header(game, m))
@@ -990,6 +998,8 @@ def show_map(game, a):
             continue
         if a.uid and struct.unpack_from(">I", r, 0x14)[0] != int(a.uid, 16):
             continue
+        if a.act is not None and not loads_in(r, a.act):
+            continue
         if near:
             x, _, z = struct.unpack_from(">3f", r, 8)
             w = game.world(m, x, z) or (x, z)
@@ -997,7 +1007,7 @@ def show_map(game, a):
                     abs(w[1] - near[1]) > (near[2] if len(near) > 2 else 300):
                 continue
         picked.append((off, r, name, dll, flags, group))
-    filtered = a.name or a.group is not None or a.dll is not None or a.uid or near
+    filtered = a.name or a.group is not None or a.dll is not None or a.uid or near or a.act is not None
     if not (filtered or a.all):
         # A summary: each def, how many, in which groups.
         seen = {}
@@ -1203,6 +1213,7 @@ def main():
     m.add_argument("--name", help="placements whose def's name holds this")
     m.add_argument("--group", type=int)
     m.add_argument("--dll", type=int)
+    m.add_argument("--act", type=int, help="placements the object loader places in the map's act n")
     m.add_argument("--uid")
     m.add_argument("--near", help="x,z[,r]: placements within r (300) of a world position")
     o = sub.add_parser("def", help="an object def: its DLL, object ids, where it is placed and its record")
