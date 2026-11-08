@@ -220,6 +220,7 @@ namespace {
 
     constexpr int transporter = 0xEC;
     constexpr int seqpoint = 0x25F;
+    constexpr int after_shrines = 0x366;      // the trigger of Warlock Mountain's sequence 0x12 (seqpoint @1D34)
     constexpr int tablet_pickup = 0x2ED;
 
     constexpr int increment_bit = 0x80014930; // (bit): adds one to its value
@@ -338,6 +339,7 @@ namespace {
         { 70, -833.3f, 208.0f, 13285.5f, Setting::Shrines },
         { 71, 4200.3f, -7.1f, 17613.1f, Setting::Shrines, tablet_area },
         { 72, 4776.0f, -8.0f, 17606.0f, Setting::Tablets, tablet_area },
+        { 77, 1389.0f, 159.0f, 16954.0f, Setting::Shrines },
         { 93, 4481.0f, 973.0f, 23358.0f, Setting::Tablets },
         { 94, 10414.0f, 23.0f, 23040.0f, Setting::Tablets },
         { 44, 4810.0f, 6.0f, 7109.0f, Setting::Palace },
@@ -373,6 +375,10 @@ namespace {
         { 11, seqpoint, 0x2983, 0x20, 2, 0x318, false }, // EC's, @0FC0
         { 11, seqpoint, 0x2AC7, 0x20, 2, 0x221, false }, // CC's, @1570
         { 11, seqpoint, 0x003C, 0x20, 2, 0x222, false }, // WG's, @1C0C
+        { 11, seqpoint, 0x30055, 0x20, 2, 0x367, false }, // sequence 0x12's, @1D34
+        // The WM_WarpPoint sequence 0x12 shows (@1D58, on 0x367) to entry 77: +0x1E's radius, times 4, was 0, where the
+        // summit's other two have 0x1E (@1504, @154C).
+        { 11, 0x265, 0x3008C, 0x1E, 1, 0x1E, false },
         { 11, 0x15D, 0x2AB7, 0x3, 1, 0xDF & ~0x80, false }, // CC's column, @1358: also act 8
         { 11, 0x15D, 0x002C, 0x5, 1, 0xE4 & ~0x80, false }, // WG's column, @1AB0: also act 9
     };
@@ -677,8 +683,9 @@ extern "C" void dino_krazoa_warlock(uint8_t* rdram, recomp_context* ctx) {
 }
 
 // us.toml's hooks in WL_seqpoint's release events (dll611), before the player's export 0xA0 takes CC's mask (0x8D4)
-// and WG's (0x778) back: GP's and NW's releases play those sequences.
-extern "C" void dino_krazoa_release_mask(uint8_t*, recomp_context* ctx) {
+// and WG's (0x778) back: GP's and NW's releases play those sequences, and WG's in act 7 sets 0x366, which plays
+// sequence 0x12 (seqpoint @1D34).
+extern "C" void dino_krazoa_release_mask(uint8_t* rdram, recomp_context* ctx) {
     if (warlock_act == 8) {
         ctx->r5 = 0x10;
     }
@@ -687,6 +694,10 @@ extern "C" void dino_krazoa_release_mask(uint8_t*, recomp_context* ctx) {
     }
     if (logging) {
         fprintf(stderr, "krazoa: act %d release takes mask 0x%X\n", warlock_act, (int)ctx->r5);
+    }
+    if (warlock_act == 7 && shrines_restored()) {
+        Calls calls(rdram, ctx);
+        set(rdram, ctx, after_shrines, 1);
     }
 }
 
