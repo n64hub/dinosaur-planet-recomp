@@ -95,7 +95,6 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   0x1D1, which took the spirit away, and its win set no act 7; Golden Plains' exit went to Diamond Bay's pad.
 - Cape Claw's test waited for 0x5B2, which nothing sets; it reads its one SabreBaddie's kill bit 0x1E7, as Discovery
   Falls' (dll433) reads its baddie's.
-- Golden Plains' pad (map 9, own entry 31) sends to the empty entry 32, which goes to GP's shrine (42).
 
 ### Krazoa Tablets
 
@@ -217,7 +216,8 @@ ROM's way. "(?)" marks a reading not checked in full.
   0xBF, task 10, which the Queen sets, drives two HitAnimators in group 6 beside 34841 (?).
 - **The shrines' ways in** (Krazoa Shrines): a Transporter beside Walled City's Sun and Moon stones (EC, shown by
   0x264, which WCInvUseObj sets), Cape Claw's tablet receptacles (CC, 0x318), Willow Grove's sundial (WG, 0x221) and
-  where Northern Wastes is entered (NW, 0x21E, ours); Golden Plains' pad to entry 32. The return entries are filled
+  where Northern Wastes is entered (NW, 0x21E, ours); Golden Plains' pad (map 9, own entry 31) sent to the empty entry
+  32, which goes to GP's shrine (42). The return entries are filled
   with those places: 65 NW, 67 WG, 68 EC, 70 GP, 71 CC. Cascade: CC's lands in the tablet room (0x2C0). The ROM
   offers: a WarpPoint 33514 to 65 on 0x5C2 and one 32857 to 67 (?). **Clash:** entry 68 is not empty: it holds
   (319, -371, -959), in the Swap Store's cells, and EC's own Transporter sends there.
