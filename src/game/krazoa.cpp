@@ -39,7 +39,8 @@
 //   (object 0xEC, dll334: +0x19 its own entry, +0x1A where it sends, +0x20 the bit that shows it) beside the place in
 //   their area the ROM ties to the shrine: EC's between Walled City's Sun and Moon stones; CC's by Cape Claw's three
 //   Krazoa tablet receptacles; WG's by Willow Grove's sundial; NW's where Northern Wastes is entered. Each shows once
-//   the spirit before it in the act order is released, EC's once the Moon Stone is placed.
+//   the spirit before it in the act order is released, EC's once both stones are in the TRex statues' sockets (once
+//   the Moon Stone is picked up with Third SpellStone on Original, where the sockets never load).
 // - EC's is the ROM's own pad, moved. Map 36, the EarthWalker Temple, an older layout of Walled City's temples (its
 //   Sun and Moon stones, dial, bridge and aperture, in older placement formats), places a Transporter (@00C7) at
 //   (319, -371, -959), own entry 68, to 40, ECShrine's, whose pad sends back to 68: entry 68 holds that spot. The
@@ -632,6 +633,19 @@ extern "C" void dino_krazoa_place_objects(uint8_t* rdram, recomp_context* ctx) {
                 fprintf(stderr, "krazoa: the red Krazoa sends the player to Drakor (entry %d)\n", drakor_entry);
             }
         }
+    }
+    // EC's Transporter (extras[0]) stands once both stones are in the TRex statues' sockets, the task list's "used Sun
+    // and Moon Stones to open shrine": Walled City's act 2 loads the sockets (dll785), and each sets its done bit at
+    // its sequence's event 1 (0x202 the sun's, 0x243 the moon's, dll785_0634). It is placed once the sun's is set and
+    // shows at the moon's, which the moon's socket takes either first or second. Without that act (Third SpellStone on
+    // Original) it stands once the Moon Stone is picked up (0x264), from the moon temple.
+    Extra& ec = extras[0];
+    if (!ec.placed) {
+        bool sockets = dino::third_stone_restored();
+        int show = sockets ? 0x243 : 0x264;
+        ec.needs = !sockets ? 0x264 : get(rdram, ctx, 0x202) ? 0x243 : 0x202;
+        ec.params[8] = (uint8_t)(show >> 8);
+        ec.params[9] = (uint8_t)show;
     }
     for (Extra& e : extras) {
         if (word(rdram, map_structs + 4 * e.map) == 0) {

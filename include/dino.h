@@ -25,12 +25,16 @@ namespace dino {
     void story_start(uint8_t* rdram, recomp_context* ctx);
     void story_report(uint8_t* rdram, recomp_context* ctx, double seconds);
     void story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds);
+    void story_set_time(const char* arg);
+    void story_timed_time(uint8_t* rdram, recomp_context* ctx, double seconds);
     bool story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
-        bool ride, float* stick_x, float* stick_y);
+        bool ride, float* stick_x, float* stick_y, int match = -1, int match_oid = 0, int match_from = 0);
     // --input's sync near: whether a drawn object of that id is within reach of (x, z).
-    bool story_object_near(uint8_t* rdram, int oid, float x, float z, float reach);
+    bool story_object_near(uint8_t* rdram, recomp_context* ctx, int oid, float x, float z, float reach);
     // --input's sync act: whether a drawn object of that id is in that act of its state machine.
     bool story_object_act(uint8_t* rdram, int oid, int act);
+    // --input's sync state: whether an object of that id within reach of (x, z) has that value in a byte of its state.
+    bool story_object_state(uint8_t* rdram, int oid, float x, float z, float reach, int offset, int mask, int value);
     // DINO_CHECK_HEAP (heap.cpp, development).
     void heap_check(uint8_t* rdram, double seconds);
 

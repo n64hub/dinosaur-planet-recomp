@@ -1,5 +1,5 @@
-// --story, --place and --bits (development, src/main/main.cpp reads them): start a run from a chosen point of the
-// story, for what a warp can't set. --watch-bits says each time the game sets a bit, for what a test changes. docs/story-points.md lists the points and what each bit is, with its evidence from
+// --story, --place, --bits and --time (development, src/main/main.cpp reads them): start a run from a chosen point of
+// the story, for what a warp can't set. --watch-bits says each time the game sets a bit, for what a test changes. docs/story-points.md lists the points and what each bit is, with its evidence from
 // the ROM.
 //
 // The story is the game's bits: func_80014670 sets one and func_800147EC reads one, a number that the table in ROM file
@@ -33,6 +33,13 @@ extern "C" void dino_dragon_rock_warp_entry(uint8_t* rdram, recomp_context* ctx)
 
 namespace {
     constexpr int32_t dll29_handle = 0x8008C9F4; // the pointer the game keeps to its loaded dll29
+    // dll7, the sky and the time of day: its export 9 sets the time (f12, in seconds of a day of 86400, taken modulo a
+    // day; dll7 0xEA0-0xF18), which it keeps at +0xC0 of its environment and copies into the save each frame
+    // (dll29's export 38, dll7 0xBEC), export 4 writes it to the float its $a0 points at (dll7 0xCDC), and export 8
+    // says night from 21:00 to 5:00 (75600 and 18000, dll7 0xDF4).
+    constexpr int32_t dll7_handle = 0x8008C980;
+    constexpr int dll7_get_time = 4;
+    constexpr int dll7_set_time = 9;
     constexpr int32_t save_pointer = 0x800AE2A0; // the save in dll29's bss, which func_80014670 writes to
     constexpr int32_t set_bit = 0x80014670;
     constexpr int32_t get_bit = 0x800147EC;
@@ -173,7 +180,8 @@ namespace {
         { "before-desert-force-point", krystal, -1, golden_plains_place, to_second_stone + second_stone_carried },
         { "before-walled-city", sabre, -1, walled_city_place,
             to_second_stone + second_stone + portal_spell + tricky_commands + darkice_flame },
-        { "before-third-stone", sabre, 66, {}, to_second_stone + second_stone + portal_spell + third_stone_carried },
+        { "before-third-stone", sabre, 66, {},
+            to_second_stone + second_stone + portal_spell + tricky_commands + darkice_flame + third_stone_carried },
         { "before-dragon-rock", krystal, -1, dragon_rock_place, four_spirits + second_stone + portal_spell + third_stone },
         { "after-dragon-rock", krystal, -1, golden_plains_place,
             four_spirits + second_stone + portal_spell + third_stone + fourth_stone_carried },
@@ -183,6 +191,9 @@ namespace {
     const StoryPoint* chosen = &points[0];
     std::vector<StoryBit> extra_bits;
     std::vector<StoryBit> timed_bits;
+    bool time_due = false;
+    float time_hours = 0.0f;
+    double time_at = 0.0;
     int chosen_warp = -1;
     std::vector<int> watched_bits;
     bool watch_all_bits = false;
@@ -324,6 +335,31 @@ void dino::story_timed_bits(uint8_t* rdram, recomp_context* ctx, double seconds)
     }
 }
 
+// --time <hour>[@<seconds>]: the time of day from then on, once the --input clock reaches that time (the story's start
+// by default) and there is a player in a level, for a test of what plays only at night.
+void dino::story_set_time(const char* arg) {
+    time_hours = (float)atof(arg);
+    const char* at = strchr(arg, '@');
+    time_at = at != nullptr ? atof(at + 1) : 0.0;
+    time_due = true;
+}
+
+void dino::story_timed_time(uint8_t* rdram, recomp_context* ctx, double seconds) {
+    int32_t handle = word(rdram, dll7_handle);
+    if (!time_due || seconds < time_at || handle == 0 || word(rdram, save_pointer) == 0) {
+        return;
+    }
+    call(rdram, ctx, player_object);
+    if (ctx->r2 == 0) {
+        return;
+    }
+    time_due = false;
+    int32_t table = word(rdram, handle);
+    ctx->f12.fl = time_hours * 3600.0f;
+    call(rdram, ctx, word(rdram, table + 4 + 4 * dll7_set_time));
+    fprintf(stderr, "--time: %.2f h at %.1f s\n", time_hours, seconds);
+}
+
 void dino::story_set_warp(int index) {
     chosen_warp = index;
 }
@@ -339,6 +375,7 @@ void dino::story_forget() {
     extra_bits.clear();
     timed_bits.clear();
     place_given = false;
+    time_due = false;
 }
 
 void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
@@ -404,9 +441,11 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 // mouth, or toward a place of more than 15 within 300 units, where it would circle it for good, and to 0.4 within 150
 // units of a place, so a turn there is made (toward an object it stays full: a ram needs the speed). A bike no nearer
 // its target in 3 s (pinned on a rise, or sliding along a wall in a turn it can't make) turns at full lock for 1.2 s
-// and comes round.
+// and comes round. With match other than -1, only toward an object whose state byte at that offset (obj+0xB8) holds
+// what the first object of id match_oid holds at match_from: the cup of ECSH_Shrine's shell game (dll470's index at
+// +0x23) that hides what the shrine drew (dll469's +0x1A).
 bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere, float to_x, float to_z, float reach,
-    bool ride, float* stick_x, float* stick_y) {
+    bool ride, float* stick_x, float* stick_y, int match, int match_oid, int match_from) {
     *stick_x = 0.0f;
     *stick_y = 0.0f;
     float fx, fz;
@@ -428,9 +467,24 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
     if (oid != -1) {
         float best = -1.0f;
         gpr all = (gpr)MEM_W(0, (gpr)objects);
+        int wanted = -1;
+        for (int i = 0; match != -1 && wanted == -1 && all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+            gpr object = MEM_W(i * 4, all);
+            gpr state = object != 0 && (int16_t)MEM_H(0x46, object) == match_oid ? (gpr)MEM_W(0xB8, object) : 0;
+            if (state != 0) {
+                wanted = MEM_BU(match_from, state);
+            }
+        }
+        if (match != -1 && wanted == -1) {
+            return false;
+        }
         for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
             gpr object = MEM_W(i * 4, all);
             if (object == 0 || object == player || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+                continue;
+            }
+            gpr state = match != -1 ? (gpr)MEM_W(0xB8, object) : 0;
+            if (match != -1 && (state == 0 || MEM_BU(match, state) != wanted)) {
                 continue;
             }
             float ox, oz;
@@ -539,8 +593,21 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
 }
 
 // --input's sync near lines (src/main/main.cpp): whether a drawn object of that id (as story_steer chases) stands
-// within reach of (x, z) on the ground.
-bool dino::story_object_near(uint8_t* rdram, int oid, float x, float z, float reach) {
+// within reach of (x, z) on the ground. 0 is the player, whichever character plays (Sabre's object id is 0, Krystal's
+// is not), drawn or not.
+bool dino::story_object_near(uint8_t* rdram, recomp_context* ctx, int oid, float x, float z, float reach) {
+    if (oid == 0) {
+        call(rdram, ctx, player_object);
+        gpr player = (gpr)(int32_t)ctx->r2;
+        if (player == 0) {
+            return false;
+        }
+        uint32_t wx = MEM_W(0x18, player), wz = MEM_W(0x20, player);
+        float px, pz;
+        memcpy(&px, &wx, 4);
+        memcpy(&pz, &wz, 4);
+        return (px - x) * (px - x) + (pz - z) * (pz - z) <= reach * reach;
+    }
     gpr all = (gpr)MEM_W(0, (gpr)objects);
     for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
         gpr object = MEM_W(i * 4, all);
@@ -576,6 +643,29 @@ bool dino::story_object_act(uint8_t* rdram, int oid, int act) {
     return false;
 }
 
+// --input's sync state lines: whether an object of that id within reach of (x, z), drawn or not (a laser's +0x36 is
+// 0), holds that value, under that mask, in the byte at that offset of its state (obj+0xB8): a timed hazard's phase,
+// such as a laser's beam (dll788, +0x34 nonzero while it is live).
+bool dino::story_object_state(uint8_t* rdram, int oid, float x, float z, float reach, int offset, int mask, int value) {
+    gpr all = (gpr)MEM_W(0, (gpr)objects);
+    for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
+        gpr object = MEM_W(i * 4, all);
+        if (object == 0 || (int16_t)MEM_H(0x46, object) != oid) {
+            continue;
+        }
+        uint32_t wx = MEM_W(0x18, object), wz = MEM_W(0x20, object);
+        float ox, oz;
+        memcpy(&ox, &wx, 4);
+        memcpy(&oz, &wz, 4);
+        gpr state = (gpr)MEM_W(0xB8, object);
+        if (state != 0 && (ox - x) * (ox - x) + (oz - z) * (oz - z) <= reach * reach &&
+            (MEM_BU(offset, state) & mask) == value) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Once a second, what an unattended run needs to tell where the player is and whether the player lives.
 void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     int32_t save = word(rdram, save_pointer);
@@ -598,8 +688,28 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     ctx->f12.fl = fx;
     ctx->f14.fl = fz;
     call(rdram, ctx, map_at);
-    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d\n", seconds, (int32_t)ctx->r2, fx, fy,
-        fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats), (int16_t)MEM_H(6, stats));
+    int32_t map = (int32_t)ctx->r2;
+    // The player's act in dll18's state machine (state +0x26C, as story_object_act reads an enemy's): a jump, a fall or
+    // a climb tells by it.
+    gpr player_state = (gpr)(int32_t)MEM_W(0xB8, (gpr)object);
+    int act = player_state != 0 ? (int16_t)MEM_H(0x26C, player_state) : -1;
+    // The time of day, in hours (-1 with no sky loaded).
+    float hours = -1.0f;
+    int32_t sky = word(rdram, dll7_handle);
+    if (sky != 0) {
+        gpr sp = ctx->r29;
+        ctx->r29 -= 0x20;
+        ctx->r4 = ctx->r29 + 0x10;
+        MEM_W(0x10, ctx->r29) = 0;
+        call(rdram, ctx, word(rdram, word(rdram, sky) + 4 + 4 * dll7_get_time));
+        uint32_t t = MEM_W(0x10, ctx->r29);
+        memcpy(&hours, &t, 4);
+        hours /= 3600.0f;
+        ctx->r29 = sp;
+    }
+    fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d, %.2f h, act %d\n", seconds, map,
+        fx, fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats),
+        (int16_t)MEM_H(6, stats), hours, act);
     // DINO_REPORT_OBJECT=<object id hex>: where each object of that id is too, for an enemy a script times by, with
     // its act (dll18's, at state +0x26C, for a character that runs on it) and its use flags (obj+0xAF), and "unseen"
     // while its byte +0x36 is 0: the game's targeting (dll2 0x1FA0) passes such an object over, so A never uses it.
@@ -615,11 +725,12 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
         if (other == 0 || (int16_t)MEM_H(0x46, other) != oid) {
             continue;
         }
-        uint32_t ox = MEM_W(0x18, other), oz = MEM_W(0x20, other);
+        uint32_t ox = MEM_W(0x18, other), oy = MEM_W(0x1C, other), oz = MEM_W(0x20, other);
         memcpy(&fx, &ox, 4);
+        memcpy(&fy, &oy, 4);
         memcpy(&fz, &oz, 4);
         gpr state = (gpr)MEM_W(0xB8, other);
-        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f act %d use 0x%02X%s\n", seconds, oid, fx, fz,
+        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f %.0f act %d use 0x%02X%s\n", seconds, oid, fx, fy, fz,
             state != 0 ? (int16_t)MEM_H(0x26C, state) : -1, MEM_BU(0xAF, other),
             MEM_BU(0x36, other) == 0 ? " unseen" : "");
         // Its focus point, where A uses it: the player within 4 x the reach byte of it, across the ground and 100 up or

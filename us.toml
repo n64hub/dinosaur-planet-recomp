@@ -764,6 +764,52 @@ func = "dll637_02E0"
 before_vram = 0x90255D3C
 text = '{ void dino_moonseeds_stone_placed(uint8_t*, recomp_context*); dino_moonseeds_stone_placed(rdram, ctx); }'
 
+# The meteor (src/game/moonseeds.cpp): MMP_moonrock's vent count (dll445_0628 0xA14), once it has set or cleared 0x89B,
+# sets the meteor's sequence trigger nothing else sets.
+[[patches.hook]]
+func = "dll445_0628"
+before_vram = 0x901DDE00
+text = '{ void dino_moonseeds_meteor(uint8_t*, recomp_context*); dino_moonseeds_meteor(rdram, ctx); }'
+
+# The Pointback mother's second egg (src/game/diamond_bay.cpp, whose header has the evidence), on Restored:
+# DB_FlameSwitch's update (dll689_0130), which rises once the mother's first act-2 step has set its unread +0x20 bit,
+# its test of what hit it (dll689 0x1C8), which takes Tricky's flame in the column it rose through as a hit, and
+# DBlgtbeam's test of whether Sabre stands on it (dll677_1164, its two multiplies by the cosine and sine of its yaw),
+# which takes them without their sign.
+[[patches.hook]]
+func = "dll689_0130"
+before_vram = 0x9027EC5C
+text = '{ void dino_diamond_bay_flame_switch(uint8_t*, recomp_context*); dino_diamond_bay_flame_switch(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll689_0130"
+before_vram = 0x9027ECF4
+text = '{ void dino_diamond_bay_flame_switch_hit(uint8_t*, recomp_context*); dino_diamond_bay_flame_switch_hit(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll677_1164"
+before_vram = 0x90275604
+text = '{ void dino_diamond_bay_beam_reach(uint8_t*, recomp_context*); dino_diamond_bay_beam_reach(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll677_1164"
+before_vram = 0x90275694
+text = '{ void dino_diamond_bay_beam_reach(uint8_t*, recomp_context*); dino_diamond_bay_beam_reach(rdram, ctx); }'
+
+# Walled City's moon temple (src/game/temples.cpp, whose header has the evidence), on Third SpellStone's Restored: the moon
+# symbol's reach takes Sabre on the lift's top, 200.25 from it.
+[[patches.hook]]
+func = "dll787_00FC"
+before_vram = 0x902CD25C
+text = '{ void dino_temples_symbol_reach(uint8_t*, recomp_context*); dino_temples_symbol_reach(rdram, ctx); }'
+
+# The temples' bridges (src/game/temples.cpp), on Third SpellStone's Restored: WCTempleBridge's export 5 (dll790_04B8)
+# returns 0 at its end, so that the bridge loads its collision model as well as the one it draws.
+[[patches.hook]]
+func = "dll790_04B8"
+before_vram = 0x902CF050
+text = '{ void dino_temples_bridge_models(uint8_t*, recomp_context*); dino_temples_bridge_models(rdram, ctx); }'
+
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
