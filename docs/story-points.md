@@ -776,7 +776,7 @@ on a floor and no crash; it says nothing about what the level needs further in.
 
 Cape Claw has no entry: `before-sand-worm` and `--place` go there. On Krazoa Shrines' Restored, 77 is filled at Cape
 Claw's act 9 setuppoint (1389, 159, 16954), where Warlock Mountain's sequence 0x12 sends the player after Willow
-Grove's release: it sets Cape Claw's act 9 (0xEE), 0x367, which shows the WM_WarpPoint to 77 at (13435, 451, 1642),
+Grove's release: it sets Cape Claw's act 9 (0xEE), 0x367, whose WM_WarpPoint (radius 0) warps the player to 77 at once,
 and 0x368, and clears 0x366 (docs/restored-content.md).
 
 ## Choices

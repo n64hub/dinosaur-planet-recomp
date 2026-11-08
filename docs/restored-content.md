@@ -104,10 +104,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   Falls' (dll433) reads its baddie's.
 - After the shrines (PR PRNUM): Warlock Mountain's act 7, WG's, places WL_seqpoint 30055 beside WG's release, playing
   sequence 0x12 once 0x366 is set (mode 1), and acts 6 and 7 count 0x366 as the release done. Sequence 0x12 is the
-  only code that sets Cape Claw's act 9 (dll611 0x664), and it sets 0x367, which shows WM_WarpPoint 3008c to entry 77.
-  Nothing sets 0x366: WG's release does (part 3). 30055's done bit was bit 0, shared, and is 0x367; 3008c's radius was
-  0, where the summit's other two have 0x1E, and is 0x1E. Cape Claw's act 9 holds act 2's objects and one setuppoint
-  of its own, e7b, by its west entrance: entry 77 is filled there.
+  only code that sets Cape Claw's act 9 (dll611 0x664), and it sets 0x367, which shows WM_WarpPoint 3008c to entry 77,
+  and in its mode 2 a radius of 0 warps at once, at any distance (dll275 0x3E0). Nothing sets 0x366: WG's release does
+  (part 3). 30055's done bit was bit 0, shared, and is 0x367. Cape Claw's act 9 holds act 2's objects and one
+  setuppoint of its own, e7b, by its west entrance: entry 77 is filled there.
 
 ### Krazoa Tablets
 

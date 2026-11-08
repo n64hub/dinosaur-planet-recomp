@@ -18,9 +18,10 @@
 //   and WG's spirits again on every visit. Acts 8 and 9 have no handler.
 // - 0x366 is the trigger of a mode 1 seqpoint (@1D34, sequence 0x12, done bit 0) placed in act 7 only, beside WG's
 //   release (@1C0C). Sequence 0x12's event (dll611 0x630) is the only code that sets Cape Claw's act 9 (map 0x1D), and
-//   it sets 0x367 and 0x368 and clears 0x366. 0x367 shows a WM_WarpPoint (dll275, @1D58: +0x1A where it sends, +0x1E its
-//   radius in 4s) to entry 77, empty in ROM file 30, whose radius is 0 where the summit's other two have 0x1E (@1504,
-//   @154C). Cape Claw's act 9 loads act 2's objects and adds one setuppoint (map 29 uid E7B), by its west entrance.
+//   it sets 0x367 and 0x368 and clears 0x366. 0x367 shows a WM_WarpPoint (dll275, @1D58: +0x1A where it sends, +0x1D
+//   its mode, +0x1E its radius in 4s) to entry 77, empty in ROM file 30: in mode 2 a radius of 0 skips the distance
+//   (0x3E0), so it warps the moment 0x367 is set, wherever the player is. Cape Claw's act 9 loads act 2's objects and
+//   adds one setuppoint (map 29 uid E7B), by its west entrance.
 // - A WL_seqpoint (dll611, object 0x25F: +0x18 yaw, +0x19 mode, +0x1A radius, +0x1C its sequence, +0x1E trigger bit,
 //   +0x20 done bit) at each spirit's site plays the release when the player walks in with its trigger bit set (mode 2),
 //   or clear, setting it (mode 3). The sequence's last event takes the mask back and sets the released bits (dll611
@@ -61,8 +62,8 @@
 //   0x12 clears it, so it could not keep a second visit from giving the spirit again. The done bits of MM's, EC's, CC's
 //   and WG's seqpoints become their released bits.
 // - After the shrines: WG's release, taking its mask back in act 7, sets 0x366, so sequence 0x12 plays, sets Cape
-//   Claw's act 9 and shows the warp point to 77. Its seqpoint's done bit becomes 0x367, the warp point's radius 0x1E,
-//   and entry 77 is filled at Cape Claw's act 9 setuppoint.
+//   Claw's act 9 and warps the player to 77. Its seqpoint's done bit becomes 0x367, and entry 77 is filled at Cape Claw's
+//   act 9 setuppoint.
 // - Cape Claw's test (dll486) waited for 0x5B2, a bit nothing sets, where its one SabreBaddie's kill bit is 0x1E7: it
 //   reads and resets 0x1E7 (us.toml).
 //
@@ -385,9 +386,6 @@ namespace {
         { 11, seqpoint, 0x2AC7, 0x20, 2, 0x221, false }, // CC's, @1570
         { 11, seqpoint, 0x003C, 0x20, 2, 0x222, false }, // WG's, @1C0C
         { 11, seqpoint, 0x30055, 0x20, 2, 0x367, false }, // sequence 0x12's, @1D34
-        // The WM_WarpPoint sequence 0x12 shows (@1D58, on 0x367) to entry 77: +0x1E's radius, times 4, was 0, where the
-        // summit's other two have 0x1E (@1504, @154C).
-        { 11, 0x265, 0x3008C, 0x1E, 1, 0x1E, false },
         { 11, 0x15D, 0x2AB7, 0x3, 1, 0xDF & ~0x80, false }, // CC's column, @1358: also act 8
         { 11, 0x15D, 0x002C, 0x5, 1, 0xE4 & ~0x80, false }, // WG's column, @1AB0: also act 9
     };
