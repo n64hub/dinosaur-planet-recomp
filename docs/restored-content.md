@@ -46,10 +46,11 @@ Always on, so each setting's Original has them too.
 - More than 40 map blocks at once at Dragon Rock's top's east end (us.toml, func_80041E84; PR 36).
 - An item's scene started again every frame, crashing in dll3_8900 (us.toml, dll210_16220; PR 39).
 - Walled City's pressure switches writing past their list (us.toml, dll781_05DC, `patches/walled_city.c`; PR 39).
+- CloudRunner Fortress's slide doors set up with no player, as a save made with the upper level open (0x458's group
+  4) loads: the door starts shut (us.toml, dll393_0018; PR 49).
 
 Open:
 
-- CFMainSlideDoor (dll393) when CloudRunner Fortress's group 4 loads with no player.
 - Falling into Walled City's moon temple's pit, which crashes making the player's side food bag.
 - The skeletons' hits.
 
