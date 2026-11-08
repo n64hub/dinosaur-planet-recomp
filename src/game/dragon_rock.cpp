@@ -35,10 +35,13 @@
 //   in map 43 has already set by then.
 //
 // What Restored changes:
-// - The way in and out: in the arena on layer -1 once 0x609 is set and the dragon isn't beaten, the player is warped
-//   by entry 89, filled with the room's setuppoint (uid 0x3534A); in the room 3 s after the stone is picked up, by entry
-//   84, filled with the arena's middle (TriggerPlane uid 0x33F78), on layer -1. The main thread's loop asks each pass
-//   (us.toml's hook on func_800145AC), and the warp fades as the game's own do. The same hook fills the arena's magic.
+// - The way in and out: at the arena's north wall on layer -1, under the room's entrance, once 0x609 is set and the
+//   dragon isn't beaten, the player is warped by entry 89, filled with the room's setuppoint (uid 0x3534A); in the room
+//   3 s after the stone is picked up, by entry 84, filled with the arena's middle (TriggerPlane uid 0x33F78), on layer
+//   -1. The main thread's loop asks each pass (us.toml's hook on func_800145AC), and the warp fades as the game's own
+//   do. The same hook fills the arena's magic. The way in waits for the wall, not the win, because the ROM frees the
+//   Earth Warrior after the win: DR_EarthWarrior reads the win (0x628) only while he is shackled (dll713 0x0508), and
+//   0x5FD, which frees him, is DR_NiceSharpy's on the gallery above, fed meat from the gallery's crates.
 // - The health's store (0x1BB8): at 0 the dragon is beaten. A CRSpellstone is placed at the player, its +0x1E 0x7A8
 //   and +0x20 0x5F4 (the stone placed at the Desert Force Point), and picked up there at once.
 // - The dragon's and the Nurse's updates: once it is beaten (0x7A8 or 0x5F4 set, so on every later visit too) each is
@@ -182,6 +185,9 @@ namespace {
     // 0) over the same ground.
     const Box arena = { 1300.0f, 2500.0f, -1900.0f, -1700.0f, -6750.0f, -5900.0f };
     const Box room = { 1280.0f, 2560.0f, -2100.0f, -1600.0f, -7040.0f, -5700.0f };
+    // The arena's north wall, under the room's entrance: map 53's TriggerPlane 0x41AF3 at (2009, -1769, -5955), which
+    // sets 0x4D7 for the KD_Sequences as the player comes in from the north.
+    const Box north_wall = { 1860.0f, 2160.0f, -1900.0f, -1700.0f, -6060.0f, -5900.0f };
 
     // The two warp entries, empty in ROM file 30: the room's setuppoint (map 53 @0000), and the arena where the
     // bottom's TriggerPlane 33F78 stands. +0xC and +0xE hold -1 for layer -1, as entry 88's do.
@@ -404,8 +410,8 @@ extern "C" void dino_earth_warrior(uint8_t* rdram, recomp_context* ctx) {
 }
 
 // us.toml's hook at the start of func_800145AC, once a pass of the main thread's loop: the warp the door takes now, or
-// -1. In the arena once it is won and the dragon isn't, into the room; in the room 3 s after the SpellStone is
-// picked up, back to the arena.
+// -1. At the arena's north wall once the arena is won and the dragon isn't, into the room; in the room 3 s after the
+// SpellStone is picked up, back to the arena.
 extern "C" int dino_dragon_rock_door(uint8_t* rdram, recomp_context* ctx) {
     if (!restored()) {
         return -1;
@@ -434,7 +440,7 @@ extern "C" int dino_dragon_rock_door(uint8_t* rdram, recomp_context* ctx) {
         if (!get(rdram, ctx, arena_fight_won)) {
             fill_magic(rdram, ctx, player);
         }
-        if (get(rdram, ctx, arena_won) && !beaten(rdram, ctx)) {
+        if (north_wall.holds(x, y, z) && get(rdram, ctx, arena_won) && !beaten(rdram, ctx)) {
             warp = into_room;
         }
     }
