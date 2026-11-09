@@ -230,14 +230,17 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 - CFTreasWindLift's direction is 0x8C8, which only the two CFWindSwitch levers at the bottom flip, so a player from
   the top hovers at the corridor's height and can't get down. How she gets down is a choice (part 3).
+- Map 15 places no barrel, and the tunnel to its chest of item 0x336, the master chest's, takes only a barrel's blast,
+  so one has to come down the shaft. When the lift carries one is a choice (part 3).
 
 ### Baby CloudRunners
 
 `src/game/cloudrunner.cpp`; PR 38.
 
 - A waiting CFCloudBaby comes out only when Kyte's export 24 says yes, a flag of hers set as she reaches a find node
-  (node types 8, 9, 21 and 22), and nothing sends her to the find nodes beside the babies, so four of the five never
+  (node types 8, 9, 21 and 22), and nothing sends her to the find nodes beside the babies, so three of the five never
   come out. When she is sent there is a choice (part 3).
+- 29FA waits on a balcony of the hall east of the courtyard that nothing reaches. Where it waits is a choice (part 3).
 
 ### Wind Bridge
 
@@ -364,8 +367,9 @@ What changes, in the order it is built, the redone choices first:
   find group as Krystal comes within its near radius (+0x18), and Kyte's own path code does the rest; the baby comes
   out once Krystal steps back from its call (played: 236A and 29B3 found and rescued). FindKyteObject
   31858 by 236A sends her to 0xF, a node not linked to 0x10 (?). Map 30's baby (2b25) starts found, and map 15's
-  (31b9c) comes out of the master chest (CFSupTreasureCh 31d0d) to item 0x336: both the ROM's own. 29FA's ledge
-  (group 21, loaded by TriggerPoint 31bf3 at the baby, rescue reach 30) has no way up found: the choice left.
+  (31b9c) comes out of the master chest (CFSupTreasureCh 31d0d) to item 0x336: both the ROM's own (played). 29FA's
+  balcony (group 21, loaded by TriggerPoint 31bf3 at the baby, rescue reach 30) has no way up: built, the baby and its
+  TriggerPoint wait on the hall's floor west of it (Where 29FA waits, below; played).
 - **The gold** (a bug, not a choice): PerchObject 429d8's chain is whole (0x46E to 0xC0, curve 429D9, message 5,
   0x8D1). Kyte didn't land because sideload 31877 makes her on the deck, whose curves (group 0x11) join none of the
   other 338, so she can't find a path to 0xC0. Played first with Kyte following from the corridor; if her joining
@@ -540,9 +544,14 @@ open: the logs.
 - **The place's group** (Desert Force Point): group 7 on while the player is between y -1300 and -1200. The ROM offers:
   the planes at (955, -1435, 8973) and (1896, -1459, 8623), which turn it on.
 - **The treasure lift's way down** (Treasure Lift): 0x8C8 set as the wind starts with the player more than 150 above
-  its base and not carrying. 0x8C8: CFWindSwitch (dll386) sets, dll370 reads. Cascade: the treasure caves (map 15).
-  The ROM offers: the levers only. The race isn't reached this way (the bottom's east is a grate) but by the pool on
-  0x4BE.
+  its base and not carrying, or carrying once 0x2E1 (the courtyard roof blown) is set: the roof needs no more barrels,
+  and map 15's tunnel needs one. 0x8C8: CFWindSwitch (dll386) sets, dll370 reads. Cascade: the treasure caves
+  (map 15), a barrel to tunnel 31b7a (0x330, 0x33A, the chest's item 0x336, the master chest's baby). The ROM offers: the
+  levers only. The race isn't reached this way (the bottom's east is a grate) but by the pool on 0x4BE.
+- **Where 29FA waits** (Baby CloudRunners): 29FA (map 12's group 21) and TriggerPoint 31bf3, which loads that group,
+  are put at (-11170, 1866, 18604) on the hall's floor west of their balcony, 183 above it, as map 12 loads (a hook at
+  func_80045BF4's end). Kyte's find nodes on the balcony (0x28) are 200 from there. The ROM offers: no ladder, lift
+  or ledge to the balcony (the hall's CFWindLifts rise to 2080 and 2200, and `cfliftplat` has no placement).
 - **When Kyte finds a baby** (Baby CloudRunners): as Krystal comes within a waiting baby's +0x18, 0x46E is set to the
   group of the find node nearest it (within 400), and put back as it is rescued (state 0xC) unless something set it
   since.

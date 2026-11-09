@@ -21,7 +21,14 @@
 // What Restored changes: when the wind starts with the player at the top (more than 150 above the lift's base), 0x8C8
 // is set, so the lift lowers her and lets her go at the bottom. Either lever there turns it back to up for the way
 // back, as the ROM has it, and a player who steps in at the bottom rides up to the top and steps off on either side. A
-// player who carries something (a barrel, for the courtyard roof: cloudrunner_barrels.cpp) is left to the wind.
+// player who carries something (a barrel, for the courtyard roof: cloudrunner_barrels.cpp) is left to the wind until
+// the roof is blown (0x2E1), and lowered from then on: the roof needs no more barrels, and the treasure caves need one.
+// There CFBlastedTunnel (dll389, map 15's 31B7A, by the treasure chest) takes only a hit of type 5, a CFbarrel's blast,
+// and sets 0x330; CFExplodeTunnel (dll390, 31B76) then blows and sets 0x33A, which frees the chest (dll399, 31B9B) the
+// GuardClaw beside it holds (dll399 0x0410-0x0468; no hit hurts the guard: dll217's damage table D_3058 is zeros), and
+// A at the chest gives item 0x336, the master chest's (dll396), whose baby is the fifth. Map 15 places no barrel, and a
+// CFbarrel comes back where it blew about 10 s later (dll388 0x039C-0x04B4), so one is carried down from the fortress.
+// On Original a player carrying one falls to the bottom (cloudrunner_barrels.cpp), so there it reaches the caves.
 //
 // The baby CloudRunners (setting Baby CloudRunners), read from the ROM:
 // - CFCloudBaby (dll373) keeps its state at its state's +0xAC, from its placement's +0x1C (or +0x20 once the bit at
@@ -45,6 +52,14 @@
 // nearest the baby (within 400; dll26's table holds the map's curves), and Kyte's own path code flies her there, where
 // her flag brings it out once Krystal steps back from its call. Once the baby is rescued 0x46E goes back to what it
 // was, unless something has set it since.
+// - 29FA waits on a balcony of the hall east of the courtyard, 183 above its floor (local (-1491, 2049, 44)), walled on
+//   its east and open on its other three sides; nothing in the ROM reaches it (no ladder, lift or ledge joins it: the
+//   hall's wind lifts, CFWindLift 964 and 95D, rise to 2080 and 2200). TriggerPoint 31BF3 there loads its group 21 as
+//   the player crosses into its radius, twice its +0x3A (240), which reaches the floor below: on the prototype the baby
+//   loads and calls from the balcony, out of reach (played). On Restored the baby and the TriggerPoint are placed on
+//   the hall's floor just west of the balcony (ledge_moves), where every other part works as the ROM has it: Kyte's
+//   find nodes on the balcony (0x28) are 200 from it. Played from sideload 42a06 by the pool: the trigger turned group
+//   21 on, its call sent Kyte to the balcony, it came out as Krystal stepped back, and A beside it rescued it (0x252).
 //
 // The deck (always on), read from the ROM:
 // - Kyte flies only along curves joined to the one her path started from. Her path starts (dll212_0CE8, while her
@@ -116,6 +131,20 @@ namespace {
     constexpr int wind_on = 0x30D;
     constexpr int wind_down = 0x8C8;
     constexpr float from_the_top = 150.0f;
+    constexpr int roof_blown = 0x2E1;
+
+    constexpr int fortress = 12;
+    constexpr int32_t loading_map = 0x800B96AC;  // the header func_80045BF4 has just loaded
+    // 29FA and its TriggerPoint, by their unique ids (+0x14), put on the hall's floor west of their balcony: +0x8, +0xC
+    // and +0x10 a placement's position, which func_80045BF4 has made world units (local (-1570, 1866, 44)).
+    struct Move {
+        uint32_t uid;
+        float x, y, z;
+    };
+    constexpr Move ledge_moves[] = {
+        { 0x29FA, -11170.0f, 1866.0f, 18604.0f },
+        { 0x31BF3, -11170.0f, 1866.0f, 18604.0f },
+    };
 
     void call(uint8_t* rdram, recomp_context* ctx, int32_t function) {
         LOOKUP_FUNC(function)(rdram, ctx);
@@ -222,7 +251,8 @@ void dino::add_cloudrunner_options(recomp::config::Config& general) {
         treasure_lift,
         "Treasure Lift",
         "In CloudRunner Fortress the wind lift past the blasted wall lowers a player who steps in from the top, the way "
-        "down to the treasure caves. <b>Original is the prototype as it was left</b>: from the top the wind only ever "
+        "down to the treasure caves, and once the courtyard roof is blown one carrying a barrel too. "
+        "<b>Original is the prototype as it was left</b>: from the top the wind only ever "
         "blows up, and the caves can't be reached.",
         treasure_lift_options,
         TreasureLift::Restored
@@ -230,8 +260,9 @@ void dino::add_cloudrunner_options(recomp::config::Config& general) {
     general.add_enum_option(
         cloud_babies,
         "Baby CloudRunners",
-        "In CloudRunner Fortress the baby CloudRunners Kyte's mother hid come out to be rescued once Kyte finds them. "
-        "<b>Original is the prototype as it was left</b>: four of the five never come out.",
+        "In CloudRunner Fortress the baby CloudRunners Kyte's mother hid come out to be rescued once Kyte finds them, "
+        "and the one on a balcony nothing reaches waits on the hall's floor below it. <b>Original is the prototype as "
+        "it was left</b>: three of the five never come out, and that one can't be reached.",
         treasure_lift_options,
         TreasureLift::Restored
     );
@@ -241,8 +272,10 @@ void dino::add_cloudrunner_options(recomp::config::Config& general) {
 // the direction bit), $s1 its placement (+0xC its y), $s0 the player.
 extern "C" void dino_treasure_lift_starts(uint8_t* rdram, recomp_context* ctx) {
     gpr state = ctx->r19, placement = ctx->r17, player = ctx->r16;
-    if (!restored() || player == 0 || (int32_t)MEM_W(0x4, state) != wind_on || (int32_t)MEM_W(0x8, state) != wind_down ||
-        dino::player_carries(rdram, (int32_t)player)) {
+    if (!restored() || player == 0 || (int32_t)MEM_W(0x4, state) != wind_on || (int32_t)MEM_W(0x8, state) != wind_down) {
+        return;
+    }
+    if (dino::player_carries(rdram, (int32_t)player) && get(rdram, ctx, roof_blown) == 0) {
         return;
     }
     float base = read_float(rdram, placement + 0xC);
@@ -395,4 +428,37 @@ extern "C" void dino_kyte_start_curve(uint8_t* rdram, recomp_context* ctx) {
             (uint32_t)MEM_W(0x14, off), MEM_HU(0x4, off), (uint32_t)MEM_W(0x14, curve));
     }
     ctx->r2 = off;
+}
+
+// us.toml's hook at the end of func_80045BF4 (beside dino_krazoa_map_loaded), which has loaded map $s0 and placed none
+// of its objects yet. On Baby CloudRunners' Restored, map 12's 29FA and its TriggerPoint are put on the hall's floor
+// (ledge_moves).
+extern "C" void dino_cloudrunner_map_loaded(uint8_t* rdram, recomp_context* ctx) {
+    if ((int32_t)ctx->r16 != fortress || !babies_restored()) {
+        return;
+    }
+    gpr header = (gpr)word(rdram, loading_map);
+    gpr list = (gpr)MEM_W(0x20, header);
+    int bytes = MEM_HU(0x8, header);
+    for (int at = 0; at < bytes;) {
+        gpr p = list + at;
+        int size = MEM_BU(2, p) * 4;
+        if (size == 0) {
+            break;
+        }
+        for (const Move& move : ledge_moves) {
+            if ((uint32_t)MEM_W(0x14, p) == move.uid) {
+                const float position[] = { move.x, move.y, move.z };
+                for (int i = 0; i < 3; i++) {
+                    uint32_t value;
+                    memcpy(&value, &position[i], sizeof(value));
+                    MEM_W(0x8 + 4 * i, p) = value;
+                }
+                if (logging) {
+                    fprintf(stderr, "cloudrunner: placement %X put on the hall's floor\n", move.uid);
+                }
+            }
+        }
+        at += size;
+    }
 }

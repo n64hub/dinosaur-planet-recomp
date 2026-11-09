@@ -845,7 +845,7 @@ text = '{ void dino_krazoa_warp_entry(uint8_t*, recomp_context*); void dino_drag
 [[patches.hook]]
 func = "func_80045BF4"
 before_vram = 0x80045D38
-text = '{ void dino_krazoa_map_loaded(uint8_t*, recomp_context*); dino_krazoa_map_loaded(rdram, ctx); }'
+text = '{ void dino_krazoa_map_loaded(uint8_t*, recomp_context*); void dino_cloudrunner_map_loaded(uint8_t*, recomp_context*); dino_krazoa_map_loaded(rdram, ctx); dino_cloudrunner_map_loaded(rdram, ctx); }'
 
 # The maps' acts (src/game/acts.cpp, whose header has the evidence): the end of func_80045BF4, after the Krazoa
 # shrines' hook, and VFP_LevelControl's constructor (dll619 0x70), which sets its map to act 1 whatever the story.

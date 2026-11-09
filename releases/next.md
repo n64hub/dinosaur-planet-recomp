@@ -6,8 +6,10 @@
   from Cape Claw's tablet room, and the last door they open leads to the red Krazoa, who sends the player on to
   Drakor. The prototype built the rooms and left them empty.
 - Baby CloudRunners on Restored: once Krystal comes near one of CloudRunner Fortress's hidden baby CloudRunners, Kyte
-  flies to where it hides, so it comes out for Krystal to rescue as she steps back. In the prototype Kyte never found
-  the ones waiting for her.
+  flies to where it hides, so it comes out for Krystal to rescue as she steps back, and the one on a balcony nothing
+  reaches waits on the hall's floor below it. In the prototype Kyte never found the ones waiting for her.
+- Treasure Lift on Restored: once the courtyard roof is blown, the wind also lowers Krystal down the treasure shaft
+  while she carries a barrel, so one reaches the tunnel in the treasure caves that hides the master chest's key.
 - Picking up an item, a key, a crystal, a tooth or a SpellStone no longer makes a second Sabre whose scene never
   ends, and no longer crashes.
 - Walled City: standing on either pressure switch no longer crashes, and the sun and moon beacons can be hit, so the

@@ -107,10 +107,11 @@ Fixed:
 - CloudRunner Fortress's treasure lift (Treasure Lift on Restored): past the blasted wall the wind lift only ever
   blew up for a player who came from the top, holding her at the corridor's height, so the treasure caves below
   couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
-  turn it back for the way up.
+  turn it back for the way up. Once the courtyard roof is blown, it lowers her carrying a barrel too.
 - CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
   found the ones waiting for her, so they never came out to be rescued. A waiting baby calls as Krystal comes near,
-  Kyte now flies to where it hides, and once Krystal steps back it comes out for her to rescue.
+  Kyte now flies to where it hides, and once Krystal steps back it comes out for her to rescue. The one on a balcony
+  nothing reaches waits on the hall's floor below it.
 - CloudRunner Fortress's gold perch: once freed from the courtyard's roof, Kyte only ever circled it, so she never
   flew to the gold perch above the courtyard when told to, and the pool over the way to the race never drained. She
   now flies on with Krystal once she is freed.
@@ -204,8 +205,9 @@ Each option a modern port adds has a value that plays as the console does. The d
   steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
   the wind only ever blows up, and the caves can't be reached.
 - **Baby CloudRunners** (General): Restored has Kyte fly to where one of CloudRunner Fortress's hidden baby
-  CloudRunners hides once Krystal comes near it, so it comes out to be rescued as she steps back. Original is the
-  prototype as it was left: the babies waiting for her never come out.
+  CloudRunners hides once Krystal comes near it, so it comes out to be rescued as she steps back, and the one on a
+  balcony nothing reaches waits on the hall's floor below it. Original is the prototype as it was left: three of the
+  five never come out, and that one can't be reached.
 - **Wind Bridge** (General): Restored has the wind over CloudRunner Fortress's treasure shaft hold a player carrying a
   barrel, as it holds one empty-handed, so the barrels reach the courtyard and blow its roof. Original is the
   prototype as it was left: carrying one, she falls to the shaft's bottom, and the roof can't be blown.
