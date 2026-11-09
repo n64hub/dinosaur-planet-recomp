@@ -448,7 +448,7 @@ the race (43) at (-20, 29) on layer -2.
   then 0x57, the power on, are set (played).
 - The baby CloudRunners. Each CFCloudBaby (373) waiting to be found (map 12's groups 20 to 22, `--bits 458=7340032`)
   comes out only when Kyte's export 24 answers yes, set while she is on a find node, and nothing in the ROM sends her
-  to the ones beside the babies, so on the prototype four of the five never come out. With Krystal inside its near
+  to the ones beside the babies, so on the prototype three of the five never come out. With Krystal inside its near
   radius (+0x18) a waiting baby plays its call in place of asking. Found, it faces Kyte, and A within its reach (+0x1A,
   30 for 29B3) rescues it: 0x901 counts it, its bit (0x24F to 0x253) is set, and it flies to its golden perch (0x2FC to
   0x300). Fixed (Baby CloudRunners on Restored, `src/game/cloudrunner.cpp`): its call sets 0x46E, Kyte's curve group, to
@@ -462,6 +462,32 @@ the race (43) at (-20, 29) on layer -2.
   0x46E goes back to 0x16 and it is on its perch (0x2FC). Its crate can't be climbed beside it while it is out: from
   the step crate's north end Krystal stays below it. Kyte's yes is any find node's, so 29FA, waiting 2260 away, came
   out while she circled 29B3's and went back once she left.
+  29FA waits on a balcony of the hall east of the courtyard, 183 above its floor, that nothing reaches. Its TriggerPoint
+  31BF3 (radius 240, twice its +0x3A, so a play has to start farther off to cross in) loads its group 21 even from the
+  floor below, so on the prototype it calls from the balcony, out of reach (played). Fixed (Baby CloudRunners on
+  Restored): the baby and its TriggerPoint are put on the hall's floor west of the balcony, at (-11170, 1866, 18604),
+  as map 12 loads. Played twice from sideload 42a06 by the pool (`--place -12068,1866,18867,0 --bits
+  43,458=5242880`), south of the pit and east: group 21 on at (-11410, 18612), its call sent Kyte to 0x28 on the
+  balcony, and with Krystal stepped back to (-11400, 18620) for 75 s it came out (state 5); A beside it rescued it
+  (0x901, 0x252) and it reached its perch (0x2FF). Once, walked back up to it before Kyte was there, it hung in its
+  sequence for the rest of the run (50 s).
+  Map 30's 2B25, on the SharpClaw galleon (WarpPoint 2b14, entry 61), starts found: from `--story
+  before-cloudrunner,61`, walked (-4300, -17185), (-4141, -17205), (-4138, -17440), (-4044, -17681), (-3990, -17820)
+  and A, it is rescued (0x901, 0x45B, 0x251; played).
+  Map 15's 31B9C comes out of the master chest (CFSupTreasureCh 31d0d, at (-12280, 18563), group 8 of 0x45A) used with
+  item 0x336: export 8 puts it to state 1 of its timer, which sets its bit and flies it off without 0x901 or its
+  count's message, so the count shows four. Item 0x336 is in CFTreasureChest 31b9b, which GuardClaw 31b83 holds (no
+  hit hurts it) until 0x33A: CFBlastedTunnel 31b7a (dll389, as the wall and the roof) takes a CFbarrel's blast and
+  sets 0x330, and CFExplodeTunnel 31b76 then sets 0x33A. Map 15 places no barrel, so one comes down the shaft:
+  Treasure Lift on Restored lowers a carrier once 0x2E1 is set. Played from `--place -12900,2049,18690,0 --bits
+  8ff,8c9,8ca,8cf,2e1,43,34f,359,458=8192` (the wall takes 0x8C9): barrel 2e32 lifted, carried west along z 18655
+  and north up the corridor into the wind, lowered with it to map 15 (0x8C8, y 1859), and set down in the passage
+  east to the tunnel, which starts east of (-12890, 19100); swung at there, it blew. Not played: a blast that
+  reaches the tunnel. Within about 110 of the GuardClaw, A locks onto it and the swings go its way, and within 20 of
+  the barrel A lifts it again. From `--place -12850,1845,19110,-1 --bits 2e1,43,34f,359,45a=4,330@6`: 0x33A 1.6 s
+  after 0x330, the chest let go, A at it gave 0x336. From `--place -12330,1840,18530,-1 --bits
+  2e1,43,34f,359,45a=256,336`: A, C-right, A at the master chest took 0x336 (0x337), and the baby set 0x253 and
+  reached its perch (0x300) 11 s later.
 - The gold. Each rescued baby's perch bit is one of 0x2FC to 0x300, and CFLevelControl (400) sets 0x4BE (Bonehead's
   state 10) from 0x8D1 and 0x300. 0x8D1 is the +0x32 bit of the curve (429D9, at (-12672, 2239, 18806)) that
   PerchObject (718, 429D8) above CFKyteGoldPerch sends Kyte to: with Kyte out and Krystal within 134 of it across the
@@ -489,9 +515,9 @@ the object takes it in the frame the player presses A with it targeted: dll2 set
 the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
-Left to play: 29FA's rescue (no way up to its ledge found, and its call needs Krystal within 85 of it on the ledge), the
-babies in map 30 and map 15 (from the master chest), and so the gold with all five on their perches (0x8D1, 0x4BE and
-0x4C1 are played with 0x2FC-0x300 set by `--bits`). Read from the ROM,
+Left to play: a barrel's blast at map 15's tunnel 31B7A, the way on foot to the master chest (group 8, which
+CFLevelControl loads on 0x8CC), and so the gold with all five on their perches in one run (0x8D1, 0x4BE and 0x4C1 are
+played with 0x2FC-0x300 set by `--bits`). Read from the ROM,
 nothing sets 0x4B8 (CFGuardian's sequence at 0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches
 by the main door take: the two ZBombs there make it (their setup's +0x18). Neither is needed to finish
 (docs/restored-content.md, The plan). 0x4DC is TriggerPlane 31a68's, at (-9917, 1445, 18272), set on one crossing and

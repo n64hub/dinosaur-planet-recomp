@@ -54,10 +54,12 @@
 // was, unless something has set it since.
 // - 29FA waits on a balcony of the hall east of the courtyard, 183 above its floor (local (-1491, 2049, 44)), walled on
 //   its east and open on its other three sides; nothing in the ROM reaches it (no ladder, lift or ledge joins it: the
-//   hall's wind lifts, CFWindLift 964 and 95D, rise to 2080 and 2200). TriggerPoint 31BF3 there (radius 120, 100 high)
-//   is what loads its group 21, so on the prototype it never even loads. On Restored the baby and the TriggerPoint are
-//   placed on the hall's floor just west of the balcony (ledge_moves), where every other part works as the ROM has it:
-//   Kyte's find nodes on the balcony (0x28) are 200 from it.
+//   hall's wind lifts, CFWindLift 964 and 95D, rise to 2080 and 2200). TriggerPoint 31BF3 there loads its group 21 as
+//   the player crosses into its radius, twice its +0x3A (240), which reaches the floor below: on the prototype the baby
+//   loads and calls from the balcony, out of reach (played). On Restored the baby and the TriggerPoint are placed on
+//   the hall's floor just west of the balcony (ledge_moves), where every other part works as the ROM has it: Kyte's
+//   find nodes on the balcony (0x28) are 200 from it. Played from sideload 42a06 by the pool: the trigger turned group
+//   21 on, its call sent Kyte to the balcony, it came out as Krystal stepped back, and A beside it rescued it (0x252).
 //
 // The deck (always on), read from the ROM:
 // - Kyte flies only along curves joined to the one her path started from. Her path starts (dll212_0CE8, while her
@@ -249,7 +251,8 @@ void dino::add_cloudrunner_options(recomp::config::Config& general) {
         treasure_lift,
         "Treasure Lift",
         "In CloudRunner Fortress the wind lift past the blasted wall lowers a player who steps in from the top, the way "
-        "down to the treasure caves. <b>Original is the prototype as it was left</b>: from the top the wind only ever "
+        "down to the treasure caves, and once the courtyard roof is blown one carrying a barrel too. "
+        "<b>Original is the prototype as it was left</b>: from the top the wind only ever "
         "blows up, and the caves can't be reached.",
         treasure_lift_options,
         TreasureLift::Restored
@@ -257,8 +260,9 @@ void dino::add_cloudrunner_options(recomp::config::Config& general) {
     general.add_enum_option(
         cloud_babies,
         "Baby CloudRunners",
-        "In CloudRunner Fortress the baby CloudRunners Kyte's mother hid come out to be rescued once Kyte finds them. "
-        "<b>Original is the prototype as it was left</b>: four of the five never come out.",
+        "In CloudRunner Fortress the baby CloudRunners Kyte's mother hid come out to be rescued once Kyte finds them, "
+        "and the one on a balcony nothing reaches waits on the hall's floor below it. <b>Original is the prototype as "
+        "it was left</b>: three of the five never come out, and that one can't be reached.",
         treasure_lift_options,
         TreasureLift::Restored
     );
