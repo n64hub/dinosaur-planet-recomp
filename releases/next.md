@@ -92,3 +92,5 @@
 - Krazoa Shrines on Restored: past Warlock Mountain's laser hall, on the way to Walled City's spirit's release, the
   two scenes after the guards now play once a laser target has been hit, and a column carries the player up from the
   guards' room to the second. In the prototype the first target hit shut both scenes for good, and nothing went up.
+- A scene whose camera cuts away from the player no longer unloads the ground under him: past Warlock Mountain's laser
+  hall, on the way to Walled City's spirit's release, the player fell out of the world as the "Father." scene ended.

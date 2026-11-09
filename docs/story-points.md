@@ -737,7 +737,7 @@ comes before the first point that sets the value. Task numbers are the task list
 | 0x316, 0x21F | `second_spirit` | WL_seqpoint 2583's release (611 0x04B4), Warlock Mountain's act 3 | Diamond Bay's spirit (task 54). Was `first_spirit`'s |
 | 0xE7 = 9 | none now | `src/game/acts.cpp`, always (The maps' acts); SC_levelcontrol (519 0x08B4) only from act 8 | SwapStone Circle, entered with both spirits released (task 56). Was `circle_act_9`, which no player's game reached |
 | 0x317, 0x21C | `third_spirit` | WL_seqpoint 27ab's release (611), Warlock Mountain's act 4 (0x317 its done bit on Restored) | Moon Mountain Pass's spirit (task 97) |
-| 0x318, 0x21D | `fourth_spirit` | WL_seqpoint 2983's sequence 0xA (611), act 5 | the Earthwalker Temple's spirit (tasks 104, 105). The way to it needs 0x2F3, which WL_LevelControl (607 0x1118) sets from WL_LaserTarget 29c1's 0x2FA: a setter, played to 297b (0x2F4) |
+| 0x318, 0x21D | `fourth_spirit` | WL_seqpoint 2983's sequence 0xA (611), act 5 | the Earthwalker Temple's spirit (tasks 104, 105). The way to it needs 0x2F3, which WL_LevelControl (607 0x1118) sets from WL_LaserTarget 29c1's 0x2FA: a setter, played from 29c1 through 297b to the release |
 | 0x49F, 0x2E8 | `second_stone_carried` | CFseqobject 30cca's sequence 0x18 (0x49F), CRSpellstone 30c30 picked up (0x2E8), map 43 | the race won (task 67), played |
 | 0x49F, 0x5F3 | `second_stone` | DFP_SpellPlace 35111 (map 21, reached by Desert Force Point's lift on Restored); GP_LevelControl (547) | the second SpellStone placed (task 72) |
 | 0x5BD | `portal_spell` | PortalSpell 34d2b picked up (map 9) | Golden Plains (task 70) |
@@ -968,18 +968,20 @@ stands, where act 5 had no column: Krazoa Shrines gives each its own done bit an
 (`src/game/krazoa.cpp`; docs/restored-content.md). Played from the doorway, in one walk: 29c1 hit, past the
 guards to 2973 (mode 3, radius 200), which plays sequence 8 and sets 0x2F2, onto the column, which carries the
 player to y 26, north onto the floor at y 13 and west along z 1600 to 297b (radius 101), which plays sequence 9
-("Father.") and sets 0x2F4. As sequence 9 ends the player falls through the corridor's floor at (13995,13,1610) and
-out of the world, and comes back in the hall: not fixed yet. Played from 0x2F4 on, by an earlier walk: down the
-walkways (WM_Walkway1 and 2, dll331, at y -44) to the release, whose sequence 0xA sets 0x21D, 0x318, 0x2F5 and 0x2F6. Acts 7
-and 9 need the same way past the column: WG's column (WL_colrise @1AB0, 14433,-101,2028), which carries the player
+("Father.") and sets 0x2F4. Its camera cuts 6.2 s in to the guards' room below, and the game loads the map's blocks
+around the camera, so the corridor's went and the player, at (13995,13,1610), fell through its floor and out of the
+world as the sequence ended, and came back in the hall. The player's cell now stays loaded (`src/game/streaming.cpp`,
+always on). Played in one walk from (14200,13,1602), east of 297b: sequence 9, which he stands through, then down the
+walkways (WM_Walkway1 and 2, dll331, at y -44) south to the release at (13934,-100,1119), where 18 s later its
+sequence 0xA has set 0x21D, 0x318, 0x2F5 and 0x2F6 and leaves him standing at (13914,-140,1099). Acts 7 and 9 need
+the same way past the column: WG's column (WL_colrise @1AB0, 14433,-101,2028), which carries the player
 up to WG's site in act 7 and NW's in act 9, stands where 2973 does. Played: in act 7 from (13700,-300,3320) through
 the hall and onto the column, which rises to y 22; in act 9 the same walk to its pit, and from the hall's end onto it,
 to y 25 (acts 7 and 9 have no guards and no TriggerArea 2972). CC's column (@1358, act 6 and GP's act 8) and MM's
 release (act 4) are west of the pad.
 
 Not played from here: the pass in one walk, from its east entry through the four hollows in turn (each is played from
-its own setuppoint, The moonseeds above); task 84's log (no ThornTail sells one, as for the first); and the walk on
-from 297b to EC's release, which falls through the floor as sequence 9 ends (above).
+its own setuppoint, The moonseeds above); and task 84's log (no ThornTail sells one, as for the first).
 
 ## The shrines
 

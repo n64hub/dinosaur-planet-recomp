@@ -5,18 +5,20 @@
 // grid of cells on the camera's (D_80092A68 and D_80092A6C its corner, the camera's cell at 7, 7). For each of its five
 // grids (layers) func_80047404 marks the cells to load around that cell with -3, four boxes the map's data gives each
 // cell (at 0x80046F9C), and the loop at 0x80047178 loads each marked cell (func_800485FC) and lets the others go. In
-// play the camera stands a few hundred units behind the player, so her cell is the camera's or one its boxes hold.
-// A sequence's camera can cut to a cell whose boxes leave hers out, and the player, still standing and still
-// falling where nothing holds her, drops through the block that just went: Warlock Mountain's sequence 9 (seqpoint
-// 297b, "Father.", act 5 with Krazoa Shrines on Restored) cuts 6.2 s in, at its time 0x176, from beside her in the
+// play the camera stands a few hundred units behind the player, so his cell is the camera's or one its boxes hold.
+// A sequence's camera can cut to a cell whose boxes leave his out, and the player, still standing and still
+// falling where nothing holds him, drops through the block that just went: Warlock Mountain's sequence 9 (seqpoint
+// 297b, "Father.", act 5 with Krazoa Shrines on Restored) cuts 6.2 s in, at its time 0x176, from beside him in the
 // corridor at (13995, 13, 1610) to the guards' room below it (the seqpoint + (207, -89, 667), its camera track 1769
-// in ROM file 13), whose cell (22, 3) loads (22, 2), (22..24, 3) and (22, 4) only; the corridor's (21, 2) went, she
-// fell out of the world, and came back at the last checkpoint in the laser hall. On the console it would be the same.
+// in ROM file 13), whose cell (22, 3) loads (22, 2), (22..24, 3) and (22, 4) only; the corridor's (21, 2) went, he
+// fell out of the world, and came back at the last checkpoint in the laser hall. The streaming is the ROM's, so the
+// console would drop him too (not played there).
 //
 // dino_streaming_keep_player_cell, us.toml's hook at 0x80047178, marks the player's cell too in each grid that
-// marks the camera's own: the block she stands on stays, and a cell with no block in that grid loads nothing
-// (func_800485FC fails and the loop marks it -2, as for any other). Nothing changes while her cell is marked
-// already, which is always outside a cutaway.
+// marks the camera's own: the block he stands on stays, and a cell with no block in that grid loads nothing
+// (func_800485FC fails and the loop marks it -2, as for any other). Nothing changes while his cell is marked
+// already, as it is whenever the camera follows the player. A cutaway loads at most one block a grid more, the one the
+// player stood on the frame before, well within the 80 the block table holds (us.toml, func_80041E84).
 
 #include <cmath>
 #include <cstdint>
