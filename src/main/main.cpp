@@ -380,9 +380,9 @@ static std::string game_thread_name(const OSThread* t) {
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
 // "ride to <x> <z> [reach]" and "ride <object id hex> [reach]" do the same for a player on a vehicle that turns by
 // stick x and goes by stick y (story_steer's ride), until within reach (0, never, by default). "place <x> <y> <z>"
-// moves the player there once, as the line starts, with the stick centred (story.cpp's story_move_player): dropped from
-// above one place after another, a run maps where a room has floor, and from a place a script tries a walk or a leap
-// over and over without the walk there. A line "menu <n>
+// moves the player there once, as the line starts, with the stick centred (story.cpp's story_move_player), so from a
+// place a script tries a walk or a leap over and over without the walk there. A drop's air time adds up from one place
+// to the next, and enough of it puts her back at the run's --place, as a fall into the cloud does. A line "menu <n>
 // <buttons hex>" presses those buttons, a fifth of a second each half second with the stick centred, in place of the
 // script's lines whenever the game shows menu n (story.cpp's story_menu): "menu 9 8000" continues after a game over,
 // wherever in the script it comes, as a player does. The parts' clocks go on meanwhile.

@@ -394,8 +394,10 @@ What changes, in the order it is built, the redone choices first:
   door's plane (nothing else sets 0x526). Each door is reached from the corridor (y 2049) through a treasure room, a
   hall of stepping platforms over cloud under patrolling RobotAnimPatrols (map 12's group 12): the south one by the
   corridor's south end, which drops into it at (-13124, 1927, 18134), the north one by CFSlideDoor1 287a, onto a
-  walkway above it. A room crossed on foot to its door isn't played yet: one leap was, from the south room's ledge to
-  a platform at (-13049, 1927, 18308).
+  walkway above it. Played on foot in one run, with the four perches and 0x336 set at the start: the south room
+  crossed to its door (two leaps over cloud, past the patrols' fire), on north through the door's cave to the master
+  chest, A, C-right, A, and back out through the door, which lets its baby to its perch (0x50B, docs/story-points.md,
+  The treasure doors). The ROM's way in plays as it stands, so it needs no change.
 - **CloudRunner's bits with no setter**: nothing to build. 0x4B7 is set by map 43's TriggerPlane 30c34 as the bay is
   entered and only plays Bonehead's talks; his state 12 goes to 13 on 0x49A alone. 0x4B8 (SwapStone Circle's act 5,
   0x4DD) and 0x4DC to 0x4DE (a scene after the race, read by nothing) aren't needed to finish; hit type 0xF is the

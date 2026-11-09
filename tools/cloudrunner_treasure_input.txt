@@ -1,0 +1,61 @@
+# CloudRunner's south treasure room crossed on foot to its door, on to the master chest and back out, from --story
+# before-cloudrunner --place -13060,2049,18600,0 --sidekick kyte --bits
+# 458=4104,2fc,2fd,2fe,2ff,43,2e1,34f,359,24f,250,251,252,8ff,8c9,8ca,336 (the corridor, y 2049; the four perches open
+# the doors, 0x336 is the GuardClaw chest's item, and Kyte, whom a --place start lacks, is read with no null test by
+# map 15's CFMagicWalls on the way north). Off the corridor's south end (0x35B) onto the room's west ledge, north and
+# east along its narrow walkway at z 18302 (at z 18284 she teeters), south down the spur and east along z 18215: a slow
+# walk leaps the gap at x -12706 onto a platform and, east-south-east off its east end, onto the east ledge. South to
+# the door's landing, west, south into the alcove and east through the door, whose plane sets 0x526 and 0x50B; standing
+# still for 0x528's scene and 0x8CC's, then north up the cave along x -12348 to the master chest, and A, C-right, A
+# (0x337). The baby sets its bit only with 0x50B clear, so last she walks back out through the door (0x253, 0x300).
+0 0 0 0
+14 0 to -13115 18140
+sync near 0 -13105 18146 12
+1 0 0 -1
+2 0 0 0
+sync 35b
+1.5 0 to -13092 18302
+sync near 0 -13092 18302 15
+0 0 to -12868 18302
+sync near 0 -12868 18302 15
+0 0 to -12850 18215
+sync near 0 -12850 18215 15
+0 0 to -12300 18215
+sync near 0 -12646 18213 25
+0.3 0 to -12300 18100
+sync near 0 -12492 18150 30
+0 0 to -12495 18040
+sync near 0 -12495 18040 20
+0 0 to -12640 18043
+sync near 0 -12640 18043 15
+0 0 to -12632 17962
+sync near 0 -12632 17962 15
+0 0 to -12400 17963
+sync 526
+0 0 0 0
+sync 8cc
+0.5 0 to -12398 18100
+sync near 0 -12398 18100 15
+0 0 to -12345 18110
+sync near 0 -12345 18110 12
+0 0 to -12348 18540
+sync near 0 -12348 18540 15
+0 0 to -12302 18563
+sync near 0 -12302 18563 12
+0.5 8000 0 0
+0.7 0 0 0
+1.7 1 0 0
+1.9 0 0 0
+2.9 8000 0 0
+3.1 0 0 0
+4 0 to -12348 18540
+sync near 0 -12348 18540 15
+0 0 to -12348 18110
+sync near 0 -12348 18110 15
+0 0 to -12400 18100
+sync near 0 -12400 18100 15
+0 0 to -12400 17963
+sync near 0 -12400 17963 15
+0 0 to -12660 17963
+sync near 0 -12660 17963 15
+0 0 0 0
