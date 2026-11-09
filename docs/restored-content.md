@@ -238,8 +238,8 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 - The Volcano Force Point's act 2 holds a second SpellPlace that takes Walled City's stone (carried 0x83B, placed
   0x878), its podium, door switch and round door, and VFP_LevelControl set act 1 in its constructor whatever the
-  story. Its act 3 sets 0x63C, which moves Diamond Bay to act 3. Restored moves the act with the stone: 2 while it is
-  carried, 3 once it is placed.
+  story. Its act 3 sets 0x63C, which moves Diamond Bay to act 3. Restored moves the act with the stone: 2 from its
+  activation (part 3, The King's activation), where the level control's own timer hands it over, 3 once it is placed.
 - Walled City's act 2 holds the Sun and Moon Stones, the statues' sockets and the temples' bits; no code in the ROM
   sets Walled City's act. When it moves is a choice (part 3).
 - The moonseeds (0x86A) are counted down by each MMP_mseedrecept and raised by nothing. Where they come from is a
@@ -479,17 +479,20 @@ open: the logs.
   CFLevelControl turns 0x2FC-0x2FF into 0x30A (the treasure door), and 0x300 with 0x8D1 into 0x4BE, which drains the
   pool to the race and moves Bonehead to state 10; CFseqobject 32dda sets 0x4C1 from 0x300 (Bonehead's state 12).
   The ROM offers: nothing sets Kyte's flag.
-- **BOSS TRex's stone** (BOSS TRex): the defeat sets 0x83B (0x82E with Walled City on Restored), 0x81C and 0x56E.
-  0x83B: VFP_LevelControl's act-2 timer sets it with 0x22B, VFP_SpellPlace 41e21 takes it, `src/game/acts.cpp` reads
-  it. Cascade: the volcano's act 2, the King. The ROM offers: the volcano's act 2 itself gives 0x83B (?), which with
-  `acts.cpp` moving to act 2 on 0x83B goes round in a circle.
-- **The volcano's acts** (Third SpellStone): act 2 on 0x83B, act 3 on 0x878. Cascade: act 3's timer sets 0x63C
-  (Diamond Bay's act 3) and 0x83C; act 2 sets 0x22B, the first stone's, again. The ROM offers: no TriggerPlane act
-  command in maps 4 or 13. **Clash, a bug of ours, fixed (PR 52):** the Queen Earthwalker sets the volcano to act 11
-  before her two cutscene warps there (dll507_04F8, after 0x486 and 0x487), and `acts.cpp` made it act 1 again at the
-  map's load, so neither cutscene played. It now leaves act 11 while a visit is to play (0x486 without 0x484, 0x487
-  without 0x485), and once both are spent moves it on as at any load: neither visit loads VFP_LevelControl, the ROM's
-  only way back to act 1, so on Original warp 81 after them finds act 11, with no podium or SpellPlace.
+- **BOSS TRex's stone** (BOSS TRex): the defeat sets 0x82E, the stone won, with 0x81C and 0x56E. 0x82E: no ROM
+  setter or getter. Cascade: the King (below), or with Walled City on Original the stone's activation at once. The ROM
+  offers: 0x83B, the stone carried, has one setter, VFP_LevelControl's act-2 timer, with 0x22B; VFP_SpellPlace 41e21
+  takes it. Redone (PR 64, The third SpellStone's hand-over): the defeat set 0x83B, which with `acts.cpp` moving to
+  act 2 on 0x83B went round in a circle.
+- **The volcano's acts** (Third SpellStone): act 2 from the stone's activation (The King's activation), kept until
+  0x878, then act 3. Cascade: act 2's timer gives the stone (0x83B) and 0x22B, the first stone's, again; act 3's sets
+  0x63C (Diamond Bay's act 3) and 0x83C. The ROM offers: no TriggerPlane act command in maps 4 or 13; the Queen's dll29
+  export 16 to act 11 is the way the game moves the volcano from outside it. **Clash, a bug of ours, fixed (PR 52):**
+  the Queen Earthwalker sets the volcano to act 11 before her two cutscene warps there (dll507_04F8, after 0x486 and
+  0x487), and `acts.cpp` made it act 1 again at the map's load, so neither cutscene played. It now leaves act 11 while a
+  visit is to play (0x486 without 0x484, 0x487 without 0x485), and once both are spent moves it on as at any load:
+  neither visit loads VFP_LevelControl, the ROM's only way back to act 1, so on Original warp 81 after them finds act
+  11, with no podium or SpellPlace.
 - **Walled City's act 2** (Third SpellStone): from 0x317, Moon Mountain Pass's spirit (dll611 sets it; dll519, dll607
   read it). Cascade: act 2 loads WCSunStone, the sockets (0x25A, 0x25B, 0x202, 0x243) and the temples (0x812, 0x813),
   and drops act 1's teeth. The ROM offers: nothing sets Walled City's act.
@@ -528,9 +531,11 @@ open: the logs.
   0x821 lets the bowl at (-7720, -748, -4700), used by A within 80, set 0x82D, the gate; the arch holds Sabre back at x
   -7660 till then. 0x821 and 0x82D: no ROM setter or getter. The ROM offers: only the boss door's two teeth (0x81E,
   0x81D).
-- **The King's activation** (Walled City): the defeat gives 0x82E and the King turns it into 0x83B. 0x82E: no ROM
-  setter or getter. The ROM offers: the volcano's act 2 gives 0x83B (above); the second SpellStone has no won and
-  activated pair either.
+- **The King's activation** (Walled City): the defeat gives 0x82E, and Sabre's talk with the King clears it and
+  moves the volcano to act 2 with dll29's export 16, as the Queen sets its act 11 (dll507_04F8), and act 2's own timer
+  gives 0x83B. On Walled City's Original, with no King's part, the defeat activates it. 0x82E: no ROM setter or
+  getter. The ROM offers: task 83 and the King's "only I can activate it" put the activation at him, and the
+  volcano's act 2 gives 0x83B (above); the second SpellStone has no won and activated pair either.
 
 ### Open
 
