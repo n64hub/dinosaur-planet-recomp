@@ -109,8 +109,8 @@ Fixed:
   couldn't be reached. Stepping in from the top now lowers her to the bottom, where the levers
   turn it back for the way up.
 - CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
-  found the ones waiting for her, so they never came out to be rescued. Kyte now finds a baby once she is near it, and
-  it comes out for Krystal to rescue.
+  found the ones waiting for her, so they never came out to be rescued. A waiting baby calls as Krystal comes near,
+  Kyte now flies to where it hides, and once Krystal steps back it comes out for her to rescue.
 - Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
   ended, and could crash.
 - Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
@@ -198,9 +198,9 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Treasure Lift** (General): Restored has CloudRunner Fortress's wind lift past the blasted wall lower a player who
   steps in from the top, the way down to the treasure caves. Original is the prototype as it was left: from the top
   the wind only ever blows up, and the caves can't be reached.
-- **Baby CloudRunners** (General): Restored has Kyte find CloudRunner Fortress's hidden baby CloudRunners once she
-  is near one, so it comes out to be rescued. Original is the prototype as it was left: the babies waiting for her
-  never come out.
+- **Baby CloudRunners** (General): Restored has Kyte fly to where one of CloudRunner Fortress's hidden baby
+  CloudRunners hides once Krystal comes near it, so it comes out to be rescued as she steps back. Original is the
+  prototype as it was left: the babies waiting for her never come out.
 - **Wind Bridge** (General): Restored has the wind over CloudRunner Fortress's treasure shaft hold a player carrying a
   barrel, as it holds one empty-handed, so the barrels reach the courtyard and blow its roof. Original is the
   prototype as it was left: carrying one, she falls to the shaft's bottom, and the roof can't be blown.

@@ -126,19 +126,22 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   it only blows up. The General tab's Treasure Lift setting, Restored by default, lowers a player who steps in from
   the top, and Original leaves it as it was (`src/game/cloudrunner.cpp`'s header has the evidence).
 - **CloudRunner Fortress's baby CloudRunners.** A baby waiting to be found (CFCloudBaby, dll373) comes out when Kyte's
-  export 24 answers yes, a flag of hers nothing in the ROM sets. The General tab's Baby CloudRunners setting, Restored
-  by default, answers yes while Kyte is within 400 of it, and Original leaves them hidden (the same header).
-- **BOSS TRex.** The TRex's defeat loads the front end with no SpellStone. The General tab's BOSS TRex setting,
-  Restored by default, gives the third SpellStone (0x83B) and the way back to Walled City in its place, and Original
-  goes to the title as the prototype did. The fixes that let the fight be won at all (the floor switches' pads, the
-  TRex's corners and facing, the door behind the player) are always on (`patches/boss_trex.c` and us.toml beside them
-  have the evidence, docs/story-points.md how the fight plays).
-- **Walled City.** The task list has the Queen EarthWalker, a RedEye chase for ten teeth that open the city's gate
-  and the King activating the third SpellStone, and the ROM built none of it: the Queen and the chase have defs and
-  stand nowhere, the gate is open and the stone is active once won. The General tab's Walled City setting, Restored
-  by default, places them and has the King activate the stone (0x82E to 0x83B), and Original leaves the city as the
-  prototype did (`src/game/walled_city.cpp`'s header has the evidence). Tricky's flame, which angers the RedEye, is
-  the one DarkIce Mines' SnowHorn teaches him (docs/story-points.md).
+  export 24 answers yes: she is on a find node, the curves beside each baby that nothing sends her to. The General
+  tab's Baby CloudRunners setting, Restored by default, sends her there (her curve group, 0x46E) as Krystal comes near
+  a waiting baby, which comes out once she steps back from its call, and Original leaves them hidden (the same
+  header).
+- **BOSS TRex.** The TRex's defeat loads the front end with no SpellStone. The General tab's BOSS TRex setting, Restored
+  by default, gives the third SpellStone as won (0x82E) and the way back to Walled City in its place, and Original goes
+  to the title as the prototype did. The fixes that let the fight be won at all (the floor switches' pads, the TRex's
+  corners and facing, the door behind the player) are always on (`patches/boss_trex.c` and us.toml beside them have the
+  evidence, docs/story-points.md how the fight plays).
+- **Walled City.** The task list has the Queen EarthWalker, a RedEye chase for ten teeth that open the city's gate and
+  the King activating the third SpellStone, and the ROM built none of it: the Queen and the chase have defs and stand
+  nowhere, the gate is open and the stone is active once won. The General tab's Walled City setting, Restored by
+  default, places them and has the King activate the stone (0x82E cleared, the Volcano Force Point to act 2, whose level
+  control hands it over as 0x83B), and Original activates it as it is won and leaves the city as the prototype did
+  (`src/game/walled_city.cpp`'s header has the evidence). Tricky's flame, which angers the RedEye, is the one DarkIce
+  Mines' SnowHorn teaches him (docs/story-points.md).
 - **CloudRunner Fortress's courtyard roof.** The roof (CFBlastedRoof) blows at the third barrel blown under it, and
   the barrels stand west of the treasure shaft, whose wind drops a player carrying one: the walking states skip the
   check that puts her on the wind while she carries. The General tab's Wind Bridge setting, Restored by default, puts

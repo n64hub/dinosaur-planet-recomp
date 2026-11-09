@@ -28,12 +28,23 @@
 //   +0x1E is set). Its rescue bit is the placement's +0x22 (0x24F-0x253): set, it loads hidden (+0x6's 0x4000).
 // - Waiting to be found (states 0, 1 and 4) it asks Kyte, the sidekick (0x8002394C), every frame (0x2050): her export
 //   24, her state's +0x1C8 & 0x200000. Yes brings it out to face her (state 5), and Krystal rescues it by pressing A
-//   within its +0x1A (0x07A0): 0x901 counts it, its bit is set, and it flies to its golden perch (0x2FC-0x300). Nothing
-//   in the ROM sets that flag of Kyte's, so no baby waiting to be found ever comes out.
+//   within its +0x1A (0x07A0): 0x901 counts it, its bit is set, and it flies to its golden perch (0x2FC-0x300). With
+//   Krystal within its +0x18 (0x0410: 70 or 85) a waiting baby plays its call (sequence 1, in state 0) in place of
+//   asking, so it comes out only once she is further away. Kyte's yes is any find node's, so every waiting baby loaded
+//   comes out while she is on one, and goes back once she leaves.
 // - A found baby asks again each frame (0x0924): no and it flies home and back to the state it had.
+// - Kyte's flag is the curve node she flies to: as she reaches one (dll212_319C) her +0x1C8 takes its node type's flags
+//   (dll212's D_48B8), and types 8, 9, 21 and 22 carry 0x200000. She flies along map curves of type 0x22 inside one
+//   group, 0x46E (dll212_0CE8; a curve's +0x4, as dll25's export 12 reads it), which TriggerPlanes (action 0x1C),
+//   FindKyteObject (dll720) and PerchObject (dll718) set. Each waiting baby has find nodes beside it in a group of
+//   their own (236A 0x10, 154 away; 29FA 0x28 on its ledge, 70; 29B3 0x1B, a loop round its crate that she circles,
+//   40), and nothing in the ROM sets 0x46E to one of them, so no baby waiting to be found ever comes out.
+//   FindKyteObject 31858 by 236A sends her to 0xF, a node of type 5.
 //
-// What Restored changes: both asks answer yes while Kyte is within 400 of the baby and it isn't a rescued one. 400 is
-// Kyte flying beside Krystal on the floor below the baby on a ledge (29FA, 300 below and beside).
+// What Restored changes: as Krystal comes within a waiting baby's +0x18, 0x46E is set to the group of the find node
+// nearest the baby (within 400; dll26's table holds the map's curves), and Kyte's own path code flies her there, where
+// her flag brings it out once Krystal steps back from its call. Once the baby is rescued 0x46E goes back to what it
+// was, unless something has set it since.
 
 #include <cstdint>
 #include <cstdio>
@@ -75,7 +86,11 @@ namespace {
     const bool logging = std::getenv("DINO_LOG_CLOUDRUNNER") != nullptr;
     constexpr int32_t player_object = 0x80023914;
     constexpr int32_t sidekick_object = 0x8002394C;
-    constexpr float kyte_finds = 400.0f;
+    constexpr int32_t get_bit = 0x800147EC;
+    constexpr int32_t dll26_handle = 0x8008C9E4;  // the curves' DLL: export 3 its table of the map's curves
+    constexpr int kyte_group = 0x46E;
+    constexpr int32_t rescued = 0xC;
+    constexpr float find_node_reach = 400.0f;
 
     constexpr int32_t set_bit = 0x80014670;
     constexpr int wind_on = 0x30D;
@@ -104,6 +119,68 @@ namespace {
         memcpy(&value, &bits, sizeof(value));
         return value;
     }
+
+    int32_t word(uint8_t* rdram, int32_t address) {
+        return MEM_W(0, (gpr)address);
+    }
+
+    float distance(uint8_t* rdram, gpr a, gpr b) {
+        float dx = read_float(rdram, a) - read_float(rdram, b);
+        float dy = read_float(rdram, a + 4) - read_float(rdram, b + 4);
+        float dz = read_float(rdram, a + 8) - read_float(rdram, b + 8);
+        return sqrtf(dx * dx + dy * dy + dz * dz);
+    }
+
+    // The group of the find node (a curve of type 0x22 whose node type, +0x1A, is 8, 9, 21 or 22) nearest the baby,
+    // or -1 with none within find_node_reach. dll26's export 3 returns its table of the map's curves, 8 bytes each with
+    // the curve's placement at +4, and writes their count to $a0's word (as dll25's export 12 reads it).
+    int find_group(uint8_t* rdram, recomp_context* ctx, gpr baby) {
+        Calls calls(ctx);
+        gpr count_at = ctx->r29 + 0x10;
+        ctx->r4 = count_at;
+        call(rdram, ctx, word(rdram, word(rdram, word(rdram, dll26_handle)) + 4 + 4 * 3));
+        gpr table = ctx->r2;
+        int32_t count = (int32_t)MEM_W(0, count_at);
+        int group = -1;
+        float nearest = find_node_reach;
+        for (int32_t i = 0; table != 0 && i < count; i++) {
+            gpr curve = MEM_W(4 + 8 * i, table);
+            if (curve == 0 || MEM_B(0x19, curve) != 0x22) {
+                continue;
+            }
+            int type = (int8_t)MEM_B(0x1A, curve);
+            if (!(type == 8 || type == 9 || type == 21 || type == 22)) {
+                continue;
+            }
+            float d = distance(rdram, curve + 8, baby + 0x18);
+            if (d < nearest) {
+                nearest = d;
+                group = MEM_HU(0x4, curve);
+            }
+        }
+        return group;
+    }
+
+    int32_t get(uint8_t* rdram, recomp_context* ctx, int bit) {
+        Calls calls(ctx);
+        ctx->r4 = bit;
+        call(rdram, ctx, get_bit);
+        return (int32_t)ctx->r2;
+    }
+
+    void set(uint8_t* rdram, recomp_context* ctx, int bit, int32_t value) {
+        Calls calls(ctx);
+        ctx->r4 = bit;
+        ctx->r5 = value;
+        call(rdram, ctx, set_bit);
+    }
+
+    // The baby Kyte was sent to, the group she was sent to and what 0x46E held before.
+    struct Sent {
+        gpr baby = 0;
+        int32_t group = 0;
+        int32_t before = 0;
+    } sent;
 
     float kyte_away(uint8_t* rdram, gpr kyte, gpr baby) {
         float dx = read_float(rdram, kyte + 0x18) - read_float(rdram, baby + 0x18);
@@ -152,16 +229,53 @@ extern "C" void dino_treasure_lift_starts(uint8_t* rdram, recomp_context* ctx) {
     call(rdram, ctx, set_bit);
 }
 
-// us.toml's hook at CFCloudBaby's update (dll373 0x01A0, $a0 the baby), with DINO_LOG_CLOUDRUNNER: each baby's state as
-// it changes, with how far Krystal and Kyte are in steps of 100.
+// us.toml's hook at CFCloudBaby's update (dll373 0x01A0, $a0 the baby). On Restored, a waiting baby (state 0, 1 or 4,
+// not hidden as a rescued one loads) with Krystal within its +0x18 sends Kyte to its find node's group (0x46E), and once
+// it is rescued (state 0xC, as it flies to its perch, which then stops its update) 0x46E goes back. With DINO_LOG_CLOUDRUNNER, each baby's state as it
+// changes, with how far Krystal is (in steps of 100) and Kyte (of 50), and whether she is on a find node.
 extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
+    gpr baby = ctx->r4;
+    int32_t state = (int32_t)MEM_W(0xAC, MEM_W(0xB8, baby));
+    bool hidden = (MEM_H(0x6, baby) & 0x4000) != 0;
+    if (babies_restored()) {
+        gpr setup = MEM_W(0x4C, baby);
+        gpr player;
+        {
+            Calls calls(ctx);
+            call(rdram, ctx, player_object);
+            player = ctx->r2;
+        }
+        bool waiting = !hidden && (state == 0 || state == 1 || state == 4);
+        if (sent.baby == baby && state == rescued) {
+            int32_t now = get(rdram, ctx, kyte_group);
+            if (now == sent.group) {
+                set(rdram, ctx, kyte_group, sent.before);
+            }
+            if (logging) {
+                fprintf(stderr, now == sent.group ? "cloudrunner: baby %08X rescued, 0x46E back to %X\n" :
+                    "cloudrunner: baby %08X rescued, 0x46E left at %X, set since\n", (uint32_t)baby,
+                    now == sent.group ? sent.before : now);
+            }
+            sent = Sent{};
+        } else if (waiting && player != 0 &&
+            kyte_away(rdram, player, baby) < (float)(int16_t)MEM_H(0x18, setup)) {
+            int group = find_group(rdram, ctx, baby);
+            int32_t now = get(rdram, ctx, kyte_group);
+            if (group >= 0 && now != group) {
+                sent = Sent{ baby, group, sent.baby == baby ? sent.before : now };
+                set(rdram, ctx, kyte_group, group);
+                if (logging) {
+                    fprintf(stderr, "cloudrunner: baby %08X calls, Kyte sent to group %X (0x46E was %X)\n",
+                        (uint32_t)baby, group, now);
+                }
+            }
+        }
+    }
     if (!logging) {
         return;
     }
     static gpr babies[8];
     static int32_t seens[8];
-    gpr baby = ctx->r4;
-    int32_t state = (int32_t)MEM_W(0xAC, MEM_W(0xB8, baby));
     int i = 0;
     while (i < 8 && babies[i] != 0 && babies[i] != baby) {
         i++;
@@ -179,64 +293,17 @@ extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
     }
     float krystal_away = player != 0 ? kyte_away(rdram, player, baby) : -1.0f;
     float kyte_is = kyte != 0 ? kyte_away(rdram, kyte, baby) : -1.0f;
-    int32_t seen = state * 10000 + (int32_t)(krystal_away / 100.0f) * 100 + (int32_t)(kyte_is / 100.0f);
+    // Kyte's export 24, her state's +0x1C8 & 0x200000: she is on a find node.
+    bool finds = kyte != 0 && (MEM_W(0x1C8, MEM_W(0xB8, kyte)) & 0x200000) != 0;
+    int32_t seen = state * 100000 + (int32_t)(krystal_away / 100.0f) * 1000 + (int32_t)(kyte_is / 50.0f) * 2 + finds;
     if (babies[i] == baby && seens[i] == seen) {
         return;
     }
     babies[i] = baby;
     seens[i] = seen;
-    fprintf(stderr, "cloudrunner: baby %08X at %.0f %.0f %.0f state %d, Krystal %.0f away, Kyte %.0f\n", (uint32_t)baby,
-        read_float(rdram, baby + 0x18), read_float(rdram, baby + 0x1C), read_float(rdram, baby + 0x20), state,
-        krystal_away, kyte_is);
-}
-
-// us.toml's hook in CFCloudBaby's test for Kyte (dll373 0x2050), which a baby waiting to be found (state 0, 1 or 4)
-// runs each frame: after the sidekick's export 24 answered ($v0), yes brings it out to face her (state 5). Export 24 is
-// her state's +0x1C8 & 0x200000, which nothing in the ROM sets, so on Original no baby waiting to be found ever comes
-// out. On Restored it answers yes while Kyte is within 400 of the baby ($sp+0x20) and the baby isn't a rescued one (hidden,
-// +0x6's 0x4000, as it loads with its bit set; its states still run).
-extern "C" void dino_cloud_baby_found(uint8_t* rdram, recomp_context* ctx) {
-    if (ctx->r2 != 0 || !babies_restored()) {
-        return;
-    }
-    gpr baby = MEM_W(0x20, ctx->r29);
-    if ((MEM_H(0x6, baby) & 0x4000) != 0) {
-        return;
-    }
-    gpr kyte;
-    {
-        Calls calls(ctx);
-        call(rdram, ctx, sidekick_object);
-        kyte = ctx->r2;
-    }
-    if (kyte == 0) {
-        return;
-    }
-    float d = kyte_away(rdram, kyte, baby);
-    if (d >= kyte_finds) {
-        return;
-    }
-    if (logging) {
-        fprintf(stderr, "cloudrunner: baby %08X found, Kyte %.0f away\n", (uint32_t)baby, d);
-    }
-    ctx->r2 = 1;
-}
-
-// us.toml's hook in CFCloudBaby's update (dll373 0x0924, $s1 the baby): a found baby (state 5) asks export 24 again
-// each frame ($v0), yes and it stays out facing Kyte (0x09C8), no and it flies home and back to the state it had
-// (0x0930). Krystal rescues it by pressing A within its +0x1A (0x07A0). On Restored the answer is the first ask's.
-extern "C" void dino_cloud_baby_follows(uint8_t* rdram, recomp_context* ctx) {
-    if (ctx->r2 != 0 || !babies_restored()) {
-        return;
-    }
-    gpr baby = ctx->r17;
-    gpr kyte;
-    {
-        Calls calls(ctx);
-        call(rdram, ctx, sidekick_object);
-        kyte = ctx->r2;
-    }
-    if (kyte != 0 && kyte_away(rdram, kyte, baby) < kyte_finds) {
-        ctx->r2 = 1;
-    }
+    fprintf(stderr, "cloudrunner: baby %08X at %.0f %.0f %.0f state %d, Krystal %.0f away, Kyte %.0f at %.0f %.0f %.0f%s\n",
+        (uint32_t)baby, read_float(rdram, baby + 0x18), read_float(rdram, baby + 0x1C), read_float(rdram, baby + 0x20),
+        state, krystal_away, kyte_is, kyte != 0 ? read_float(rdram, kyte + 0x18) : 0.0f,
+        kyte != 0 ? read_float(rdram, kyte + 0x1C) : 0.0f, kyte != 0 ? read_float(rdram, kyte + 0x20) : 0.0f,
+        finds ? ", on a find node" : "");
 }

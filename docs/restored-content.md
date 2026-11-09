@@ -215,8 +215,9 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 `src/game/cloudrunner.cpp`; PR 38.
 
-- A waiting CFCloudBaby comes out only when Kyte's export 24 says yes, a flag of hers nothing in the ROM sets, so four
-  of the five never come out. When Kyte finds one is a choice (part 3).
+- A waiting CFCloudBaby comes out only when Kyte's export 24 says yes, a flag of hers set as she reaches a find node
+  (node types 8, 9, 21 and 22), and nothing sends her to the find nodes beside the babies, so four of the five never
+  come out. When she is sent there is a choice (part 3).
 
 ### Wind Bridge
 
@@ -323,11 +324,12 @@ What changes, in the order it is built, the redone choices first:
   bits. So Sabre finds them in the dark, wet cave under the Hollow (map 8, SwapStone Hollow 2), four for the four
   MMP_mseedrecept (41a59, 41a5b-41a5d), each a pickup counting 0x86A up as SHbluemushroom (dll502) counts 0xC1.
   Where in map 8 they lie is the choice left.
-- **When Kyte finds a baby** (replaces "within 400"): her export 24 reads a flag of the curve node she stands on
+- **When Kyte finds a baby** (built; replaced "within 400"): her export 24 reads a flag of the curve node she stands on
   (dll212_319C, set for node types 8, 9, 21 and 22), and the waiting babies 236A, 29FA and 29B3 have find curves of
   those types beside them (groups 0x10, 0x25 and 0x28, 0x1B) that nothing sends her to. 0x46E, her target group, is
   what sends her (TriggerPlanes' action 0x1C, FindKyteObject, PerchObject). Restored sets 0x46E to a waiting baby's
-  find group as Krystal comes within its near radius (+0x18), and Kyte's own path code does the rest. FindKyteObject
+  find group as Krystal comes within its near radius (+0x18), and Kyte's own path code does the rest; the baby comes
+  out once Krystal steps back from its call (played: 236A and 29B3 found and rescued). FindKyteObject
   31858 by 236A sends her to 0xF, a node not linked to 0x10 (?). Map 30's baby (2b25) starts found, and map 15's
   (31b9c) comes out of the master chest (CFSupTreasureCh 31d0d) to item 0x336: both the ROM's own. 29FA's ledge
   (group 21, loaded by TriggerPoint 31bf3 at the baby, rescue reach 30) has no way up found: the choice left.
@@ -482,14 +484,19 @@ open: the logs.
   its base and not carrying. 0x8C8: CFWindSwitch (dll386) sets, dll370 reads. Cascade: the treasure caves (map 15).
   The ROM offers: the levers only. The race isn't reached this way (the bottom's east is a grate) but by the pool on
   0x4BE.
-- **When Kyte finds a baby** (Baby CloudRunners): within 400. Cascade: 0x901, 0x24F-0x253 and the perches 0x2FC-0x300;
+- **When Kyte finds a baby** (Baby CloudRunners): as Krystal comes within a waiting baby's +0x18, 0x46E is set to the
+  group of the find node nearest it (within 400), and put back as it is rescued (state 0xC) unless something set it
+  since.
+  0x46E: TriggerPlanes (action 0x1C), FindKyteObject (dll720), PerchObject (dll718) and others set it, Kyte's path
+  code (dll212) reads it. Cascade: 0x901, 0x24F-0x253 and the perches 0x2FC-0x300;
   CFLevelControl turns 0x2FC-0x2FF into 0x30A (the treasure door), and 0x300 with 0x8D1 into 0x4BE, which drains the
   pool to the race and moves Bonehead to state 10; CFseqobject 32dda sets 0x4C1 from 0x300 (Bonehead's state 12).
-  The ROM offers: nothing sets Kyte's flag.
+  The ROM offers: Kyte's flag from the find nodes; FindKyteObject 31858 by 236A sends her to 0xF (a type 5 node), not
+  to the baby's 0x10, and only from Kyte's command.
 - **BOSS TRex's stone** (BOSS TRex): the defeat sets 0x82E, the stone won, with 0x81C and 0x56E. 0x82E: no ROM
   setter or getter. Cascade: the King (below), or with Walled City on Original the stone's activation at once. The ROM
   offers: 0x83B, the stone carried, has one setter, VFP_LevelControl's act-2 timer, with 0x22B; VFP_SpellPlace 41e21
-  takes it. Redone (PR 65, The third SpellStone's hand-over): the defeat set 0x83B, which with `acts.cpp` moving to
+  takes it. Redone (PR 66, The third SpellStone's hand-over): the defeat set 0x83B, which with `acts.cpp` moving to
   act 2 on 0x83B went round in a circle.
 - **The volcano's acts** (Third SpellStone): act 2 from the stone's activation (The King's activation), kept until
   0x878, then act 3. Cascade: act 2's timer gives the stone (0x83B) and 0x22B, the first stone's, again; act 3's sets
@@ -555,7 +562,7 @@ open: the logs.
   (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300. 0x4B7 (dll369 reads and clears it,
   TriggerPlane 30e8c clears it) and 0x4B8 (dll519, dll400 read it) have no setter. 0x4DC is set and cleared by
   TriggerPlane 31a68 at (-9917, 1445, 18272), and dll400 turns it into 0x4DD, whose sequence sets 0x4DE.
-- **The babies left**: 29FA's ledge, 29B3, map 30's and map 15's from the master chest.
+- **The babies left**: 29FA's ledge, map 30's and map 15's from the master chest.
 - **The logs** (tasks after 0x22B and task 84): no ThornTail sells one, SHriver is a placement with no code, and the
   hollow has no dock.
 

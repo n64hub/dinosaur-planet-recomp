@@ -444,13 +444,21 @@ the race (43) at (-20, 29) on layer -2.
   item menu (0x54 takes 0x51, 0x55 0x52, 0x56 0x53), each base's sequence sends 0xA0005, and with all three 0x4E0 and
   then 0x57, the power on, are set (played).
 - The baby CloudRunners. Each CFCloudBaby (373) waiting to be found (map 12's groups 20 to 22, `--bits 458=7340032`)
-  comes out only when Kyte's export 24 answers yes, a flag of hers nothing in the ROM sets, so on the prototype four of
-  the five never come out. Found, it faces Kyte, and A within its reach rescues it: 0x901 counts it, its bit (0x24F to
-  0x253) is set, and it flies to its golden perch (0x2FC to 0x300). Fixed (Baby CloudRunners on Restored,
-  `src/game/cloudrunner.cpp`): Kyte finds a baby while she is within 400 of it. Kyte is loaded by the sideload objects
-  (269), so a `--place` far from one has her nowhere (`--sidekick kyte` brings her). Played: 236A, from `--place
-  -10428,1895,18659,0 --bits 43,458=7340032`, found with Kyte 240 away, rescued (0x901, 0x250) and on its perch (0x2FD);
-  29FA, on a ledge 300 above the corridor, found with Kyte 382 away and held out while she stays near.
+  comes out only when Kyte's export 24 answers yes, set while she is on a find node, and nothing in the ROM sends her
+  to the ones beside the babies, so on the prototype four of the five never come out. With Krystal inside its near
+  radius (+0x18) a waiting baby plays its call in place of asking. Found, it faces Kyte, and A within its reach (+0x1A,
+  30 for 29B3) rescues it: 0x901 counts it, its bit (0x24F to 0x253) is set, and it flies to its golden perch (0x2FC to
+  0x300). Fixed (Baby CloudRunners on Restored, `src/game/cloudrunner.cpp`): its call sets 0x46E, Kyte's curve group, to
+  its find nodes' group, Kyte flies there, and once Krystal steps back it comes out; rescued, 0x46E goes back. Kyte is
+  loaded by the sideload objects (269), so a `--place` far from one has her nowhere, and `--sidekick kyte` brings a
+  Kyte who flies no curves. Played: 236A, from `--place -10428,1895,18659,0 --bits 43,458=7340032`: 0x46E 0xD to 0x10,
+  found with Kyte 36 away, rescued (0x901, 0x250) and on its perch (0x2FD). 29B3, on a crate east of the pit, from
+  sideload 31a1c's floor (`--place -13353,2060,18820,0`) round the pit's east side by (-13150, 18800) and (-13140,
+  18420): its call sets 0x46E 0x16 to 0x1B, Kyte circles the loop of find nodes round its crate, it comes out with
+  Krystal stepped back to 158, and up the step crate to its crate's top from the south, A rescues it (0x901, 0x24F),
+  0x46E goes back to 0x16 and it is on its perch (0x2FC). Its crate can't be climbed beside it while it is out: from
+  the step crate's north end Krystal stays below it. Kyte's yes is any find node's, so 29FA, waiting 2260 away, came
+  out while she circled 29B3's and went back once she left.
 - The gold. Each rescued baby's perch bit is one of 0x2FC to 0x300, and CFLevelControl (400) sets 0x4BE (Bonehead's
   state 10) from 0x8D1 and 0x300. 0x8D1 is the +0x32 bit of the curve (429D9, at (-12672, 2239, 18806)) that
   PerchObject (718, 429D8) above CFKyteGoldPerch sends Kyte to: with Kyte out and Krystal within 134 of it, Kyte's
@@ -464,13 +472,13 @@ the object takes it in the frame the player presses A with it targeted: dll2 set
 the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
-Left to play: 29FA's rescue (no way up to its ledge found), the babies 29B3, map 30's and map 15's (from the master
-chest), Kyte landing at the gold perch (she stays by the sideload that loaded her, so 0x8D1, 0x4BE and 0x4C1 are read,
-not played; the way to the race waits on 0x4BE too). Read from the ROM, nothing sets 0x4B8 (CFGuardian's sequence at
-0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches by the main door take: the two ZBombs there
-make it (their setup's +0x18). Neither is needed to finish (docs/restored-content.md, The plan). 0x4DC is TriggerPlane
-31a68's, at (-9917, 1445, 18272), set on one crossing and cleared on the other, and CFLevelControl turns it into 0x4DD,
-whose sequence sets 0x4DE.
+Left to play: 29FA's rescue (no way up to its ledge found, and its call needs Krystal within 85 of it on the ledge), the
+babies in map 30 and map 15 (from the master chest), Kyte landing at the gold perch (she stays by the sideload that
+loaded her, so 0x8D1, 0x4BE and 0x4C1 are read, not played; the way to the race waits on 0x4BE too). Read from the ROM,
+nothing sets 0x4B8 (CFGuardian's sequence at 0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches
+by the main door take: the two ZBombs there make it (their setup's +0x18). Neither is needed to finish
+(docs/restored-content.md, The plan). 0x4DC is TriggerPlane 31a68's, at (-9917, 1445, 18272), set on one crossing and
+cleared on the other, and CFLevelControl turns it into 0x4DD, whose sequence sets 0x4DE.
 
 ## Golden Plains and the Desert Force Point
 
