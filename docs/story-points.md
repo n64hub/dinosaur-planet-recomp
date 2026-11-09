@@ -648,8 +648,10 @@ the map the playing object is in), and ROM file 13 holds one such event, which s
   loads 151 of the palace's 415 placements, none of its own: not its two KP_Transporters, setuppoints, crates or
   mushrooms. Act 1 loads all 415.
 - Cape Claw, with Krazoa Tablets on Restored: act 9 loads as act 2 while the tablet room is unsolved (0x52B clear),
-  and act 2 or 3 as act 9 once it is solved and Willow Grove's release has set act 9 and 0x367. Sequence 0x12 sets
-  act 9 at that release, and only acts 2 and 3 load the room's receptacles and tablets (1 to 3 its lights). PLAYED.
+  and act 2 or 3 as act 9 once it is solved and Willow Grove's spirit is released (0x222). Sequence 0x12 sets
+  act 9 after that release, and only acts 2 and 3 load the room's receptacles and tablets (1 to 3 its lights).
+  Played from `before-wg-shrine --place 13447,472,1612,0 --bits e4=7,366` (WG's release site in act 7, its sequence
+  0x12 at 48 s) and from `before-sand-worm --bits ee=2,52b,222`: docs/restored-content.md, The plan.
 
 A map's act is kept in the save, so a death or retry restores the act the map had when the level started, and the
 map's next load moves it on again. Diamond Bay moves by itself: act 2 from the first SpellStone (0x4E9) holds the

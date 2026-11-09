@@ -359,8 +359,12 @@ What changes, in the order it is built, the redone choices first:
 - **Cape Claw's act and the tablet room** (Open, decided): the room loads in acts 2 and 3, from task 17, and act 9
   (WG's release) drops it. Nothing in the ROM orders the room before WG's shrine, and its tasks, 133 to 136 (bits
   0x238, 0x239, 0x237, 0x3AC), are numbered past the story's last, 106. So it stays beside the route: on Restored
-  Cape Claw stays in act 2 while 0x52B is clear and takes act 9 once it is set (`acts.cpp`), and entry 77
-  (setuppoint 33f90, acts 1-13) lands in either. No gate on WG's shrine. Built (PR 68): PLAYED.
+  Cape Claw stays in act 2 while 0x52B is clear and takes act 9 once it is set and WG's spirit is released (0x222,
+  saved; 0x367 isn't) (`acts.cpp`), and entry 77 (setuppoint 33f90, acts 1-13) lands in either. No gate on WG's
+  shrine. Built (PR 69), played from `before-wg-shrine` at WG's release in Warlock Mountain's act 7 (`--place
+  13447,472,1612,0 --bits e4=7,366`): sequence 0x12 at 48 s, then Cape Claw loaded in act 2 by its west entrance,
+  and the tablet room (entry 72) held its receptacles; with 0x52B set it stayed in act 9; on Original, act 9. From
+  `before-sand-worm --bits ee=2,52b`, act 2, and with 0x222 too, act 9.
 - **The third tablet** (decided once its text is found): text 0x201, "I took this before the Sharpclaw could get their
   hands on it ... It might be of use to you back in Cape Claw", gives a tablet away from Cape Claw; 0x237 is the one
   tablet bit with no placement, and CCkrazoaTabletA (dll214) is a sequence's actor for it. No DLL names 0x201, so a
@@ -433,8 +437,9 @@ open: the logs.
 - **Cape Claw's act 9 after the tablet room** (Krazoa Tablets): sequence 0x12 sets Cape Claw's act 9 at WG's release
   (dll611 0x664, its only setter), and act 9 holds none of the tablet room, so a player who came to the release with
   the room unsolved could never set 0x52B, the palace's fire door. Act 9 loads as act 2, the act Kyte's rescue sets
-  (TriggerPlane 30ec4), while 0x52B is clear, and act 2 or 3 as act 9 once 0x52B and 0x367 are both set
-  (`src/game/acts.cpp`). 0xEE: dll611 and 30ec4 set it, the object loader reads it. Cascade: 0x52B (the fire door)
+  (TriggerPlane 30ec4), while 0x52B is clear, and act 2 or 3 as act 9 once 0x52B and 0x222, WG's spirit released,
+  are both set (`src/game/acts.cpp`): 0x367 and 0x368, which sequence 0x12 sets, are bank 0, not saved, and the warp
+  point clears 0x367 as it warps. 0xEE: dll611 and 30ec4 set it, the object loader reads it. Cascade: 0x52B (the fire door)
   can be set after the release; entry 77's setuppoint loads in acts 1 to 13, so its warp lands in either act. The ROM
   offers: a gate on WG's shrine (none: the room's tasks, 133 to 136, are past the story's 106), or act 3, act 2 less
   the CCkdoors and three foes.

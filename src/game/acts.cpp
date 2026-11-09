@@ -46,13 +46,15 @@
 // - Cape Claw (map 29, act bits 0xEE). Its tablet room, the three CCkrazoaReceptas, their CCkrazoaTablets and the
 //   settlement room's CCKrazoaTabletP, loads in acts 2 and 3 only (and 12, 13, 15 and 16), and its lights
 //   (CCkrazoabright) in 1 to 3: act 2 is the one TriggerPlane 30ec4 sets as Kyte is freed (task 17, above), and act 3
-//   is act 2 less the CCkdoors and three foes. Sequence 0x12, at Willow Grove's release, sets act 9 and 0x367, which
+//   is act 2 less the CCkdoors and three foes. Sequence 0x12, after Willow Grove's release, sets act 9 and 0x367, which
 //   shows Warlock Mountain's warp to entry 77 by Cape Claw's west entrance (dll611 0x664), and nothing sets another
 //   act after it. Nothing in the ROM orders the room before that shrine (its tasks, 133 to 136, are numbered past the
 //   story's last, 106), so a player who reaches the release with the room unsolved could never solve it or set
 //   0x52B (krazoa.cpp), which opens Krazoa Palace's fire door. Here act 9 loads as act 2 while 0x52B is clear, and
-//   act 2 or 3 loads as act 9 once 0x52B and 0x367 are both set. Entry 77's setuppoint (33f90) loads in acts 1 to 13,
-//   so the warp lands in either.
+//   act 2 or 3 loads as act 9 once 0x52B and 0x222 are both set: 0x222 is WG's spirit released, saved (ROM file 55,
+//   bank 1), which the release sets in the same function (dll611 0x4B4) before sequence 0x12 plays. 0x367 and 0x368
+//   are bank 0, not saved, and the warp point clears 0x367 as it warps. Entry 77's setuppoint (33f90) loads in acts 1
+//   to 13, so the warp lands in either.
 
 #include <cstdint>
 #include <cstdio>
@@ -90,7 +92,7 @@ namespace {
     constexpr int tablet_room_later_act = 3;
     constexpr int after_willow_grove_act = 9;
     constexpr int tablets_solved = 0x52B;
-    constexpr int cape_claw_warp_shown = 0x367;
+    constexpr int willow_grove_released = 0x222;
 
     const std::string third_stone = "third_stone";
 
@@ -147,7 +149,7 @@ namespace {
 
     // The act the story has the map in, from the one it is in: the volcano's from acts 1 to 3, and from the Queen's
     // act 11 once her visits are spent; the palace's act 1 from 14; Cape Claw's act 2 from 9 until the tablet room is
-    // solved, and 9 from 2 or 3 once it is and Willow Grove's release has set 9.
+    // solved, and 9 from 2 or 3 once it is and Willow Grove's spirit is released.
     int story_act(uint8_t* rdram, recomp_context* ctx, int map, int act) {
         if (map == volcano_force_point) {
             if (act == queen_act ? queen_visit_pending(rdram, ctx) : act < 1 || act > 3) {
@@ -169,7 +171,7 @@ namespace {
                 return tablet_room_act;
             }
             if ((act == tablet_room_act || act == tablet_room_later_act) && get(rdram, ctx, tablets_solved) &&
-                get(rdram, ctx, cape_claw_warp_shown)) {
+                get(rdram, ctx, willow_grove_released)) {
                 return after_willow_grove_act;
             }
         }

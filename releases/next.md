@@ -66,3 +66,5 @@
   to leave the city and come back first.
 - Ending on Restored: once Drakor is beaten and his fall has played, the game's own credits, which nothing in the
   prototype ever showed, play on black, then the title.
+- Krazoa Tablets on Restored: Cape Claw's tablet room stays until it is solved. In the prototype it went away at Willow
+  Grove's spirit's release, so a player who came there with it unsolved could never open Krazoa Palace's fire door.
