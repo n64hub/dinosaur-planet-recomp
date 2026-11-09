@@ -53,10 +53,8 @@ Always on, so each setting's Original has them too.
   PR 55).
 - More than 420 late frees in a frame, writing over the loaded models' table, as Dragon Rock's arena unloads after
   the Earth Warrior is freed (us.toml, func_800175D4, `src/game/heap.cpp`; PR 56).
-
-Open:
-
-- The skeletons' hits.
+- A sky switched and freed in one frame, then drawn: Warlock Mountain's room past the laser hall as the player comes
+  in, where WL_LevelControl sets the sky each frame (us.toml, dll7_102C; PR 82).
 
 ## 2. Restored from what the ROM shows
 
@@ -155,6 +153,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   (part 3). 30055's done bit was bit 0, shared, and is 0x367. Cape Claw's act 9 loads act 8's placements less 28 of
   its curves, none of its own and no trigger that sets an act: entry 77 is filled at setuppoint 7, by its west
   entrance, which act 9 loads.
+- EC's course in act 5 (PR 82): every WL_LaserTarget (dll595) sets bit 0 with its own bit (their +0x20 is 0), and
+  seqpoints 2973 (sequence 8, past the guards) and 297b (sequence 9, "Father.") have done bit 0, so the first target
+  hit, in the hall or 29c1, which frees the guards, shut both for good. Their done bits are their triggers, 0x2F2 and
+  0x2F4, which a mode 3 seqpoint sets as its sequence starts.
 
 ### Krazoa Tablets
 
@@ -294,9 +296,9 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Open
 
-Not played yet, so what it needs isn't known (docs/story-points.md, The third SpellStone and the moonseeds): a hit on
-Warlock Mountain's laser targets (WL_LaserTarget, dll595), whose 29c1 lets EC's guards go (0x2FA), and which a
-script's aimed shots have not set.
+Found in play, not fixed yet (docs/story-points.md, The third SpellStone and the moonseeds): on the way to EC's
+release, once 297b's sequence 9 ends, the player falls through the corridor's floor at (13995, 13, 1610) and out of
+the world, and comes back in the laser hall.
 
 ## 3. Choices
 
@@ -490,6 +492,12 @@ open: the logs.
   2973 and 297b). It reads and sets no bit: dll331 only turns it as it is made. Cascade: none. The ROM offers: act 7's
   TriggerPlane 2e6f at its face (0x36C), on which WL_LevelControl (dll607 0x1788) starts a rockfall (0x36D), as if it
   fell then (?); nothing else that moves or opens it, or a way round (docs/story-points.md).
+- **Act 5's column** (Krazoa Shrines): the guards' room (y -99) leads on only up where 2973 stands, to 297b's floor at
+  y 13, and act 5 places no column there, so act 3's WL_colrise (uid 2A8E, no bit: it rises while it is stood on,
+  dll599 0x144) is shown in act 5 too. At its own y -100 its top is level with the floor around it, which holds the
+  player before the column sees him step on (func_8005509C), and it rose only on slow frames: it stands at -98.
+  Cascade: none (act 3 has it 2 higher). The ROM offers: acts 3 and 7 place a column at that spot (2A8E, and WG's
+  @1AB0, which needs 0x1D1); nothing else that goes up.
 - **The third tablet's place** (Krazoa Tablets): a CCKrazoaTabletP with 0x237 at (3574, -257, 16514), where the sand
   worm's arena has CCnewseqobject 42BDF, which nothing triggers (its trigger 0x96 is never), placed once the worm is
   dead (0x3FB, dll461). 0x237: no ROM setter; dll458 reads it. Cascade: 0x23B, 0x23C (the settlement room's door),

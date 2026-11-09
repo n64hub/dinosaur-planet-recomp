@@ -58,7 +58,8 @@ Fixed:
   pressed on the very frame the player comes back after a death, before the staff or sword was made, Golden
   Plains' portable hole spell, whose pickup made a new player every frame until the game ran out of memory, and a
   fall into the pit in either of Walled City's temples, which loads the city again and made an object the game no
-  longer has.
+  longer has, and the room past Warlock Mountain's laser hall, whose sky was freed on the frame the player came in
+  and drawn after.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
@@ -68,9 +69,11 @@ Fixed:
   who stood still won as its answer time ran out. After Willow Grove's spirit, Warlock Mountain's own scene and warp
   point on to Cape Claw, which never came, now do. A fallen column across Warlock Mountain's way north from the pad,
   which shut off the releases of Walled City's, Willow Grove's and Northern Wastes' spirits, is gone while they are
-  carried. Two of the fixes are always on: the pad the player arrives on in Moon Mountain Pass's shrine, which sent a
-  player who stepped back on it nowhere, and Golden Plains' fly baddie, whose every shot made a second player who took
-  the camera.
+  carried, and past the laser hall on the way to Walled City's release, the two scenes after its guards, which the
+  first laser target hit had shut for good, now play, and a column there carries the player up to the second. Two of
+  the fixes are always on: the pad the player arrives on in Moon Mountain Pass's shrine, which sent a player who
+  stepped back on it nowhere, and Golden Plains' fly baddie, whose every shot made a second player who took the
+  camera.
 - SwapStone Hollow's Tricky's run to his mother, the Queen Earthwalker (Tricky's Run on Restored): it never started.
   With no Tricky beside Sabre it would have crashed, which is fixed on either setting.
 - SwapStone Hollow's SwapStone could stop answering in its own corner of the hollow, and answer only outside it,
@@ -161,10 +164,6 @@ Fixed:
   the SnowClaw guarding it is beaten) angers the RedEye by the gate, a RedEye that catches Sabre roars and drops a
   tooth, ten teeth in the bowl by the arch open the gate, and the King EarthWalker activates the stone once Sabre
   brings it to him.
-
-Under way:
-
-- Crashes in the game's own code still to find: the skeletons' hits.
 
 ## The ROM
 

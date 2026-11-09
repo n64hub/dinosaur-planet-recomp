@@ -87,3 +87,8 @@
 - SwapStone Circle's chief now gives Krystal the key to Moon Mountain Pass once Diamond Bay's spirit is released. In
   the prototype he never did after a swap back to Krystal, so CloudRunner Fortress and the rest of the story were out
   of reach.
+- Warlock Mountain no longer crashes as the player walks into the room past the laser hall without the SharpClaw
+  disguise, where the game sends the player back to the hall.
+- Krazoa Shrines on Restored: past Warlock Mountain's laser hall, on the way to Walled City's spirit's release, the
+  two scenes after the guards now play once a laser target has been hit, and a column carries the player up from the
+  guards' room to the second. In the prototype the first target hit shut both scenes for good, and nothing went up.
