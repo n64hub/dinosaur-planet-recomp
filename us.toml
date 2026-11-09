@@ -704,6 +704,14 @@ func = "func_80037A14"
 before_vram = 0x80037C6C
 text = "ctx->r7 = ADD32(ctx->r7, 1);"
 
+# The rows above and below the 3D picture (src/game/screen_clear.cpp): with no full clear to do (its flag 1, $t3, is
+# clear at 0x80037C58), func_80037A14 fills them black, its display list pointer in $s0, before it looks for a
+# cutscene's bars.
+[[patches.hook]]
+func = "func_80037A14"
+before_vram = 0x80037C60
+text = "{ void dino_clear_borders(uint8_t*, gpr, gpr); dino_clear_borders(rdram, ctx->r16, ctx->r29); }"
+
 # The minimap keeps to the left: dll59_0148's display list pointer is $a0, then 0x68($sp).
 [[patches.hook]]
 func = "dll59_0148"

@@ -63,3 +63,4 @@
   the prototype nothing moved it.
 - Walled City: the temples' symbols at the tops of their stairs take the light once their doors open, with no need
   to leave the city and come back first.
+- The garbage in the thin bands across the top and bottom of the picture in play is gone: they are black.
