@@ -489,7 +489,7 @@ open: the logs.
 - **BOSS TRex's stone** (BOSS TRex): the defeat sets 0x82E, the stone won, with 0x81C and 0x56E. 0x82E: no ROM
   setter or getter. Cascade: the King (below), or with Walled City on Original the stone's activation at once. The ROM
   offers: 0x83B, the stone carried, has one setter, VFP_LevelControl's act-2 timer, with 0x22B; VFP_SpellPlace 41e21
-  takes it. Redone (PR 64, The third SpellStone's hand-over): the defeat set 0x83B, which with `acts.cpp` moving to
+  takes it. Redone (PR 65, The third SpellStone's hand-over): the defeat set 0x83B, which with `acts.cpp` moving to
   act 2 on 0x83B went round in a circle.
 - **The volcano's acts** (Third SpellStone): act 2 from the stone's activation (The King's activation), kept until
   0x878, then act 3. Cascade: act 2's timer gives the stone (0x83B) and 0x22B, the first stone's, again; act 3's sets
