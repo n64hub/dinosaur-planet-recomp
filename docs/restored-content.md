@@ -54,10 +54,6 @@ Always on, so each setting's Original has them too.
 - More than 420 late frees in a frame, writing over the loaded models' table, as Dragon Rock's arena unloads after
   the Earth Warrior is freed (us.toml, func_800175D4, `src/game/heap.cpp`; PR 56).
 
-Open:
-
-- The skeletons' hits.
-
 ## 2. Restored from what the ROM shows
 
 ### Plain bugs, always on

@@ -162,10 +162,6 @@ Fixed:
   tooth, ten teeth in the bowl by the arch open the gate, and the King EarthWalker activates the stone once Sabre
   brings it to him.
 
-Under way:
-
-- Crashes in the game's own code still to find: the skeletons' hits.
-
 ## The ROM
 
 The prototype's ROM as a big-endian `.z64` of 64 MiB with MD5 `49f7bb346ade39d1915c22e090ffd748` (SHA-1
