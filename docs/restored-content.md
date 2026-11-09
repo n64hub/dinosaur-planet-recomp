@@ -312,11 +312,18 @@ What changes, in the order it is built, the redone choices first:
   act 14, to the palace's Transporters, on both settings.
 - **The third SpellStone's hand-over** (replaces BOSS TRex's stone and the King's activation): the volcano's level
   control hands over each stone in the act it loads in: act 1's timer sets 0x123, the first stone carried, its only
-  setter, and act 2's sets 0x83B and 0x22B (dll619_024C, +0x24C, +0x410, +0x428). Task 83, "KING EARTHWALKER
-  ACTIVATES THE SPELLSTONE", and his "Bring it back to me, as only I can activate it" put the activation at the
-  King. So the King's activation moves the volcano to act 2, as the Queen sets its act 11 (dll29's export 16), and
-  act 2 gives 0x83B; the defeat sets 0x82E only, nothing of ours sets 0x83B, and `acts.cpp` no longer moves the act
-  on it, which ends the circle. Act 3 stays on 0x878. `before-third-stone`'s story point moves with it.
+  setter, and act 2's sets 0x83B and 0x22B (dll619_024C, +0x24C, +0x410, +0x428). Task 83, "KING EARTHWALKER ACTIVATES
+  THE SPELLSTONE", and his "Bring it back to me, as only I can activate it" put the activation at the King. So the
+  King's activation moves the volcano to act 2, as the Queen sets its act 11 (dll29's export 16), and act 2 gives 0x83B;
+  the defeat sets 0x82E only, nothing of ours sets 0x83B, and `acts.cpp` no longer moves the act on it, which ends the
+  circle. Act 3 stays on 0x878. `before-third-stone`'s story point moves with it. Built (PR 66), played on Restored:
+  Sabre's talk with the King cleared 0x82E and put the volcano in act 2, and there the level control's act-2 timer gave
+  0x83B and 0x22B 2.1 s after it loaded (warp 81, group 10 on). Walked in from Diamond Bay's side, across TriggerPlane
+  31de8, which turns group 10 on, it gave them 2.2 s in, and again 2.2 s after walking out and back in: each load of the
+  level control's DLL starts its timer again. With 0x878 the next load was act 3, whose timer gave 0x63C and 0x83C 2.1 s
+  in, two runs of two. The act-2 podium (0x515) didn't take the stone from a `--place` start beside it (A, C-right, A);
+  it reads the act and 0x83B as before (?). With Walled City on Original, BOSS TRex's defeat
+  (`tools/boss_trex_input.txt`) gave 0x82E and moved the volcano to act 2 in the same frame.
 - **The moonseeds** (replaces four given at 0x878): task 91, "COLLECTED MOONSEEDS FOR KRYSTAL" with the clue "SEARCH
   IN DARK, WET PLACES", is Sabre's, after 90 (the stone placed) and before 92 (the swap); a SwapStone Hollow
   ThornTail says "Moonseeds grow in dark damp places.", and the item is "MOON SEEDS". MMP_moonseed (def 528) is

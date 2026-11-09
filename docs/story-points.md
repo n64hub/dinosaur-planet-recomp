@@ -685,10 +685,13 @@ inventory with it selected, and A uses it on what is in reach (`--input` lines `
   warp 43) by A, about 20 s after an arrival, as EC's does, with or without the meteor's bits (0x803, 0x804).
 - Walled City in act 2 loads the Sun and Moon Stones (WCSunStone, 272), the TRex statues' sockets (785) and its
   level control's act 2 (779).
-- The volcano in act 3 (`--story before-third-stone,81 --bits 878,500=1024`, group 10 holding VFP_LevelControl):
-  its act-3 timer (130, less the frame's time each frame, 0x69C) runs out 2 to 4 s in and sets 0x63C and 0x83C, and
-  Diamond Bay goes to act 3. That was three runs of four (4.2 s, on Third
-  SpellStone's Restored): in the other, nothing was set in 48 s, and why is not known.
+- The volcano in act 3 (`--story before-third-stone --place -12250,-1440,-2240 --bits 878` and the `--input` line
+  `1 0 to -12750 -2240`, which walks in from Diamond Bay's side across TriggerPlane 31de8: it turns on group 10, which
+  holds VFP_LevelControl, and a warp to 81, beyond it, needs `--bits 500=1024`): its act-3 timer (130, less the frame's
+  time each frame, 0x69C) runs out 2.1 s after each load of the level control and sets 0x63C and 0x83C, and Diamond
+  Bay goes to act 3. Two runs of two, and act 2's the same way, five loads of five, two of them in one run
+  (walked out and back in). An earlier run from warp 81 set nothing in 48 s, and why is not known: group 10 off would do
+  it.
 
 Played from here on the desktop build, each from the one before it but where a `--place` or `--bits` start is named:
 
