@@ -84,6 +84,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   fastest that lets the bike over. The race itself sets everything it needs (0x49A comes about 12 s after 0x2E8 with
   no code call, and seqobject 30cca's sequence 0x18 then sets 0x49F), and is reached by the pool on 0x4BE, so it
   needs 0x8D1 and 0x300.
+- CloudRunner Fortress's gold perch: Kyte, freed on the courtyard's deck, kept to its six curves, which join none of
+  the fortress's others, so whatever she was sent to she circled the deck, and the gold perch's 0x8D1, which she sets
+  as she lands there, never came. Once 0x43 frees her with 0x46E at the deck's 0x11, her path starts again from the
+  nearest curve off it (us.toml, dll400_0914 and dll212_0CE8, `src/game/cloudrunner.cpp`).
 - Diamond Bay: DBlgtbeam's test of Sabre on a beam (dll677_1164) took the cosine and sine of its yaw with their sign,
   so beams 2 and 3 took him from about 60 off and a leap from 3 to 4 stepped the bridge back from under him; both are
   taken without their sign (us.toml, `src/game/diamond_bay.cpp`; PR 54).
@@ -102,6 +106,11 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   cells never loaded, the lever on a purple void, and the scene left the player past the gallery's east end over
   nothing, whose respawn took back the meat, 0x5FD, 0x5FE and 0x654, so the Earth Warrior couldn't be freed. The
   origin is now cleared with its flag, so it names only the start after it (us.toml's second hook on dll3_8900).
+- Every screen in play: the world was kept off 6 rows at the top and 6 at the bottom, which nothing drew or cleared
+  (func_80037A14 fills them only for a cutscene's bars), so they showed what a screen before left there, broken tiles
+  and half of the boot screens' "PUBLISHED BY" line. The world's viewport already reaches past them, so its clears
+  and scissor now take the whole frame and the picture fills the window; a cutscene's letterbox keeps them (us.toml,
+  `src/game/view_rows.cpp`).
 
 ### Tricky's Run
 
@@ -283,8 +292,8 @@ def names, placements and acts, and how the finished stretches do the same thing
 prototype became, is a hint where both have a stretch, never evidence. Three rules:
 
 - The route is gated only where the ROM gates it. A stretch the ROM leaves open beside the route stays open, and a
-  restoration doesn't make it a step: Cape Claw's tablet room loads from Kyte's rescue (task 17) to Willow Grove's
-  release.
+  restoration doesn't make it a step: Cape Claw's tablet room loads from Kyte's rescue (task 17) until it is
+  solved, whenever Willow Grove's release comes.
 - The ROM's mechanism comes before ours: a stand-in goes once the ROM's own way is found, and one that unlocks several
   beats several.
 - What looks cut (text no object uses, as "the 6 SpellStones!") is left out; what is placed or coded and can't be
@@ -343,7 +352,9 @@ What changes, in the order it is built, the redone choices first:
 - **The gold** (a bug, not a choice): PerchObject 429d8's chain is whole (0x46E to 0xC0, curve 429D9, message 5,
   0x8D1). Kyte didn't land because sideload 31877 makes her on the deck, whose curves (group 0x11) join none of the
   other 338, so she can't find a path to 0xC0. Played first with Kyte following from the corridor; if her joining
-  leaves her on the deck, she is moved to the nearest curve off it once 0x43 is set, always on.
+  leaves her on the deck, she is moved to the nearest curve off it once 0x43 is set, always on. Built: freed on the
+  deck, her path starts again from the nearest curve off it (0x46E at 0x11 with 0x43 set), and the star sent her to
+  429D9 (0x8D1); with the babies' perches set, 0x4BE, the pool (0x4BF) and 0x4C1 followed (played).
 - **The treasure caves' way in** (Treasure Lift likely goes): task 66, "ENTERED THE TREASURE CAVES UNDER THE
   FORTRESS" with "DRAINED POOLS HAVE HIDDEN DOORS", the signs "TREASURE ROOMS ... the door will only open when Regal
   Perches are in use" and "WIND LIFT ... Please use lever to change wind direction". The ROM's way: four perches
@@ -359,8 +370,12 @@ What changes, in the order it is built, the redone choices first:
 - **Cape Claw's act and the tablet room** (Open, decided): the room loads in acts 2 and 3, from task 17, and act 9
   (WG's release) drops it. Nothing in the ROM orders the room before WG's shrine, and its tasks, 133 to 136 (bits
   0x238, 0x239, 0x237, 0x3AC), are numbered past the story's last, 106. So it stays beside the route: on Restored
-  Cape Claw stays in act 2 while 0x52B is clear and takes act 9 once it is set (`acts.cpp`), and entry 77
-  (setuppoint 33f90, acts 1-13) lands in either. No gate on WG's shrine.
+  Cape Claw stays in act 2 while 0x52B is clear and takes act 9 once it is set and WG's spirit is released (0x222,
+  saved; 0x367 isn't) (`acts.cpp`), and entry 77 (setuppoint 33f90, acts 1-13) lands in either. No gate on WG's
+  shrine. Built (PR 69), played from `before-wg-shrine` at WG's release in Warlock Mountain's act 7 (`--place
+  13447,472,1612,0 --bits e4=7,366`): sequence 0x12 at 48 s, then Cape Claw loaded in act 2 by its west entrance,
+  and the tablet room (entry 72) held its receptacles; with 0x52B set it stayed in act 9; on Original, act 9. From
+  `before-sand-worm --bits ee=2,52b`, act 2, and with 0x222 too, act 9.
 - **The third tablet** (decided once its text is found): text 0x201, "I took this before the Sharpclaw could get their
   hands on it ... It might be of use to you back in Cape Claw", gives a tablet away from Cape Claw; 0x237 is the one
   tablet bit with no placement, and CCkrazoaTabletA (dll214) is a sequence's actor for it. No DLL names 0x201, so a
@@ -415,8 +430,8 @@ open: the logs.
   3001c, to act 1, are acts 12 and up's; TriggerPlane 30ec4, to act 2, fires on 0x2C5, Kyte freed, before any shrine),
   so Cape Claw stays in act 9, which holds
   none of the tablet room's receptacles and set tablets (acts 2 and 3) or its lights (CCkrazoabright, 1 to 3), as acts
-  4 to 8 hold none: Cape Claw after the tablet room (Open). The ROM offers: the tablet room, Krazoa Palace or Drakor,
-  none tied to act 9.
+  4 to 8 hold none: Cape Claw after the tablet room, so act 9 waits for the room (The plan). The ROM offers: the
+  tablet room, Krazoa Palace or Drakor, none tied to act 9.
 - **Warlock Mountain's bits each visit** (Krazoa Shrines): act 5 sets 0x142, EC's release trigger (no ROM setter),
   act 7 sets 0x1D1, WG's. The ROM offers nothing else.
 - **"Already won"** (Krazoa Shrines): Golden Plains' as act 8 or later, Willow Grove's as act 7 or later.
@@ -430,6 +445,15 @@ open: the logs.
   worm's arena has CCnewseqobject 42BDF, which nothing triggers (its trigger 0x96 is never), placed once the worm is
   dead (0x3FB, dll461). 0x237: no ROM setter; dll458 reads it. Cascade: 0x23B, 0x23C (the settlement room's door),
   0x238-0x23A, 0x3A9. The ROM offers: 42BDF's sequence 8, untriggered (?).
+- **Cape Claw's act 9 after the tablet room** (Krazoa Tablets): sequence 0x12 sets Cape Claw's act 9 at WG's release
+  (dll611 0x664, its only setter), and act 9 holds none of the tablet room, so a player who came to the release with
+  the room unsolved could never set 0x52B, the palace's fire door. Act 9 loads as act 2, the act Kyte's rescue sets
+  (TriggerPlane 30ec4), while 0x52B is clear, and act 2 or 3 as act 9 once 0x52B and 0x222, WG's spirit released,
+  are both set (`src/game/acts.cpp`): 0x367 and 0x368, which sequence 0x12 sets, are bank 0, not saved, and the warp
+  point clears 0x367 as it warps. 0xEE: dll611 and 30ec4 set it, the object loader reads it. Cascade: 0x52B (the fire door)
+  can be set after the release; entry 77's setuppoint loads in acts 1 to 13, so its warp lands in either act. The ROM
+  offers: a gate on WG's shrine (none: the room's tasks, 133 to 136, are past the story's 106), or act 3, act 2 less
+  the CCkdoors and three foes.
 - **The tablet room's end** (Krazoa Tablets): the last lights set 0x52B, a saved bit with no ROM setter, getter or
   placement, which shows a Transporter in the room, own entry 72, sending to 94. Cascade: Krazoa Palace's fire door
   opens on 0x52B, so the palace needs Krazoa Tablets. The ROM offers: Warlock Mountain's WM_WarpPoint 2ac6 sends to 72
@@ -560,13 +584,8 @@ open: the logs.
 
 ### Open
 
-- **Cape Claw's act 9 before the tablet room** (Krazoa Shrines, Krazoa Tablets): sequence 0x12 sets Cape Claw's act
-  9 at WG's release, and Cape Claw stays in it (Entry 77), so a player who comes to WG's release with the tablet room
-  unsolved finds no receptacles there, and 0x52B, the palace's fire door, can't be set (?). The ROM's acts put the
-  room first (acts 4 to 9 are Cape Claw after it), and nothing makes a player solve it before WG's shrine. Nothing
-  built.
-- **CloudRunner Fortress's gold and Bonehead**: 0x8D1 is set from curve 429d9's +0x32 as Kyte lands at the gold perch
-  (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300. 0x4B7 (dll369 reads and clears it,
+- **CloudRunner Fortress's gold and Bonehead**: 0x8D1 is set from curve 429d9's +0x32 while Kyte sits on the gold
+  perch (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300 (both played). 0x4B7 (dll369 reads and clears it,
   TriggerPlane 30e8c clears it) and 0x4B8 (dll519, dll400 read it) have no setter. 0x4DC is set and cleared by
   TriggerPlane 31a68 at (-9917, 1445, 18272), and dll400 turns it into 0x4DD, whose sequence sets 0x4DE.
 - **The babies left**: 29FA's ledge, map 30's and map 15's from the master chest.

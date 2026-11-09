@@ -45,6 +45,20 @@
 // nearest the baby (within 400; dll26's table holds the map's curves), and Kyte's own path code flies her there, where
 // her flag brings it out once Krystal steps back from its call. Once the baby is rescued 0x46E goes back to what it
 // was, unless something has set it since.
+//
+// The deck (always on), read from the ROM:
+// - Kyte flies only along curves joined to the one her path started from. Her path starts (dll212_0CE8, while her
+//   state's +0x4 is 0) from the curve nearest her of any group, whose group becomes 0x46E, or with 0x454 set from the
+//   nearest of 0x46E's group, where she is put. Each node after (dll212_1404) is on a path through the links to 0x46E's
+//   group (nearest the player), and with none she takes a neighbour and 0x46E becomes its group: what she was sent to
+//   is dropped. A curve's group is its placement's +0x5.
+// - Shut in on the courtyard's roof (0x41 without 0x43) CFLevelControl (dll400_0914) holds 0x46E at 0x11 and sets
+//   0x454, so she is on the deck's six curves (deck_curves), which join none of the fortress's others, and nothing moves
+//   her off once 0x43 frees her: she circles the deck whatever sends her elsewhere, PerchObject 429D8's star to the gold
+//   perch (0xC0, whose curve sets 0x8D1 as she lands) included.
+//
+// What it changes: once 0x43 is set, a path start passes over the deck's curves for the nearest curve off it, and
+// with 0x46E still at 0x11 and Kyte out her path starts again.
 
 #include <cstdint>
 #include <cstdio>
@@ -91,6 +105,12 @@ namespace {
     constexpr int kyte_group = 0x46E;
     constexpr int32_t rescued = 0xC;
     constexpr float find_node_reach = 400.0f;
+    constexpr int kyte_freed = 0x43;
+    constexpr int kyte_to_start = 0x454;
+    constexpr int deck_group = 0x11;
+    // The deck's curves (map 12, group 0x11), by their unique ids (+0x14): they join none of the fortress's others.
+    constexpr uint32_t deck_curves[] = { 0x31861, 0x31862, 0x31863, 0x31864, 0x318AC, 0x42D10 };
+    constexpr int16_t kyte_object = 0x25;
 
     constexpr int32_t set_bit = 0x80014670;
     constexpr int wind_on = 0x30D;
@@ -131,34 +151,41 @@ namespace {
         return sqrtf(dx * dx + dy * dy + dz * dz);
     }
 
-    // The group of the find node (a curve of type 0x22 whose node type, +0x1A, is 8, 9, 21 or 22) nearest the baby,
-    // or -1 with none within find_node_reach. dll26's export 3 returns its table of the map's curves, 8 bytes each with
-    // the curve's placement at +4, and writes their count to $a0's word (as dll25's export 12 reads it).
-    int find_group(uint8_t* rdram, recomp_context* ctx, gpr baby) {
+    // The curve of type 0x22 nearest the position that want() takes, or 0 with none within reach. dll26's export 3
+    // returns its table of the map's curves, 8 bytes each with the curve's placement at +4, and writes their count to
+    // $a0's word (as dll25's export 12 reads it); a curve's group is its placement's +0x4.
+    template <typename Want>
+    gpr nearest_curve(uint8_t* rdram, recomp_context* ctx, gpr position, float reach, Want want) {
         Calls calls(ctx);
         gpr count_at = ctx->r29 + 0x10;
         ctx->r4 = count_at;
         call(rdram, ctx, word(rdram, word(rdram, word(rdram, dll26_handle)) + 4 + 4 * 3));
         gpr table = ctx->r2;
         int32_t count = (int32_t)MEM_W(0, count_at);
-        int group = -1;
-        float nearest = find_node_reach;
+        gpr found = 0;
+        float nearest = reach;
         for (int32_t i = 0; table != 0 && i < count; i++) {
             gpr curve = MEM_W(4 + 8 * i, table);
-            if (curve == 0 || MEM_B(0x19, curve) != 0x22) {
+            if (curve == 0 || MEM_B(0x19, curve) != 0x22 || !want(curve)) {
                 continue;
             }
-            int type = (int8_t)MEM_B(0x1A, curve);
-            if (!(type == 8 || type == 9 || type == 21 || type == 22)) {
-                continue;
-            }
-            float d = distance(rdram, curve + 8, baby + 0x18);
+            float d = distance(rdram, curve + 8, position);
             if (d < nearest) {
                 nearest = d;
-                group = MEM_HU(0x4, curve);
+                found = curve;
             }
         }
-        return group;
+        return found;
+    }
+
+    // The group of the find node (a curve of type 0x22 whose node type, +0x1A, is 8, 9, 21 or 22) nearest the baby,
+    // or -1 with none within find_node_reach.
+    int find_group(uint8_t* rdram, recomp_context* ctx, gpr baby) {
+        gpr curve = nearest_curve(rdram, ctx, baby + 0x18, find_node_reach, [rdram](gpr curve) {
+            int type = (int8_t)MEM_B(0x1A, curve);
+            return type == 8 || type == 9 || type == 21 || type == 22;
+        });
+        return curve != 0 ? MEM_HU(0x4, curve) : -1;
     }
 
     int32_t get(uint8_t* rdram, recomp_context* ctx, int bit) {
@@ -306,4 +333,66 @@ extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
         state, krystal_away, kyte_is, kyte != 0 ? read_float(rdram, kyte + 0x18) : 0.0f,
         kyte != 0 ? read_float(rdram, kyte + 0x1C) : 0.0f, kyte != 0 ? read_float(rdram, kyte + 0x20) : 0.0f,
         finds ? ", on a find node" : "");
+}
+
+namespace {
+    bool on_the_deck(uint8_t* rdram, gpr curve) {
+        uint32_t uid = (uint32_t)MEM_W(0x14, curve);
+        for (uint32_t deck : deck_curves) {
+            if (uid == deck) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+// us.toml's hook at the start of CFLevelControl's Kyte routine (dll400_0914), every frame map 12 is loaded. Always on:
+// with Kyte freed (0x43), out, and her group (0x46E) still the deck's, her path code starts again (her state's +0x4 back
+// to 0, so dll212_0CE8 runs next), from a curve off the deck (dino_kyte_start_curve).
+extern "C" void dino_cloudrunner_kyte_freed(uint8_t* rdram, recomp_context* ctx) {
+    if (get(rdram, ctx, kyte_freed) == 0 || get(rdram, ctx, kyte_group) != deck_group) {
+        return;
+    }
+    gpr kyte;
+    {
+        Calls calls(ctx);
+        call(rdram, ctx, sidekick_object);
+        kyte = ctx->r2;
+    }
+    if (kyte == 0 || MEM_H(0x46, kyte) != kyte_object || MEM_B(0x4, MEM_W(0xB8, kyte)) != 1) {
+        return;
+    }
+    MEM_B(0x4, MEM_W(0xB8, kyte)) = 0;
+    if (logging) {
+        fprintf(stderr, "cloudrunner: Kyte freed with 0x46E at the deck's 0x11, her path started again\n");
+    }
+}
+
+// us.toml's hook in Kyte's path start (dll212_0CE8 0x0DE0, $v0 the curve nearest her, whose group becomes 0x46E, the
+// curve her path starts from). Always on: once she is freed (0x43), a curve of the deck is passed over for the nearest
+// curve off it.
+extern "C" void dino_kyte_start_curve(uint8_t* rdram, recomp_context* ctx) {
+    gpr curve = ctx->r2;
+    if (curve == 0 || !on_the_deck(rdram, curve) || get(rdram, ctx, kyte_freed) == 0) {
+        return;
+    }
+    gpr kyte;
+    {
+        Calls calls(ctx);
+        call(rdram, ctx, sidekick_object);
+        kyte = ctx->r2;
+    }
+    if (kyte == 0) {
+        return;
+    }
+    gpr off = nearest_curve(rdram, ctx, kyte + 0x18, 1e9f, [rdram](gpr c) { return !on_the_deck(rdram, c); });
+    if (off == 0) {
+        return;
+    }
+    if (logging) {
+        fprintf(stderr, "cloudrunner: Kyte starts off the deck, at curve %X (group %X) in place of %X\n",
+            (uint32_t)MEM_W(0x14, off), MEM_HU(0x4, off), (uint32_t)MEM_W(0x14, curve));
+    }
+    ctx->r2 = off;
 }

@@ -1,6 +1,7 @@
 // The maps' acts: the story moves the Volcano Force Point and Walled City on to the objects their later visits play,
 // with Third SpellStone on Restored (the default); on Original both stay in act 1 as in the prototype. Krazoa Palace
-// is kept out of the act that drops its Transporters, with Krazoa Palace on Restored (the default).
+// is kept out of the act that drops its Transporters, with Krazoa Palace on Restored (the default), and Cape Claw out
+// of the one that drops its tablet room until the room is solved, with Krazoa Tablets on Restored (the default).
 //
 // Each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets (map 4's is bit 0x4FE,
 // Walled City's 0xE6, Diamond Bay's 0x3EE: the u16 at +0x1F90 + 2 * map in dll29's data). A new game puts every map
@@ -8,7 +9,7 @@
 // set (byte +5 for acts 9 to 16). Sequences set the act of the map the playing object is in (dll3's event 0x1D, at
 // 0x6DF0: a word act << 16 | 0x746 of ROM file 13), and the one such event in all of file 13 sets act 3. Of the code
 // that sets a map's act by its number (`tools/dino.py calls dll29.16`), only the Queen Earthwalker names map 4 or 13
-// (below), and the rest set their own map's act or another's. The three acts this file moves:
+// (below), only dll611 map 29, and the rest set their own map's act or another's. The four acts this file moves:
 // - Volcano Force Point (map 4). Its second SpellPlace (@15B8, VFP_SpellPlace dll637: placed bit 0x878, carried 0x83B),
 //   the podium that takes the third SpellStone for the second path (VFP_PodiumPoint @0D5C, which sets 0x515), its
 //   seqpoint (@1380, holding 0x878), the door switch (@0D14) and the round door (@2B90) load in act 2 only, and the
@@ -42,6 +43,18 @@
 //   14 151 of them, none of its own: not the two KP_Transporters (42cdf, 42ce0, acts 1-13, 15 and 16), its
 //   setuppoints, crates and mushrooms, so a palace entered in act 14 can't be crossed or left. Here act 14 loads as
 //   act 1.
+// - Cape Claw (map 29, act bits 0xEE). Its tablet room, the three CCkrazoaReceptas, their CCkrazoaTablets and the
+//   settlement room's CCKrazoaTabletP, loads in acts 2 and 3 only (and 12, 13, 15 and 16), and its lights
+//   (CCkrazoabright) in 1 to 3: act 2 is the one TriggerPlane 30ec4 sets as Kyte is freed (task 17, above), and act 3
+//   is act 2 less the CCkdoors and three foes. Sequence 0x12, after Willow Grove's release, sets act 9 and 0x367, which
+//   shows Warlock Mountain's warp to entry 77 by Cape Claw's west entrance (dll611 0x664), and nothing sets another
+//   act after it. Nothing in the ROM orders the room before that shrine (its tasks, 133 to 136, are numbered past the
+//   story's last, 106), so a player who reaches the release with the room unsolved could never solve it or set
+//   0x52B (krazoa.cpp), which opens Krazoa Palace's fire door. Here act 9 loads as act 2 while 0x52B is clear, and
+//   act 2 or 3 loads as act 9 once 0x52B and 0x222 are both set: 0x222 is WG's spirit released, saved (ROM file 55,
+//   bank 1), which the release sets in the same function (dll611 0x4B4) before sequence 0x12 plays. 0x367 and 0x368
+//   are bank 0, not saved, and the warp point clears 0x367 as it warps. Entry 77's setuppoint (33f90) loads in acts 1
+//   to 13, so the warp lands in either.
 
 #include <cstdint>
 #include <cstdio>
@@ -61,6 +74,7 @@ namespace {
     constexpr int volcano_force_point = 4;
     constexpr int walled_city = 13;
     constexpr int krazoa_palace = 3;
+    constexpr int cape_claw = 29;
 
     constexpr int third_stone_placed = 0x878;
     constexpr int third_spirit_released = 0x317;
@@ -73,6 +87,12 @@ namespace {
     constexpr int queen_second_visit_played = 0x485;
 
     constexpr int palace_without_transporters = 14;
+
+    constexpr int tablet_room_act = 2;
+    constexpr int tablet_room_later_act = 3;
+    constexpr int after_willow_grove_act = 9;
+    constexpr int tablets_solved = 0x52B;
+    constexpr int willow_grove_released = 0x222;
 
     const std::string third_stone = "third_stone";
 
@@ -128,7 +148,8 @@ namespace {
     }
 
     // The act the story has the map in, from the one it is in: the volcano's from acts 1 to 3, and from the Queen's
-    // act 11 once her visits are spent; the palace's act 1 from 14.
+    // act 11 once her visits are spent; the palace's act 1 from 14; Cape Claw's act 2 from 9 until the tablet room is
+    // solved, and 9 from 2 or 3 once it is and Willow Grove's spirit is released.
     int story_act(uint8_t* rdram, recomp_context* ctx, int map, int act) {
         if (map == volcano_force_point) {
             if (act == queen_act ? queen_visit_pending(rdram, ctx) : act < 1 || act > 3) {
@@ -144,6 +165,15 @@ namespace {
         }
         if (map == krazoa_palace && act == palace_without_transporters) {
             return 1;
+        }
+        if (map == cape_claw) {
+            if (act == after_willow_grove_act && !get(rdram, ctx, tablets_solved)) {
+                return tablet_room_act;
+            }
+            if ((act == tablet_room_act || act == tablet_room_later_act) && get(rdram, ctx, tablets_solved) &&
+                get(rdram, ctx, willow_grove_released)) {
+                return after_willow_grove_act;
+            }
         }
         return act;
     }
@@ -196,7 +226,8 @@ bool dino::third_stone_restored() {
 extern "C" void dino_acts_map_loaded(uint8_t* rdram, recomp_context* ctx) {
     int map = (int32_t)ctx->r16;
     bool restored = map == volcano_force_point || map == walled_city ? dino::third_stone_restored() :
-        map == krazoa_palace && dino::krazoa_palace_restored();
+        map == krazoa_palace ? dino::krazoa_palace_restored() :
+        map == cape_claw && dino::krazoa_tablets_restored();
     if (!restored) {
         return;
     }

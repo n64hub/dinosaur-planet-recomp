@@ -111,6 +111,9 @@ Fixed:
 - CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
   found the ones waiting for her, so they never came out to be rescued. A waiting baby calls as Krystal comes near,
   Kyte now flies to where it hides, and once Krystal steps back it comes out for her to rescue.
+- CloudRunner Fortress's gold perch: once freed from the courtyard's roof, Kyte only ever circled it, so she never
+  flew to the gold perch above the courtyard when told to, and the pool over the way to the race never drained. She
+  now flies on with Krystal once she is freed.
 - Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
   ended, and could crash.
 - Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,
@@ -183,8 +186,8 @@ Each option a modern port adds has a value that plays as the console does. The d
   end once its baddie is beaten, and gives each spirit its release at Warlock Mountain, from what the prototype's own
   maps and code hold. Original is the prototype as it was left: three shrines are reached from the world, Cape Claw's
   test never ends, and three spirits have nowhere to go.
-- **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, and has the
-  tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
+- **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, keeps the
+  tablet room until it is solved, and has the tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
   tablet is nowhere, and the puzzle's end leads nowhere.
 - **Kamerian Dragon** (General): Restored lets Krystal pick up and cast the ice spell on Dragon Rock's top, fills her
   magic while the fight in the Skeetla arena at its bottom is on, lets her give the Earth Warrior there Dragon Rock's
