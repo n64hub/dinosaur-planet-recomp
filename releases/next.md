@@ -74,3 +74,5 @@
   prototype she only ever circled the roof.
 - Krazoa Tablets on Restored: Cape Claw's tablet room stays until it is solved. In the prototype it went away at Willow
   Grove's spirit's release, so a player who came there with it unsolved could never open Krazoa Palace's fire door.
+- The sketched picture behind the Rareware and Nintendo logos at boot no longer has seams across it, through the
+  dinosaur's head and the stones.

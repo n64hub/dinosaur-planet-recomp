@@ -733,6 +733,14 @@ func = "func_80002490"
 before_vram = 0x80002620
 text = "{ int32_t dino_view_margin(uint8_t*); int32_t m = dino_view_margin(rdram); ctx->r7 = ADD32(ctx->r7, 6 - m); ctx->r3 = ADD32(ctx->r3, m - 6); }"
 
+# A texture drawn in tiles loads the rows its mesh reads (src/game/tiled_textures.cpp): dll76_18A8 has written a tile's
+# load and size when it reaches 0x900AC45C, where its vertices begin (and each batch of them after: those find no
+# tile's commands before them).
+[[patches.hook]]
+func = "dll76_18A8"
+before_vram = 0x900AC45C
+text = '{ void dino_tiled_texture_rows(uint8_t*, recomp_context*); dino_tiled_texture_rows(rdram, ctx); }'
+
 # The minimap keeps to the left: dll59_0148's display list pointer is $a0, then 0x68($sp).
 [[patches.hook]]
 func = "dll59_0148"
