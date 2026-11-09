@@ -14,7 +14,8 @@
 // place of the 6, so in play the world, its clears and its scissor take the whole frame, the picture the viewport
 // already drew reaching the window's top and bottom, nothing stretched. A cutscene's letterbox keeps the game's 6.
 //
-// dino_clear_borders is for a letterbox the game leaves unfilled (D_8008C524 without D_8008C528): us.toml calls it
+// dino_clear_borders is for a letterbox the game leaves unfilled (D_8008C524 without D_8008C528, the frame after a
+// cutscene drops its bars, since the game copies D_8008C528 to D_8008C524 once a frame at 0x80003CDC): us.toml calls it
 // where func_80037A14 has no full clear to do, after it set the colour image to the framebuffer in fill mode, and it
 // fills the rows outside the rectangle black, as the game's own bars are filled, before anything else of the frame; a
 // cutscene's bars still fill them in the game's colour after it. Their right side is the frame's width, as the
