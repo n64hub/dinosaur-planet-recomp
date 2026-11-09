@@ -188,10 +188,12 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Ending
 
-`src/game/drakor.cpp`; PR 29.
+`src/game/drakor.cpp`; PRs 29 and 64.
 
 - Drakor's fight is won as the ROM has it (a hit, the Diamond, his fall), and nothing follows his fall: sequence 1
   sends no event and no BossDrakor_sequ holds a warp entry. What follows is a choice (part 3).
+- The credits are the ROM's own: dll78, menu 15, ten pages (texture 0xC5, then text 0x1FD's lines) on a clock of
+  7350 ticks, some 2 minutes, which nothing opens (EndObject, dll299, is empty) and which end on nothing.
 
 ### Desert Force Point
 
@@ -363,6 +365,8 @@ What changes, in the order it is built, the redone choices first:
   to enter that evil place ... Follow me, I will open the Jungle Door for you") are looked for with 0x201's.
 - **The ending** (replaces the title alone): the credits are the ROM's: dll78, menu 15, shows text 0x1FD, and
   nothing opens it (EndObject, dll299, is empty). After Drakor's fall the credits play, then the title.
+  Built (PR 64): over the front end, with the screen cleared to black while they show (nothing clears it there), and
+  played from `before-drakor`: the credits at 83 s, on black, and the title at 206 s.
 
 Kept as they are: Tricky's run's trigger, the shrines' ways in, GP's and NW's spirits, acts 6 and 7's check, who sets
 0x366, entry 77, the fallen column, the tablet room's end (0x52B), Krazoa Palace's shaft, wings and red Krazoa
@@ -462,9 +466,12 @@ open: the logs.
   it above 0, 0x654). The ROM offers: his export 20 adds 12 as he walks onto a mushroom (dll502 0x0698), but he walks
   only once freed (0x655), and freed he is still bitten. Played: from `before-dragon-rock` in one run, five picked up
   on the top and given him as the fight starts, and the fight won (docs/story-points.md).
-- **The ending** (Ending): back to the title by dll67's way after 15 quiet updates, the save as it was. The ROM offers:
-  the TRex's defeat loads the front end the same way (dll702), and the credits, dll78's menu 15, which nothing opens
-  (the plan).
+- **The ending** (Ending): to the front end by dll67's way after 15 quiet updates, the save as it was, with the ROM's
+  credits (dll78, menu 15) in place of the title, and the title once dll78's page passes its last (us.toml's hook in
+  its update, 0x0104); dll78 itself ends on nothing. The ROM offers: the TRex's defeat loads the front end the same
+  way (dll702); no caller of menu 15, so where the credits open is ours: over Front End2, so the fight doesn't go on
+  behind them, with the frame's clear (func_80037A14's mode bit 0, off in the front end) on while they show, so they
+  show on black and not over the fight's last frames.
 - **The force point's second lift** (Desert Force Point): a second DFPLift1 under the stub at (-275, 9280), its top at
   -1313 and bottom at -1486, on 0x5E8 (the round door's switch). The ROM offers: its own lift (33ea7, on 0x5E3); the
   act-3 DFP_Textblock chain (0x7BF to 0x7C4, blocks at y -1212 and -1223) and DFP_Platform1, which move only from
