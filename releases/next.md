@@ -76,3 +76,5 @@
   Grove's spirit's release, so a player who came there with it unsolved could never open Krazoa Palace's fire door.
 - The sketched picture behind the Rareware and Nintendo logos at boot no longer has seams across it, through the
   dinosaur's head and the stones.
+- The sketched picture behind the Rareware and Nintendo logos at boot fills the window's height, with no black bands
+  above and below it; with Aspect Ratio Expand it shows whole across a widescreen window.
