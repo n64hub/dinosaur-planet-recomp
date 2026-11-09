@@ -1,4 +1,4 @@
-# CloudRunner's race won, from --story before-cloudrunner --place -13460,1262,18866,-2,0 --bits 4a3=7,4a0,4ba (beside
+# CloudRunner's race won, from --story before-cloudrunner --place -13460,1262,18866,-2,0 --bits 4a3=7,4ba (beside
 # CRSnowBike). A mounts the bike (0x49D), pressed each second until it does, since a busy host boots late. The start
 # then launches it west over the bay's bank into a pocket below it; the way back in is east over the pocket's edge at
 # z 18935, taken head on from the pocket's west end: a bike that comes at it aslant slides along it. Then rams on

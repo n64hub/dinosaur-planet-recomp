@@ -106,6 +106,11 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   cells never loaded, the lever on a purple void, and the scene left the player past the gallery's east end over
   nothing, whose respawn took back the meat, 0x5FD, 0x5FE and 0x654, so the Earth Warrior couldn't be freed. The
   origin is now cleared with its flag, so it names only the start after it (us.toml's second hook on dll3_8900).
+- SwapStone Circle: its chief gives Moon Mountain Pass's key only in the circle's act 9 (0xE7), which
+  SC_levelcontrol (dll519_08B4) reaches only from act 8, while Krystal carries Discovery Falls' spirit, once Diamond
+  Bay's is released (0x316). Each swap back to Krystal (SHswapstone, dll515_0448) sets the circle to act 2, and
+  Diamond Bay's spirit is Sabre's, so in a player's game it never got there. Act 2, 3 or 8 now loads as 9 once both
+  spirits are released, until the key (0x611) is given (`src/game/acts.cpp`).
 - Every screen in play: the world was kept off 6 rows at the top and 6 at the bottom, which nothing drew or cleared
   (func_80037A14 fills them only for a cutscene's bars), so they showed what a screen before left there, broken tiles
   and half of the boot screens' "PUBLISHED BY" line. The world's viewport already reaches past them, so its clears

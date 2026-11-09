@@ -125,7 +125,17 @@ namespace {
     // Pass's and the Earthwalker Temple's. Discovery Falls' win puts Warlock Mountain in act 2, whose level control
     // gives the projectile spell, 0x2D (dll607 0x0940), so it comes with the first.
     const Bits first_spirit = { { 0x277, 1 }, { 0x21B, 1 }, { 0x2D, 1 } };
-    const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x4E9, 1 }, { 0x877, 1 } };
+    // Tricky's commands (his export 13, dll211 0x10D4, offers none without it): DarkIce Mines' boss (dll565) sets it as
+    // Sabre rescues him, and Northern Wastes' Tricky (dll497) as he joins.
+    const Bits tricky_commands = { { 0x4E4, 1 } };
+    // Tricky's flame (0x245, his command 4), which the same level gives: its SnowClaw (dll215, uid 1602) sets 0x172 as
+    // it is beaten, and the SnowHorn it guards (DIMSnowHorn1 1a5e, dll712 0x2470) then talks, setting 0x245 and 0x27.
+    const Bits darkice_flame = { { 0x172, 1 }, { 0x245, 1 }, { 0x27, 1 } };
+    // The way to the first SpellStone, Sabre's: Northern Wastes (0x104, task 29), DarkIce Mines (tasks 30 to 40, Tricky
+    // and his flame), the Guardian's activation (0x22B, dll496) and Northern Wastes' act 2 (its TriggerPlane 41e5a),
+    // whose seqobject 41ec3 sets 0x22E, and the Volcano Force Point (0x4E9, and 0x877 placed).
+    const Bits first_stone = Bits { { 0x104, 1 }, { 0x22E, 1 }, { 0x4E9, 1 }, { 0x877, 1 } } + tricky_commands +
+        darkice_flame;
     const Bits second_spirit = { { 0x316, 1 }, { 0x21F, 1 } };
     const Bits third_spirit = { { 0x317, 1 }, { 0x21C, 1 } };
     const Bits fourth_spirit = { { 0x318, 1 }, { 0x21D, 1 } };
@@ -151,12 +161,6 @@ namespace {
     // Dragon Rock's DR_SupPortal (754) opens only to it.
     const Bits portal_spell = { { 0x5BD, 1 } };
     const Bits third_stone_carried = { { 0x83B, 1 }, { 0x4FE, 2 } };
-    // Tricky's commands (his export 13, dll211 0x10D4, offers none without it): DarkIce Mines' boss (dll565) sets it as
-    // Sabre rescues him, and Northern Wastes' Tricky (dll497) as he joins.
-    const Bits tricky_commands = { { 0x4E4, 1 } };
-    // Tricky's flame (0x245, his command 4), which the same level gives: its SnowClaw (dll215, uid 1602) sets 0x172 as
-    // it is beaten, and the SnowHorn it guards (DIMSnowHorn1 1a5e, dll712 0x2470) then talks, setting 0x245 and 0x27.
-    const Bits darkice_flame = { { 0x172, 1 }, { 0x245, 1 }, { 0x27, 1 } };
     const Bits third_stone = { { 0x878, 1 } };
     // The fourth, which the Kamerian Dragon leaves with Kamerian Dragon on Restored (dragon_rock.cpp), is carried as
     // 0x7A8 to the Desert Force Point's other place (0x5F4).
@@ -197,10 +201,9 @@ namespace {
         { "before-desert-force-point", krystal, -1, golden_plains_place,
             to_second_stone + disguise + second_stone_carried },
         { "before-walled-city", sabre, -1, walled_city_place,
-            to_second_stone + disguise + second_stone + portal_spell + tricky_commands + darkice_flame },
+            to_second_stone + disguise + second_stone + portal_spell },
         { "before-third-stone", sabre, 66, {},
-            to_second_stone + disguise + second_stone + portal_spell + tricky_commands + darkice_flame +
-            third_stone_carried },
+            to_second_stone + disguise + second_stone + portal_spell + third_stone_carried },
         { "before-dragon-rock", krystal, -1, dragon_rock_place,
             four_spirits + second_stone + portal_spell + third_stone + food_bag },
         { "after-dragon-rock", krystal, -1, golden_plains_place,

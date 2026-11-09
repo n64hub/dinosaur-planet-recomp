@@ -84,3 +84,6 @@
   dinosaur's head and the stones.
 - The sketched picture behind the Rareware and Nintendo logos at boot fills the window's height, with no black bands
   above and below it; with Aspect Ratio Expand it shows whole across a widescreen window.
+- SwapStone Circle's chief now gives Krystal the key to Moon Mountain Pass once Diamond Bay's spirit is released. In
+  the prototype he never did after a swap back to Krystal, so CloudRunner Fortress and the rest of the story were out
+  of reach.
