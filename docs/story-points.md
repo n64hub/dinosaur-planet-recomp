@@ -219,12 +219,17 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   which Cape Claw's shrine won sets (dll486 0x0C44), and `before-dragon-rock` and `after-dragon-rock` set it. Then
   DR_Seqobj 0x339C4 (group 1, on from the door's trigger) plays sequence 2, the lever pulled, and sets 0x5FE, which
   opens the DR_Shackles (747), and his update (dll713 0x0670), while his health is above 0, sets 0x654. The lever's
-  scene looks from outside the walls, at no blocks, and ends with the player at (2446, -1610, -6731), past the
-  gallery's east end over nothing: she fell into the void, whose respawn by the door reloads the bits as they were
-  there, the meat, 0x5FD, 0x5FE and 0x654 gone. Always on, she is caught as she falls there and held where she gave
-  the meat until the cells loaded around the camera (func_80044810) hold the gallery again, and half a second more
-  for its blocks (`src/game/dragon_rock.cpp`): put back at once, she fell through the gallery too. From the gallery
-  she drops into the arena. DR_Seqobj 0x348DC (no
+  scene is about 15 s: NiceSharpy eats and pulls the lever on the gallery, the shackles open on the arena's floor, and
+  it ends with the player where she gave the meat. The give names NiceSharpy as the next sequence's origin (dll3.30,
+  next_sequence_origin, with its flag set) for its own start, and the seqobj's start comes in the same frame, before
+  the give's end (dll3.18) clears that origin: dll3_8900 cleared only the flag after a start, so the lever's scene was
+  placed and turned around NiceSharpy, its camera outside the walls over cells never loaded (func_80044810 -1 at the
+  player), and it ended with her at (2446, -1610, -6731), past the gallery's east end over nothing. The void's respawn
+  by the door then reloaded the bits as they were there, the meat, 0x5FD, 0x5FE and 0x654 gone. Always on, the
+  origin is cleared with its flag (us.toml). A sequence's actors and keys are ROM files 63 and 64 (its actors: object
+  ids, 0xFFFF the origin, 0xFFFE the AnimCamera), 15, 14 and 13 (each actor's keys: x, y and z offsets turned by the
+  origin's facing, yaw, pitch); sequence 2's camera stands on the gallery, then at (1586, -1804, -6127) by the
+  shackles, from the seqobj. From the gallery she drops into the arena. DR_Seqobj 0x348DC (no
   group, flags 0x04: it loads with the player within its +6 byte, 14, times 8, so 112, of it) stands at (1563,
   -1782, -6188) on the arena's south side, and on 0x654 plays sequence 0xC and sets 0x655. Freed (his state's
   +0xA58 bit 0x20) he no longer reads the win (0x628, 0x0508): the ROM frees him after the arena is won, and needs
@@ -232,9 +237,10 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   (0x04, repeat, without 0x01, forward) never run.
 - Played from `before-dragon-rock` with `--place 750,-1620,-6440,-1 --bits 5ce,5d8,5d9,5da` (the controls out, no
   Skeetlas, his health at 1) and an `--input` that walks the gallery's route, breaks the crates, takes the meat and
-  gives it: the meat at 66 s (0x380), 0x5FD and 0x5FE at 91 s, the scene's end and the catch at 100 s with 0x654,
-  the gallery loaded again within a second, and from the gallery down into the arena and to 0x348DC, 0x655 at 115 s,
-  her health untouched. Without the catch the void's respawn took the bits back and 0x655 never came.
+  gives it: the meat at 67 s (0x380), 0x5FD and 0x5FE at 91 s, the scene on the gallery and the shackles, its end
+  with her where she gave at 106.6 s with 0x654, and from the gallery down into the arena and to 0x348DC, 0x655 at
+  122 s, her health untouched. With the origin left set the scene showed the lever against a purple void and the
+  void's respawn took the bits back.
 - Played from `before-dragon-rock` with `--place 750,-1620,-6440,-1 --bits 5ce`, past the door's DR_Creators' trigger,
   and an `--input` that walks to the door, then to each control from its north and casts the ice: the door's
   sequence at 14 s (0x5FA), the controls out at 54 s (0x5DA), 66 s (0x5D8) and 81 s (0x5D9), the fight won (0x628,

@@ -93,9 +93,9 @@ Fixed:
 - Dragon Rock's bottom: a wall that the top's earth call pad opens stood again once the player came down the stairs
   from the top's east end, shutting the way to the Skeetla arena.
 - Dragon Rock's Earth Warrior couldn't be freed: the meat from the crates on the arena's gallery, given to the
-  sharpclaw beside them, pulls the lever that opens his shackles, but its scene left Krystal falling into the void,
-  and the respawn took it all back. She is now put back on the gallery, and walking to the arena's south side frees
-  him.
+  sharpclaw beside them, pulls the lever that opens his shackles, but its scene looked at the lever from outside the
+  level and left Krystal falling into the void, and the respawn took it all back. The scene now plays on the gallery
+  and in the arena, it ends with her where she gave the meat, and walking to the arena's south side frees him.
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
   the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
   was. The prototype started the fight again after his fall, so the game never ended.

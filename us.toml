@@ -105,6 +105,18 @@ func = "dll3_8900"
 before_vram = 0x900139D4
 text = "{ if (ctx->r3 == 0) goto L_900139D8; }"
 
+# The same call names the next sequence's origin (its a1, data +0xA680, with a flag at +0xA678 that moves it out along
+# the origin's facing): the object the scene is placed and turned around in place of its own. dll3_8900 clears the
+# flag once a start has used both (0x9038) but leaves the origin for the end (dll3_906C, 0x933C), so a sequence another
+# object starts before that end is placed around the first one's origin. Giving meat to Dragon Rock's DR_NiceSharpy
+# names it for the give, and its 0x5FD starts DR_Seqobj 0x339C4's lever scene in the same frame: placed around
+# NiceSharpy, turned to its facing, the scene's camera stood outside the gallery's walls, over cells never loaded, and
+# its end left the player past the gallery over nothing. The origin is cleared with the flag, so it is the one start's.
+[[patches.hook]]
+func = "dll3_8900"
+before_vram = 0x90013C50
+text = "{ MEM_W(0x24, ctx->r1) = 0; }"
+
 # The player's pickup state (dll210_16220, state 42, the player in $s1) starts the item's scene once its animation is
 # done (0x16408-0x16424) and stays in the state with its time at 0, so it starts the scene again each frame until the
 # scene takes the player over, and the repeated starts crashed in dll3_8900 (an actor whose state, +0xB8, was 0). A
@@ -1117,3 +1129,4 @@ text = '{ void dino_cloud_baby_follows(uint8_t*, recomp_context*); dino_cloud_ba
 func = "dll373_01A0"
 before_vram = 0x901A60D4
 text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_baby_update(rdram, ctx); }'
+

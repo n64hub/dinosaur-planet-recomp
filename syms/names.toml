@@ -141,6 +141,20 @@ dll = 29
 index = 18
 name = "group_field"  # (map): its group field
 
+# dll3, the sequences (the scenes objects play: us.toml's hooks on dll3_8900).
+[[export]]
+dll = 3
+index = 17
+name = "start_sequence"  # (index in the object's def list, def +0x1C, object): its slot, or -1
+[[export]]
+dll = 3
+index = 18
+name = "end_sequence"  # (slot): clears the next sequence's origin
+[[export]]
+dll = 3
+index = 30
+name = "next_sequence_origin"  # (item, origin object, flag): the next start's placeholder item and origin
+
 # Walled City (src/game/walled_city.cpp).
 [[export]]
 dll = 25
