@@ -283,8 +283,8 @@ def names, placements and acts, and how the finished stretches do the same thing
 prototype became, is a hint where both have a stretch, never evidence. Three rules:
 
 - The route is gated only where the ROM gates it. A stretch the ROM leaves open beside the route stays open, and a
-  restoration doesn't make it a step: Cape Claw's tablet room loads from Kyte's rescue (task 17) to Willow Grove's
-  release.
+  restoration doesn't make it a step: Cape Claw's tablet room loads from Kyte's rescue (task 17) until it is
+  solved, whenever Willow Grove's release comes.
 - The ROM's mechanism comes before ours: a stand-in goes once the ROM's own way is found, and one that unlocks several
   beats several.
 - What looks cut (text no object uses, as "the 6 SpellStones!") is left out; what is placed or coded and can't be
@@ -360,7 +360,7 @@ What changes, in the order it is built, the redone choices first:
   (WG's release) drops it. Nothing in the ROM orders the room before WG's shrine, and its tasks, 133 to 136 (bits
   0x238, 0x239, 0x237, 0x3AC), are numbered past the story's last, 106. So it stays beside the route: on Restored
   Cape Claw stays in act 2 while 0x52B is clear and takes act 9 once it is set (`acts.cpp`), and entry 77
-  (setuppoint 33f90, acts 1-13) lands in either. No gate on WG's shrine.
+  (setuppoint 33f90, acts 1-13) lands in either. No gate on WG's shrine. Built (PR 68): PLAYED.
 - **The third tablet** (decided once its text is found): text 0x201, "I took this before the Sharpclaw could get their
   hands on it ... It might be of use to you back in Cape Claw", gives a tablet away from Cape Claw; 0x237 is the one
   tablet bit with no placement, and CCkrazoaTabletA (dll214) is a sequence's actor for it. No DLL names 0x201, so a
@@ -415,8 +415,8 @@ open: the logs.
   3001c, to act 1, are acts 12 and up's; TriggerPlane 30ec4, to act 2, fires on 0x2C5, Kyte freed, before any shrine),
   so Cape Claw stays in act 9, which holds
   none of the tablet room's receptacles and set tablets (acts 2 and 3) or its lights (CCkrazoabright, 1 to 3), as acts
-  4 to 8 hold none: Cape Claw after the tablet room (Open). The ROM offers: the tablet room, Krazoa Palace or Drakor,
-  none tied to act 9.
+  4 to 8 hold none: Cape Claw after the tablet room, so act 9 waits for the room (The plan). The ROM offers: the
+  tablet room, Krazoa Palace or Drakor, none tied to act 9.
 - **Warlock Mountain's bits each visit** (Krazoa Shrines): act 5 sets 0x142, EC's release trigger (no ROM setter),
   act 7 sets 0x1D1, WG's. The ROM offers nothing else.
 - **"Already won"** (Krazoa Shrines): Golden Plains' as act 8 or later, Willow Grove's as act 7 or later.
@@ -430,6 +430,14 @@ open: the logs.
   worm's arena has CCnewseqobject 42BDF, which nothing triggers (its trigger 0x96 is never), placed once the worm is
   dead (0x3FB, dll461). 0x237: no ROM setter; dll458 reads it. Cascade: 0x23B, 0x23C (the settlement room's door),
   0x238-0x23A, 0x3A9. The ROM offers: 42BDF's sequence 8, untriggered (?).
+- **Cape Claw's act 9 after the tablet room** (Krazoa Tablets): sequence 0x12 sets Cape Claw's act 9 at WG's release
+  (dll611 0x664, its only setter), and act 9 holds none of the tablet room, so a player who came to the release with
+  the room unsolved could never set 0x52B, the palace's fire door. Act 9 loads as act 2, the act Kyte's rescue sets
+  (TriggerPlane 30ec4), while 0x52B is clear, and act 2 or 3 as act 9 once 0x52B and 0x367 are both set
+  (`src/game/acts.cpp`). 0xEE: dll611 and 30ec4 set it, the object loader reads it. Cascade: 0x52B (the fire door)
+  can be set after the release; entry 77's setuppoint loads in acts 1 to 13, so its warp lands in either act. The ROM
+  offers: a gate on WG's shrine (none: the room's tasks, 133 to 136, are past the story's 106), or act 3, act 2 less
+  the CCkdoors and three foes.
 - **The tablet room's end** (Krazoa Tablets): the last lights set 0x52B, a saved bit with no ROM setter, getter or
   placement, which shows a Transporter in the room, own entry 72, sending to 94. Cascade: Krazoa Palace's fire door
   opens on 0x52B, so the palace needs Krazoa Tablets. The ROM offers: Warlock Mountain's WM_WarpPoint 2ac6 sends to 72
@@ -560,11 +568,6 @@ open: the logs.
 
 ### Open
 
-- **Cape Claw's act 9 before the tablet room** (Krazoa Shrines, Krazoa Tablets): sequence 0x12 sets Cape Claw's act
-  9 at WG's release, and Cape Claw stays in it (Entry 77), so a player who comes to WG's release with the tablet room
-  unsolved finds no receptacles there, and 0x52B, the palace's fire door, can't be set (?). The ROM's acts put the
-  room first (acts 4 to 9 are Cape Claw after it), and nothing makes a player solve it before WG's shrine. Nothing
-  built.
 - **CloudRunner Fortress's gold and Bonehead**: 0x8D1 is set from curve 429d9's +0x32 as Kyte lands at the gold perch
   (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300. 0x4B7 (dll369 reads and clears it,
   TriggerPlane 30e8c clears it) and 0x4B8 (dll519, dll400 read it) have no setter. 0x4DC is set and cleared by

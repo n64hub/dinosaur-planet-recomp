@@ -542,8 +542,8 @@ void dino::add_krazoa_options(recomp::config::Config& general) {
     general.add_enum_option(
         krazoa_tablets,
         "Krazoa Tablets",
-        "Cape Claw's third Krazoa tablet is found where the sand worm fell, and the tablet room's last puzzle opens a "
-        "Transporter to Krazoa Palace. <b>Original is the prototype as it was left</b>: the third tablet is nowhere, "
+        "Cape Claw's third Krazoa tablet is found where the sand worm fell, the tablet room stays until it is solved, "
+        "and its last puzzle opens a Transporter to Krazoa Palace. <b>Original is the prototype as it was left</b>: the third tablet is nowhere, "
         "and the last puzzle leads nowhere.",
         krazoa_tablets_options,
         KrazoaTablets::Restored
@@ -557,6 +557,10 @@ void dino::add_krazoa_options(recomp::config::Config& general) {
         krazoa_palace_options,
         KrazoaPalace::Restored
     );
+}
+
+bool dino::krazoa_tablets_restored() {
+    return tablets_restored();
 }
 
 bool dino::krazoa_palace_restored() {

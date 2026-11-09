@@ -617,13 +617,13 @@ to 2 (`--story new-game,88 --bits 5dc=7`): DR_Creator (738) sends Skeetlas (615)
 
 Besides its groups, each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets,
 numbered by the u16 at +0x1F90 + 2 × map in dll29's data: 0x4FE the Volcano Force Point (4), 0x3EE Diamond Bay (35),
-0xE6 Walled City (13), 0x8EC Krazoa Palace (3). A new game puts every map in act 1 (dll29 0x300-0x334), and the object loader
+0xE6 Walled City (13), 0x8EC Krazoa Palace (3), 0xEE Cape Claw (29). A new game puts every map in act 1 (dll29 0x300-0x334), and the object loader
 (`func_8004B4A0`) skips a placement whose byte +3 has bit act - 1 set (byte +5's bit 16 - act for acts 9 to 16, and
 `tools/dino.py map <map> --act <act>` lists what loads), so a map holds
 other objects in each act. A level's control object sets its act, or a sequence does (dll3's event 0x1D, the act of
 the map the playing object is in), and ROM file 13 holds one such event, which sets act 3.
 
-`src/game/acts.cpp` moves three maps' acts with the story, at each map load (the header has the evidence), and
+`src/game/acts.cpp` moves four maps' acts with the story, at each map load (the header has the evidence), and
 `DINO_LOG_ACTS=1` prints each act it moves or leaves:
 
 - The Volcano Force Point: act 2 from the King's activation of Walled City's SpellStone, 3 once it is placed (0x878).
@@ -647,6 +647,9 @@ the map the playing object is in), and ROM file 13 holds one such event, which s
   13, 15 and 16) sets Cape Claw's act 2 (0xEE) and the palace's act 14 as Kyte is freed (0x2C5, task 17), and act 14
   loads 151 of the palace's 415 placements, none of its own: not its two KP_Transporters, setuppoints, crates or
   mushrooms. Act 1 loads all 415.
+- Cape Claw, with Krazoa Tablets on Restored: act 9 loads as act 2 while the tablet room is unsolved (0x52B clear),
+  and act 2 or 3 as act 9 once it is solved and Willow Grove's release has set act 9 and 0x367. Sequence 0x12 sets
+  act 9 at that release, and only acts 2 and 3 load the room's receptacles and tablets (1 to 3 its lights). PLAYED.
 
 A map's act is kept in the save, so a death or retry restores the act the map had when the level started, and the
 map's next load moves it on again. Diamond Bay moves by itself: act 2 from the first SpellStone (0x4E9) holds the
@@ -958,7 +961,9 @@ on a floor and no crash; it says nothing about what the level needs further in.
 Cape Claw has no entry: `before-sand-worm` and `--place` go there. On Krazoa Shrines' Restored, 77 is filled at Cape
 Claw's setuppoint 7 by its west entrance (1457, 156, 16940), which its act 9 loads, where Warlock Mountain's sequence
 0x12 sends the player after Willow Grove's release: it sets Cape Claw's act 9 (0xEE), 0x367, whose WM_WarpPoint
-(radius 0) warps the player to 77 at once, and 0x368, and clears 0x366 (docs/restored-content.md).
+(radius 0) warps the player to 77 at once, and 0x368, and clears 0x366 (docs/restored-content.md). On Krazoa
+Tablets' Restored that act 9 loads as act 2 until the tablet room is solved (`src/game/acts.cpp`); 77 lands in
+either.
 
 ## Choices
 
