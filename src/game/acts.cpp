@@ -167,8 +167,9 @@ void dino::add_third_stone_options(recomp::config::Config& general) {
         "Third SpellStone",
         "In the prototype, the Volcano Force Point and Walled City never get past the first visit, so the third "
         "SpellStone has nowhere to go, and nothing gives the moonseeds Krystal plants. <b>Restored</b> moves both "
-        "with the story, the force point on to its second visit once the stone is activated, and gives four "
-        "moonseeds as the stone is placed. <b>Original is the prototype as it was left</b>.",
+        "with the story, the force point on to its second visit once the stone is activated, and lays four "
+        "moonseeds in the cave under SwapStone Hollow once the stone is placed. <b>Original is the prototype as it "
+        "was left</b>.",
         third_stone_options,
         ThirdStone::Restored);
 }
