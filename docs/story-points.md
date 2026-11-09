@@ -692,16 +692,17 @@ Played from here on the desktop build, each from the one before it but where a `
   In the moon temple at 22:00, with what its push blocks and symbol set already set (`--bits 813,25d,829,244`), the
   Moon Stone shows and is taken (0x264). Each temple's bridge of light holds Sabre (`src/game/temples.cpp`).
 - The moon temple's way in, played as Sabre in one run from the east courtyard by night (`--story before-walled-city
-  --place -6008,-976,-7336 --bits 317,36a=136 --time 21@4`, `tools/moon_temple_input.txt`, whose header has the
-  pushes). The push blocks are pushed only by night (dll7's export 8), and only from inside the grid, which runs wall to
-  wall: six pushes land the four blocks on the moon tiles, 0x811 counts to 4, and 0x813 and 0x25D set with the last,
-  51 s in. The pollen cannon at the grid's north-west corner (WG_PollenCannon 41b22) knocks Sabre out of a push now and
-  then, so the script presses A again until the block moves. He waits at the lift's foot (-5952,-6720) for the next
-  night, and steps on the lift as the clock reaches 21:21: it carries him up as he steps on, and on its top, 196 from
-  the symbol, C-up and the stick down a fifth of a second look up at the symbol as the clock passes 22:00, which sets
-  0x829 and 0x244 and opens the way in. The lift moves only for Sabre (object id 0, dll786_0030), and it waits 5 s at
-  the top before it goes down again. The symbol lights by how near the screen's middle it is and how near 22:00 the
-  time is (`src/game/temples.cpp`): looked at level, at the same hour, it stops at about 150, under its 200.
+  --place -6008,-976,-7336 --bits 317,36a=136 --time 21@4`, `tools/moon_temple_input.txt`, whose header has the pushes).
+  The push blocks are pushed only by night (dll7's export 8), and only from inside the grid, which runs wall to wall:
+  six pushes land the four blocks on the moon tiles, 0x811 counts to 4, and 0x813 and 0x25D set with the last, 42 to 51
+  s in over three runs. The pollen cannon at the grid's north-west corner (WG_PollenCannon 41b22) knocks Sabre out of a
+  push now and then, so the script presses A again until the block moves. He waits at the lift's foot (-5952,-6720) for
+  the next night (`sync hour`), and steps on the lift as the clock reaches 21:15: it carries him up as he steps on, and
+  once it stops on top, 196 from the symbol, C-up and the stick down a fifth of a second look up at it as the clock
+  nears 22:00, which sets 0x829 and 0x244 and opens the way in. The lift moves only for Sabre (object id 0,
+  dll786_0030), and it waits 5 s at the top before it goes down again; C-up pressed before it stops does nothing. The
+  symbol lights by how near the screen's middle it is and how near 22:00 the time is (`src/game/temples.cpp`): looked at
+  level, at the same hour, it stops at about 150, under its 200.
 - The sockets: from the chamber under the statues (`--place -8000,-1080,-7400`), the Sun Stone used on the sun
   statue's socket (-7908,-1102,-7220) sets 0x202 and the Moon Stone on the moon's (-8091,-1102,-7219, by way of
   -7990,-7380 and -8088,-7285) 0x243. The sockets take an item from 48 units. The chamber's bats take the target

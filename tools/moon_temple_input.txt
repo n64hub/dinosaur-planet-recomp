@@ -4,11 +4,11 @@
 # (2,7) and (6,4), and the moon tiles at (1,2), (3,6), (5,7) and (6,1). A pushed block slides until the cell before the
 # next block, onto a tile, or to the grid's edge, and the grid runs wall to wall, so Sabre pushes from inside it. Six
 # pushes: (1,5) south onto (1,2), (2,7) east onto (5,7), (6,4) south onto (6,1), then (1,1) east to (5,1), north to
-# (5,6) and west onto (3,6). Each walk waits for him to arrive; each push walks into the block and presses A every
-# 1.2 s until it moves, since the pollen cannon at the grid's north-west corner knocks him out of a push now and then.
-# The last sets 0x811 to 4, 0x813 and 0x25D. Then up the corridor to the lift's foot, a wait for the next night's
-# 21:21, the lift, and on its top C-up and a fifth of a second of the stick down, which looks up at the moon symbol
-# as the clock passes 22:00: 0x829 and 0x244.
+# (5,6) and west onto (3,6). Each walk waits for him to arrive; each push walks into the block and presses A every 1.2 s
+# until it moves, since the pollen cannon at the grid's north-west corner knocks him out of a push now and then. The
+# last sets 0x811 to 4, 0x813 and 0x25D. Then up the corridor to the lift's foot, a wait for the next night's 21:15, the
+# lift, and once it stops at the top C-up and a fifth of a second of the stick down, which looks up at the moon symbol
+# as the clock nears 22:00: 0x829 and 0x244.
 0 0 0 0
 6 0 0 0
 0 0 to -6008 -7240
@@ -295,11 +295,12 @@ sync near 0 -5952 -7100 22
 0 0 to -5952 -6720
 sync near 0 -5952 -6720 15
 0.3 0 0 0
-sync hour 21.35 22.5
-0 0 to -5953 -6617
-sync near 0 -5953 -6617 10
-0.5 0 0 0
-4.0 0008 0 0
-4.3 0 0 0
-4.6 0 0 -40
-4.8 0 0 0
+sync hour 21.25 22.5
+0 0 to -5952 -6617
+sync near 0 -5952 -6617 10
+0.3 0 0 0
+sync near 0 -5952 -6437 6
+1.0 0008 0 0
+1.3 0 0 0
+1.6 0 0 -40
+1.8 0 0 0
