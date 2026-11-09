@@ -842,6 +842,13 @@ func = "dll790_04B8"
 before_vram = 0x902CF050
 text = '{ void dino_temples_bridge_models(uint8_t*, recomp_context*); dino_temples_bridge_models(rdram, ctx); }'
 
+# The temples' symbols (src/game/temples.cpp), a plain bug, so always: WCApertureSymbo's update (dll787_00FC) takes its
+# door's bit while it is loaded, as its init does as it loads.
+[[patches.hook]]
+func = "dll787_00FC"
+before_vram = 0x902CD18C
+text = '{ void dino_temples_symbol_door(uint8_t*, recomp_context*); dino_temples_symbol_door(rdram, ctx); }'
+
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330

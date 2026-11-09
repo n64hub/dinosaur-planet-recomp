@@ -130,7 +130,8 @@ Fixed:
   vents now move the meteor, and EC's Transporter stands once both stones are in the TRex statues' sockets.
 - Diamond Bay's light beams to the Pointback's egg took Sabre as standing on two of them from well off, so a leap
   between them stepped the bridge back from under him, and Walled City's temples' bridges of light let the player
-  fall through into the pit below.
+  fall through into the pit below. The temples' symbols at the tops of their stairs stayed dark once their doors had
+  opened, until the player left the city and came back.
 - CloudRunner Fortress's courtyard roof (Wind Bridge on Restored): its barrels stand west of the treasure shaft, and
   the shaft's wind, which holds an empty-handed player at the corridor's height, dropped one carrying a barrel to the
   bottom, so no barrel reached the courtyard and its roof, which three of them blow, kept Kyte shut in. The wind now

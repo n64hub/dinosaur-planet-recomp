@@ -61,3 +61,5 @@
 - Krazoa Shrines on Restored: the fallen column across Warlock Mountain's way north from the pad is gone while
   Walled City's, Willow Grove's or Northern Wastes' spirit is carried, so the walk to its release can be played. In
   the prototype nothing moved it.
+- Walled City: the temples' symbols at the tops of their stairs take the light once their doors open, with no need
+  to leave the city and come back first.

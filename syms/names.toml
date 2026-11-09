@@ -232,6 +232,11 @@ of = "setup"
 dll = 787
 offset = 0x1E
 name = "lit_bit"  # 0x829 for the moon's
+[[field]]
+of = "setup"
+dll = 787
+offset = 0x20
+name = "door_bit"  # 0x25D for the moon's: set as it loads, it starts at symbol_phase 1
 [[bit]]
 bit = 0x811
 name = "moon_blocks_placed"  # dll782 adds one as a WCPushBlock lands on its tile; WCLevelControl sets 0x813 at 4

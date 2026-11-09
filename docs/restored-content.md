@@ -90,6 +90,11 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 - Walled City: the temples' bridges of light (WCTempleBridge, dll790) loaded only the model they draw, so the floor
   test found no floor in the slot it reads and the player fell through; their export 5 returns 0, as the moon lift's
   does, and all three models load (us.toml, `src/game/temples.cpp`; PR 54).
+- Walled City: the temples' symbols (WCApertureSymbo, dll787) take the light only in their phase 1, which their init
+  gives them with their door's bit (0x25D, the sun's 0x25C) set as they load, or an event of a sequence they act in;
+  the door's sequence (seqobject 41458's 8) has them in no part, so a symbol loaded before its door opened stayed dark
+  until it loaded again. Their update takes the bit while they are loaded (us.toml, dll787_00FC,
+  `src/game/temples.cpp`; PR 61).
 - Dragon Rock's bottom: the lever's scene, which feeding DR_NiceSharpy plays (DR_Seqobj 0x339C4's sequence 2), was
   placed around DR_NiceSharpy, not the seqobj: the give names it as the next sequence's origin (dll3's export 30), and
   dll3_8900 cleared that origin's flag after the give's own start but left the origin for the give's end, which comes
@@ -399,7 +404,8 @@ ROM's way. "(?)" marks a reading not checked in full.
   a lift's top taken to stand 200.25 from it (PR 54). **Clash, fixed (PR 61):** the lift (WCMoonTempleLif,
   dll786_0030) moves only for a rider of object id 0, Sabre, and on its top he stands 196 from the symbol, within the
   setup's 200: played by night as Sabre, the push blocks, the lift and the symbol in the first person view set 0x829
-  and 0x244 by the ROM's own code. The reach is the setup's again, with no stand-in.
+  and 0x244 by the ROM's own code, with the symbols' door bit taken while loaded (Plain bugs). The reach is the
+  setup's again, with no stand-in.
 - **EC's Transporter by the sockets** (Krazoa Shrines, Third SpellStone): placed on 0x202 and shown on 0x243, the
   sockets' done bits (dll785_0634), the task list's "used Sun and Moon Stones to open shrine"; on Third SpellStone's
   Original, where the sockets never load, 0x264 as before. Cascade: the shrine (map 33, entry 40) and its return to

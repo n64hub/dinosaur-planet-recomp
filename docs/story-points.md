@@ -694,15 +694,19 @@ Played from here on the desktop build, each from the one before it but where a `
 - The moon temple's way in, played as Sabre in one run from the east courtyard by night (`--story before-walled-city
   --place -6008,-976,-7336 --bits 317,36a=136 --time 21@4`, `tools/moon_temple_input.txt`, whose header has the pushes).
   The push blocks are pushed only by night (dll7's export 8), and only from inside the grid, which runs wall to wall:
-  six pushes land the four blocks on the moon tiles, 0x811 counts to 4, and 0x813 and 0x25D set with the last, 42 to 51
-  s in over three runs. The pollen cannon at the grid's north-west corner (WG_PollenCannon 41b22) knocks Sabre out of a
+  six pushes land the four blocks on the moon tiles, 0x811 counts to 4, and 0x813 and 0x25D set with the last, 45 to 57
+  s in over nine runs. The pollen cannon at the grid's north-west corner (WG_PollenCannon 41b22) knocks Sabre out of a
   push now and then, so the script presses A again until the block moves. He waits at the lift's foot (-5952,-6720) for
   the next night (`sync hour`), and steps on the lift as the clock reaches 21:15: it carries him up as he steps on, and
-  once it stops on top, 196 from the symbol, C-up and the stick down a fifth of a second look up at it as the clock
-  nears 22:00, which sets 0x829 and 0x244 and opens the way in. The lift moves only for Sabre (object id 0,
-  dll786_0030), and it waits 5 s at the top before it goes down again; C-up pressed before it stops does nothing. The
-  symbol lights by how near the screen's middle it is and how near 22:00 the time is (`src/game/temples.cpp`): looked at
-  level, at the same hour, it stops at about 150, under its 200.
+  once it stops on top, 196 from the symbol, C-up and the stick held a little down (-0.4) tilt the first person view up
+  at it as the clock nears 22:00, which sets 0x829 and 0x244 about 254.6 s in and opens the way in: three runs of four
+  (the fourth, played without the symbol's report, stayed dark and shows no why). The lift moves only for Sabre (object
+  id 0, dll786_0030), and it waits 5 s at the top before it goes down again; C-up pressed before it stops does nothing.
+  The symbol lights by how near the screen's middle it is and how near 22:00 the time is (`src/game/temples.cpp`): the
+  view's tilt follows the stick and goes back to level when it is let go, the whole way down tilts it past the symbol,
+  and looked at level, at the same hour, it stops at about 180, under its 200. It takes the light only once it has
+  taken the door's 0x25D, which the ROM's symbol, loaded with the courtyard before the door opens, did only as it loaded
+  again (docs/restored-content.md, Plain bugs).
 - The sockets: from the chamber under the statues (`--place -8000,-1080,-7400`), the Sun Stone used on the sun
   statue's socket (-7908,-1102,-7220) sets 0x202 and the Moon Stone on the moon's (-8091,-1102,-7219, by way of
   -7990,-7380 and -8088,-7285) 0x243. The sockets take an item from 48 units. The chamber's bats take the target

@@ -7,8 +7,9 @@
 # (5,6) and west onto (3,6). Each walk waits for him to arrive; each push walks into the block and presses A every 1.2 s
 # until it moves, since the pollen cannon at the grid's north-west corner knocks him out of a push now and then. The
 # last sets 0x811 to 4, 0x813 and 0x25D. Then up the corridor to the lift's foot, a wait for the next night's 21:15, the
-# lift, and once it stops at the top C-up and a fifth of a second of the stick down, which looks up at the moon symbol
-# as the clock nears 22:00: 0x829 and 0x244.
+# lift, and once it stops at the top C-up and the stick held a little down (-0.4), which tilts the first person view up
+# at the moon symbol as the clock nears 22:00: 0x829 and 0x244. The view's tilt follows the stick, back to level when
+# it is let go: the whole way down tilts it past the symbol, and level leaves it under the 200 that lights it.
 0 0 0 0
 6 0 0 0
 0 0 to -6008 -7240
@@ -300,7 +301,6 @@ sync hour 21.25 22.5
 sync near 0 -5952 -6617 10
 0.3 0 0 0
 sync near 0 -5952 -6437 6
-1.0 0008 0 0
-1.3 0 0 0
-1.6 0 0 -40
-1.8 0 0 0
+1.8 0008 0 0
+2.1 0 0 -0.4
+4.1 0 0 0
