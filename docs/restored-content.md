@@ -339,7 +339,13 @@ What changes, in the order it is built, the redone choices first:
   dll214, a sequence's actor, not a pickup; WM_MoonSeedMoun is dll331's scenery; nothing raises 0x86A, a count of 3
   bits. So Sabre finds them in the dark, wet cave under the Hollow (map 8, SwapStone Hollow 2), four for the four
   MMP_mseedrecept (41a59, 41a5b-41a5d), each a pickup counting 0x86A up as SHbluemushroom (dll502) counts 0xC1.
-  Where in map 8 they lie is the choice left.
+  Built (`src/game/moonseeds.cpp`): two lie at the pool room's edges, its west corner and its north side, and two in
+  the corridor north of it, by the white mushrooms. Each is dll272's collectable, as the boss door's teeth are, with
+  the moonseed's model and its text on the pickup's scroll, a picked-up bit of its own (0x6AB-0x6AE) and 0x86A in its
+  count field, so the ROM's own pickup counts it. Played from `swapstone-hollow --bits 878`: A on the west corner's
+  set 0x6AB and 0x86A 1 as its scroll (MOON SEEDS, Grow Moon Seeds) closed, and the north side's 0x6AC and 0x86A 2;
+  from the corridor's setuppoint (`--place -7866,-1076,-1711 --bits 878,6ab,6ac,86a=2`) the two there were the only
+  ones placed, and they gave 0x6AD, 0x6AE and 0x86A 3 and 4. On Original none are placed.
 - **When Kyte finds a baby** (built; replaced "within 400"): her export 24 reads a flag of the curve node she stands on
   (dll212_319C, set for node types 8, 9, 21 and 22), and the waiting babies 236A, 29FA and 29B3 have find curves of
   those types beside them (groups 0x10, 0x25 and 0x28, 0x1B) that nothing sends her to. 0x46E, her target group, is
@@ -541,11 +547,13 @@ open: the logs.
 - **Walled City's act 2** (Third SpellStone): from 0x317, Moon Mountain Pass's spirit (dll611 sets it; dll519, dll607
   read it). Cascade: act 2 loads WCSunStone, the sockets (0x25A, 0x25B, 0x202, 0x243) and the temples (0x812, 0x813),
   and drops act 1's teeth. The ROM offers: nothing sets Walled City's act.
-- **The moonseeds** (Third SpellStone): four given as the third stone is placed (0x878). Cascade: the four receptacles,
+- **The moonseeds** (Third SpellStone): four lie in the cave under SwapStone Hollow (map 8) once the third stone is
+  placed (0x878), each picked up once (0x6AB-0x6AE) and counted in 0x86A. Cascade: the four receptacles,
   then the plants, which want Kyte's flame (0x46E) at night. The ROM offers: task 91, "COLLECTED MOONSEEDS FOR KRYSTAL",
   is Sabre's, with the clue "SEARCH IN DARK, WET PLACES", a talker says "Moonseeds grow in dark damp places.", the
   pickup MMP_moonseed has a def and is placed nowhere, and WM_MoonSeedMoun ("MoonSeed Mound") is Warlock Mountain's.
-  So the ROM has them found, not given, and doesn't say where.
+  So the ROM has them found, not given, and doesn't say where: the cave under the Hollow, dark and wet and Sabre's
+  by then, and the spots in it, off its way through, are the choice.
 - **The meteor's trigger** (Third SpellStone): the three rocks in vents 3, 4 and 6 (0x89B, dll445_0628) set 0x803
   too, the trigger of the meteor's MMP_seqobject 412AF (sequence 5, done bit 0x804). 0x803: no code, placement or
   event of ROM file 13 names it. 0x89B: dll445 sets it, HitAnimator 4267A (map animation 7) reads it. Cascade: the

@@ -458,6 +458,21 @@ name = "kp_water_done"
 bit = 0x6AA
 name = "kp_magic_done"
 [[bit]]
+bit = 0x6AB
+name = "moonseed_1_taken"  # Third SpellStone on Restored: each moonseed in the cave under SwapStone Hollow, picked up
+[[bit]]
+bit = 0x6AC
+name = "moonseed_2_taken"
+[[bit]]
+bit = 0x6AD
+name = "moonseed_3_taken"
+[[bit]]
+bit = 0x6AE
+name = "moonseed_4_taken"
+[[bit]]
+bit = 0x86A
+name = "moonseeds"  # the count both inventories show; each MMP_mseedrecept takes one
+[[bit]]
 bit = 0x912
 name = "transporter_tutorial"  # dll334 shows its first-use text while it is clear
 [[bit]]

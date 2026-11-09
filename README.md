@@ -128,8 +128,8 @@ Fixed:
   so the SpellStone carried back from BOSS TRex had no path to open and no place to go, and Walled City never showed its
   Sun and Moon Stones. The force point now loads its second visit once the King has activated the stone, and hands it
   over there, and its third once it is placed, and Walled City its second once the third spirit is released. And the
-  moonseeds Krystal plants in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone
-  gives Sabre four, one for each of the pass's receptacles. Diamond Bay's flame switch stayed sunk below the ground, so
+  moonseeds Krystal plants in Moon Mountain Pass, which nothing in the prototype gives: once the third SpellStone is
+  placed, Sabre finds four in the dark, wet cave under SwapStone Hollow, one for each of the pass's receptacles. Diamond Bay's flame switch stayed sunk below the ground, so
   the Pointback mother's second egg couldn't be reached: talking to her now raises it, and Tricky's flame lights it.
   Three rocks in Moon Mountain Pass's
   vents now move the meteor, and EC's Transporter stands once both stones are in the TRex statues' sockets.

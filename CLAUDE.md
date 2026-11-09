@@ -157,8 +157,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **The third SpellStone.** A map's act, a story value, picks which of its objects load, and the Volcano Force Point
   and Walled City never leave act 1 in the ROM, so the third SpellStone has nowhere to go and Walled City's Sun and
   Moon Stones never show; nothing gives the moonseeds Krystal plants in Moon Mountain Pass either. The General tab's
-  Third SpellStone setting, Restored by default, moves both maps' acts with the story and gives four moonseeds as the
-  stone is placed, and Original leaves them as they were (`src/game/acts.cpp` and `src/game/moonseeds.cpp` have the
+  Third SpellStone setting, Restored by default, moves both maps' acts with the story and, once the stone is placed,
+  lays four moonseeds in the cave under SwapStone Hollow for Sabre to find, and Original leaves them as they were (`src/game/acts.cpp` and `src/game/moonseeds.cpp` have the
   evidence, docs/story-points.md, The maps' acts, how they move).
 - **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
@@ -173,7 +173,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   jump `src/game/interpolation.cpp` finds, with each origin step, `DINO_LOG_KRAZOA=1` each object
   `src/game/krazoa.cpp` places and any of them freed while its map is loaded, each spirit it gives and has taken
   back and each event of Golden Plains' shrine,
-  `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves or leaves,
+  `DINO_LOG_ACTS=1` each map's act `src/game/acts.cpp` moves or leaves, `DINO_LOG_MOONSEEDS=1` each moonseed
+  `src/game/moonseeds.cpp` places,
   `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
   `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on,
   `DINO_LOG_WALLED_CITY=1` each object `src/game/walled_city.cpp` places and each step of the chase, the gate and the
