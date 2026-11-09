@@ -797,12 +797,12 @@ func = "dll619_0018"
 before_vram = 0x9024D34C
 text = '{ void dino_acts_volcano_level_control(uint8_t*, recomp_context*); dino_acts_volcano_level_control(rdram, ctx); }'
 
-# The moonseeds (src/game/moonseeds.cpp, whose header has the evidence): VFP_SpellPlace once it has set its placed bit
-# (dll637 0x388), which for the third SpellStone gives the moonseeds nothing else gives.
+# The moonseeds (src/game/moonseeds.cpp, whose header has the evidence): func_80021450 before it loads each model of the
+# object it makes, which for a moonseed placed in the cave under SwapStone Hollow is the moonseed's.
 [[patches.hook]]
-func = "dll637_02E0"
-before_vram = 0x90255D3C
-text = '{ void dino_moonseeds_stone_placed(uint8_t*, recomp_context*); dino_moonseeds_stone_placed(rdram, ctx); }'
+func = "func_80021450"
+before_vram = 0x80021780
+text = '{ void dino_moonseeds_model(uint8_t*, recomp_context*); dino_moonseeds_model(rdram, ctx); }'
 
 # The meteor (src/game/moonseeds.cpp): MMP_moonrock's vent count (dll445_0628 0xA14), once it has set or cleared 0x89B,
 # sets the meteor's sequence trigger nothing else sets.
@@ -853,7 +853,7 @@ text = '{ void dino_temples_symbol_door(uint8_t*, recomp_context*); dino_temples
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
-text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); void dino_walled_city_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); dino_walled_city_frame(rdram, ctx); }'
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); void dino_walled_city_frame(uint8_t*, recomp_context*); void dino_moonseeds_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); dino_walled_city_frame(rdram, ctx); dino_moonseeds_frame(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
 # whether their spirit is released by 0x366, a bit nothing sets: on Restored they ask CC's (0x221) and WG's (0x222)
