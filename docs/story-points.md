@@ -418,10 +418,23 @@ the race (43) at (-20, 29) on layer -2.
   and 31B6E (dll389). Each door is reached from the corridor (y 2049) through a treasure room, stepping platforms over
   cloud with RobotAnimPatrols (map 12's group 12) and FXEmits along them: the corridor's south end drops into the
   south room at (-13124, 1927, 18134) (0x35B), and CFSlideDoor1 287a, at (-12664, 2049, 19545), opens onto a walkway
-  above the north room, whose ladder at (-13030, 19591) climbs to the tower's platform. A walk at full stick off the
-  south room's ledge toward (-13000, 18450) leapt onto a platform at (-13049, 1927, 18308); walks at the platforms
-  along the FXEmits (x -12980, -12799, -12618) fell, as did every step off the north door's landing but through the
-  door.
+  above the north room, whose ladder at (-13030, 19591) climbs to the tower's platform. The south room is crossed on
+  foot: its west ledge (x -13140 to -13075, z 18108-18308) joins a narrow walkway north along z 18285-18310 east to x
+  -12862 (at z 18284 she teeters), a spur from it south to z 18198, and a strip east along z 18198-18230 to x -12706.
+  There a slow walk east (`to` at strength 1) leaps the gap onto a platform at y 1937 (x -12685 to -12577), and one
+  east-south-east off its east end at (-12577, 18184) onto the east ledge at x -12492, which leads south to the door's
+  landing (x -12678 to -12492, z 18000-18046); west along it and south at x -12640 is an alcove (z 17929-17990) whose
+  east end is the door. The FXEmits stand on the platforms. The two RobotAnimPatrols fly along z 18198 at y 1976 and
+  shoot: the crossing cost 2 of 12 health, standing 30 s in their way 5. Walks at full stick off the ledges run over
+  their edges, and every step off the landing but through the door falls into the cloud. Beyond the door, map 15's
+  cave runs east to x -12169 at z 18090-18117, and north from it along x -12348, past the CFMagicWalls at x -12320,
+  to the master chest's room. `tools/cloudrunner_treasure_input.txt` plays it all from `--story before-cloudrunner
+  --place -13060,2049,18600,0 --sidekick kyte --bits
+  458=4104,2fc,2fd,2fe,2ff,43,2e1,34f,359,24f,250,251,252,8ff,8c9,8ca,336` (the corridor): 0x35B at 21.3 s, the
+  platform at 32.5 s, the east ledge at 36.1 s, 0x526 at the door at 40.2 s (in each of five runs), 0x528 at 63.6 s,
+  0x8CC at 78.6 s, the master chest's 0x337 at 93.0 s, and back out through the door 0x253 at 109.7 s and 0x300 at
+  114.1 s. CFMagicWall (398) reads the sidekick's position with no null test, so a `--place` run past the walls without
+  `--sidekick kyte` crashes; nothing else needs Kyte there. The north room isn't crossed.
 - The way to the race. In the hall east of the courtyard, on the fortress's floor (y 1866), a pool fills a pit at
   (-11960, 18867), its water at y 1824 over a tunnel that runs west under the courtyard. Swimming, no button dives (Z,
   B, A, R and L played). XYZAnimator (356, 32DDB) drains it on 0x4BE, the gold's (below), and sets 0x4BF once drained.
@@ -521,7 +534,10 @@ the race (43) at (-20, 29) on layer -2.
   keep the count. From `--place -12850,1845,19110,-1 --bits 2e1,43,34f,359,45a=4,330@6`: 0x33A 1.6 s
   after 0x330, the chest let go, A at it gave 0x336. From `--place -12330,1840,18530,-1 --bits
   2e1,43,34f,359,45a=256,336`: A, C-right, A at the master chest took 0x336 (0x337), and the baby set 0x253 and
-  reached its perch (0x300) 11 s later.
+  reached its perch (0x300) 11 s later. The baby, its flight over and hidden at (-12210, 1888, 18559), sets its bit only
+  while 0x50B is clear (dll373 0x0260), and the TriggerPlanes at the treasure doors (map 12's 2DB6, map 15's 31BEF) set
+  0x50B on the way in and clear it on the way out: come in through a door, Krystal sees it fly and vanish, and 0x253
+  and 0x300 come as she walks back out through the door (played, The treasure doors).
 - The gold. Each rescued baby's perch bit is one of 0x2FC to 0x300, and CFLevelControl (400) sets 0x4BE (Bonehead's
   state 10) from 0x8D1 and 0x300. 0x8D1 is the +0x32 bit of the curve (429D9, at (-12672, 2239, 18806)) that
   PerchObject (718, 429D8) above CFKyteGoldPerch sends Kyte to: with Kyte out and Krystal within 134 of it across the
@@ -549,10 +565,10 @@ the object takes it in the frame the player presses A with it targeted: dll2 set
 the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
-Left to play: the way on foot to the master chest (group 8, which CFLevelControl loads on 0x8CC, which only a treasure
-door's plane leads to: a treasure room's platforms crossed to its door), the GuardClaw's chest opened and its 0x336
-taken in the same run as the barrel's blast, and so the gold with all five on their perches in one run (0x8D1,
-0x4BE and 0x4C1 are played with 0x2FC-0x300 set by `--bits`). Read from the ROM,
+Left to play: the GuardClaw's chest opened and its 0x336 taken in the same run as the barrel's blast, and so the gold
+with all five on their perches in one run (0x8D1, 0x4BE and 0x4C1 are played with 0x2FC-0x300 set by `--bits`, and
+the way on foot through the south treasure room to the master chest with the four perches and 0x336 set by them). Read
+from the ROM,
 nothing sets 0x4B8 (CFGuardian's sequence at 0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches
 by the main door take: the two ZBombs there make it (their setup's +0x18). Neither is needed to finish
 (docs/restored-content.md, The plan). 0x4DC is TriggerPlane 31a68's, at (-9917, 1445, 18272), set on one crossing and
