@@ -1,5 +1,6 @@
 // The maps' acts: the story moves the Volcano Force Point and Walled City on to the objects their later visits play,
-// with Third SpellStone on Restored (the default); on Original both stay in act 1 as in the prototype.
+// with Third SpellStone on Restored (the default); on Original both stay in act 1 as in the prototype. Krazoa Palace
+// is kept out of the act that drops its Transporters, with Krazoa Palace on Restored (the default).
 //
 // Each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets (map 4's is bit 0x4FE,
 // Walled City's 0xE6, Diamond Bay's 0x3EE: the u16 at +0x1F90 + 2 * map in dll29's data). A new game puts every map
@@ -7,7 +8,7 @@
 // set (byte +5 for acts 9 to 16). Sequences set the act of the map the playing object is in (dll3's event 0x1D, at
 // 0x6DF0: a word act << 16 | 0x746 of ROM file 13), and the one such event in all of file 13 sets act 3. Of the code
 // that sets a map's act by its number (`tools/dino.py calls dll29.16`), only the Queen Earthwalker names map 4 or 13
-// (below), and the rest set their own map's act or another's. The two acts this file moves:
+// (below), and the rest set their own map's act or another's. The three acts this file moves:
 // - Volcano Force Point (map 4). Its second SpellPlace (@15B8, VFP_SpellPlace dll637: placed bit 0x878, carried 0x83B),
 //   the podium that takes the third SpellStone for the second path (VFP_PodiumPoint @0D5C, which sets 0x515), its
 //   seqpoint (@1380, holding 0x878), the door switch (@0D14) and the round door (@2B90) load in act 2 only, and the
@@ -30,6 +31,11 @@
 //   that open the Sun and Moon temples (0x810/0x811 into 0x812/0x813, 0x1BD0-0x1C84). The task list sends Sabre back
 //   to Walled City for the stones once Moon Mountain Pass's spirit is released, so the act is 2 from then (0x317,
 //   which WL_seqpoint's release sets).
+// - Krazoa Palace (map 3). Cape Claw's TriggerPlane 30ec4 (acts 1, 12, 13, 15 and 16), on 0x2C5 as Kyte is freed
+//   (task 17), sets Cape Claw's act 2 and the palace's act 14. Act 1 loads all 415 of the palace's placements and act
+//   14 151 of them, none of its own: not the two KP_Transporters (42cdf, 42ce0, acts 1-13, 15 and 16), its
+//   setuppoints, crates and mushrooms, so a palace entered in act 14 can't be crossed or left. Here act 14 loads as
+//   act 1.
 
 #include <cstdint>
 #include <cstdio>
@@ -48,6 +54,7 @@ namespace {
 
     constexpr int volcano_force_point = 4;
     constexpr int walled_city = 13;
+    constexpr int krazoa_palace = 3;
 
     constexpr int third_stone_carried = 0x83B;
     constexpr int third_stone_placed = 0x878;
@@ -58,6 +65,8 @@ namespace {
     constexpr int queen_first_visit_played = 0x484;
     constexpr int queen_second_visit = 0x487;
     constexpr int queen_second_visit_played = 0x485;
+
+    constexpr int palace_without_transporters = 14;
 
     const std::string third_stone = "third_stone";
 
@@ -113,7 +122,7 @@ namespace {
     }
 
     // The act the story has the map in, from the one it is in: the volcano's from acts 1 to 3, and from the Queen's
-    // act 11 once her visits are spent.
+    // act 11 once her visits are spent; the palace's act 1 from 14.
     int story_act(uint8_t* rdram, recomp_context* ctx, int map, int act) {
         if (map == volcano_force_point) {
             if (act == queen_act ? queen_visit_pending(rdram, ctx) : act < 1 || act > 3) {
@@ -129,6 +138,9 @@ namespace {
         }
         if (map == walled_city && act == 1 && get(rdram, ctx, third_spirit_released)) {
             return 2;
+        }
+        if (map == krazoa_palace && act == palace_without_transporters) {
+            return 1;
         }
         return act;
     }
@@ -166,7 +178,9 @@ bool dino::third_stone_restored() {
 // us.toml's hook at the end of func_80045BF4, which has loaded map $s0 and placed none of its objects yet.
 extern "C" void dino_acts_map_loaded(uint8_t* rdram, recomp_context* ctx) {
     int map = (int32_t)ctx->r16;
-    if ((map != volcano_force_point && map != walled_city) || !dino::third_stone_restored()) {
+    bool restored = map == volcano_force_point || map == walled_city ? dino::third_stone_restored() :
+        map == krazoa_palace && dino::krazoa_palace_restored();
+    if (!restored) {
         return;
     }
     Calls calls(ctx);

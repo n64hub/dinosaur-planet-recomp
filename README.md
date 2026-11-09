@@ -142,6 +142,7 @@ Fixed:
 - Krazoa Palace (Krazoa Palace on Restored): the prototype built its rooms and left them empty, and nothing past
   Cape Claw led on to Drakor. Its four wings now each have a door, a console and a text block, played in turn, fire,
   earth, water and magic, and the last door they open leads to the red Krazoa, who sends the player on to Drakor.
+  Freeing Kyte in Cape Claw left the palace without its two Transporters; it now keeps them.
 - Walled City's way in (Walled City on Restored): the prototype never built the tasks its task list has here, so the
   Queen EarthWalker was missing, the city's gate stood open, and the third SpellStone was active as soon as it was
   won. Now the Queen waits in the corridor outside, Tricky's flame (learned from the SnowHorn in DarkIce Mines once
