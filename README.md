@@ -97,8 +97,9 @@ Fixed:
   level and left Krystal falling into the void, and the respawn took it all back. The scene now plays on the gallery
   and in the arena, it ends with her where she gave the meat, and walking to the arena's south side frees him.
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
-  the Kamerian Diamond in the room below, and the end of Drakor's fall now goes back to the title with the save as it
-  was. The prototype started the fight again after his fall, so the game never ended.
+  the Kamerian Diamond in the room below, and the end of Drakor's fall now plays the game's own credits, which nothing
+  opened, then goes back to the title with the save as it was. The prototype started the fight again after his fall,
+  so the game never ended.
 - The Desert Force Point's second SpellStone (Desert Force Point on Restored): Golden Plains filled its place each time
   it loaded, so the stone stayed carried and SwapStone Circle refused the swap back to Sabre, and nothing led up from
   the force point's floor to the duct that reaches the place. Golden Plains now leaves the place to the player, and a
@@ -210,8 +211,8 @@ Each option a modern port adds has a value that plays as the console does. The d
 - **Walled City** (General): Restored has the Queen EarthWalker in the corridor outside Walled City, a RedEye there
   to anger with Tricky's flame for ten teeth that open the city's gate, and the King EarthWalker activating the third
   SpellStone. Original is the prototype as it was left: the gate stands open and the stone is active once won.
-- **Ending** (General): Restored goes back to the title once Drakor is beaten and his fall has played, as the game's
-  own menus go back to it. Original is the prototype as it was left: after his fall the fight starts again.
+- **Ending** (General): Restored plays the game's own credits once Drakor is beaten and his fall has played, then
+  goes back to the title. Original is the prototype as it was left: after his fall the fight starts again.
 
 Controls are rebound in Controls. A cutscene's camera and the first person view are the game's own in either mode.
 

@@ -63,3 +63,5 @@
   the prototype nothing moved it.
 - Walled City: the temples' symbols at the tops of their stairs take the light once their doors open, with no need
   to leave the city and come back first.
+- Ending on Restored: once Drakor is beaten and his fall has played, the game's own credits, which nothing in the
+  prototype ever showed, play on black, then the title.
