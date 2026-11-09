@@ -149,8 +149,10 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   (0x776) at 37 s and the warp to the bottom came at 45 s.
 - The bottom is two parts on layer -1. The west part holds warp 88's landing, the tracks under it (DR_PushCart,
   DR_TrackLevers, DR_pulleys and DR_cradles), DR_ExplodeDoors and DRProjectileSwitches for the projectile spell, and a
-  shaft at (-1395, -5807) whose TriggerPlane steps up a layer to the top's west (and down again). The landing's way
-  out is a gap in its west wall, then a corridor west at y -1522 and a ramp south along x -1870 to a floor at y -1805.
+  shaft at (-1395, -5807) whose TriggerPlane (4052f) steps up a layer to the top's west (and down again) and sets
+  0x7CC, on which the top's DR_Seqobj 40669 plays sequence 858: Sabre, Tricky, an AnimSpellstone and a cave-in, and
+  text 0x1FE, "The Last SpellStone! ... Only he can activate it!" (read, not played). The landing's way out is a gap
+  in its west wall, then a corridor west at y -1522 and a ramp south along x -1870 to a floor at y -1805.
   The east part is the top's east end's layer below: TriggerPlanes at (171, -6198) and (222, -6166) step between
   them, setuppoint 1 at (128, -1426, -6184) on the top's side. From there it goes east past a DR_Platform (0x5CD, its
   DR_Lever at 109, -6103) and setuppoint 4 (572, -1568, -6174) to the Skeetla arena's door at setuppoint 0 (1152,
@@ -294,8 +296,9 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
 - Cape Claw's Krazoa tablets: file 55 gives bits to tasks 133 to 136 (0x238, 0x239, 0x237, 0x3AC), which the task
   list names only as placeholders. The three receptacles (CCkrazoaRecepta, 308) take tablets counted in 0x23B and
   are done as 0x238 to 0x23A; CCkrazoaTablet (459) sets 0x3A9 once all three are placed. CCkrazoaBits (458) counts
-  a tablet into 0x23B and sets 0x23C for each of 0x234, 0x236 and 0x237 newly set: 0x234 by a TriggerPlane in
-  Discovery Falls, 0x236 by the tablet (CCKrazoaTabletP) in Cape Claw's settlement room, behind the door
+  a tablet into 0x23B and sets 0x23C for each of 0x234, 0x236 and 0x237 newly set: 0x234 by TriggerPlane 34adc in
+  Discovery Falls, in place of HighTop's scene there (CCseqobject 34add, sequence 873, text 0x201, trigger 0x96), 0x236
+  by the tablet (CCKrazoaTabletP) in Cape Claw's settlement room, behind the door
   (CCsettlementroo, 307) that 0x23C opens. Nothing sets 0x237: the third tablet is not in the ROM. CCkrazoabright
   (457) runs the room's puzzle in states: the perch switches' lights (sequence 0, whose data sets 0x393), the two
   levers (0x41E, 0x604; 0x4D6 and sequence 1), then the three beacons with the three tablets placed (sequence 3,

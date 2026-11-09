@@ -7,6 +7,7 @@ through as raw MIPS. Run it from anywhere; it reads roms/dinoplanet.z64, syms/ a
     python3 tools/dino.py map 29 --name sandeel   a map's cells and group field; its placements summed, or filtered
     python3 tools/dino.py def SHswapstone         an object def: DLL, object ids, where it is placed, its record
     python3 tools/dino.py warp [26]               the warp table: each entry's place, the map holding it, who warps
+    python3 tools/dino.py text 0x201              the sequences that show a text, their actors and who plays them
 
 `dis` prints one function densely: each line its offset in the DLL's text (or its address), then the instruction with
 what its registers hold in place of them. Cut: nops, the $gp setups and reloads, the prologue's and epilogue's saves
@@ -36,6 +37,15 @@ setup from +0x18, named from syms/names.toml where they are, and `act<n>` for th
 `--only-act N` those that load in it and no other. `def` takes a name, an object id or dll<n>. `warp` names the
 maps whose cells and layer hold an entry, and each call to func_8004D1D4 that warps there.
 
+`text` reads the sequences (the scenes dll3 plays). An object's def lists sequence numbers (def +0x1C, its count at
++0x7A), and start_sequence (dll3.17) plays the one at an index of that list: ROM file 64 gives the number's actors as a
+range of file 63's 8-byte records (+6 the actor's object id: -1 the object playing it, -2 another of dll3's), and actor
+a's track is file 14's entry file15[number] + a (+0 its size << 16 | its count of 4-byte events, +4 its offset in file
+13; the keyframes follow the events). An event 0x0D queues to dll3_422C the type in its halfword +2's high nibble and
+its low 12 bits: type 0xA shows that text (dll22.3, the text box), 0xB and 0xC set and clear the bit in the next
+event's low half. A seqobject (dll309, dll310) plays its def's list at its setup's byte +0x1E once its trigger_bit
+(+0x1A) is set and its played_bit (+0x18) isn't, setting played_bit as it starts unless its +0x1D says not to.
+
 What it reads of the whole ROM (the handles, each function's argument kinds, every call site) is kept in
 build/dino/<the ROM's md5>/, written the first time and read after; nothing from the ROM goes in git.
 """
@@ -60,6 +70,8 @@ NAMES_PATH = ROOT / "syms" / "names.toml"
 CACHE_ROOT = ROOT / "build" / "dino"
 
 OBJECT_TAB_FILE, OBJECT_BIN_FILE, OBJECT_INDEX_FILE, BIT_TABLE_FILE = 65, 66, 67, 55
+SEQ_EVENTS_FILE, SEQ_TRACKS_FILE, SEQ_FIRST_FILE, SEQ_ACTORS_FILE, SEQ_RANGES_FILE = 13, 14, 15, 63, 64
+SEQ_OBJECT_DLLS = (309, 310)
 PLACEMENTS_FILE, MAP_TABLE_FILE, MAP_NAMES_FILE, MAP_GRID_FILE, WARPS_FILE = 31, 32, 33, 21, 30
 CELL = 640
 WARP_ENTRY = 0x8004D1D4
@@ -1107,6 +1119,75 @@ def show_warps(game, idx, want):
         print(s)
 
 
+def sequences(game):
+    """Each sequence number: its actors, as (object id, its track's index in file 14, the track's events)."""
+    rom, f = game.rom, {i: g.rom_file(game.rom, i) for i in (SEQ_EVENTS_FILE, SEQ_TRACKS_FILE, SEQ_FIRST_FILE,
+                                                               SEQ_ACTORS_FILE, SEQ_RANGES_FILE)}
+    first = struct.unpack_from(f">{f[SEQ_FIRST_FILE][1] // 2}H", rom, f[SEQ_FIRST_FILE][0])
+    ranges = struct.unpack_from(f">{f[SEQ_RANGES_FILE][1] // 2}h", rom, f[SEQ_RANGES_FILE][0])
+    out = {}
+    for n in range(min(len(first), len(ranges) - 1)):
+        lo, hi = ranges[n], ranges[n + 1]
+        if first[n] == 0xFFFF or not 0 <= lo <= hi:
+            continue
+        actors = []
+        for a in range(hi - lo):
+            obj = struct.unpack_from(">h", rom, f[SEQ_ACTORS_FILE][0] + (lo + a) * 8 + 6)[0]
+            k = first[n] + a
+            head, off = struct.unpack_from(">II", rom, f[SEQ_TRACKS_FILE][0] + k * 8)
+            count = min(head & 0xFFFF, (head >> 16) // 4)
+            if off + count * 4 > f[SEQ_EVENTS_FILE][1]:
+                count = 0
+            actors.append((obj, k, struct.unpack_from(f">{count}I", rom, f[SEQ_EVENTS_FILE][0] + off)))
+        out[n] = actors
+    return out
+
+
+def show_text(game, want):
+    o, _ = g.rom_file(game.rom, OBJECT_TAB_FILE)
+    b, _ = g.rom_file(game.rom, OBJECT_BIN_FILE)
+    lists = {}
+    for i in range(len(game.defs)):
+        at = b + struct.unpack_from(">I", game.rom, o + 4 * i)[0]
+        count, rel = struct.unpack_from(">h", game.rom, at + 0x7A)[0], struct.unpack_from(">I", game.rom, at + 0x1C)[0]
+        if 0 < count < 0x100 and rel < 0x1000:
+            lists[i] = struct.unpack_from(f">{count}h", game.rom, at + rel)
+
+    def actor(obj):
+        if obj < 0:
+            return "the object playing it" if obj == -1 else str(obj)
+        d = game.def_of(obj)
+        return f"{game.defs[d][0] if d >= 0 else '?'} #{obj:X}"
+
+    bit = lambda v: "none" if v < 0 else f"{v:#x}" + (f" ({game.bit_label(v)})" if game.bit_label(v) else "")
+    found = False
+    for n, actors in sequences(game).items():
+        shows = [(a, k, e) for a, (_, k, events) in enumerate(actors) for e, w in enumerate(events)
+                 if w >> 24 == 0x0D and (w >> 12) & 0xF == 0xA and w & 0xFFF == want]
+        if not shows:
+            continue
+        found = True
+        print(f"text {want:#x}: sequence {n}, " + ", ".join(f"actor {a} ({actor(actors[a][0])}) track {k} event {e}"
+                                                          for a, k, e in shows))
+        print("  actors: " + ", ".join(actor(obj) for obj, _, _ in actors))
+        listed = {i: [x for x, v in enumerate(lst) if v == n] for i, lst in lists.items() if n in lst}
+        for i, at in listed.items():
+            print(f"  listed by {game.defs[i][0]} (def {i}, dll{game.defs[i][1]}) at " + ", ".join(map(str, at)))
+        played = False
+        for m in game.maps:
+            for off, r in game.placements(m):
+                d = game.def_of(struct.unpack_from(">H", r, 0)[0])
+                if d in listed and game.defs[d][1] in SEQ_OBJECT_DLLS and len(r) > 0x1E and r[0x1E] in listed[d]:
+                    played = True
+                    played_bit, trigger = struct.unpack_from(">hh", r, 0x18)
+                    print(f"  played by map {m} {game.maps[m]['name']} {placement_line(game, m, off, r, False)}: "
+                          f"trigger_bit {bit(trigger)}, played_bit {bit(played_bit)}")
+        if listed and not played:
+            print("  no seqobject plays it: the defs' own code picks the index (`calls dll3.17`)")
+    if not found:
+        print(f"no sequence shows text {want:#x}")
+
+
 # ---- Finding what to print ----
 
 def parse_func(game, spec, rng=None):
@@ -1237,12 +1318,16 @@ def main():
     o.add_argument("spec", help="a name (or part), an object id (0x1A3 or #1A3), or dll<n>")
     w = sub.add_parser("warp", help="the warp table (ROM file 30): place, map and the calls that warp there")
     w.add_argument("index", nargs="?", type=int)
+    t = sub.add_parser("text", help="the sequences that show a text, their actors and the objects that play them")
+    t.add_argument("id", help="the text's number (0x201)")
     a = p.parse_args()
     game = Game()
     if a.cmd == "map":
         return show_map(game, a)
     if a.cmd == "def":
         return show_def(game, a.spec)
+    if a.cmd == "text":
+        return show_text(game, int(a.id, 0))
     idx = load_index(game)
     if a.cmd == "warp":
         return show_warps(game, idx, a.index)
