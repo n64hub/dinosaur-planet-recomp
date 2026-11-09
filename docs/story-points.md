@@ -286,9 +286,11 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   (and sets 0x7AF, which nothing reads). His second state gives the player 43 s from the hit; then the Diamond goes
   back (0x7C5, sequence 3) and the fight goes on. Sequence 1 sends no event and none of the map's four
   BossDrakor_sequ (309) holds a warp entry, so on the console the fight starts again after his fall. The Ending
-  setting, Restored, goes back to the title there (`src/game/drakor.cpp`). Played from `before-drakor` with
+  setting, Restored, plays the ROM's credits there (dll78, menu 15, which nothing opens), then the title
+  (`src/game/drakor.cpp`). Played from `before-drakor` with
   `--input`: A every half second from 12 s to 25.6 s hits him (0x7C6 at 25 s), the stick held up from 27 s walks the
-  player to the Diamond (0x7AE at 47-49 s), and the title follows at 82 s.
+  player to the Diamond (0x7AE at 47-49 s), the credits follow at 83 s, their ten pages on black, and the title at
+  206 s, as the credits' clock (7350 ticks) runs out.
 - Cape Claw's Krazoa tablets: file 55 gives bits to tasks 133 to 136 (0x238, 0x239, 0x237, 0x3AC), which the task
   list names only as placeholders. The three receptacles (CCkrazoaRecepta, 308) take tablets counted in 0x23B and
   are done as 0x238 to 0x23A; CCkrazoaTablet (459) sets 0x3A9 once all three are placed. CCkrazoaBits (458) counts

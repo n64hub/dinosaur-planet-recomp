@@ -1,8 +1,8 @@
 // BOSS Drakor (map 44), the prototype's last fight, and the game's end. The fight is won in the ROM as it is: a hit
 // lets the Kamerian Diamond go into the room under the fight, and the player who reaches it there plays Drakor's fall
 // (sequence 1). Nothing follows it: the fight starts again, and the game never ends. With Ending on Restored (the
-// default) the end of his fall goes back to the title, the way the ROM's own menus go back to it; on Original it plays
-// as the console does.
+// default) the end of his fall plays the ROM's own credits, which nothing opens, then goes back to the title; on
+// Original it plays as the console does.
 //
 // The fight, read from the ROM (offsets are a DLL's text, `@` a placement in map 44's object list):
 // - BossDrakorLevel (dll692, @0080) holds the fight's objects: the player, Drakor (0x2AB, dll697), the Diamond (0x376,
@@ -29,12 +29,28 @@
 //   func_80013FB4, which resets the video mode and the play flags and loads Front End2 (func_800141A4 with map 1), then
 //   func_8000F404 with menu 2, the title (dll60). func_80013FB4 alone, as BOSS TRex's defeat in the prototype calls it
 //   (dll702 0x2DF4), leaves the play menu up over Front End2, and the screen black.
+// - The credits are dll78, the menu table's menu 15, and nothing calls set_menu(15) (EndObject, dll299, placed in map
+//   4, is empty). Its constructor loads texture 0xC5 (func_8003CD7C) and text 0x1FD (dll21.4); its update (export 0,
+//   0x00D4) adds each frame's time to a clock (D_0F20) and moves its page (D_0F18) on as the clock passes the page's
+//   end (a page is 0x98 bytes of a table at D_0924, its end at +0x92), each line fading in and out by four times of
+//   its own; its draw (export 1, 0x0570) shows page 0 as the texture and pages 1 to 9 as text 0x1FD's lines, white
+//   on a black shadow, over whatever is drawn. Past page 9 it draws nothing and stays, so it ends nowhere: nothing in
+//   it opens another menu. The pages hold 7350 ticks of the game's clock, some 2 minutes.
+// - The frame (func_800137B4) starts with func_80037A14, which fills the screen with the clear colour (D_800917A0,
+//   A4, A8, which only func_8003798C sets, to black, as a map loads) when bit 0 of its mode (a2) is set. With play
+//   flag 0x2000 clear, as in the front end, the mode is 0 and nothing clears the screen: the title draws a backdrop of
+//   its own, and a menu that draws none shows over what the last frames left (played: the fight and the boot's logos).
 //
 // What Restored changes:
 // - The end of sequence 1: a sequence object's callback runs each frame its sequence plays and marks the object's state
 //   (bit 4 of the byte at +0xB8, which its update clears), so updates with no mark after marked ones are the sequence
-//   ended. Then the game goes back to the title as dll67 does. The save is left as it was: Game Select plays from the
-//   last save, before the fight.
+//   ended. Then the game goes to the front end as dll67 does, but with menu 15, the credits, over it in place of the
+//   title, so the fight doesn't go on behind them. The save is left as it was: Game Select plays from the last save,
+//   before the fight.
+// - While menu 15 shows, the frame's mode has bit 0 set, so the credits show on black, not over the fight's last
+//   frames.
+// - The end of the credits: dll78's update, as it reads its page, sees the page past the last, and opens the title.
+//   Only Restored opens the credits, so it needs no check of its own.
 
 #include <cstdint>
 #include <cstdio>
@@ -67,6 +83,9 @@ namespace {
     constexpr int32_t to_front_end = 0x80013FB4;
     constexpr int32_t set_menu = 0x8000F404;
     constexpr int title_menu = 2;
+    constexpr int credits_menu = 15;
+    constexpr int credits_pages = 10;
+    constexpr int32_t current_menu = 0x800A7D84;
     constexpr int diamond_reached = 0x7AE;
     constexpr int quiet_updates = 15; // updates with no mark before sequence 1 counts as ended
 
@@ -92,12 +111,19 @@ namespace {
         }
     };
 
-    // The ROM's way back to the title, as dll67 0x02F8-0x0324.
-    void go_to_title(uint8_t* rdram, recomp_context* ctx) {
+    void open_menu(uint8_t* rdram, recomp_context* ctx, int menu) {
         Calls calls(ctx);
-        call(rdram, ctx, to_front_end);
-        ctx->r4 = title_menu;
+        ctx->r4 = menu;
         call(rdram, ctx, set_menu);
+    }
+
+    // The ROM's way back to the title, as dll67 0x02F8-0x0324, with the credits in place of the title.
+    void go_to_credits(uint8_t* rdram, recomp_context* ctx) {
+        {
+            Calls calls(ctx);
+            call(rdram, ctx, to_front_end);
+        }
+        open_menu(rdram, ctx, credits_menu);
     }
 }
 
@@ -105,8 +131,8 @@ void dino::add_drakor_options(recomp::config::Config& general) {
     general.add_enum_option(
         ending,
         "Ending",
-        "Once Drakor is beaten and his fall has played, the game goes back to the title. <b>Original is the prototype "
-        "as it was left</b>: after his fall the fight starts again, and the game never ends.",
+        "Once Drakor is beaten and his fall has played, the game's own credits play, then the title. <b>Original is "
+        "the prototype as it was left</b>: after his fall the fight starts again, and the game never ends.",
         ending_options,
         Ending::Restored
     );
@@ -130,7 +156,26 @@ extern "C" void dino_drakor_sequence(uint8_t* rdram, recomp_context* ctx) {
     }
     fall_object = 0;
     if (logging) {
-        fprintf(stderr, "drakor: his fall has played, back to the title\n");
+        fprintf(stderr, "drakor: his fall has played, the credits\n");
     }
-    go_to_title(rdram, ctx);
+    go_to_credits(rdram, ctx);
+}
+
+// us.toml's hook in the credits' update (dll78 0x0104), once it has read its page into v0: past the last, the title.
+extern "C" void dino_credits_page(uint8_t* rdram, recomp_context* ctx) {
+    if ((int32_t)ctx->r2 < credits_pages) {
+        return;
+    }
+    if (logging) {
+        fprintf(stderr, "drakor: the credits have played, the title\n");
+    }
+    open_menu(rdram, ctx, title_menu);
+}
+
+// us.toml's hook in the frame (func_800137B4) before it starts the screen with func_80037A14, its mode in v1: while
+// the credits show, the screen is cleared.
+extern "C" void dino_credits_clear(uint8_t* rdram, recomp_context* ctx) {
+    if (MEM_W(0, current_menu) == credits_menu) {
+        ctx->r3 |= 1;
+    }
 }
