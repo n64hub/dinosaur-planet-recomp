@@ -681,12 +681,36 @@ Played from here on the desktop build, each from the one before it but where a `
   (`--input`'s `chase 1BF 10 match 23 1B9 1A`). The third right pick sets 0x128, the win gives the spirit (mask 8)
   and 0xFD, and Sabre is back on Warlock Mountain's pad, where its act 5 sets 0x142 (`src/game/krazoa.cpp`).
 
+From the pad to EC's release (WL_seqpoint 2983 at 13929,-117,1106, mode 2 on 0x142), played from the end of the pad's
+walkway east along z 2960, past the crates and two GuardClaws, at (13700,-300,3320): a fallen column (WMfallencol,
+dll331, uid 11 at 13743,-292,3090) lies across the way north in acts 5 to 13, and nothing moves it (dll331 only turns
+it as it is made, and its update and exports never test its object), nor goes round it: the pool south of the corridor
+ends in a wall at z 3818, burned away or not by the vine's 0x2DB, and the top Transporter's room (entry 6) is shut.
+Krazoa Shrines leaves it out of acts 5, 7 and 9 (`src/game/krazoa.cpp`). Past it the way is the ROM's: a ramp up west
+to (13558,-205,2734), and the hall east along z 2735, which the three WL_LaserBeams (dll594, 291f, 2923 and 2924, at x
+13753, 13951 and 14155) cross from the north: each beam holds the player back while it is on and lets him by when its
+timer turns it off (a few seconds to 16 s), and none is on once its WL_LaserTarget (dll595, high on the north wall)
+is hit and sets its bit (0x2E2 to 0x2E4). The hall rises east to (14430,-99,2740), and north of it TriggerArea 2972
+sets 0x2EE, which WL_LevelControl (dll607 0x13B0) turns into a warp back to entry 57 (13553,-170,2732) unless the
+player's spell is the SharpClaw disguise (0x40) or the forcefield (0x1D7), or 0x2F3 is set. C-left, C-left and A
+cast the disguise, which drains magic (about one a second and a half) and keeps the warp off, but the two
+ClubSharpClaws and the GuardClaw stand across the way at z 2068 and hold the player there, disguised or not. What
+lets them go is LaserTarget 29c1 (14429,237,2152, high above them): its bit 0x2FA sets 0x2F7, which frees them, and
+after a while 0x2F3. Played in one walk from (13700,-300,3320): the ramp, the hall, the disguise and the guards'
+hold. Played from 0x2F3 on: WL_seqpoint 2973 (mode 3, radius 200) plays sequence 8 and sets 0x2F2; up to y
+13 and west along z 1600, 297b (radius 101) plays sequence 9 ("Father.") and sets 0x2F4; down the walkways
+(WM_Walkway1 and 2, dll331, at y -44) to the release, whose sequence 0xA sets 0x21D, 0x318, 0x2F5 and 0x2F6. Acts 7
+and 9 need the same way past the column: WG's column (WL_colrise @1AB0, 14433,-101,2028), which carries the player
+up to WG's site in act 7 and NW's in act 9, stands where 2973 does. Played: in act 7 from (13700,-300,3320) through
+the hall and onto the column, which rises to y 22; in act 9 the same walk to its pit, and from the hall's end onto it,
+to y 25 (acts 7 and 9 have no guards and no TriggerArea 2972). CC's column (@1358, act 6 and GP's act 8) and MM's
+release (act 4) are west of the pad.
+
 Not played from here: the moon temple's push blocks by night (0x811 to 4, then 0x813, the door, 0x25D) and its moon
 symbol in the first person view (C-up, 21:23 to 22:38, 0x829); a walk into the moonseed's hollow from where a
-player can be with Kyte, and the other three receptacles' seeds; the walk from
-Warlock Mountain's pad to EC's release (WL_seqpoint 2983 at 13929,-117,1106, mode 2 on 0x142): the pad's walkway east
-along z 2960, past the crates and two GuardClaws to (13700,3320), meets a fallen column (WMfallencol, 13743,-292,3090)
-across the way north, with WL_LaserBeam's beams beyond it; and task 84's log (no ThornTail sells one, as for the first).
+player can be with Kyte, and the other three receptacles' seeds; task 84's log (no ThornTail sells one, as for
+the first); and a hit on a WL_LaserTarget (dll595, its hit is func_80025F40's): a dozen of Sabre's aimed shots at
+29c1 from z 2330 to 2700, and some at the hall's, set no bit.
 
 ## The shrines
 
