@@ -704,13 +704,33 @@ func = "func_80037A14"
 before_vram = 0x80037C6C
 text = "ctx->r7 = ADD32(ctx->r7, 1);"
 
-# The rows above and below the 3D picture (src/game/screen_clear.cpp): with no full clear to do (its flag 1, $t3, is
-# clear at 0x80037C58), func_80037A14 fills them black, its display list pointer in $s0, before it looks for a
-# cutscene's bars.
+# The 3D picture's rows (src/game/view_rows.cpp). A letterbox the game leaves unfilled: with no full clear to do (its
+# flag 1, $t3, is clear at 0x80037C58), func_80037A14 fills the rows outside the world's rectangle black, its display
+# list pointer in $s0, before it looks for a cutscene's bars.
 [[patches.hook]]
 func = "func_80037A14"
 before_vram = 0x80037C60
 text = "{ void dino_clear_borders(uint8_t*, gpr, gpr); dino_clear_borders(rdram, ctx->r16, ctx->r29); }"
+
+# The world's rectangle takes the whole frame in play: func_80002130's top row ($t0 = D_8008C524 + 6, stored at
+# 0x8000217C) and the row after its last ($t5 = height - D_8008C524 - 6, stored at 0x80002190) take dino_view_margin in
+# place of the 6.
+[[patches.hook]]
+func = "func_80002130"
+before_vram = 0x8000217C
+text = "{ int32_t dino_view_margin(uint8_t*); ctx->r8 = ADD32(ctx->r25, dino_view_margin(rdram)); }"
+
+[[patches.hook]]
+func = "func_80002130"
+before_vram = 0x80002190
+text = "{ int32_t dino_view_margin(uint8_t*); ctx->r13 = ADD32(ctx->r12, -dino_view_margin(rdram)); }"
+
+# And the world's scissor, func_80002490's one-view case (0x80002600-0x80002620): $a3 already holds height -
+# D_8008C524 - 6, and 0x80002620 sets its top row, $t1, to $v1 (D_8008C524) + 6; $v1 is read again only after a load.
+[[patches.hook]]
+func = "func_80002490"
+before_vram = 0x80002620
+text = "{ int32_t dino_view_margin(uint8_t*); int32_t m = dino_view_margin(rdram); ctx->r7 = ADD32(ctx->r7, 6 - m); ctx->r3 = ADD32(ctx->r3, m - 6); }"
 
 # The minimap keeps to the left: dll59_0148's display list pointer is $a0, then 0x68($sp).
 [[patches.hook]]

@@ -1,21 +1,35 @@
-// The rows above and below the 3D picture, cleared to black each frame. func_80002130 gives the world's viewport the
-// frame's rows from 6 + D_8008C524 to its height less that (D_8008C524 is a cutscene's letterbox), and func_80037A14,
-// which starts each frame's list, fills the colour image only for a full clear (its flag 1, the menus') or, outside the
-// viewport, while D_8008C528 is set (a cutscene's bars, in the game's clear colour). In play neither is, so the 6 rows
-// at the top and the bottom are never drawn and keep whatever a screen before left in that framebuffer: broken tiles,
-// half of the boot screens' "PUBLISHED BY" line. The VI shows all 240 rows (func_8005D75C, libultra's mode), so a
-// console has them too, mostly in a TV's overscan; a window shows all of it. A plain bug fix, always on.
+// The 3D picture's rows: the whole frame's in play, where the game left 6 at the top and 6 at the bottom undrawn.
 //
-// us.toml calls dino_clear_borders where func_80037A14 has no full clear to do, after it set the colour image to the
-// framebuffer in fill mode: it fills the rows outside the viewport black, as the game's own bars are filled, before
-// anything else of the frame, and a cutscene's bars still fill them in the game's colour after it. Their right side is
-// the frame's width, as the widescreen hook beside it makes the game's, so RT64 takes them to the window's sides.
+// The world's viewport (func_800029D4) is a square as wide as the frame, centred on it, so its picture reaches past
+// the frame's top and bottom; what keeps it to fewer rows is the rectangle func_80002130 gives the frame's clears and
+// dll28's scissors and func_80002490 the world's scissor: rows from 6 + D_8008C524 to the frame's height less that,
+// D_8008C524 a cutscene's letterbox. func_80037A14, which starts each frame's list, fills the colour image only for a
+// full clear (its flag 1, the menus') or, outside that rectangle, while D_8008C528 is set (a cutscene's bars). In play
+// neither is, so the 6 rows at the top and the bottom were never drawn and kept whatever a screen before left in that
+// framebuffer: broken tiles, half of the boot screens' "PUBLISHED BY" line. The VI shows all 240 rows (func_8005D75C,
+// libultra's mode), so a console has them too, mostly in a TV's overscan; a window shows every row. A plain bug fix,
+// always on.
+//
+// dino_view_margin is those 6 rows, 0 with no letterbox: us.toml's hooks on func_80002130 and func_80002490 take it in
+// place of the 6, so in play the world, its clears and its scissor take the whole frame, the picture the viewport
+// already drew reaching the window's top and bottom, nothing stretched. A cutscene's letterbox keeps the game's 6.
+//
+// dino_clear_borders is for a letterbox the game leaves unfilled (D_8008C524 without D_8008C528): us.toml calls it
+// where func_80037A14 has no full clear to do, after it set the colour image to the framebuffer in fill mode, and it
+// fills the rows outside the rectangle black, as the game's own bars are filled, before anything else of the frame; a
+// cutscene's bars still fill them in the game's colour after it. Their right side is the frame's width, as the
+// widescreen hook beside it makes the game's, so RT64 takes them to the window's sides.
 
 #include <cstdint>
 
 #include "recomp.h"
 
 namespace {
+    // A cutscene's letterbox, in rows at the top and the bottom, and whether func_80037A14 fills its bars.
+    constexpr gpr letterbox_rows = (gpr)(int32_t)0x8008C524;
+    constexpr gpr letterbox_filled = (gpr)(int32_t)0x8008C528;
+    constexpr int32_t game_margin = 6;
+
     // func_80037A14's locals, on its stack: the frame's width and height (func_8005D6C8) and the viewport's first row
     // and the row after its last (func_80002130).
     constexpr int32_t frame_width_slot = 0x70;
@@ -48,6 +62,10 @@ namespace {
         write_command(rdram, gfx_pointer, opcode_fill_rectangle | ((right & 0x3FF) << 14) | ((bottom & 0x3FF) << 2),
             (top & 0x3FF) << 2);
     }
+}
+
+extern "C" int32_t dino_view_margin(uint8_t* rdram) {
+    return (MEM_H(0, letterbox_rows) == 0 && MEM_H(0, letterbox_filled) == 0) ? 0 : game_margin;
 }
 
 // gfx_pointer is func_80037A14's $s0, sp its $sp.
