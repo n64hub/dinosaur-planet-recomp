@@ -66,9 +66,11 @@ Fixed:
 - The Krazoa shrines (Krazoa Shrines on Restored): all eight finished, a way into the five that have none, and their
   spirits taken to Warlock Mountain, Cape Claw's test, which never ended, and Walled City's shell game, which a player
   who stood still won as its answer time ran out. After Willow Grove's spirit, Warlock Mountain's own scene and warp
-  point on to Cape Claw, which never came, now do. Two of the fixes are always on: the pad the player arrives on in
-  Moon Mountain Pass's shrine, which sent a player who stepped back on it nowhere, and Golden Plains' fly baddie,
-  whose every shot made a second player who took the camera.
+  point on to Cape Claw, which never came, now do. A fallen column across Warlock Mountain's way north from the pad,
+  which shut off the releases of Walled City's, Willow Grove's and Northern Wastes' spirits, is gone while they are
+  carried. Two of the fixes are always on: the pad the player arrives on in Moon Mountain Pass's shrine, which sent a
+  player who stepped back on it nowhere, and Golden Plains' fly baddie, whose every shot made a second player who took
+  the camera.
 - SwapStone Hollow's Tricky's run to his mother, the Queen Earthwalker (Tricky's Run on Restored): it never started.
   With no Tricky beside Sabre it would have crashed, which is fixed on either setting.
 - SwapStone Hollow's SwapStone could stop answering in its own corner of the hollow, and answer only outside it,

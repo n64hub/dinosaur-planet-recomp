@@ -254,8 +254,8 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the
 moon temple's push blocks by night and its symbol's moonlight; the walk into the moonseed's hollow with Kyte (planted
 and grown there, the ROM's own code needs no fix: the moonseed is used facing the receptacle, and Kyte's flame is her
-scroll's second row at night); the walk from Warlock Mountain's
-pad to EC's release (WL_seqpoint 2983, on 0x142), which a fallen column (WMfallencol, dll331) blocks.
+scroll's second row at night); a hit on Warlock Mountain's laser targets (WL_LaserTarget, dll595), whose 29c1 lets
+EC's guards go (0x2FA), and which a script's aimed shots have not set.
 
 ## 3. Choices
 
@@ -298,6 +298,12 @@ ROM's way. "(?)" marks a reading not checked in full.
 - **Warlock Mountain's bits each visit** (Krazoa Shrines): act 5 sets 0x142, EC's release trigger (no ROM setter),
   act 7 sets 0x1D1, WG's. The ROM offers nothing else.
 - **"Already won"** (Krazoa Shrines): Golden Plains' as act 8 or later, Willow Grove's as act 7 or later.
+- **The fallen column** (Krazoa Shrines): Warlock Mountain's WMfallencol (uid 11, @1A44) is left out of acts 5, 7 and
+  9, where it lies across the only way north from the pad: EC's release (act 5) and WG's column (@1AB0, acts 7 and 9)
+  are beyond it, and the ROM places act 5's whole course there (the lasers, checkpoint 57, the guards, seqpoints 296b,
+  2973 and 297b). It reads and sets no bit: dll331 only turns it as it is made. Cascade: none. The ROM offers: act 7's
+  TriggerPlane 2e6f at its face (0x36C), on which WL_LevelControl (dll607 0x1788) starts a rockfall (0x36D), as if it
+  fell then (?); nothing else that moves or opens it, or a way round (docs/story-points.md).
 - **The third tablet's place** (Krazoa Tablets): a CCKrazoaTabletP with 0x237 at (3574, -257, 16514), where the sand
   worm's arena has CCnewseqobject 42BDF, which nothing triggers (its trigger 0x96 is never), placed once the worm is
   dead (0x3FB, dll461). 0x237: no ROM setter; dll458 reads it. Cascade: 0x23B, 0x23C (the settlement room's door),

@@ -57,3 +57,6 @@
   left Krystal falling into the void, which took it all back. She is now put back on the gallery.
 - Kamerian Dragon on Restored: the way into the dragon's room is now the arena's north wall once the arena is won,
   not the win itself, so the Earth Warrior can still be freed after the fight.
+- Krazoa Shrines on Restored: the fallen column across Warlock Mountain's way north from the pad is gone while
+  Walled City's, Willow Grove's or Northern Wastes' spirit is carried, so the walk to its release can be played. In
+  the prototype nothing moved it.
