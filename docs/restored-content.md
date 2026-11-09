@@ -158,7 +158,8 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   the first tablet with text 0x201, and sets 0x234 as it starts, but its trigger is 0x96, never, and TriggerPlane
   34adc beside it sets 0x234 in its place (action 0x12, arg 0x4234, no other plane in any map). Restored skips that
   set and reads 34add's trigger as set once the plane is crossed, so the scene plays and gives the tablet, which
-  Discovery Falls' CCkrazoaBits (34b50) counts; Original keeps the plane's silent set.
+  Discovery Falls' CCkrazoaBits (34b50) counts; Original keeps the plane's silent set. Played from
+  `before-df-shrine` on the block by the plane, both ways (docs/story-points.md, HighTop's scene).
 - The tablet room's puzzle ends in a state with no handler, and CCkrazoaBits, placed by distance in the room, missed
   a tablet picked up elsewhere: the pickup counts the third itself.
 - Entries 71 and 72 land in the tablet room with no plane crossed, so they set 0x2C0, which the planes on the way in

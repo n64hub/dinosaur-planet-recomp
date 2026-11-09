@@ -166,6 +166,16 @@ offset = 0x1A
 name = "trigger_bit"  # once set, it plays its def's list at its byte +0x1E
 [[field]]
 of = "setup"
+dll = 325
+offset = 0x3A
+name = "half_size"  # a TriggerPlane's radius over 2 (dll325_19C0), 6 for 34adc by HighTop's scene
+[[field]]
+of = "setup"
+dll = 325
+offset = 0x3D
+name = "facing"  # a TriggerPlane's yaw over 256 (dll325_19C0)
+[[field]]
+of = "setup"
 dll = 310
 offset = 0x18
 name = "played_bit"
