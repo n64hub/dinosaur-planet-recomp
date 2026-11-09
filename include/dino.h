@@ -37,6 +37,8 @@ namespace dino {
     bool story_object_act(uint8_t* rdram, int oid, int act);
     // --input's sync state: whether an object of that id within reach of (x, z) has that value in a byte of its state.
     bool story_object_state(uint8_t* rdram, int oid, float x, float z, float reach, int offset, int mask, int value);
+    // --input's menu lines: the menu the game shows (9 on a game over).
+    int story_menu(uint8_t* rdram);
     // DINO_CHECK_HEAP (heap.cpp, development).
     void heap_check(uint8_t* rdram, double seconds);
 

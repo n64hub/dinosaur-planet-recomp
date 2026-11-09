@@ -51,8 +51,8 @@
 //   the player to take it, and the scroll aims and casts it as it does the projectile (below).
 // - The arena's magic: while its fight is on, the player's magic is filled there as the dragon's fight fills it
 //   (below), so its three DRLavaControls can be put out.
-// - The arena's DR_EarthWarrior: fed the blue mushrooms placed by the arena, as his update feeds him item 0xC1 used
-//   on him, which Krystal's item menu lists and he takes while the fight is on (below).
+// - The arena's DR_EarthWarrior: fed Dragon Rock's blue mushrooms, on the top and by the arena, as his update feeds
+//   him item 0xC1 used on him, which Krystal's item menu lists and he takes while the fight is on (below).
 //
 // Always on, a plain bug: the gallery's lever. The scene 0x5FD plays (DR_Seqobj 0x339C4's sequence 2) leaves the player
 // past the gallery's east end, with nothing under her, and the void's respawn takes the freeing back. The door's hook

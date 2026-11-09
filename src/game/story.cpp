@@ -693,6 +693,13 @@ bool dino::story_object_act(uint8_t* rdram, int oid, int act) {
     return false;
 }
 
+// --input's menu lines (src/main/main.cpp): the menu the game shows, as story_report prints it. 9 is the game over's,
+// on which A continues where the player fell, at full health and with the bits as they were, and C-right moves to
+// its other choice, a load of the last save.
+int dino::story_menu(uint8_t* rdram) {
+    return word(rdram, current_menu);
+}
+
 // --input's sync state lines: whether an object of that id within reach of (x, z), drawn or not (a laser's +0x36 is
 // 0), holds that value, under that mask, in the byte at that offset of its state (obj+0xB8): a timed hazard's phase,
 // such as a laser's beam (dll788, +0x34 nonzero while it is live).

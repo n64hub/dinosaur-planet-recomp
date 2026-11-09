@@ -9,7 +9,9 @@
 # DRLavaControl in turn, 0x5DA, 0x5D8 and 0x5D9, the ice cast straight at it every 15 s until it is out (C-left,
 # a second C-left the first time, A, A held, B), then, the staff put away for the walk there, the ice swept over
 # the Skeetlas at the EarthWarrior and a walk at each one left (chase 43E); and once the win's sequence is over
-# (sync 609), a walk to the arena's north wall, where the way into the dragon's room is.
+# (sync 609), a walk to the arena's north wall, where the way into the dragon's room is. A game over, which the
+# swarm at the Warrior can bring, is continued where it came (menu 9 8000).
+menu 9 8000
 0 0 0 0
 4 0 chase 4A 4
 8 0 0 0
@@ -1139,6 +1141,7 @@ sync 5d9
 236.5 4000
 236.7 0
 sync 609
-0 0 to 2009 -6080
-12 0 to 2009 -5900
-22 0 0 0
+0 0 to 1700 -6200
+11 0 to 2009 -6200
+18 0 to 2009 -5900
+28 0 0 0

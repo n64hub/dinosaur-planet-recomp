@@ -347,7 +347,8 @@ ROM's way. "(?)" marks a reading not checked in full.
   while she carries one. 0xC1: SHbluemushroom (dll502) raises it, DR_EarthWarrior (dll713) reads and lowers it, Tricky
   (dll211) lowers it. Cascade: none (the Warrior's health, which the arena's win needs above -20 and his freeing after
   it above 0, 0x654). The ROM offers: his export 20 adds 12 as he walks onto a mushroom (dll502 0x0698), but he walks
-  only once freed (0x655), and freed he is still bitten.
+  only once freed (0x655), and freed he is still bitten. Played: from `before-dragon-rock` in one run, five picked up
+  on the top and given him as the fight starts, and the fight won (docs/story-points.md).
 - **The ending** (Ending): back to the title by dll67's way after 15 quiet updates, the save as it was. The ROM offers:
   the TRex's defeat loads the front end the same way (dll702); no credits or text.
 - **The force point's second lift** (Desert Force Point): a second DFPLift1 under the stub at (-275, 9280), its top at
