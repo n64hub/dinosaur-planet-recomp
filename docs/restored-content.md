@@ -158,6 +158,12 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 - CCkrazoaBits counts three tablet bits, 0x234, 0x236 and 0x237, and nothing sets 0x237: the third tablet is missing.
   Where it lies is a choice (part 3). Text 0x201, "It might be of use to you back in Cape Claw", is HighTop's
   hand-over of the first, 0x234, in Discovery Falls (part 3, The plan).
+- HighTop's scene: Discovery Falls' CCseqobject 34add plays sequence 873, HighTop (DFanimhightop) handing Krystal
+  the first tablet with text 0x201, and sets 0x234 as it starts, but its trigger is 0x96, never, and TriggerPlane
+  34adc beside it sets 0x234 in its place (action 0x12, arg 0x4234, no other plane in any map). Restored skips that
+  set and reads 34add's trigger as set once the plane is crossed, so the scene plays and gives the tablet, which
+  Discovery Falls' CCkrazoaBits (34b50) counts; Original keeps the plane's silent set. Played from
+  `before-df-shrine` on the block by the plane, both ways (docs/story-points.md, HighTop's scene).
 - The tablet room's puzzle ends in a state with no handler, and CCkrazoaBits, placed by distance in the room, missed
   a tablet picked up elsewhere: the pickup counts the third itself.
 - Entries 71 and 72 land in the tablet room with no plane crossed, so they set 0x2C0, which the planes on the way in
@@ -278,11 +284,6 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Open
 
-- **HighTop's tablet scene** (Krazoa Tablets; card 17942258671990000): Discovery Falls' CCseqobject 34add plays
-  sequence 873, HighTop (DFanimhightop) handing Krystal the first tablet with text 0x201, and sets 0x234 as it
-  starts, but its trigger is 0x96, never, and TriggerPlane 34adc beside it sets 0x234 in its place. On Restored,
-  crossing 34adc plays the scene, which gives the tablet.
-
 Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the walk
 into the moonseed's hollow with Kyte (planted and grown there, the ROM's own code needs no fix: the moonseed is used
 facing the receptacle, and Kyte's flame is her scroll's second row at night); a hit on Warlock Mountain's laser targets
@@ -398,13 +399,17 @@ What changes, in the order it is built, the redone choices first:
   one CCseqobject placed with that index is 34add in Discovery Falls (map 6), whose played_bit, which dll309 sets as
   the scene starts, is 0x234: the first tablet, which TriggerPlane 34adc beside it sets in its place (its trigger is
   0x96, never). So 0x201 hands over the tablet the prototype already gives, nothing gives 0x237, and the third
-  tablet stays in the sand worm's arena. The scene itself is restored from the ROM (part 2, Open).
-- **The Queen in Walled City** (simplified): WCQueenEarthWal's name puts her in Walled City, no def is a "Jungle
+  tablet stays in the sand worm's arena. The scene itself is restored from the ROM (part 2, Krazoa Tablets).
+- **The Queen in Walled City** (simplified, built): WCQueenEarthWal's name puts her in Walled City, no def is a "Jungle
   Door", and dll507, the Hollow's Queen, has no step past 7. Where she stands stays, and she is met by her own talk
   reach (dll773 0x4EC, 100) with Tricky out, in place of 150 and 400. Her unused lines (0x219, 0x21A: "I forbid you
   to enter that evil place ... Follow me, I will open the Jungle Door for you") are shown by no sequence and passed by
   no DLL (the TriggerPlanes that name 0x219 and 0x21A pass them to func_80000450, action 0x0D, not to the text box):
-  cut text, left out.
+  cut text, left out. Built (`src/game/walled_city.cpp`): 0x80A is set once her state (dll18's, +0x268) is 2, which
+  dll773_04D0 moves her to from 1 with the player within 100 by her own distance (+0x828), and a sidekick is out.
+  Played from `before-walled-city` on Restored: Sabre stood 135 from her for 5 s and didn't meet her (150 did), met
+  her walking on, 95 and 97 from her in two runs, and at the RedEye by the gate Tricky's flame made it mad, and it
+  roared and dropped a tooth.
 - **The ending** (replaces the title alone): the credits are the ROM's: dll78, menu 15, shows text 0x1FD, and
   nothing opens it (EndObject, dll299, is empty). After Drakor's fall the credits play, then the title.
   Built (PR 64): over the front end, with the screen cleared to black while they show (nothing clears it there), and
@@ -591,9 +596,10 @@ open: the logs.
   Original, where the sockets never load, 0x264 as before. Cascade: the shrine (map 33, entry 40) and its return to
   68, the pad's own (part 2). The ROM offers: what shows the pad in map 36 is not read (?) (PR 54).
 - **The Queen in Walled City** (Walled City): at (-8330, -733, -4720), in the corridor outside the gate; met (0x80A,
-  no ROM setter or getter) with Sabre within 150 and Tricky within 400. The ROM offers: task 75's clue "CHECK AGAIN
-  WHERE TRICKY'S MOTHER ONCE STOOD", where she stood in SwapStone Hollow (SHqueenearthwal 120e, at -8656, -835,
-  -3165), and task 76's "ONLY TRICKY CAN FIND HIS MOM".
+  no ROM setter or getter) once her own talk check has passed (dll773_04D0: her state 1 moves to 2, where it stays,
+  with Sabre within 100) and Tricky is out. The ROM offers: task 75's clue "CHECK AGAIN WHERE TRICKY'S MOTHER ONCE
+  STOOD", where she stood in SwapStone Hollow (SHqueenearthwal 120e, at -8656, -835, -3165), and task 76's "ONLY
+  TRICKY CAN FIND HIS MOM".
 - **The RedEye chase** (Walled City): Tricky's sideload at (-8250, -733, -4800) in zone 184; a RedEye (WCTrexChase) at
   (-7820, -735, -4810) with a flame point (a type-0x24 curve) at (-7900, -735, -4800); offered within 300, flame 150,
   catch 70, give-up 600. Task 77's "TRICKY'S FLAME BEGINS THE CHASE!" is the ROM's; the rest is ours.

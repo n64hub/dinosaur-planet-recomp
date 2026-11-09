@@ -297,7 +297,8 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   list names only as placeholders. The three receptacles (CCkrazoaRecepta, 308) take tablets counted in 0x23B and
   are done as 0x238 to 0x23A; CCkrazoaTablet (459) sets 0x3A9 once all three are placed. CCkrazoaBits (458) counts
   a tablet into 0x23B and sets 0x23C for each of 0x234, 0x236 and 0x237 newly set: 0x234 by TriggerPlane 34adc in
-  Discovery Falls, in place of HighTop's scene there (CCseqobject 34add, sequence 873, text 0x201, trigger 0x96), 0x236
+  Discovery Falls in place of HighTop's scene there (CCseqobject 34add, sequence 873, text 0x201, trigger 0x96), and
+  on Krazoa Tablets' Restored by the scene, which crossing the plane plays, 0x236
   by the tablet (CCKrazoaTabletP) in Cape Claw's settlement room, behind the door
   (CCsettlementroo, 307) that 0x23C opens. Nothing sets 0x237: the third tablet is not in the ROM. CCkrazoabright
   (457) runs the room's puzzle in states: the perch switches' lights (sequence 0, whose data sets 0x393), the two
@@ -308,6 +309,14 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   Restored, the default, places the third tablet in the sand worm's arena once the worm is dead, and the last lights
   set 0x52B, which shows a Transporter in the tablet room to Krazoa Palace's east end (warp entry 94; 72 is its own,
   93 the palace's west Transporter). `src/game/krazoa.cpp`'s header has the evidence.
+- HighTop's scene (Discovery Falls, 6): TriggerPlane 34adc is a disc of radius 12 (setup +0x3A × 2, facing +0x3D ×
+  256) at local (293, 38, 1552), world (-2907, 38, 19472), on the mossy block above the pool, by HighTop's pedestal.
+  Played from `before-df-shrine --place -2938,90,19421,0` (the drop lands her on the block) with `--input` walks
+  through the plane's centre, `to -2876 19523` then back, on Restored: the plane crossed at 6 s, the scene at once,
+  0x234 at 7 s and Discovery Falls' own CCkrazoaBits (34b50) counting it (0x23B 1, 0x23C 1), HighTop's three lines
+  ("I took this before the Sharpclaw could get their hands on it.", "I believe it dates back to the time of the
+  Krazoa.", "It might be of use to you back in Cape Claw") about 20 s, Krystal left holding the tablet. On Original
+  the plane sets 0x234 and counts it the same, with no scene. A walk at the water's level (y -25) never reaches it.
 - Krazoa Palace (3): its rooms are built and it boots and plays at its setuppoints, but of its 19 objects (KP_*, the
   four consoles, the red Krazoa, the doors) none is placed. It holds mushrooms, crates and two KP_Transporters, each
   beside a setuppoint and each sending to the other's entry, 93 and 94, both zero. Its zone planes mark a hub and
@@ -923,10 +932,10 @@ Tricky's flame).
 
 Fixed (Walled City on Restored, `src/game/walled_city.cpp`, whose header has the evidence):
 
-- The Queen stands in the corridor outside the gate, at (-8330, -733, -4720). Sabre coming to her with Tricky near
-  meets her (0x80A). She gives nothing: Tricky's flame is the one he learned in DarkIce Mines. Tricky comes from a
-  sideload beside her: he walks only inside his zones (type-0x26 curves), and the corridor's are unlinked, so he is
-  made in the RedEye's, 184.
+- The Queen stands in the corridor outside the gate, at (-8330, -733, -4720). Sabre coming within her own talk
+  reach (100: dll773's state 1 moves to 2) with Tricky out meets her (0x80A). She gives nothing: Tricky's flame is the
+  one he learned in DarkIce Mines. Tricky comes from a sideload beside her: he walks only inside his zones (type-0x26
+  curves), and the corridor's are unlinked, so he is made in the RedEye's, 184.
 - A RedEye (WCTrexChase) waits by the arch, in Tricky's target list (0x33), and offers his flame within 300. Its flame
   point, a type-0x24 curve of kind 4 at (-7900, -735, -4800), is added to the curves' table with the map. Tricky's
   flame reaching it makes it mad: it runs at Sabre, roars as it catches him, and a tooth (WCTrexTooth) falls between
@@ -941,7 +950,9 @@ Fixed (Walled City on Restored, `src/game/walled_city.cpp`, whose header has the
   bowl, and Sabre through the gate. With no teeth the gate held. From `--place -7987,-874,-6790,0,0 --bits
   82e,36a=32` the King's talk activated the stone. The fight giving 0x82E was not played to its end. On Original none
   of it is placed and the arch is open. With the flame from the story point and none from the Queen, the same start
-  met the Queen at 8.8 s, and the RedEye got mad at Tricky's flame, roared and dropped the tenth tooth.
+  met the Queen at 8.8 s, and the RedEye got mad at Tricky's flame, roared and dropped the tenth tooth. Met by her own
+  talk reach, from `--story before-walled-city`: Sabre held 135 from her for 5 s didn't meet her, and walking on met
+  her 95 from her; at the RedEye Tricky's flame made it mad, and it roared and dropped a tooth.
 
 ## The warp table
 

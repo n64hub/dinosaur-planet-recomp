@@ -74,6 +74,10 @@
   prototype she only ever circled the roof.
 - Krazoa Tablets on Restored: Cape Claw's tablet room stays until it is solved. In the prototype it went away at Willow
   Grove's spirit's release, so a player who came there with it unsolved could never open Krazoa Palace's fire door.
+- Walled City on Restored: Sabre meets the Queen EarthWalker when he walks up to her with Tricky, at the distance
+  where she turns to talk, a little closer than before.
+- Krazoa Tablets on Restored: in Discovery Falls, HighTop hands Krystal the first Krazoa tablet in his own scene,
+  which the prototype built and never played: it gave the tablet with no scene as she walked past.
 - The sketched picture behind the Rareware and Nintendo logos at boot no longer has seams across it, through the
   dinosaur's head and the stones.
 - The sketched picture behind the Rareware and Nintendo logos at boot fills the window's height, with no black bands

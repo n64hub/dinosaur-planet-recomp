@@ -608,10 +608,13 @@ text = '{ int dino_tricky_run_restored(void); if ((int16_t)MEM_H(0x1A, MEM_W(0x4
 # actions with the crossing's direction in $s3, +1 front to back, and played across the plane +1 is the way in (east,
 # toward the SwapStone). So for that arg, before the call to the bit action (dll325_1764, the arg in $t3), the bit is
 # set to whether the crossing goes in, and the call is skipped.
+# The same call with arg 0x4234 is TriggerPlane 34adc in Discovery Falls setting the first Krazoa tablet in place of
+# HighTop's scene: with Krazoa Tablets on Restored, src/game/krazoa.cpp keeps the crossing for the scene and the call is
+# skipped.
 [[patches.hook]]
 func = "dll325_09B4"
 before_vram = 0x90185540
-text = '{ if ((ctx->r11 & 0xFFFF) == 0x8887) { recomp_context c = *ctx; c.r4 = 0x887; c.r5 = (int32_t)ctx->r19 > 0; func_80014670(rdram, &c); goto L_90185A34; } }'
+text = '{ if ((ctx->r11 & 0xFFFF) == 0x8887) { recomp_context c = *ctx; c.r4 = 0x887; c.r5 = (int32_t)ctx->r19 > 0; func_80014670(rdram, &c); goto L_90185A34; } if ((ctx->r11 & 0xFFFF) == 0x4234) { int dino_krazoa_hightop_plane(uint8_t*, recomp_context*); if (dino_krazoa_hightop_plane(rdram, ctx)) goto L_90185A34; } }'
 
 # Cape Claw's SandEels (dll216, setups 0x41BFA/B/C beside the worm) each hold a bit at +0x18 of their setup, 0x1EB,
 # 0x1EC and 0x22A, which an eel sets once it is beaten (its state at dll216_34A0) and the worm's constructor rotates
@@ -974,6 +977,13 @@ text = '{ void dino_krazoa_tablet_picked(uint8_t*, recomp_context*); dino_krazoa
 func = "dll458_0018"
 before_vram = 0x901E4334
 text = '{ void dino_krazoa_tablet_bits(uint8_t*, recomp_context*); dino_krazoa_tablet_bits(rdram, ctx); }'
+
+# HighTop's scene in Discovery Falls: CCseqobject's update (dll309 0x0124) on the answer of its trigger bit (+0x1A of
+# its setup, $s0), which is set once TriggerPlane 34adc (dll325's hook above) has been crossed.
+[[patches.hook]]
+func = "dll309_0124"
+before_vram = 0x9017AD2C
+text = '{ void dino_krazoa_hightop_scene(uint8_t*, recomp_context*); dino_krazoa_hightop_scene(rdram, ctx); }'
 
 # Krazoa Palace: its text blocks ask for Desert Force Point's 0x7BF, so dll654's update (0x314) also lets a player
 # who stands at one set it off.

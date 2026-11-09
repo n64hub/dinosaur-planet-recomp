@@ -166,6 +166,16 @@ offset = 0x1A
 name = "trigger_bit"  # once set, it plays its def's list at its byte +0x1E
 [[field]]
 of = "setup"
+dll = 325
+offset = 0x3A
+name = "half_size"  # a TriggerPlane's radius over 2 (dll325_19C0), 6 for 34adc by HighTop's scene
+[[field]]
+of = "setup"
+dll = 325
+offset = 0x3D
+name = "facing"  # a TriggerPlane's yaw over 256 (dll325_19C0)
+[[field]]
+of = "setup"
 dll = 310
 offset = 0x18
 name = "played_bit"
@@ -222,6 +232,16 @@ name = "block_cell"  # the cell a WCPushBlock stands in
 dll = 779
 index = 20
 name = "push_block"  # slides it to the cell before the next block, onto a tile (2), or to the grid's edge (4)
+[[field]]
+of = "state"
+dll = 773
+offset = 0x268
+name = "queen_talk_state"  # WCQueenEarthWal's dll18 state: 1 waiting, 2 once the player came within 100 (dll773_04D0)
+[[field]]
+of = "state"
+dll = 773
+offset = 0x828
+name = "queen_player_distance"  # set each frame by dll773's update (func_80016298), read by its talk check
 [[field]]
 of = "state"
 dll = 786

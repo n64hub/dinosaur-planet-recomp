@@ -187,9 +187,10 @@ Each option a modern port adds has a value that plays as the console does. The d
   end once its baddie is beaten, and gives each spirit its release at Warlock Mountain, from what the prototype's own
   maps and code hold. Original is the prototype as it was left: three shrines are reached from the world, Cape Claw's
   test never ends, and three spirits have nowhere to go.
-- **Krazoa Tablets** (General): Restored places Cape Claw's third Krazoa tablet where the sand worm fell, keeps the
-  tablet room until it is solved, and has the tablet room's last puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the third
-  tablet is nowhere, and the puzzle's end leads nowhere.
+- **Krazoa Tablets** (General): Restored has HighTop hand Krystal the first Krazoa tablet in Discovery Falls, places
+  Cape Claw's third where the sand worm fell, keeps the tablet room until it is solved, and has the tablet room's last
+  puzzle open a Transporter to Krazoa Palace. Original is the prototype as it was left: the first tablet comes with no
+  scene, the third is nowhere, and the puzzle's end leads nowhere.
 - **Kamerian Dragon** (General): Restored lets Krystal pick up and cast the ice spell on Dragon Rock's top, fills her
   magic while the fight in the Skeetla arena at its bottom is on, lets her give the Earth Warrior there Dragon Rock's
   blue mushrooms from her items, has the arena, once won, lead into the Kamerian Dragon's room, and the dragon die
