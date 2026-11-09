@@ -674,8 +674,9 @@ text = '{ void dino_trex_facing(uint8_t*, recomp_context*); recomp_context c = *
 
 # With BOSS TRex on Restored (src/game/boss_trex.cpp):
 # The TRex's last state (dll702_2D98) calls func_80013FB4, the load of the front end, at 0x2DF8 (jalr $t9 -> nop),
-# and dino_trex_beaten gives the SpellStone and the way back in its place. On Original the hook makes the call. With
-# Walled City on Restored (src/game/walled_city.cpp) the stone is then won, for the King to activate.
+# and dino_trex_beaten gives the SpellStone as won and the way back in its place. On Original the hook makes the call.
+# With Walled City on Restored (src/game/walled_city.cpp) the King then activates the stone, and on Original it is
+# activated at once.
 [[patches.instruction]]
 func = "dll702_2D98"
 vram = 0x9028874C

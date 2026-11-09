@@ -72,9 +72,11 @@ namespace dino {
     bool player_carries(uint8_t* rdram, int32_t player);
     // BOSS TRex's fight's setting (boss_trex.cpp).
     void add_boss_trex_options(recomp::config::Config& general);
-    // The third SpellStone's setting (acts.cpp), and whether it is on Restored (moonseeds.cpp).
+    // The third SpellStone's setting (acts.cpp), and whether it is on Restored (moonseeds.cpp). Once the stone is
+    // activated (walled_city.cpp), the Volcano Force Point's next visit hands it over.
     void add_third_stone_options(recomp::config::Config& general);
     bool third_stone_restored();
+    void third_stone_activated(uint8_t* rdram, recomp_context* ctx);
     // Walled City's restored tasks' setting (walled_city.cpp).
     void add_walled_city_options(recomp::config::Config& general);
     // The right stick of --input (src/main/main.cpp, development).

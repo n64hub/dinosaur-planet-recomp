@@ -92,7 +92,8 @@ file 19, each task's name and clue), which says when the player swaps.
   outside the city's gate, with the second SpellStone placed, Tricky's commands (0x4E4) and his flame (0x245,
   with 0x172 and 0x27 as DarkIce Mines leaves them, DarkIce Mines' SnowHorn). With a warp it starts there instead:
   `before-walled-city,91` where BOSS TRex's way back comes out.
-- `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone.
+- `before-third-stone`: Sabre in Diamond Bay (warp 66), carrying Walled City's SpellStone, with the Volcano Force
+  Point in act 2, which handed it over.
 - `before-dragon-rock`: Krystal on Dragon Rock's top (its setuppoint 2), with all four spirits, three SpellStones
   placed and Golden Plains' portal spell (0x5BD, its PortalSpell, dll272), which DR_SupPortal on the top opens to.
 - `after-dragon-rock`: Krystal in Golden Plains (its setuppoint 0), carrying the fourth SpellStone (0x7A8) that the
@@ -625,11 +626,12 @@ the map the playing object is in), and ROM file 13 holds one such event, which s
 `src/game/acts.cpp` moves three maps' acts with the story, at each map load (the header has the evidence), and
 `DINO_LOG_ACTS=1` prints each act it moves or leaves:
 
-- The Volcano Force Point: act 2 while Walled City's SpellStone is carried (0x83B), 3 once it is placed (0x878). Its
-  second SpellPlace, the podium that takes the stone for the second path, the door switch and the round door load
-  in act 2 only, and VFP_LevelControl (619) set the map to act 1 in its constructor, whatever the story, so nothing
-  of act 2 or 3 ever played. Its act 3 sets 0x63C, which moves Diamond Bay on to act 3 (DBlevelControl, 663: 1 and
-  one each for 0x4E9, 0x63C and 0x63D).
+- The Volcano Force Point: act 2 from the King's activation of Walled City's SpellStone, 3 once it is placed (0x878).
+  Act 2's level control hands the stone over (0x83B) 130 ticks after the level control's DLL loads. Its second
+  SpellPlace, the podium that takes the stone for the second path, the door switch and the round door load in act 2
+  only, and VFP_LevelControl (619) set the map to act 1 in its constructor, whatever the story, so nothing of act 2 or 3
+  ever played. Its act 3 sets 0x63C, which moves Diamond Bay on to act 3 (DBlevelControl, 663: 1 and one each for 0x4E9,
+  0x63C and 0x63D).
 - The Volcano Force Point's act 11 is the Queen Earthwalker's: she sets it before each warp to entry 81 (0x486, then
   0x487), and only it loads the two SHseqobjects that play her cutscenes (30afa, done bit 0x484; 30afc, 0x485) and a
   WarpPoint, without the level's podium, SpellPlaces and puzzles. It is left while a visit is to play, and once both
@@ -683,10 +685,13 @@ inventory with it selected, and A uses it on what is in reach (`--input` lines `
   warp 43) by A, about 20 s after an arrival, as EC's does, with or without the meteor's bits (0x803, 0x804).
 - Walled City in act 2 loads the Sun and Moon Stones (WCSunStone, 272), the TRex statues' sockets (785) and its
   level control's act 2 (779).
-- The volcano in act 3 (`--story before-third-stone,81 --bits 878,500=1024`, group 10 holding VFP_LevelControl):
-  its act-3 timer (130, less the frame's time each frame, 0x69C) runs out 2 to 4 s in and sets 0x63C and 0x83C, and
-  Diamond Bay goes to act 3. That was three runs of four (4.2 s, on Third
-  SpellStone's Restored): in the other, nothing was set in 48 s, and why is not known.
+- The volcano in act 3 (`--story before-third-stone --place -12250,-1440,-2240 --bits 878` and the `--input` line
+  `1 0 to -12750 -2240`, which walks in from Diamond Bay's side across TriggerPlane 31de8: it turns on group 10, which
+  holds VFP_LevelControl, and a warp to 81, beyond it, needs `--bits 500=1024`): its act-3 timer (130, less the frame's
+  time each frame, 0x69C) runs out 2.1 s after each load of the level control and sets 0x63C and 0x83C, and Diamond
+  Bay goes to act 3. Two runs of two, and act 2's the same way, five loads of five, two of them in one run
+  (walked out and back in). An earlier run from warp 81 set nothing in 48 s, and why is not known: group 10 off would do
+  it.
 
 Played from here on the desktop build, each from the one before it but where a `--place` or `--bits` start is named:
 
@@ -863,18 +868,18 @@ where BOSS TRex's way back comes out. From there to the third SpellStone, as pla
   TRex reaches the player: on the switch 2.5 s into act 4. As played, the rounds' walls were the east, south, west and
   south ones.
 
-  Four things stopped the fight. The door behind the player (KT_RexDoorPlaye, 307) shut it out of the arena as the
-  intro ended (us.toml, beside dll210_0934). A switch's collision mesh lies 28 off the pad drawn round it, so a player
+  Four things stopped the fight. The door behind the player (KT_RexDoorPlaye, 307) shut it out of the arena as the intro
+  ended (us.toml, beside dll210_0934). A switch's collision mesh lies 28 off the pad drawn round it, so a player
   standing on the pad never charged it, and no wall ever fired. After the first hit the TRex went round its corners in
-  place and never charged again. And a charge that ran on round a corner kept the TRex's facing, so it ran sideways,
-  its later corners swung it out of the ring, and a stun could leave its head beyond the corridor's outer wall
+  place and never charged again. And a charge that ran on round a corner kept the TRex's facing, so it ran sideways, its
+  later corners swung it out of the ring, and a stun could leave its head beyond the corridor's outer wall
   (`patches/boss_trex.c` has the last three, with their evidence). Once beaten, it loaded the front end and gave no
-  stone. With BOSS TRex on Restored it gives 0x83B and opens the player's door and the WarpPoint (0x81C) back to warp
-  91 (`patches/boss_trex.c`). The beaten TRex lies across its corridor, so a player beyond it from the south-east
-  corner, where the door is, goes back the other way round the ring. `DINO_REPORT_OBJECT=3D9` with `--report` reports
-  where the TRex is and its act, and `sync act 3D9 <act>` in an `--input` script waits for one.
-  `tools/boss_trex_input.txt` is the `--input` script that wins the fight and walks out to the WarpPoint, from
-  `--story before-walled-city,90` with `DINO_REPORT_OBJECT=3D9`; its comments say how each round is timed.
+  stone. With BOSS TRex on Restored it gives the stone as won (0x82E) and opens the player's door and the WarpPoint
+  (0x81C) back to warp 91 (`patches/boss_trex.c`). The beaten TRex lies across its corridor, so a player beyond it from
+  the south-east corner, where the door is, goes back the other way round the ring. `DINO_REPORT_OBJECT=3D9` with
+  `--report` reports where the TRex is and its act, and `sync act 3D9 <act>` in an `--input` script waits for one.
+  `tools/boss_trex_input.txt` is the `--input` script that wins the fight and walks out to the WarpPoint, from `--story
+  before-walled-city,90` with `DINO_REPORT_OBJECT=3D9`; its comments say how each round is timed.
 
 The task list has more here than the ROM:
 
@@ -901,7 +906,8 @@ Fixed (Walled City on Restored, `src/game/walled_city.cpp`, whose header has the
   (WCTeethBowl, 308) by the arch be used, and A by it opens the gate (0x82D). The bowl's def has no focus point, so
   the game never targets it, and Restored marks it used for A within 80 as the targeting would. Until then the arch
   holds Sabre back at x -7660.
-- BOSS TRex's defeat gives the stone as won (0x82E), and talking to the King with it activates it (0x83B).
+- BOSS TRex's defeat gives the stone as won (0x82E), and talking to the King with it activates it: the Volcano Force
+  Point moves to act 2, whose level control gives the stone carried (0x83B) on the next visit there.
 - Played from `--story before-walled-city --bits d5=9`, in one run: the Queen met with Tricky, the flame offered and
   breathed, the RedEye mad, the tenth tooth dropped and picked up (its first pickup's scene waits for A), A by the
   bowl, and Sabre through the gate. With no teeth the gate held. From `--place -7987,-874,-6790,0,0 --bits
