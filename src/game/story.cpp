@@ -112,31 +112,39 @@ namespace {
         return a;
     }
 
-    // What the game has set by each step of its task list (docs/story-points.md has each bit's evidence).
+    // What the game has set by each step of its task list: each value is one a player's game sets by then, and
+    // docs/story-points.md (The values a point sets) names its setter on the way there. 0x15A comes with Rocky's
+    // greeting at SwapStone Circle, before Ice Mountain.
     const Bits to_swapstone_hollow = {
-        { 0xD0, 1 }, { 0xB4, 1 }, { 0x2B2, 1 }, { 0x70, 1 }, { 0x37A, 1 }, { 0x4D3, 1 }, { 0xAB, 1 },
+        { 0xD0, 1 }, { 0xB4, 1 }, { 0x2B2, 1 }, { 0x70, 1 }, { 0x37A, 1 }, { 0x4D3, 1 }, { 0xAB, 1 }, { 0x15A, 1 },
     };
     const Bits to_first_shrine = to_swapstone_hollow + Bits {
-        { 0xBF, 1 }, { 0x15A, 1 }, { 0x3A0, 1 }, { 0x88, 1 }, { 0x3B0, 1 }, { 0x2C5, 1 }, { 0x615, 1 }, { 0x2D, 1 },
-        { 0x1D7, 1 }, { 0x40, 1 },
+        { 0xBF, 1 }, { 0x88, 1 }, { 0x3B0, 1 }, { 0x2C5, 1 }, { 0x615, 1 }, { 0x1D7, 1 },
     };
-    const Bits first_spirit = { { 0x316, 1 }, { 0x21F, 1 } };
+    // The spirits in the order they are released (dll611 0x4B4): Discovery Falls', then Diamond Bay's, Moon Mountain
+    // Pass's and the Earthwalker Temple's. Discovery Falls' win puts Warlock Mountain in act 2, whose level control
+    // gives the projectile spell, 0x2D (dll607 0x0940), so it comes with the first.
+    const Bits first_spirit = { { 0x277, 1 }, { 0x21B, 1 }, { 0x2D, 1 } };
     const Bits first_stone = { { 0x104, 1 }, { 0x22E, 1 }, { 0x4E9, 1 }, { 0x877, 1 } };
-    const Bits second_spirit = { { 0x277, 1 }, { 0x21B, 1 } };
+    const Bits second_spirit = { { 0x316, 1 }, { 0x21F, 1 } };
     const Bits third_spirit = { { 0x317, 1 }, { 0x21C, 1 } };
     const Bits fourth_spirit = { { 0x318, 1 }, { 0x21D, 1 } };
-    const Bits four_spirits = to_first_shrine + first_spirit + first_stone + second_spirit + third_spirit + fourth_spirit;
+    // The SharpClaw disguise, which Bonehead (CFGuardian, dll369) teaches Krystal in CloudRunner's dungeon: talked to
+    // in his first state he plays his list's sequence 142, which sets it.
+    const Bits disguise = { { 0x40, 1 } };
+    const Bits four_spirits =
+        to_first_shrine + first_spirit + first_stone + second_spirit + third_spirit + fourth_spirit + disguise;
     // The SpellStones after the first, each by the SpellPlace that takes it: a placement's +0x1E is its placed bit and
     // +0x20 the bit of the stone carried (VFP_SpellPlace 637 in map 4, DFP_SpellPlace in map 21). CloudRunner's, won in
     // the race (CRSpellstone, map 43, 0x49F), is carried as 0x2E8 to the Desert Force Point (placed, 0x5F3); Walled
     // City's is carried as 0x83B to the Volcano Force Point's second place (0x878): the King's activation puts that map
     // in act 2 (its act, 0x4FE), whose level control gives 0x83B (acts.cpp), and the act stays 2 until it is placed.
     // SwapStone Circle's act, the 4-bit field 0xE7, moves a step each time the player enters map 14 (SC_levelcontrol,
-    // dll519): to 3 with 0x2C5, to 8 carrying the first spirit, to 9 once it is released (0x316). Its chief
-    // (SC_chieflightfoot, dll518) gives the Moon Mountain Pass key only at act 9: talked to, he sets 0x60E, which
-    // starts the sequence that sets the key, 0x611, the bit Moon Mountain Pass's padlock needs.
-    const Bits circle_act_9 = { { 0xE7, 9 } };
-    const Bits to_second_stone = to_first_shrine + first_spirit + first_stone + second_spirit + circle_act_9;
+    // dll519): to 3 with 0x2C5, to 8 carrying Discovery Falls' spirit, to 9 once Diamond Bay's is released (0x316).
+    // Its chief (SC_chieflightfoot, dll518) gives the Moon Mountain Pass key only at act 9: talked to, he sets 0x60E,
+    // which starts the sequence that sets the key, 0x611, the bit Moon Mountain Pass's padlock needs. Each swap back
+    // to Krystal puts the circle in act 2, so src/game/acts.cpp moves it to 9 once both spirits are released.
+    const Bits to_second_stone = to_first_shrine + first_spirit + first_stone + second_spirit;
     const Bits second_stone_carried = { { 0x49F, 1 }, { 0x2E8, 1 } };
     const Bits second_stone = { { 0x49F, 1 }, { 0x5F3, 1 } };
     // Golden Plains' PortalSpell (dll272, map 9) gives the portal spell, 0x5BD, before the Desert Force Point (task 70);
@@ -177,18 +185,22 @@ namespace {
         { "before-sand-worm", krystal, -1, sand_worm_place, to_first_shrine },
         { "before-df-shrine", krystal, 36, {}, to_first_shrine },
         { "before-db-shrine", sabre, 38, {}, to_first_shrine + first_spirit + first_stone },
-        { "before-mm-shrine", krystal, 43, {}, to_first_shrine + first_spirit + first_stone + second_spirit },
-        { "before-ec-shrine", sabre, 40, {}, to_first_shrine + first_spirit + first_stone + second_spirit + third_spirit },
+        { "before-mm-shrine", krystal, 43, {},
+            to_first_shrine + first_spirit + first_stone + second_spirit + disguise },
+        { "before-ec-shrine", sabre, 40, {},
+            to_first_shrine + first_spirit + first_stone + second_spirit + third_spirit + disguise },
         { "before-gp-shrine", krystal, 42, {}, four_spirits },
         { "before-nw-shrine", krystal, 37, {}, four_spirits },
         { "before-cc-shrine", krystal, 41, {}, four_spirits },
         { "before-wg-shrine", krystal, 39, {}, four_spirits },
         { "before-cloudrunner", krystal, 73, {}, to_second_stone },
-        { "before-desert-force-point", krystal, -1, golden_plains_place, to_second_stone + second_stone_carried },
+        { "before-desert-force-point", krystal, -1, golden_plains_place,
+            to_second_stone + disguise + second_stone_carried },
         { "before-walled-city", sabre, -1, walled_city_place,
-            to_second_stone + second_stone + portal_spell + tricky_commands + darkice_flame },
+            to_second_stone + disguise + second_stone + portal_spell + tricky_commands + darkice_flame },
         { "before-third-stone", sabre, 66, {},
-            to_second_stone + second_stone + portal_spell + tricky_commands + darkice_flame + third_stone_carried },
+            to_second_stone + disguise + second_stone + portal_spell + tricky_commands + darkice_flame +
+            third_stone_carried },
         { "before-dragon-rock", krystal, -1, dragon_rock_place,
             four_spirits + second_stone + portal_spell + third_stone + food_bag },
         { "after-dragon-rock", krystal, -1, golden_plains_place,
