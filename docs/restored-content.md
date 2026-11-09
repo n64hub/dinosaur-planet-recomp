@@ -474,7 +474,8 @@ open: the logs.
   The ROM offers: the levers only. The race isn't reached this way (the bottom's east is a grate) but by the pool on
   0x4BE.
 - **When Kyte finds a baby** (Baby CloudRunners): as Krystal comes within a waiting baby's +0x18, 0x46E is set to the
-  group of the find node nearest it (within 400), and put back once its bit is set unless something set it since.
+  group of the find node nearest it (within 400), and put back as it is rescued (state 0xC) unless something set it
+  since.
   0x46E: TriggerPlanes (action 0x1C), FindKyteObject (dll720), PerchObject (dll718) and others set it, Kyte's path
   code (dll212) reads it. Cascade: 0x901, 0x24F-0x253 and the perches 0x2FC-0x300;
   CFLevelControl turns 0x2FC-0x2FF into 0x30A (the treasure door), and 0x300 with 0x8D1 into 0x4BE, which drains the

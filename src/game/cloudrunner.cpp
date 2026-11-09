@@ -86,6 +86,7 @@ namespace {
     constexpr int32_t get_bit = 0x800147EC;
     constexpr int32_t dll26_handle = 0x8008C9E4;  // the curves' DLL: export 3 its table of the map's curves
     constexpr int kyte_group = 0x46E;
+    constexpr int32_t rescued = 0xC;
     constexpr float find_node_reach = 400.0f;
 
     constexpr int32_t set_bit = 0x80014670;
@@ -227,8 +228,8 @@ extern "C" void dino_treasure_lift_starts(uint8_t* rdram, recomp_context* ctx) {
 
 // us.toml's hook at CFCloudBaby's update (dll373 0x01A0, $a0 the baby). On Restored, a waiting baby (state 0, 1 or 4,
 // not hidden as a rescued one loads) with Krystal within its +0x18 sends Kyte to its find node's group (0x46E), and once
-// it is rescued (its bit, the placement's +0x22) 0x46E goes back. With DINO_LOG_CLOUDRUNNER, each baby's state as it
-// changes, with how far Krystal and Kyte are in steps of 100.
+// it is rescued (state 0xC, as it flies to its perch, which then stops its update) 0x46E goes back. With DINO_LOG_CLOUDRUNNER, each baby's state as it
+// changes, with how far Krystal is (in steps of 100) and Kyte (of 50), and whether she is on a find node.
 extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
     gpr baby = ctx->r4;
     int32_t state = (int32_t)MEM_W(0xAC, MEM_W(0xB8, baby));
@@ -242,7 +243,7 @@ extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
             player = ctx->r2;
         }
         bool waiting = !hidden && (state == 0 || state == 1 || state == 4);
-        if (sent.baby == baby && get(rdram, ctx, (int16_t)MEM_H(0x22, setup)) != 0) {
+        if (sent.baby == baby && state == rescued) {
             if (get(rdram, ctx, kyte_group) == sent.group) {
                 set(rdram, ctx, kyte_group, sent.before);
             }
@@ -286,13 +287,17 @@ extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
     }
     float krystal_away = player != 0 ? kyte_away(rdram, player, baby) : -1.0f;
     float kyte_is = kyte != 0 ? kyte_away(rdram, kyte, baby) : -1.0f;
-    int32_t seen = state * 10000 + (int32_t)(krystal_away / 100.0f) * 100 + (int32_t)(kyte_is / 100.0f);
+    // Kyte's export 24, her state's +0x1C8 & 0x200000: she is on a find node.
+    bool finds = kyte != 0 && (MEM_W(0x1C8, MEM_W(0xB8, kyte)) & 0x200000) != 0;
+    int32_t seen = state * 100000 + (int32_t)(krystal_away / 100.0f) * 1000 + (int32_t)(kyte_is / 50.0f) * 2 + finds;
     if (babies[i] == baby && seens[i] == seen) {
         return;
     }
     babies[i] = baby;
     seens[i] = seen;
-    fprintf(stderr, "cloudrunner: baby %08X at %.0f %.0f %.0f state %d, Krystal %.0f away, Kyte %.0f\n", (uint32_t)baby,
-        read_float(rdram, baby + 0x18), read_float(rdram, baby + 0x1C), read_float(rdram, baby + 0x20), state,
-        krystal_away, kyte_is);
+    fprintf(stderr, "cloudrunner: baby %08X at %.0f %.0f %.0f state %d, Krystal %.0f away, Kyte %.0f at %.0f %.0f %.0f%s\n",
+        (uint32_t)baby, read_float(rdram, baby + 0x18), read_float(rdram, baby + 0x1C), read_float(rdram, baby + 0x20),
+        state, krystal_away, kyte_is, kyte != 0 ? read_float(rdram, kyte + 0x18) : 0.0f,
+        kyte != 0 ? read_float(rdram, kyte + 0x1C) : 0.0f, kyte != 0 ? read_float(rdram, kyte + 0x20) : 0.0f,
+        finds ? ", on a find node" : "");
 }
