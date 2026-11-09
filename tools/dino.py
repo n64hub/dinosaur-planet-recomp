@@ -175,8 +175,9 @@ class Game:
             name = rom[names + m * 32:names + m * 32 + 32].split(b"\0")[0].decode("latin-1")
             w, h, ox, oz = struct.unpack_from(">4h", rom, self.placements_rom + head)
             field = struct.unpack_from(">H", rom, d29.rom_addr + d29.data + 0xF0 + 2 * m)[0]
+            act = struct.unpack_from(">H", rom, d29.rom_addr + d29.data + 2 * m)[0]  # +0x1F90 from its text
             self.maps[m] = {"name": name, "start": start, "end": end, "size": (w, h), "offset": (ox, oz),
-                            "cell": cells.get(m), "field": field}
+                            "cell": cells.get(m), "field": field, "act": act}
 
     def placements(self, m):
         """A map's placements: (offset in its list, the record)."""
@@ -1317,13 +1318,14 @@ def calls(game, idx, spec, want):
         bit_holders(game, want)
 
 
-def trigger_bits(r, want, field=None):
+def trigger_bits(r, want, field=None, act=None):
     """The bits a trigger (dll325: TriggerPlane, TriggerPoint and their kind) sets, as lines: its own bit at +0x44, set
     once it fires, and its 8 actions at +0x18, each flags (0x01 crossed forward, 0x02 back, 0x04 each time), action
     and a u16 arg (dll325's table at D_34E4). Action 0x12 (dll325_1764) sets the bit in the arg's low 14 bits by its top
     2: 0 clears it, 1 sets it, 2 flips it; 0x21 (dll325_17FC) flips bit (top 3 bits) of the field in the low 13. With
     field, the group field of the trigger's map: actions 0x13, 0x14 and 0x22 turn the group in the arg on, off or over
-    (dll29.19 with the trigger's map)."""
+    (dll29.19 with the trigger's map). With act, the act value of the trigger's map: action 0x18 (dll325 0x1344)
+    puts that map in the act in the arg (dll29.16). Action 0x0D plays the sequence in its arg, not a bit."""
     out = []
     own = struct.unpack_from(">h", r, 0x44)[0] if len(r) > 0x45 else -1
     if own in want:
@@ -1337,6 +1339,8 @@ def trigger_bits(r, want, field=None):
         elif field is not None and action in (0x13, 0x14, 0x22):
             out.append(f"bit {field:#x} group {arg} {dict([(0x13, 'on'), (0x14, 'off'), (0x22, 'over')])[action]}"
                        f" (action {action:#x}, flags {flags:#x})")
+        elif act is not None and action == 0x18:
+            out.append(f"bit {act:#x} act {arg} (action 0x18, flags {flags:#x})")
     return out
 
 
@@ -1366,7 +1370,9 @@ def bit_holders(game, want):
                 continue
             uid = struct.unpack_from(">I", r, 0x14)[0]
             if dll == TRIGGER_DLL:
-                for line in trigger_bits(r, want, game.maps[m]["field"] if game.maps[m]["field"] in want else None):
+                info = game.maps[m]
+                for line in trigger_bits(r, want, info["field"] if info["field"] in want else None,
+                                         info["act"] if info["act"] in want else None):
                     print(f"map {m:<3} {uid:x} {name:13} {line}")
                     n += 1
                 continue
