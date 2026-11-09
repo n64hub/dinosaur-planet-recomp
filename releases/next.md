@@ -5,8 +5,8 @@
 - Krazoa Palace on Restored: the palace's four wings each have a door, a console and a text block, played in turn
   from Cape Claw's tablet room, and the last door they open leads to the red Krazoa, who sends the player on to
   Drakor. The prototype built the rooms and left them empty.
-- Baby CloudRunners on Restored: Kyte finds CloudRunner Fortress's hidden baby CloudRunners once she is near one, so
-  it comes out for Krystal to rescue. In the prototype Kyte never found the ones waiting for her.
+- Baby CloudRunners on Restored: once Krystal comes near one of CloudRunner Fortress's hidden baby CloudRunners, Kyte
+  flies to where it hides, so it comes out for Krystal to rescue. In the prototype Kyte never found the ones waiting for her.
 - Picking up an item, a key, a crystal, a tooth or a SpellStone no longer makes a second Sabre whose scene never
   ends, and no longer crashes.
 - Walled City: standing on either pressure switch no longer crashes, and the sun and moon beacons can be hit, so the
