@@ -184,10 +184,10 @@ Each option a modern port adds has a value that plays as the console does. The d
   tablet is nowhere, and the puzzle's end leads nowhere.
 - **Kamerian Dragon** (General): Restored lets Krystal pick up and cast the ice spell on Dragon Rock's top, fills her
   magic while the fight in the Skeetla arena at its bottom is on, lets her give the Earth Warrior there Dragon Rock's
-  blue mushrooms from her items, has the arena, once won, lead into the Kamerian Dragon's room, and the dragon die once its health runs out and leave the fourth
-  SpellStone for the Desert Force Point, which leads back out. Original is the prototype as it was left: the ice
-  spell can't be taken or cast, the arena can't be won, nothing leads to the room, the fight never ends, and the
-  fourth SpellStone is nowhere.
+  blue mushrooms from her items, has the arena, once won, lead into the Kamerian Dragon's room, and the dragon die
+  once its health runs out and leave the fourth SpellStone for the Desert Force Point, which leads back out. Original
+  is the prototype as it was left: the ice spell can't be taken or cast, the arena can't be won, nothing leads to the
+  room, the fight never ends, and the fourth SpellStone is nowhere.
 - **Desert Force Point** (General): Restored leaves the second SpellStone's place empty until the player places the
   stone, and adds a lift up to the duct that leads there, in the corridor behind the round door. Original is the
   prototype as it was left: Golden Plains fills the place, and nothing leads up to it.
