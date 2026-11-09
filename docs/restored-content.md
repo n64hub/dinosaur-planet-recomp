@@ -90,10 +90,13 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 - Walled City: the temples' bridges of light (WCTempleBridge, dll790) loaded only the model they draw, so the floor
   test found no floor in the slot it reads and the player fell through; their export 5 returns 0, as the moon lift's
   does, and all three models load (us.toml, `src/game/temples.cpp`; PR 54).
-- Dragon Rock's bottom: the lever's scene, which feeding DR_NiceSharpy plays (DR_Seqobj 0x339C4's sequence 2), left
-  the player past the gallery's east end with nothing under her, and the void's respawn took back the meat, 0x5FD,
-  0x5FE and 0x654, so the Earth Warrior couldn't be freed; she is caught as she falls there and held where she gave
-  the meat until the gallery is loaded again (us.toml's hook on func_800145AC, `src/game/dragon_rock.cpp`; PR 56).
+- Dragon Rock's bottom: the lever's scene, which feeding DR_NiceSharpy plays (DR_Seqobj 0x339C4's sequence 2), was
+  placed around DR_NiceSharpy, not the seqobj: the give names it as the next sequence's origin (dll3's export 30), and
+  dll3_8900 cleared that origin's flag after the give's own start but left the origin for the give's end, which comes
+  after the seqobj's start in the same frame. Turned to NiceSharpy's facing, the camera stood outside the walls over
+  cells never loaded, the lever on a purple void, and the scene left the player past the gallery's east end over
+  nothing, whose respawn took back the meat, 0x5FD, 0x5FE and 0x654, so the Earth Warrior couldn't be freed. The
+  origin is now cleared with its flag, so it names only the start after it (us.toml's second hook on dll3_8900).
 
 ### Tricky's Run
 
