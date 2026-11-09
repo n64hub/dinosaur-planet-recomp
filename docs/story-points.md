@@ -461,10 +461,24 @@ the race (43) at (-20, 29) on layer -2.
   out while she circled 29B3's and went back once she left.
 - The gold. Each rescued baby's perch bit is one of 0x2FC to 0x300, and CFLevelControl (400) sets 0x4BE (Bonehead's
   state 10) from 0x8D1 and 0x300. 0x8D1 is the +0x32 bit of the curve (429D9, at (-12672, 2239, 18806)) that
-  PerchObject (718, 429D8) above CFKyteGoldPerch sends Kyte to: with Kyte out and Krystal within 134 of it, Kyte's
-  command scroll (C-down, C-down rolls it, A uses it) offers its star, which sets 0x46E to 0xC0 (played), and Kyte's
-  message 5 as she lands there sets 0x8D1. Map 12's group 8 plays Kyte's Guardian scene on the way (`--bits
-  34f,359,2e1` skips it) and 0x4DF has the courtyard's guard beaten.
+  PerchObject (718, 429D8) above CFKyteGoldPerch sends Kyte to: with Kyte out and Krystal within 134 of it across the
+  ground (the courtyard below counts), Kyte's command scroll (C-down, C-down rolls it, A uses it) offers its star, which
+  sets 0x46E to 0xC0, and Kyte's message 5 as she lands there sets 0x8D1. It holds only while she sits there (it clears
+  as she flies off, about 4 s later), so 0x4BE needs the babies on their perches first. Map 12's group 8 plays Kyte's
+  Guardian scene on the way (`--bits 34f,359,2e1` skips it) and 0x4DF has the courtyard's guard beaten.
+  Kyte flies only along the curves joined to the one her path started from (dll212_0CE8: with 0x454 clear, the curve
+  nearest her of any group, whose group becomes 0x46E; with it set, the nearest of 0x46E's group, and she is put
+  there). dll212_1404 searches the links for 0x46E's group, and with no path takes a neighbour and sets 0x46E to its
+  group. Shut in on the deck (0x41 without 0x43) CFLevelControl (400 0x0914) holds 0x46E at 0x11 and sets 0x454, which
+  puts her on the deck's six curves (31861-31864, 318AC, 42D10), joined to none of the fortress's other 344, and nothing
+  moves her once 0x43 frees her: on the prototype she circles the deck, and the star's 0xC0 goes back to 0x11 a frame
+  later (played). A curve's group is its placement's +0x5, which `dino.py map` prints as acts 9-16 (429D9's
+  "act1-8,11-16" is 0xC0). Fixed, always on (`src/game/cloudrunner.cpp`): with 0x43 set and 0x46E at 0x11, her path
+  starts again from the nearest curve off the deck. Played from `--place -12600,2240,18811,0,0` (she lands in the
+  courtyard under the perch, y 2081) with `--bits 458=288,41,2e1,34f,359,43@8`: Kyte, put on the deck, starts again at
+  3186B (group 0x12) as 0x43 is set and follows Krystal down; the star sent her to 429D9, she landed 9 s later and 0x8D1
+  was set. With `2fc,2fd,2fe,2ff,300` too, 0x4BE came with it, the pool drained (0x4BF) 7 s later, and CFseqobject
+  32DDA set 0x4C1 (Bonehead's state 12) 2 s after that.
 
 An object that wants an item (a lock, dll308, its item at +0x1E; CFGuardian) takes it only as used from the item menu,
 never from the bit alone. C-right opens Krystal's items (dll1's menu 1), A uses the one shown and closes the menu, and
@@ -473,8 +487,8 @@ the player inside its radius and within 100 units of its height. dll1's export 7
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
 Left to play: 29FA's rescue (no way up to its ledge found, and its call needs Krystal within 85 of it on the ledge), the
-babies in map 30 and map 15 (from the master chest), Kyte landing at the gold perch (she stays by the sideload that
-loaded her, so 0x8D1, 0x4BE and 0x4C1 are read, not played; the way to the race waits on 0x4BE too). Read from the ROM,
+babies in map 30 and map 15 (from the master chest), and so the gold with all five on their perches (0x8D1, 0x4BE and
+0x4C1 are played with 0x2FC-0x300 set by `--bits`). Read from the ROM,
 nothing sets 0x4B8 (CFGuardian's sequence at 0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches
 by the main door take: the two ZBombs there make it (their setup's +0x18). Neither is needed to finish
 (docs/restored-content.md, The plan). 0x4DC is TriggerPlane 31a68's, at (-9917, 1445, 18272), set on one crossing and

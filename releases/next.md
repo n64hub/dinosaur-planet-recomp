@@ -66,5 +66,10 @@
   to leave the city and come back first.
 - Ending on Restored: once Drakor is beaten and his fall has played, the game's own credits, which nothing in the
   prototype ever showed, play on black, then the title.
+- The thin bands of garbage across the top and bottom of the picture in play are gone: the game's picture now
+  reaches the window's top and bottom.
+- CloudRunner Fortress: once freed from the courtyard's roof, Kyte flies on with Krystal, so she can be sent to the
+  gold perch above the courtyard and, with the babies home, the pool over the way to the race drains. In the
+  prototype she only ever circled the roof.
 - Krazoa Tablets on Restored: Cape Claw's tablet room stays until it is solved. In the prototype it went away at Willow
   Grove's spirit's release, so a player who came there with it unsolved could never open Krazoa Palace's fire door.

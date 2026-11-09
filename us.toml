@@ -705,6 +705,34 @@ func = "func_80037A14"
 before_vram = 0x80037C6C
 text = "ctx->r7 = ADD32(ctx->r7, 1);"
 
+# The 3D picture's rows (src/game/view_rows.cpp). A letterbox the game leaves unfilled: with no full clear to do (its
+# flag 1, $t3, is clear at 0x80037C58), func_80037A14 fills the rows outside the world's rectangle black, its display
+# list pointer in $s0, before it looks for a cutscene's bars.
+[[patches.hook]]
+func = "func_80037A14"
+before_vram = 0x80037C60
+text = "{ void dino_clear_borders(uint8_t*, gpr, gpr); dino_clear_borders(rdram, ctx->r16, ctx->r29); }"
+
+# The world's rectangle takes the whole frame in play: func_80002130's top row ($t0 = D_8008C524 + 6, stored at
+# 0x8000217C) and the row after its last ($t5 = height - D_8008C524 - 6, stored at 0x80002190) take dino_view_margin in
+# place of the 6.
+[[patches.hook]]
+func = "func_80002130"
+before_vram = 0x8000217C
+text = "{ int32_t dino_view_margin(uint8_t*); ctx->r8 = ADD32(ctx->r25, dino_view_margin(rdram)); }"
+
+[[patches.hook]]
+func = "func_80002130"
+before_vram = 0x80002190
+text = "{ int32_t dino_view_margin(uint8_t*); ctx->r13 = ADD32(ctx->r12, -dino_view_margin(rdram)); }"
+
+# And the world's scissor, func_80002490's one-view case (0x80002600-0x80002620): $a3 already holds height -
+# D_8008C524 - 6, and 0x80002620 sets its top row, $t1, to $v1 (D_8008C524) + 6; $v1 is read again only after a load.
+[[patches.hook]]
+func = "func_80002490"
+before_vram = 0x80002620
+text = "{ int32_t dino_view_margin(uint8_t*); int32_t m = dino_view_margin(rdram); ctx->r7 = ADD32(ctx->r7, 6 - m); ctx->r3 = ADD32(ctx->r3, m - 6); }"
+
 # The minimap keeps to the left: dll59_0148's display list pointer is $a0, then 0x68($sp).
 [[patches.hook]]
 func = "dll59_0148"
@@ -1134,4 +1162,18 @@ text = '{ void dino_snow_bike_wall_point(uint8_t*, recomp_context*); dino_snow_b
 func = "dll373_01A0"
 before_vram = 0x901A60D4
 text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_baby_update(rdram, ctx); }'
+
+# CloudRunner Fortress's deck (src/game/cloudrunner.cpp): CFLevelControl's Kyte routine holds 0x46E at the deck's
+# curves, 0x11, while she is shut in there, and nothing moves it on once she is freed: her path starts from the curve
+# nearest her (dll212_0CE8, with 0x454 clear), the deck's, whose curves join no others, so she could fly nowhere. Once
+# 0x43 is set, the routine's start has her path start again, and the start takes the nearest curve off the deck.
+[[patches.hook]]
+func = "dll400_0914"
+before_vram = 0x901BD830
+text = '{ void dino_cloudrunner_kyte_freed(uint8_t*, recomp_context*); dino_cloudrunner_kyte_freed(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll212_0CE8"
+before_vram = 0x90112C3C
+text = '{ void dino_kyte_start_curve(uint8_t*, recomp_context*); dino_kyte_start_curve(rdram, ctx); }'
 
