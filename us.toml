@@ -930,6 +930,13 @@ func = "dll787_00FC"
 before_vram = 0x902CD18C
 text = '{ void dino_temples_symbol_door(uint8_t*, recomp_context*); dino_temples_symbol_door(rdram, ctx); }'
 
+# The map streamer's load loop (src/game/streaming.cpp), a plain bug, so always: the player's cell is loaded beside
+# the cells around the camera's, so a cutscene's camera cut elsewhere leaves her ground.
+[[patches.hook]]
+func = "func_80046BC8"
+before_vram = 0x80047178
+text = '{ void dino_streaming_keep_player_cell(uint8_t*, recomp_context*); dino_streaming_keep_player_cell(rdram, ctx); }'
+
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
