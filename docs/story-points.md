@@ -316,7 +316,10 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   Past it the red Krazoa sends the player to BOSS Drakor (entry 44, empty, filled at its setuppoint). Played from the
   tablet room's Transporter (`--place 4776,-8,17606,0 --bits 52b,2c0,912`; 0x912 is the Transporter's first-use
   tutorial, and A on a Transporter is taken about 20 s after an arrival) through the four wings to BOSS Drakor.
-  `src/game/krazoa.cpp`'s header has the layout and the evidence.
+  `src/game/krazoa.cpp`'s header has the layout and the evidence. A real save has the palace in act 14 from Kyte's
+  rescue, which loads as act 1 (The maps' acts): played from `--story before-sand-worm --place 1660,150,16976,0 --bits
+  52b,2c0,912`, walking east across TriggerPlane 30ec4 (0x8EC to 14), then `--warp 72@20` and A on the tablet room's
+  Transporter, to the palace's east KP_Transporter, which sent Krystal to the west one and back.
 - CloudRunner - TrapRooms (17), Krazoa Shrine (20), krazchamber (22) and MikesLava (49) have no record in file 21:
   nothing reaches them.
 
@@ -603,13 +606,13 @@ to 2 (`--story new-game,88 --bits 5dc=7`): DR_Creator (738) sends Skeetlas (615)
 
 Besides its groups, each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets,
 numbered by the u16 at +0x1F90 + 2 × map in dll29's data: 0x4FE the Volcano Force Point (4), 0x3EE Diamond Bay (35),
-0xE6 Walled City (13). A new game puts every map in act 1 (dll29 0x300-0x334), and the object loader
+0xE6 Walled City (13), 0x8EC Krazoa Palace (3). A new game puts every map in act 1 (dll29 0x300-0x334), and the object loader
 (`func_8004B4A0`) skips a placement whose byte +3 has bit act - 1 set (byte +5's bit 16 - act for acts 9 to 16, and
 `tools/dino.py map <map> --act <act>` lists what loads), so a map holds
 other objects in each act. A level's control object sets its act, or a sequence does (dll3's event 0x1D, the act of
 the map the playing object is in), and ROM file 13 holds one such event, which sets act 3.
 
-`src/game/acts.cpp` moves two maps' acts with the story, at each map load (the header has the evidence), and
+`src/game/acts.cpp` moves three maps' acts with the story, at each map load (the header has the evidence), and
 `DINO_LOG_ACTS=1` prints each act it moves or leaves:
 
 - The Volcano Force Point: act 2 while Walled City's SpellStone is carried (0x83B), 3 once it is placed (0x878). Its
@@ -628,6 +631,10 @@ the map the playing object is in), and ROM file 13 holds one such event, which s
 - Walled City: act 2 once Moon Mountain Pass's spirit is released (0x317), when the task list sends Sabre back for
   the Sun and Moon Stones. The stones beside the boss door, the sockets on the TRex statues that take them, and
   WCLevelControl's (779) bits that open the Sun and Moon temples are act 2's only; the RedEye teeth are act 1's.
+- Krazoa Palace, with Krazoa Palace on Restored: act 14 loads as act 1. Cape Claw's TriggerPlane 30ec4 (acts 1, 12,
+  13, 15 and 16) sets Cape Claw's act 2 (0xEE) and the palace's act 14 as Kyte is freed (0x2C5, task 17), and act 14
+  loads 151 of the palace's 415 placements, none of its own: not its two KP_Transporters, setuppoints, crates or
+  mushrooms. Act 1 loads all 415.
 
 A map's act is kept in the save, so a death or retry restores the act the map had when the level started, and the
 map's next load moves it on again. Diamond Bay moves by itself: act 2 from the first SpellStone (0x4E9) holds the

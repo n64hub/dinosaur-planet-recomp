@@ -559,6 +559,10 @@ void dino::add_krazoa_options(recomp::config::Config& general) {
     );
 }
 
+bool dino::krazoa_palace_restored() {
+    return palace_restored();
+}
+
 // us.toml's hook in WARP_ENTRY (func_8004D1D4) once it has read entry 0x20(sp) of ROM file 30 into the buffer at
 // 0x1C(sp): 16 bytes, x, y and z as floats and an s16 layer, all zero in an empty entry.
 extern "C" void dino_krazoa_warp_entry(uint8_t* rdram, recomp_context* ctx) {
