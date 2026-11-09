@@ -181,7 +181,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   stone, `DINO_LOG_EFFECTS=1`
   each effect drawn after its object was freed,
   `DINO_DRAGON_HEALTH=<n>` starts its fight with n health, and `DINO_CHECK_HEAP=1` each block of the game's heaps
-  written past its end, with the tag of what asked for it (`src/game/heap.cpp`).
+  written past its end, with the tag of what asked for it (`src/game/heap.cpp`). On Windows `tools/grab_window.ps1`
+  grabs the window as a run plays (its header says how). A grab made another way on a display scaled past 100% can
+  hold only the picture's top left, without the HUD's right and bottom: the C menus draw.
 - **Story points.** `--story <point>[@<seconds>][,<warp>]` starts a run from a named point of the story, with the
   game's bits, the character and the place set as the save would have them, in memory and with nothing written to
   Flash: `--boot --story before-wg-shrine` is in a Krazoa shrine with Krystal alive. `--place
