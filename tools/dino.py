@@ -3,7 +3,7 @@ through as raw MIPS. Run it from anywhere; it reads roms/dinoplanet.z64, syms/ a
 
     python3 tools/dino.py dis dll210_16220        one function: dll<n>_<offset>, func_<address>, a name, dll<n>.<export>
     python3 tools/dino.py dis dll272 0x18-0x200   a range of a DLL's text (offsets in its text, cut at its end)
-    python3 tools/dino.py calls bit 0x1EB         every call to it: bit [<bit>], a function or dll<n>.<export>, args
+    python3 tools/dino.py calls bit 0x1EB 0x1EC   every call to it: bit [<bit>...], a function or dll<n>.<export>, args
     python3 tools/dino.py map 29 --name sandeel   a map's cells and group field; its placements summed, or filtered
     python3 tools/dino.py def SHswapstone         an object def: DLL, object ids, where it is placed, its record
     python3 tools/dino.py warp [26]               the warp table: each entry's place, the map holding it, who warps
@@ -15,6 +15,12 @@ and restores, and the loads and address arithmetic whose value a later line show
 before its branch or call, since it runs first (a likely branch's runs only if taken: `[then ...]`). `>` marks a
 branch target. A call is one line, `call <target>(a0=.., a1=..)`, with the arguments set since the last call; a call
 to the bit setter or getter is `bit 0x5F4 set 1`, with the bit's name or its task (ROM file 55).
+
+`calls bit <bit>...` lists, after the calls with those bits, what sets them with no call of its own: each sequence
+event that sets or clears one (and who plays the sequence), each trigger (dll325: TriggerPlane, TriggerPoint) whose
+actions set, clear or flip one or turn a group of a map whose group field it is on or off, and each other placement
+whose setup holds one as a halfword (a seqobject's played_bit, a SpellPlace's +0x1E): a setter that isn't a call, or
+an object that only reads it. Curves are left out: theirs are the low halves of other curves' uids.
 
 How a value is named, from a dataflow pass over the function (meets at branch targets, s-registers and stack slots
 kept across calls):
@@ -72,6 +78,7 @@ CACHE_ROOT = ROOT / "build" / "dino"
 OBJECT_TAB_FILE, OBJECT_BIN_FILE, OBJECT_INDEX_FILE, BIT_TABLE_FILE = 65, 66, 67, 55
 SEQ_EVENTS_FILE, SEQ_TRACKS_FILE, SEQ_FIRST_FILE, SEQ_ACTORS_FILE, SEQ_RANGES_FILE = 13, 14, 15, 63, 64
 SEQ_OBJECT_DLLS = (309, 310)
+TRIGGER_DLL = 325
 PLACEMENTS_FILE, MAP_TABLE_FILE, MAP_NAMES_FILE, MAP_GRID_FILE, WARPS_FILE = 31, 32, 33, 21, 30
 CELL = 640
 WARP_ENTRY = 0x8004D1D4
@@ -1143,7 +1150,8 @@ def sequences(game):
     return out
 
 
-def show_text(game, want):
+def sequence_lists(game):
+    """Each object def's list of sequence numbers (def +0x1C, its count at +0x7A)."""
     o, _ = g.rom_file(game.rom, OBJECT_TAB_FILE)
     b, _ = g.rom_file(game.rom, OBJECT_BIN_FILE)
     lists = {}
@@ -1152,6 +1160,24 @@ def show_text(game, want):
         count, rel = struct.unpack_from(">h", game.rom, at + 0x7A)[0], struct.unpack_from(">I", game.rom, at + 0x1C)[0]
         if 0 < count < 0x100 and rel < 0x1000:
             lists[i] = struct.unpack_from(f">{count}h", game.rom, at + rel)
+    return lists
+
+
+def sequence_players(game, lists, n):
+    """Who plays sequence n: the defs that list it, as {def: [index]}, and the seqobjects placed to play it, as
+    (map, offset, record)."""
+    listed = {i: [x for x, v in enumerate(lst) if v == n] for i, lst in lists.items() if n in lst}
+    played = []
+    for m in game.maps:
+        for off, r in game.placements(m):
+            d = game.def_of(struct.unpack_from(">H", r, 0)[0])
+            if d in listed and game.defs[d][1] in SEQ_OBJECT_DLLS and len(r) > 0x1E and r[0x1E] in listed[d]:
+                played.append((m, off, r))
+    return listed, played
+
+
+def show_text(game, want):
+    lists = sequence_lists(game)
 
     def actor(obj):
         if obj < 0:
@@ -1170,18 +1196,13 @@ def show_text(game, want):
         print(f"text {want:#x}: sequence {n}, " + ", ".join(f"actor {a} ({actor(actors[a][0])}) track {k} event {e}"
                                                           for a, k, e in shows))
         print("  actors: " + ", ".join(actor(obj) for obj, _, _ in actors))
-        listed = {i: [x for x, v in enumerate(lst) if v == n] for i, lst in lists.items() if n in lst}
+        listed, played = sequence_players(game, lists, n)
         for i, at in listed.items():
             print(f"  listed by {game.defs[i][0]} (def {i}, dll{game.defs[i][1]}) at " + ", ".join(map(str, at)))
-        played = False
-        for m in game.maps:
-            for off, r in game.placements(m):
-                d = game.def_of(struct.unpack_from(">H", r, 0)[0])
-                if d in listed and game.defs[d][1] in SEQ_OBJECT_DLLS and len(r) > 0x1E and r[0x1E] in listed[d]:
-                    played = True
-                    played_bit, trigger = struct.unpack_from(">hh", r, 0x18)
-                    print(f"  played by map {m} {game.maps[m]['name']} {placement_line(game, m, off, r, False)}: "
-                          f"trigger_bit {bit(trigger)}, played_bit {bit(played_bit)}")
+        for m, off, r in played:
+            played_bit, trigger = struct.unpack_from(">hh", r, 0x18)
+            print(f"  played by map {m} {game.maps[m]['name']} {placement_line(game, m, off, r, False)}: "
+                  f"trigger_bit {bit(trigger)}, played_bit {bit(played_bit)}")
         if listed and not played:
             print("  no seqobject plays it: the defs' own code picks the index (`calls dll3.17`)")
     if not found:
@@ -1276,9 +1297,9 @@ def calls(game, idx, spec, want):
     for sec, fa, site, key, args in idx["calls"]:
         if key not in keys:
             continue
-        if want is not None:
+        if want:
             a0 = args.get(4)
-            if not (a0 and a0[0] == "imm" and a0[1] == want):
+            if not (a0 and a0[0] == "imm" and a0[1] in want):
                 continue
         fname = game.func_names.get((sec, fa), f"{fa:X}")
         where = f"{fname}+{site - fa:#x}" if sec != "main" else f"{fname}+{site - fa:#x}"
@@ -1292,6 +1313,71 @@ def calls(game, idx, spec, want):
             print(f"{where:24} {game.func_name(key)}({fmt_args(game, args)})")
         n += 1
     print(f"{n} calls", file=sys.stderr)
+    if spec == "bit" and want:
+        bit_holders(game, want)
+
+
+def trigger_bits(r, want, field=None):
+    """The bits a trigger (dll325: TriggerPlane, TriggerPoint and their kind) sets, as lines: its own bit at +0x44, set
+    once it fires, and its 8 actions at +0x18, each flags (0x01 crossed forward, 0x02 back, 0x04 each time), action
+    and a u16 arg (dll325's table at D_34E4). Action 0x12 (dll325_1764) sets the bit in the arg's low 14 bits by its top
+    2: 0 clears it, 1 sets it, 2 flips it; 0x21 (dll325_17FC) flips bit (top 3 bits) of the field in the low 13. With
+    field, the group field of the trigger's map: actions 0x13, 0x14 and 0x22 turn the group in the arg on, off or over
+    (dll29.19 with the trigger's map)."""
+    out = []
+    own = struct.unpack_from(">h", r, 0x44)[0] if len(r) > 0x45 else -1
+    if own in want:
+        out.append(f"bit {own:#x} set as it fires (+0x44)")
+    for i in range(8):
+        flags, action, arg = struct.unpack_from(">BBH", r, 0x18 + 4 * i)
+        if action == 0x12 and arg & 0x3FFF in want:
+            out.append(f"bit {arg & 0x3FFF:#x} {('clear', 'set', 'flip', '?')[arg >> 14]} (action 0x12, flags {flags:#x})")
+        elif action == 0x21 and arg & 0x1FFF in want:
+            out.append(f"bit {arg & 0x1FFF:#x} flips {1 << (arg >> 13):#x} (action 0x21, flags {flags:#x})")
+        elif field is not None and action in (0x13, 0x14, 0x22):
+            out.append(f"bit {field:#x} group {arg} {dict([(0x13, 'on'), (0x14, 'off'), (0x22, 'over')])[action]}"
+                       f" (action {action:#x}, flags {flags:#x})")
+    return out
+
+
+def bit_holders(game, want):
+    """What sets a bit without a call of its own: a sequence's event 0x0D of type 0xB or 0xC sets or clears the bit in
+    the next event's low half (with who plays it), and a placement's setup holds bits its DLL sets or reads (a
+    seqobject's played_bit, a SpellPlace's +0x1E): each halfword from +0x18 that is one of them, named where names.toml
+    names the field. A curve's are the low halves of other curves' uids, so curves are left out."""
+    n = 0
+    lists = None
+    for s, actors in sequences(game).items():
+        for a, (obj, _, events) in enumerate(actors):
+            for e, w in enumerate(events[:-1]):
+                kind = (w >> 12) & 0xF
+                if w >> 24 == 0x0D and kind in (0xB, 0xC) and events[e + 1] & 0xFFFF in want:
+                    lists = lists or sequence_lists(game)
+                    listed, played = sequence_players(game, lists, s)
+                    who = [f"map {m} {struct.unpack_from('>I', r, 0x14)[0]:x}" for m, _, r in played] or                           [game.defs[i][0] for i in listed]
+                    print(f"sequence {s:<15} bit {events[e + 1] & 0xFFFF:#x} {'set' if kind == 0xB else 'clear'}"
+                          f"  ; actor {a} event {e}, " + (("played by " + ", ".join(who)) if who else "no def lists it"))
+                    n += 1
+    for m in game.maps:
+        for off, r in game.placements(m):
+            d = game.def_of(struct.unpack_from(">H", r, 0)[0])
+            name, dll = game.defs[d] if d >= 0 else ("?", 0)
+            if name == "curve":
+                continue
+            uid = struct.unpack_from(">I", r, 0x14)[0]
+            if dll == TRIGGER_DLL:
+                for line in trigger_bits(r, want, game.maps[m]["field"] if game.maps[m]["field"] in want else None):
+                    print(f"map {m:<3} {uid:x} {name:13} {line}")
+                    n += 1
+                continue
+            for at in range(0x18, len(r) - 1, 2):
+                v = struct.unpack_from(">H", r, at)[0]
+                if v in want:
+                    field = game.field("setup", dll, at)
+                    uid = struct.unpack_from(">I", r, 0x14)[0]
+                    print(f"map {m:<3} {uid:x} {name:13} bit {v:#x} at +{at:#x}" + (f" ({field})" if field else ""))
+                    n += 1
+    print(f"{n} sequence events and setup words", file=sys.stderr)
 
 
 def main():
@@ -1303,7 +1389,7 @@ def main():
     d.add_argument("--args", help="what a0, a1, ... are, for a function reached only through a pointer: obj,state,setup,def or - (e.g. obj,-,state)")
     c = sub.add_parser("calls", help="every call to a function, an export, or the bit setter and getter")
     c.add_argument("target")
-    c.add_argument("arg", nargs="?", help="only calls whose a0 is this (for bit: the bit)")
+    c.add_argument("arg", nargs="*", help="only calls whose a0 is one of these (for bit: the bits)")
     m = sub.add_parser("map", help="a map: its cells, group field and placements")
     m.add_argument("map", help="its number or part of its name")
     m.add_argument("--all", action="store_true", help="every placement, one a line")
@@ -1339,7 +1425,7 @@ def main():
                 kinds[r] = (k, None if sec == "main" else sec, k)
         print("\n".join(dis(game, idx, sec, s, e, title, kinds)))
     elif a.cmd == "calls":
-        calls(game, idx, a.target, int(a.arg, 16) if a.arg else None)
+        calls(game, idx, a.target, {int(x, 16) for x in a.arg})
 
 
 if __name__ == "__main__":
