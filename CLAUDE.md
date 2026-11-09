@@ -25,7 +25,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - `src/`: RecompFrontend's main (`src/main/main.cpp`, with the GameEntry), the code sections it gives the runtime
   (`src/main/register_overlays.cpp`), the DLLs' loading (`src/game/dlls.cpp`), the natives the patches call
   (`src/game/recomp_api.cpp`), the libultra functions the runtime lacks (`src/game/libultra.cpp`), the HUD's and the
-  clear's widescreen placement (`src/game/widescreen.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
+  clear's widescreen placement (`src/game/widescreen.cpp`), the 3D picture's top and bottom rows
+  (`src/game/view_rows.cpp`), the free camera and mouse (`src/game/camera.cpp`), the
   Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the Kamerian Dragon's end
   (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), CloudRunner Fortress's treasure lift
   and baby CloudRunners (`src/game/cloudrunner.cpp`), wind bridge (`src/game/cloudrunner_barrels.cpp`), BOSS

@@ -66,3 +66,5 @@
   to leave the city and come back first.
 - Ending on Restored: once Drakor is beaten and his fall has played, the game's own credits, which nothing in the
   prototype ever showed, play on black, then the title.
+- The thin bands of garbage across the top and bottom of the picture in play are gone: the game's picture now
+  reaches the window's top and bottom.
