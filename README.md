@@ -120,16 +120,14 @@ Fixed:
   could lie out of reach.
 - BOSS TRex's SpellStone (BOSS TRex on Restored): beating the TRex went back to the title with no SpellStone. The
   third SpellStone is now carried out, through the arena's own way back to Walled City.
-- The third SpellStone (Third SpellStone on Restored): the Volcano Force Point loaded as on the first visit every
-  time, so the SpellStone carried back from BOSS TRex had no path to open and no place to go, and Walled City never
-  showed its Sun and Moon Stones. The force point now loads its second visit while the stone is carried and its third
-  once it is placed, and Walled City its second once the third spirit is released. And the moonseeds Krystal plants
-  in Moon Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives Sabre four, one for
-  each of the pass's receptacles. Diamond Bay's flame switch stayed sunk below the ground, so the Pointback mother's
-  second egg couldn't be reached: talking to her now raises it, and Tricky's flame lights it. Three rocks in Moon
-  Mountain Pass's vents now move the meteor, the moon symbol atop Walled City's moon temple takes the moonlight from
-  the lift's top, which stood just out of its reach, and EC's Transporter stands once both stones are in the TRex
-  statues' sockets.
+- The third SpellStone (Third SpellStone on Restored): the Volcano Force Point loaded as on the first visit every time,
+  so the SpellStone carried back from BOSS TRex had no path to open and no place to go, and Walled City never showed its
+  Sun and Moon Stones. The force point now loads its second visit while the stone is carried and its third once it is
+  placed, and Walled City its second once the third spirit is released. And the moonseeds Krystal plants in Moon
+  Mountain Pass, which nothing in the prototype gives: placing the third SpellStone gives Sabre four, one for each of
+  the pass's receptacles. Diamond Bay's flame switch stayed sunk below the ground, so the Pointback mother's second egg
+  couldn't be reached: talking to her now raises it, and Tricky's flame lights it. Three rocks in Moon Mountain Pass's
+  vents now move the meteor, and EC's Transporter stands once both stones are in the TRex statues' sockets.
 - Diamond Bay's light beams to the Pointback's egg took Sabre as standing on two of them from well off, so a leap
   between them stepped the bridge back from under him, and Walled City's temples' bridges of light let the player
   fall through into the pit below.

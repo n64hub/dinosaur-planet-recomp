@@ -226,8 +226,8 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Third SpellStone
 
-`src/game/acts.cpp`, `src/game/moonseeds.cpp`; PRs 25 and 52. `src/game/diamond_bay.cpp`, `src/game/temples.cpp`,
-`src/game/krazoa.cpp`; PR 54.
+`src/game/acts.cpp`, `src/game/moonseeds.cpp`; PRs 25 and 52. `src/game/diamond_bay.cpp`, `src/game/krazoa.cpp`; PR
+54.
 
 - The Volcano Force Point's act 2 holds a second SpellPlace that takes Walled City's stone (carried 0x83B, placed
   0x878), its podium, door switch and round door, and VFP_LevelControl set act 1 in its constructor whatever the
@@ -254,11 +254,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Open
 
-Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the
-moon temple's push blocks by night and its symbol's moonlight; the walk into the moonseed's hollow with Kyte (planted
-and grown there, the ROM's own code needs no fix: the moonseed is used facing the receptacle, and Kyte's flame is her
-scroll's second row at night); a hit on Warlock Mountain's laser targets (WL_LaserTarget, dll595), whose 29c1 lets
-EC's guards go (0x2FA), and which a script's aimed shots have not set.
+Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the walk
+into the moonseed's hollow with Kyte (planted and grown there, the ROM's own code needs no fix: the moonseed is used
+facing the receptacle, and Kyte's flame is her scroll's second row at night); a hit on Warlock Mountain's laser targets
+(WL_LaserTarget, dll595), whose 29c1 lets EC's guards go (0x2FA), and which a script's aimed shots have not set.
 
 ## 3. Choices
 
@@ -396,10 +395,11 @@ ROM's way. "(?)" marks a reading not checked in full.
   below the risen switch's hit sphere. Cascade: 0x3D9, the bridge (DBbridgeanim 415CA) and the beams to the egg
   (0x86D, 0x39E). The ROM offers: no code call names 0x3D9 (the switch holds it in its setup), and no other
   flame reaches the switch's height (?) (PR 54).
-- **The moon symbol's reach** (Third SpellStone): 210 in place of its setup's 200 (WCApertureSymbo, dll787_00FC); the
-  lift's top stands 200.25 from it. Cascade: 0x829, the moon in the ring and 0x244, then the Moon Stone (0x264). The
-  ROM offers: no code call names 0x829 (the symbol holds it in its setup), and the lift's top is the only floor of
-  type 0x21 by it (?) (PR 54).
+- **The moon symbol's reach** (Third SpellStone): 210 in place of its setup's 200 (WCApertureSymbo, dll787_00FC), for
+  a lift's top taken to stand 200.25 from it (PR 54). **Clash, fixed (PR 61):** the lift (WCMoonTempleLif,
+  dll786_0030) moves only for a rider of object id 0, Sabre, and on its top he stands 196 from the symbol, within the
+  setup's 200: played by night as Sabre, the push blocks, the lift and the symbol in the first person view set 0x829
+  and 0x244 by the ROM's own code. The reach is the setup's again, with no stand-in.
 - **EC's Transporter by the sockets** (Krazoa Shrines, Third SpellStone): placed on 0x202 and shown on 0x243, the
   sockets' done bits (dll785_0634), the task list's "used Sun and Moon Stones to open shrine"; on Third SpellStone's
   Original, where the sockets never load, 0x264 as before. Cascade: the shrine (map 33, entry 40) and its return to

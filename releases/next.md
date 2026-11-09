@@ -46,9 +46,9 @@
 - Third SpellStone on Restored: the Queen EarthWalker's two scenes at the Volcano Force Point play again, and the
   force point is its first visit's once they are over. Restored had turned both scenes into an empty level.
 - Third SpellStone on Restored: talking to the Pointback mother in Diamond Bay raises her flame switch, so Tricky's
-  flame lights it and the bridge to her second egg rises; three rocks in Moon Mountain Pass's vents move the meteor;
-  the moon symbol in Walled City's moon temple takes the moonlight from the lift's top; and EC's Transporter stands
-  once both stones are in the TRex statues' sockets. In the prototype none of them could be reached.
+  flame lights it and the bridge to her second egg rises; three rocks in Moon Mountain Pass's vents move the meteor; and
+  EC's Transporter stands once both stones are in the TRex statues' sockets. In the prototype none of them could be
+  reached.
 - Diamond Bay's light beams to the Pointback's egg no longer drop Sabre between them, and Walled City's temples'
   bridges of light hold the player.
 - Dragon Rock's bottom no longer crashes as the Skeetla arena unloads once the sharpclaw on its gallery is fed, when
