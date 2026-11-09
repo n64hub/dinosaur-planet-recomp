@@ -1163,3 +1163,17 @@ func = "dll373_01A0"
 before_vram = 0x901A60D4
 text = '{ void dino_cloud_baby_update(uint8_t*, recomp_context*); dino_cloud_baby_update(rdram, ctx); }'
 
+# CloudRunner Fortress's deck (src/game/cloudrunner.cpp): CFLevelControl's Kyte routine holds 0x46E at the deck's
+# curves, 0x11, while she is shut in there, and nothing moves it on once she is freed: her path starts from the curve
+# nearest her (dll212_0CE8, with 0x454 clear), the deck's, whose curves join no others, so she could fly nowhere. Once
+# 0x43 is set, the routine's start has her path start again, and the start takes the nearest curve off the deck.
+[[patches.hook]]
+func = "dll400_0914"
+before_vram = 0x901BD830
+text = '{ void dino_cloudrunner_kyte_freed(uint8_t*, recomp_context*); dino_cloudrunner_kyte_freed(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll212_0CE8"
+before_vram = 0x90112C3C
+text = '{ void dino_kyte_start_curve(uint8_t*, recomp_context*); dino_kyte_start_curve(rdram, ctx); }'
+

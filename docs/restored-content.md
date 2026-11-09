@@ -84,6 +84,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   fastest that lets the bike over. The race itself sets everything it needs (0x49A comes about 12 s after 0x2E8 with
   no code call, and seqobject 30cca's sequence 0x18 then sets 0x49F), and is reached by the pool on 0x4BE, so it
   needs 0x8D1 and 0x300.
+- CloudRunner Fortress's gold perch: Kyte, freed on the courtyard's deck, kept to its six curves, which join none of
+  the fortress's others, so whatever she was sent to she circled the deck, and the gold perch's 0x8D1, which she sets
+  as she lands there, never came. Once 0x43 frees her with 0x46E at the deck's 0x11, her path starts again from the
+  nearest curve off it (us.toml, dll400_0914 and dll212_0CE8, `src/game/cloudrunner.cpp`).
 - Diamond Bay: DBlgtbeam's test of Sabre on a beam (dll677_1164) took the cosine and sine of its yaw with their sign,
   so beams 2 and 3 took him from about 60 off and a leap from 3 to 4 stepped the bridge back from under him; both are
   taken without their sign (us.toml, `src/game/diamond_bay.cpp`; PR 54).
@@ -348,7 +352,9 @@ What changes, in the order it is built, the redone choices first:
 - **The gold** (a bug, not a choice): PerchObject 429d8's chain is whole (0x46E to 0xC0, curve 429D9, message 5,
   0x8D1). Kyte didn't land because sideload 31877 makes her on the deck, whose curves (group 0x11) join none of the
   other 338, so she can't find a path to 0xC0. Played first with Kyte following from the corridor; if her joining
-  leaves her on the deck, she is moved to the nearest curve off it once 0x43 is set, always on.
+  leaves her on the deck, she is moved to the nearest curve off it once 0x43 is set, always on. Built: freed on the
+  deck, her path starts again from the nearest curve off it (0x46E at 0x11 with 0x43 set), and the star sent her to
+  429D9 (0x8D1); with the babies' perches set, 0x4BE, the pool (0x4BF) and 0x4C1 followed (played).
 - **The treasure caves' way in** (Treasure Lift likely goes): task 66, "ENTERED THE TREASURE CAVES UNDER THE
   FORTRESS" with "DRAINED POOLS HAVE HIDDEN DOORS", the signs "TREASURE ROOMS ... the door will only open when Regal
   Perches are in use" and "WIND LIFT ... Please use lever to change wind direction". The ROM's way: four perches
@@ -570,8 +576,8 @@ open: the logs.
   unsolved finds no receptacles there, and 0x52B, the palace's fire door, can't be set (?). The ROM's acts put the
   room first (acts 4 to 9 are Cape Claw after it), and nothing makes a player solve it before WG's shrine. Nothing
   built.
-- **CloudRunner Fortress's gold and Bonehead**: 0x8D1 is set from curve 429d9's +0x32 as Kyte lands at the gold perch
-  (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300. 0x4B7 (dll369 reads and clears it,
+- **CloudRunner Fortress's gold and Bonehead**: 0x8D1 is set from curve 429d9's +0x32 while Kyte sits on the gold
+  perch (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300 (both played). 0x4B7 (dll369 reads and clears it,
   TriggerPlane 30e8c clears it) and 0x4B8 (dll519, dll400 read it) have no setter. 0x4DC is set and cleared by
   TriggerPlane 31a68 at (-9917, 1445, 18272), and dll400 turns it into 0x4DD, whose sequence sets 0x4DE.
 - **The babies left**: 29FA's ledge, map 30's and map 15's from the master chest.
