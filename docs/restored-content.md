@@ -232,6 +232,8 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   the top hovers at the corridor's height and can't get down. How she gets down is a choice (part 3).
 - Map 15 places no barrel, and the tunnel to its chest of item 0x336, the master chest's, takes only a barrel's blast,
   so one has to come down the shaft. When the lift carries one is a choice (part 3).
+- The treasure doors (0x30A, from the four perches) open onto the caves' east half only, walled off from the shaft's
+  bottom and its levers, so they don't replace the lift (part 3, The treasure caves' way in).
 
 ### Baby CloudRunners
 
@@ -376,14 +378,24 @@ What changes, in the order it is built, the redone choices first:
   leaves her on the deck, she is moved to the nearest curve off it once 0x43 is set, always on. Built: freed on the
   deck, her path starts again from the nearest curve off it (0x46E at 0x11 with 0x43 set), and the star sent her to
   429D9 (0x8D1); with the babies' perches set, 0x4BE, the pool (0x4BF) and 0x4C1 followed (played).
-- **The treasure caves' way in** (Treasure Lift likely goes): task 66, "ENTERED THE TREASURE CAVES UNDER THE
+- **The treasure caves' way in** (decided: Treasure Lift stays): task 66, "ENTERED THE TREASURE CAVES UNDER THE
   FORTRESS" with "DRAINED POOLS HAVE HIDDEN DOORS", the signs "TREASURE ROOMS ... the door will only open when Regal
   Perches are in use" and "WIND LIFT ... Please use lever to change wind direction". The ROM's way: four perches
   (0x2FC-0x2FF) set 0x30A, which opens the CFTreasureDoors (2a9b, 2bef); planes 31d9d and 31dac set 0x526,
   CFseqobject 31d99 0x528 and map 15's 429c1 0x8CC, on which CFLevelControl loads the super chests and the master
-  chest; its baby sets 0x300, and with 0x8D1, 0x4BE drains the pool. Played after the babies and the gold: if the
-  treasure doors reach map 15 (?), Treasure Lift goes. Wind Bridge stays: the barrels cross the wind at the
-  corridor's height.
+  chest; its baby sets 0x300, and with 0x8D1, 0x4BE drains the pool. Played: with the four perches set, 0x30A came
+  as the map loaded, and crossing the north door's plane set 0x526, then 0x528 (31d99's scene, 23 s) and 0x8CC
+  (429c1's, 15 s more). But both doors stand at x -12600, in the caves' east half, the master chest's room and the
+  doors' caves, which walls part from the shaft's bottom and its two levers (walked from the master chest's room:
+  west it stops at x -12731, north at z 18730-18807); the halves join only at the tunnels a barrel's blast opens
+  (31b7a, 31b6e). So the doors are no way to the levers, a barrel reaches the caves only by the wind lowering from
+  the top, and the doors don't replace Treasure Lift: it stays, and so does Wind Bridge, whose barrels cross the wind
+  at the corridor's height. The master chest needs both halves: 0x336 from the shaft's side, and 0x8CC only from a
+  door's plane (nothing else sets 0x526). Each door is reached from the corridor (y 2049) through a treasure room, a
+  hall of stepping platforms over cloud under patrolling RobotAnimPatrols (map 12's group 12): the south one by the
+  corridor's south end, which drops into it at (-13124, 1927, 18134), the north one by CFSlideDoor1 287a, onto a
+  walkway above it. A room crossed on foot to its door isn't played yet: one leap was, from the south room's ledge to
+  a platform at (-13049, 1927, 18308).
 - **CloudRunner's bits with no setter**: nothing to build. 0x4B7 is set by map 43's TriggerPlane 30c34 as the bay is
   entered and only plays Bonehead's talks; his state 12 goes to 13 on 0x49A alone. 0x4B8 (SwapStone Circle's act 5,
   0x4DD) and 0x4DC to 0x4DE (a scene after the race, read by nothing) aren't needed to finish; hit type 0xF is the
@@ -547,7 +559,8 @@ open: the logs.
   its base and not carrying, or carrying once 0x2E1 (the courtyard roof blown) is set: the roof needs no more barrels,
   and map 15's tunnel needs one. 0x8C8: CFWindSwitch (dll386) sets, dll370 reads. Cascade: the treasure caves
   (map 15), a barrel to tunnel 31b7a (0x330, 0x33A, the chest's item 0x336, the master chest's baby). The ROM offers: the
-  levers only. The race isn't reached this way (the bottom's east is a grate) but by the pool on 0x4BE.
+  levers only; the treasure doors (0x30A) open onto the caves' east half, walled off from them (The plan, The
+  treasure caves' way in). The race isn't reached this way (the bottom's east is a grate) but by the pool on 0x4BE.
 - **Where 29FA waits** (Baby CloudRunners): 29FA (map 12's group 21) and TriggerPoint 31bf3, which loads that group,
   are put at (-11170, 1866, 18604) on the hall's floor west of their balcony, 183 above it, as map 12 loads (a hook at
   func_80045BF4's end). Kyte's find nodes on the balcony (0x28) are 200 from there. The ROM offers: no ladder, lift

@@ -528,6 +528,15 @@ name = "cf_treasure_wind"  # CFTreasWindLift blows (src/game/cloudrunner.cpp)
 bit = 0x8C8
 name = "cf_treasure_wind_down"  # (src/game/cloudrunner.cpp)
 [[bit]]
+bit = 0x30A
+name = "cf_treasure_doors_open"  # CFLevelControl sets it from the four perches 0x2FC-0x2FF; CFTreasureDoor reads it
+[[bit]]
+bit = 0x526
+name = "cf_treasure_door_crossed"  # TriggerPlanes 31D9D and 31DAC at the treasure doors; CFseqobject 31D99 plays on it
+[[bit]]
+bit = 0x8CC
+name = "cf_master_chest_shown"  # map 15's CFseqobject 429C1 sets it; CFLevelControl loads map 15's group 8 on it
+[[bit]]
 bit = 0x900
 name = "cf_roof_hits"  # CFBlastedRoof's count of barrels (src/game/cloudrunner_barrels.cpp)
 [[bit]]

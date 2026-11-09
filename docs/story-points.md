@@ -406,6 +406,22 @@ the race (43) at (-20, 29) on layer -2.
   while she carries (dll210 0xA470, 0xAAB4, 0xAF28). Fixed (Wind Bridge on Restored,
   `src/game/cloudrunner_barrels.cpp`): she goes on the wind carrying too, and Treasure Lift leaves her to it. Played:
   carried across and up into the courtyard. The bottom leads north and south into the caves; east of it is a grate.
+- The treasure doors. Two CFTreasureDoors (394, 2A9B at (-12600, 1928, 19794) and 2BEF at (-12596, 1922, 17963),
+  map 12's group 3) open on 0x30A, which CFLevelControl (400) sets from the four perches 0x2FC-0x2FF, and the planes
+  at them (31D9D, 31DAC) set 0x526; CFseqobject 31D99 plays on it and sets 0x528, and map 15's 429C1 then sets 0x8CC,
+  on which CFLevelControl loads the master chest (group 8 of 0x45A). Nothing else sets 0x526. Played from `--place
+  -12658,1927,19751,0 --bits 458=8200,24f,250,251,252,2fc,2fd,2fe,2ff,43,2e1,34f,359` (the north door's landing):
+  0x30A as the map loaded, 0x526 at the plane, 0x528 23 s later and 0x8CC 15 s after that. The doors stand in the
+  caves' east half, the master chest's room and the doors' caves, which walls part from the shaft's side: from the
+  master chest's room (`--place -12330,1840,18530,-1`) the way west stops at x -12731 and north at z 18730-18807, and
+  the shaft's north passage leads only east to the GuardClaw's chest. The halves join at the blastable tunnels 31B7A
+  and 31B6E (dll389). Each door is reached from the corridor (y 2049) through a treasure room, stepping platforms over
+  cloud with RobotAnimPatrols (map 12's group 12) and FXEmits along them: the corridor's south end drops into the
+  south room at (-13124, 1927, 18134) (0x35B), and CFSlideDoor1 287a, at (-12664, 2049, 19545), opens onto a walkway
+  above the north room, whose ladder at (-13030, 19591) climbs to the tower's platform. A walk at full stick off the
+  south room's ledge toward (-13000, 18450) leapt onto a platform at (-13049, 1927, 18308); walks at the platforms
+  along the FXEmits (x -12980, -12799, -12618) fell, as did every step off the north door's landing but through the
+  door.
 - The way to the race. In the hall east of the courtyard, on the fortress's floor (y 1866), a pool fills a pit at
   (-11960, 18867), its water at y 1824 over a tunnel that runs west under the courtyard. Swimming, no button dives (Z,
   B, A, R and L played). XYZAnimator (356, 32DDB) drains it on 0x4BE, the gold's (below), and sets 0x4BF once drained.
@@ -525,8 +541,9 @@ the player inside its radius and within 100 units of its height. dll1's export 7
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
 Left to play: a barrel's blast at map 15's tunnel 31B7A, the way on foot to the master chest (group 8, which
-CFLevelControl loads on 0x8CC), and so the gold with all five on their perches in one run (0x8D1, 0x4BE and 0x4C1 are
-played with 0x2FC-0x300 set by `--bits`). Read from the ROM,
+CFLevelControl loads on 0x8CC, which only a treasure door's plane leads to: a treasure room's platforms crossed to its
+door), and so the gold with all five on their perches in one run (0x8D1,
+0x4BE and 0x4C1 are played with 0x2FC-0x300 set by `--bits`). Read from the ROM,
 nothing sets 0x4B8 (CFGuardian's sequence at 0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches
 by the main door take: the two ZBombs there make it (their setup's +0x18). Neither is needed to finish
 (docs/restored-content.md, The plan). 0x4DC is TriggerPlane 31a68's, at (-9917, 1445, 18272), set on one crossing and

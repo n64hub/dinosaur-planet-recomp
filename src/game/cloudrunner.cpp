@@ -17,6 +17,9 @@
 // - Only the two CFWindSwitch levers (dll386) flip 0x8C8 (their sequence's callback, 0x038C), and both stand at the
 //   bottom, about 165 below the corridor. Nothing on the top's side sets it, so a player who comes from the top always
 //   finds the wind blowing up: a bridge across the shaft to the courtyard on its east, never the way down.
+// - The treasure doors (CFTreasureDoor, dll394, map 12's 2A9B and 2BEF), which 0x30A opens once four babies sit on
+//   their perches, open onto the caves' east half, the master chest's room, which walls part from the shaft's bottom:
+//   they are no way to the levers (docs/restored-content.md, The treasure caves' way in).
 //
 // What Restored changes: when the wind starts with the player at the top (more than 150 above the lift's base), 0x8C8
 // is set, so the lift lowers her and lets her go at the bottom. Either lever there turns it back to up for the way
