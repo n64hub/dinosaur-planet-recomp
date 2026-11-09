@@ -75,6 +75,10 @@
 //   setuppoint by Cape Claw's west entrance that act 9 loads.
 // - Cape Claw's test (dll486) waited for 0x5B2, a bit nothing sets, where its one SabreBaddie's kill bit is 0x1E7: it
 //   reads and resets 0x1E7 (us.toml).
+// - EC's course in act 5, past the laser hall: seqpoints 2973 and 297b had done bit 0, which every WL_LaserTarget sets,
+//   so the first target hit shut them; their done bits become their triggers 0x2F2 and 0x2F4. The guards' room leads
+//   on only up where 2973 stands, so act 3's column there (WL_colrise 2A8E) is shown in act 5 too, 2 higher, where it
+//   rises each time it is stood on.
 //
 // Cape Claw's Krazoa tablets: three are carried into the tablet room (map 29) and set in its receptacles, and its
 // puzzle then opens the way on. Krazoa Tablets is its own setting: on Restored (the default) HighTop hands over the
@@ -407,8 +411,21 @@ namespace {
         { 11, seqpoint, 0x2AC7, 0x20, 2, 0x221, false }, // CC's, @1570
         { 11, seqpoint, 0x003C, 0x20, 2, 0x222, false }, // WG's, @1C0C
         { 11, seqpoint, 0x30055, 0x20, 2, 0x367, false }, // sequence 0x12's, @1D34
+        // Act 5's 2973 (sequence 8, past the guards) and 297b (sequence 9, "Father.") have done bit 0, which every
+        // WL_LaserTarget sets with its own bit (their +0x20 is 0), so the first target hit, in the hall or 29c1 to free
+        // the guards, shut both: each one's done bit is its trigger, 0x2F2 and 0x2F4, which it sets as its sequence
+        // starts (mode 3).
+        { 11, seqpoint, 0x2973, 0x20, 2, 0x2F2, false },
+        { 11, seqpoint, 0x297B, 0x20, 2, 0x2F4, false },
         { 11, 0x15D, 0x2AB7, 0x3, 1, 0xDF & ~0x80, false }, // CC's column, @1358: also act 8
         { 11, 0x15D, 0x002C, 0x5, 1, 0xE4 & ~0x80, false }, // WG's column, @1AB0: also act 9
+        // Act 5's way on from the guards' room (y -99) to 297b (y 13) is up where 2973 stands, and no column stands
+        // there in act 5: act 3's (uid 2A8E, no bit, so it rises as it is stood on, dll599 0x144) is shown in act 5 too.
+        // At its y -100 its top is level with the floor around it, which holds the player before the column sees him
+        // step on (func_8005509C's sweep), so it rose only on slow frames, and at WG's -101 not at all: at -98 its top
+        // stands above the floor, and it rises each time (+0xC, y's high half).
+        { 11, 0x15D, 0x2A8E, 0x3, 1, 0xFB & ~0x10, false },
+        { 11, 0x15D, 0x2A8E, 0xC, 2, 0xC2C4, false },
         // The fallen column (WMfallencol, @1A44) lies across the way north from the pad in acts 5-13, and nothing
         // moves it (dll331 only turns it). In act 5 it shuts off all EC's course (the lasers, checkpoint 57, the
         // guards, seqpoints 296b, 2973 and 297b, the release 2983), and in acts 7 and 9 WG's column (@1AB0), which
