@@ -1002,6 +1002,13 @@ func = "dll78_00D4"
 before_vram = 0x900ACEA0
 text = '{ void dino_credits_page(uint8_t*, recomp_context*); dino_credits_page(rdram, ctx); }'
 
+# And the frame (func_800137B4) before it starts the screen (func_80037A14, its mode in v1), which clears it behind the
+# credits.
+[[patches.hook]]
+func = "func_800137B4"
+before_vram = 0x8001396C
+text = '{ void dino_credits_clear(uint8_t*, recomp_context*); dino_credits_clear(rdram, ctx); }'
+
 # The Kamerian Dragon (src/game/dragon_rock.cpp, whose header has the evidence): KamerianBoss's update once it has stored
 # its health less one (dll707 0x1BB8), and the starts of its and the Nurse's updates (dll707 0x0FC4, dll708 0x0290).
 [[patches.hook]]
