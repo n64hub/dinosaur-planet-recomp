@@ -185,11 +185,28 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   than 21 Skeetlas are about, and faster with each control out; the bites start about 35 s after it loads. The door's
   two DR_Creators (kind 1, group 3, on from TriggerPlane 0x33E61 at 577, -6121 to the door) send Skeetlas at the
   player, which follow her in and knock her about. Each ice blast that hits a Skeetla kills it, and the fight is won
-  only once none is left, the door's too. Item 0xC1 given him adds 12 (0x0974), as his export 20 does, but nothing
-  on Dragon Rock gives it and nothing calls the export, so the fight has about 45 s of bites, which in a run from the
-  top run out before the third control. With Kamerian Dragon on Restored he is fed 12 once his health is down to -10,
-  once in a fight and once more for each control put out, so a player who stops putting them out still loses him.
-  The controls nearest him go last: 0x5DA, then 0x5D8, then 0x5D9, then the blast on the Skeetlas left.
+  only once none is left, the door's too. Item 0xC1 used on him adds 12 (0x0974), as his export 20 does, which
+  SHbluemushroom (dll502 0x0698) calls as he walks onto one. Dragon Rock places eleven blue mushrooms (dll502, model 0):
+  four by the arena's east side, at about 2260, -6200, and on the top three south of the start (34885 to 34887, about
+  -3480, -5350) and four by its east end (40091 to 40094, about -390, -6850). One of each of the top's groups (34887, 40093)
+  runs from the player once she is within its setup's +0x19 (49 and 80) and the others stand still. Each is picked up
+  with A once it can be picked out: one at rest (state 0) has +0xAF bit 3 set, and only its state 9, now and then,
+  clears it, so A pressed each second beside one takes it within about 6 s; A pressed on the move, with none in reach,
+  has her creep (her act 55) after the one in view, slower than it runs. Each raises 0xC1, and the first plays text
+  sequence 0x169 (0x911). But only Sabre's item menu (dll1's table at +0x2E4) lists 0xC1, not Krystal's (+0x128); the
+  Warrior's update sets his own +0xAF bit 3 while the fight is on (0x0540), so he can't be picked out, and he walks
+  onto none until he is freed (0x655). So the fight has about 45 s of bites, which in a run from the top run out
+  before the third control. With Kamerian Dragon on Restored Krystal's menu lists 0xC1 first, and he can be picked out
+  while she carries one: C-right, then A, from where A uses him (his focus point, about 1580, -6104, south of him)
+  gives it, 12 health and about 4 s of eating, in which he can't be picked out again. From 30 units further south a
+  Skeetla nearer her is picked out in his place, and in a full arena ten tries running failed there; on the focus
+  point each give landed within five. The C-right menu keeps its place between opens and C-right pressed while it is
+  open rolls it on, so with her food bag (0x164) in it a try that leaves it open rolls the next one onto the bag: B
+  twice before each shuts it. The Skeetlas the door's DR_Creators send bite Krystal there too, about every 2 s, and at
+  0 the game over's menu (9) continues on A where she fell, at full health and with the fight as it was, while C-right
+  on it moves to its other choice, a load of the last save. He is bitten about every 2 s with the arena full, so each
+  mushroom buys about 24 s. The controls nearest him go last: 0x5DA, then 0x5D8, then 0x5D9, then the blast on the
+  Skeetlas left.
 - The Warrior is freed by 0x5FD, which DR_NiceSharpy (739, uid 0x33EB2, on the gallery above the arena's east end at
   2413, -6793) sets when it is given item 0x380 or 0x381 (its 0x07B4 reads dll210's export 74, and calls export
   75 with 1). 0x380 is meat: the two Crates beside it (0x40C16 and 0x40C17, about 2059 to 2479, -6800), broken with
@@ -223,12 +240,14 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   sequence at 14 s (0x5FA), the controls out at 54 s (0x5DA), 66 s (0x5D8) and 81 s (0x5D9), the fight won (0x628,
   0x609) at 92 s with the Warrior one bite from death, and the warp into the dragon's room at once.
 - Played from `before-dragon-rock` in one run, with no `--place` or `--bits`: `tools/dragon_rock_input.txt` takes the
-  ice spell (8.5 s), walks the top south and east to its east end, steps down to layer -1, walks to the door (0x5FA
-  at 179 s), and, each part waiting on the bit before it (`sync`), casts at each control from its north until it is
-  out (0x5DA at 221 s, 0x5D8 at 246 s, 0x5D9 at 286 s), sweeps the ice over the Skeetlas at the Warrior and then
-  walks at each one left (`chase 43E`): the fight won (0x628, 0x609) at 308 s, the Warrior fed three times, and the
-  warp into the dragon's room at once, and the same again at 310 s in a second run. Without the feeding, eight such
-  runs lost the Warrior.
+  ice spell (8.6 s), picks up five of the top's blue mushrooms on its way south and east (0xC1 at 38, 44, 121, 130 and
+  135 s), steps down to layer -1, walks to the door (0x5FA at 221 s), and, each part waiting on the bit before it
+  (`sync`), gives the Warrior the five from his focus point once she is by him (at 252, 258, 265, 271 and 278 s),
+  casts at each control from its north until it is out (0x5DA at 308 s, 0x5D8 at 333 s, 0x5D9 at 373 s), sweeps the
+  ice over the Skeetlas at him and walks at each one left (`chase 43E`): the fight won (0x628, 0x609) at 386 s with
+  his health at 7, never below 1, and the walk to the north wall into the dragon's room (map 53) at 406 s. Two more
+  runs won, at 403 s with five given and at 402 s with four, Krystal's one game over there continued (`menu 9 8000`);
+  one lost the Warrior after the controls were out at 383 s, the Skeetla left found by none of the walks in 200 s.
 - The arena and the dragon's room share the world cell (2, -8) and their ground: the room is the arena on layer 0,
   its KamColumns' pits where the arena's DRLavaControls stand. Nothing in the ROM leads into the room: no warp entry
   lies in it, and its entrance, a TriggerPlane at its north (0x41AF3, which sets 0x4D7 for its KD_Sequences), faces

@@ -475,7 +475,8 @@ void dino::story_start(uint8_t* rdram, recomp_context* ctx) {
 }
 
 // --input's to and chase lines (src/main/main.cpp): the stick that walks the player toward (to_x, to_z), or with oid
-// other than -1 toward the nearest object of that id (its halfword at +0x46) that is drawn, as the player's code reads
+// other than -1 toward the nearest object of that id (its halfword at +0x46) that is drawn and not hidden (+0x6 bit
+// 0x4000, as a blue mushroom picked up is), as the player's code reads
 // the stick: up the way the camera looks at the player. An enemy beaten stays where it fell with its alpha (+0x36)
 // faded to 0 (ScorpionRobot's death state, dll234 0x1CB0), so the chase goes on to the next. With sphere other than -1,
 // toward that hit sphere of the object instead: its model instance's (+0x7C, the one at +0xAD) spheres at +0x24, 16
@@ -528,7 +529,8 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
         }
         for (int i = 0; all != 0 && i < MEM_W(0, (gpr)object_count); i++) {
             gpr object = MEM_W(i * 4, all);
-            if (object == 0 || object == player || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0) {
+            if (object == 0 || object == player || (int16_t)MEM_H(0x46, object) != oid || MEM_BU(0x36, object) == 0 ||
+                (MEM_H(0x6, object) & 0x4000)) {
                 continue;
             }
             gpr state = match != -1 ? (gpr)MEM_W(0xB8, object) : 0;
@@ -691,6 +693,13 @@ bool dino::story_object_act(uint8_t* rdram, int oid, int act) {
     return false;
 }
 
+// --input's menu lines (src/main/main.cpp): the menu the game shows, as story_report prints it. 9 is the game over's,
+// on which A continues where the player fell, at full health and with the bits as they were, and C-right moves to
+// its other choice, a load of the last save.
+int dino::story_menu(uint8_t* rdram) {
+    return word(rdram, current_menu);
+}
+
 // --input's sync state lines: whether an object of that id within reach of (x, z), drawn or not (a laser's +0x36 is
 // 0), holds that value, under that mask, in the byte at that offset of its state (obj+0xB8): a timed hazard's phase,
 // such as a laser's beam (dll788, +0x34 nonzero while it is live).
@@ -760,8 +769,8 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
         (int16_t)MEM_H(6, stats), hours, act);
     // DINO_REPORT_OBJECT=<object id hex>: where each object of that id is too, for an enemy a script times by, with
     // its act (dll18's, at state +0x26C, for a character that runs on it) and its use flags (obj+0xAF), and "unseen"
-    // while its byte +0x36 is 0: the game's targeting (dll2 0x1FA0) passes such an object over, so A never uses it.
-    // A line after it says where A does.
+    // while its byte +0x36 is 0, "hidden" while bit 0x4000 of its +0x6 is set: the game's targeting (dll2 0x1FA0)
+    // passes such an object over, so A never uses it. A line after it says where A does.
     static const char* report_object = getenv("DINO_REPORT_OBJECT");
     if (report_object == nullptr) {
         return;
@@ -778,9 +787,9 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
         memcpy(&fy, &oy, 4);
         memcpy(&fz, &oz, 4);
         gpr state = (gpr)MEM_W(0xB8, other);
-        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f %.0f act %d use 0x%02X%s\n", seconds, oid, fx, fy, fz,
+        fprintf(stderr, "story: %.1f s object 0x%X at %.0f %.0f %.0f act %d use 0x%02X%s%s\n", seconds, oid, fx, fy, fz,
             state != 0 ? (int16_t)MEM_H(0x26C, state) : -1, MEM_BU(0xAF, other),
-            MEM_BU(0x36, other) == 0 ? " unseen" : "");
+            MEM_BU(0x36, other) == 0 ? " unseen" : "", (MEM_H(0x6, other) & 0x4000) ? " hidden" : "");
         // Its focus point, where A uses it: the player within 4 x the reach byte of it, across the ground and 100 up or
         // down (dll2 0xE58): obj+0x74's points, 24 bytes each with the world place at +0xC, obj+0x78's 5-byte records
         // with that reach at +0, and obj+0xD4 the one in use.

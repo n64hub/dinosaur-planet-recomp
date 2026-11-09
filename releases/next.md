@@ -33,7 +33,9 @@
   the shaft's bottom with one.
 - Kamerian Dragon on Restored: the Skeetla arena at the bottom of Dragon Rock can be won. The ice spell on the top,
   the only spell that puts out the arena's lava controls, can be picked up and cast from the spell scroll, and the
-  arena fills Krystal's magic and feeds the Earth Warrior while its fight is on.
+  arena fills Krystal's magic while its fight is on. The Earth Warrior there eats the blue mushrooms Krystal picks
+  up on Dragon Rock, given him from her items: the prototype listed them only in Sabre's, and never let her pick
+  him out during the fight.
 - Dragon Rock's bottom: the way from the stairs to the Skeetla arena no longer shuts once the player comes down from
   the top's east end.
 - CloudRunner's snow race: the bike rides back over the edge into the bay where the SnowClaw waits, so the race can

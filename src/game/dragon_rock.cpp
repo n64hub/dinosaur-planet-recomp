@@ -51,8 +51,8 @@
 //   the player to take it, and the scroll aims and casts it as it does the projectile (below).
 // - The arena's magic: while its fight is on, the player's magic is filled there as the dragon's fight fills it
 //   (below), so its three DRLavaControls can be put out.
-// - The arena's DR_EarthWarrior: fed as the item nothing on Dragon Rock gives would feed him, once in the fight and
-//   once more for each DRLavaControl put out (below).
+// - The arena's DR_EarthWarrior: fed Dragon Rock's blue mushrooms, on the top and by the arena, as his update feeds
+//   him item 0xC1 used on him, which Krystal's item menu lists and he takes while the fight is on (below).
 //
 // Always on, a plain bug: the gallery's lever. The scene 0x5FD plays (DR_Seqobj 0x339C4's sequence 2) leaves the player
 // past the gallery's east end, with nothing under her, and the void's respawn takes the freeing back. The door's hook
@@ -219,11 +219,11 @@ void dino::add_dragon_rock_options(recomp::config::Config& general) {
         kamerian_dragon,
         "Kamerian Dragon",
         "The ice spell on Dragon Rock's top can be picked up and cast, and the Skeetla arena at its bottom fills "
-        "Krystal's magic and feeds the Earth Warrior while its fight is on and, once won, leads into the Kamerian "
-        "Dragon's room. The dragon dies once its health runs out, and leaves the fourth SpellStone for the Desert "
-        "Force Point, which leads back out. <b>Original is the prototype as it was left</b>: the ice spell can't be "
-        "taken or cast, the arena can't be won, nothing leads to the room, the fight never ends, and the fourth "
-        "SpellStone is nowhere.",
+        "Krystal's magic while its fight is on, the Earth Warrior there takes Dragon Rock's blue mushrooms from "
+        "Krystal's items, and the arena, once won, leads into the Kamerian Dragon's room. The dragon dies once its "
+        "health runs out, and leaves the fourth SpellStone for the Desert Force Point, which leads back out. "
+        "<b>Original is the prototype as it was left</b>: the ice spell can't be taken or cast, the arena can't be "
+        "won, nothing leads to the room, the fight never ends, and the fourth SpellStone is nowhere.",
         kamerian_dragon_options,
         KamerianDragon::Restored
     );
@@ -373,51 +373,112 @@ static void fill_magic(uint8_t* rdram, recomp_context* ctx, gpr player) {
 }
 
 // The arena's DR_EarthWarrior (dll713), shackled (its setup's +0x19 is 1), starts with 1 health (+0xA56 of its state,
-// 0x03B8), loses one to each Skeetla's bite (0x30C0) and dies below -20 (0x5DE, the fight lost). The arena's
-// DR_Creators send their Skeetlas at him from as soon as the arena loads, as the player comes to its door, and the
-// bites start about 35 s later, before the player can have put out a DRLavaControl: so 21 bites, about 45 s of them,
-// are all the fight has, and the Skeetlas that chase the player from the door's DR_Creators follow her in. The game
-// keeps him alive by feeding: item 0xC1 given him adds 12 (0x0974), as his export 20 does (0x3444), but nothing on
-// Dragon Rock gives that item and nothing calls that export. So, as a fed item would, 12 is added once his health is
-// down to -10: once in a fight, and once more for each DRLavaControl put out (0x789), so a player who stops putting
-// them out still loses him.
-constexpr int warrior_fed_at = -10;
-constexpr int warrior_feed = 12;
-constexpr int lava_controls_out = 0x789;
+// 0x03B8), loses one to each Skeetla's bite (0x30C0) and dies below -20 (0x5DE, the fight lost): about 45 s of bites
+// from about 35 s after the arena loads. His food is the blue mushroom: SHbluemushroom (dll502) of model 0 (its
+// setup's +0x20), which Dragon Rock - Bottom places four of by the arena (uids 348d8 to 348db, about 2260, -6200)
+// and the top seven, in two groups by its path (34885 to 34887, about -3480, -5350, and 40091 to 40094, about -390,
+// -6850; one of each runs from the player).
+// Picked up (A on it) it raises item 0xC1 (0x0698, once the side food bag has said no), and 0xC1 used on him from the
+// item menu adds 12 to his health and lowers 0xC1 by one (0x08CC-0x09A8). Two things of the ROM's stop that while the
+// fight is on, and Restored lifts each:
+// - Krystal's item menu doesn't list 0xC1. dll1's C-right lists the items of one of two tables, Krystal's (object
+//   0x1F) or Sabre's (0x5C4-0x624), and 0xC1 is in Sabre's only (Tricky eats them, dll211), so the mushrooms she picks
+//   up can't be chosen. Her table is given, where dll1 reads it (dll1_3718, whether the menu opens, and dll1_325C, its
+//   list), as a copy with Sabre's 0xC1 entry before her own, so the menu opens on it rather than on her bags.
+// - He can't be targeted while it is on: until it is won (0x628), his update sets +0xAF bit 3 each frame (0x0530),
+//   which keeps the targeting from placing his focus point (func_80036438) and so from marking him used (dll2 0xE58).
+//   While the player holds a mushroom it is left clear.
+constexpr int32_t allocate = 0x80016AA8;      // (size, tag, name): a block of the game's heap
+constexpr int krystal = 0x1F;
+constexpr int blue_mushroom = 0xC1;
+constexpr int item_entry = 12;                // dll1's table entry: +0 the item's bit, a negative one ends the table
+constexpr int most_entries = 64;
 
-// us.toml's hook at the start of dll713's update (0x0408): a0 the object.
-extern "C" void dino_earth_warrior(uint8_t* rdram, recomp_context* ctx) {
+// The entries of the table at table (to its end), or -1 for a table not ended within most_entries.
+static int table_entries(uint8_t* rdram, gpr table) {
+    for (int i = 0; i < most_entries; i++) {
+        if ((int16_t)MEM_H(i * item_entry, table) < 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static int table_find(uint8_t* rdram, gpr table, int count, int item) {
+    for (int i = 0; i < count; i++) {
+        if ((int16_t)MEM_H(i * item_entry, table) == item) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// us.toml's hooks at the start of dll1_3718 and dll1_325C: a0 an item table. Sabre's follows Krystal's in dll1's data.
+extern "C" void dino_item_table(uint8_t* rdram, recomp_context* ctx) {
     if (!restored()) {
         return;
     }
-    gpr warrior = ctx->r4;
-    gpr setup = (gpr)MEM_W(0x4C, warrior);
-    gpr state = (gpr)MEM_W(0xB8, warrior);
-    if (setup == 0 || state == 0 || MEM_B(0x19, setup) != 1) {
+    gpr table = ctx->r4;
+    int count = table_entries(rdram, table);
+    if (count < 0 || table_find(rdram, table, count, blue_mushroom) >= 0) {
         return;
     }
-    // A fight's feeds: a warrior that hasn't updated for a while has been unloaded, and the next is a new fight (a long
-    // pause counts as one too, which can only feed him more).
-    using clock = std::chrono::steady_clock;
-    static clock::time_point last_update;
-    static int fed = 0;
-    clock::time_point now = clock::now();
-    if (now - last_update > std::chrono::seconds(2)) {
-        fed = 0;
-    }
-    last_update = now;
-    int health = (int16_t)MEM_H(0xA56, state);
-    if (health > warrior_fed_at || health < -20) {
+    gpr next = table + (count + 1) * item_entry;
+    int next_count = table_entries(rdram, next);
+    int mushroom = next_count < 0 ? -1 : table_find(rdram, next, next_count, blue_mushroom);
+    if (mushroom < 0) {
         return;
     }
-    Calls calls(ctx);
-    if (get(rdram, ctx, arena_fight_won) || fed > get(rdram, ctx, lava_controls_out)) {
+    static gpr copy = 0;
+    static int copy_count = 0;
+    {
+        Calls calls(ctx);
+        call(rdram, ctx, player_object);
+        if (ctx->r2 == 0 || (int16_t)MEM_H(0x46, ctx->r2) != krystal) {
+            return;
+        }
+        if (copy == 0) {
+            ctx->r4 = (count + 2) * item_entry;
+            ctx->r5 = -1;
+            ctx->r6 = 0;
+            call(rdram, ctx, allocate);
+            copy = ctx->r2;
+            copy_count = count;
+        }
+    }
+    if (copy == 0 || copy_count != count) {
         return;
     }
-    MEM_H(0xA56, state) = health + warrior_feed;
-    fed++;
-    if (logging) {
-        fprintf(stderr, "dragon: the warrior is fed, health %d to %d\n", health, health + warrior_feed);
+    for (int w = 0; w < item_entry / 4; w++) {
+        for (int i = 0; i < count; i++) {
+            MEM_W((i + 1) * item_entry + w * 4, copy) = MEM_W(i * item_entry + w * 4, table);
+        }
+        MEM_W(w * 4, copy) = MEM_W(mushroom * item_entry + w * 4, next);
+        MEM_W((count + 1) * item_entry + w * 4, copy) = MEM_W(count * item_entry + w * 4, table);
+    }
+    ctx->r4 = copy;
+}
+
+// us.toml's hook at dll713's store of +0xAF with bit 3 set while the fight is on (0x0540): $t2 the byte, $s1 him.
+// DINO_LOG_DRAGON set (development): his health (+0xA56 of his state) is printed as it changes.
+extern "C" void dino_earth_warrior_target(uint8_t* rdram, recomp_context* ctx) {
+    static const bool logging = std::getenv("DINO_LOG_DRAGON") != nullptr;
+    static int last_health = 0x7FFF;
+    gpr state = (gpr)MEM_W(0xB8, ctx->r17);
+    if (logging && state != 0 && (int16_t)MEM_H(0xA56, state) != last_health) {
+        last_health = (int16_t)MEM_H(0xA56, state);
+        fprintf(stderr, "dragon: the warrior's health %d\n", last_health);
+    }
+    if (!restored()) {
+        return;
+    }
+    int mushrooms;
+    {
+        Calls calls(ctx);
+        mushrooms = get(rdram, ctx, blue_mushroom);
+    }
+    if (mushrooms > 0) {
+        ctx->r10 &= ~(gpr)0x8;
     }
 }
 

@@ -537,7 +537,7 @@ name = "hit_animator_flags"  # 1 the lines' state with the bit clear, 4 that it 
 [[export]]
 dll = 713
 index = 20
-name = "feed"  # (warrior, 1): adds 12 to his health, as item 0xC1 given him does; nothing calls it
+name = "feed"  # (warrior, 1): adds 12 to his health, as item 0xC1 given him does; SHbluemushroom (dll502 0x0698) calls it as he walks onto one
 [[bit]]
 bit = 0x49D
 name = "snow_bike_ridden"  # CRSnowBike mounted, with 0x497; CRCloudRace clears both as the race is won

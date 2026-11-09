@@ -377,7 +377,10 @@ static std::string game_thread_name(const OSThread* t) {
 // within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
 // "ride to <x> <z> [reach]" and "ride <object id hex> [reach]" do the same for a player on a vehicle that turns by
-// stick x and goes by stick y (story_steer's ride), until within reach (0, never, by default).
+// stick x and goes by stick y (story_steer's ride), until within reach (0, never, by default). A line "menu <n>
+// <buttons hex>" presses those buttons, a fifth of a second each half second with the stick centred, in place of the
+// script's lines whenever the game shows menu n (story.cpp's story_menu): "menu 9 8000" continues after a game over,
+// wherever in the script it comes, as a player does. The parts' clocks go on meanwhile.
 struct ScriptedInput {
     double at;
     uint32_t buttons;
@@ -414,6 +417,10 @@ static constexpr int max_input_parts = 96;
 static InputPart input_part[max_input_parts];
 static std::atomic<double> input_part_start[max_input_parts];
 static int input_parts = 1;
+// The menu line's menu (-1 with none) and buttons, and the menu the game showed at its last pass.
+static int input_menu = -1;
+static uint32_t input_menu_buttons = 0;
+static std::atomic<int> shown_menu = -1;
 
 static double script_seconds();
 
@@ -504,6 +511,8 @@ static void load_input_script(const char* path) {
             after[0] = input_parts;
             afters = 1;
             input_parts++;
+        }
+        else if (sscanf(line, "menu %d %x", &input_menu, &input_menu_buttons) == 2) {
         }
         else if (line[0] != '#' && sscanf(line, "%lf %x to %f %f", &in.at, &in.buttons, &in.to_x, &in.to_z) == 4) {
             in.steer = true;
@@ -713,6 +722,9 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     take_web_options();
 #endif
     double now = script_seconds();
+    if (input_menu >= 0) {
+        shown_menu = dino::story_menu(rdram);
+    }
     if (const ScriptedInput* in = steering) {
         float x, y;
         dino::story_steer(rdram, ctx, in->oid, in->sphere, in->to_x, in->to_z, in->reach, in->ride, &x, &y, in->match, in->match_oid,
@@ -771,6 +783,12 @@ static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out,
             }
         }
         steering = steer_line != nullptr && steer_line->steer ? steer_line : nullptr;
+        if (input_menu >= 0 && shown_menu == input_menu) {
+            *buttons_out = fmod(now, 0.5) < 0.2 ? (uint16_t)input_menu_buttons : 0;
+            *x_out = 0.0f;
+            *y_out = 0.0f;
+            ret = true;
+        }
     }
     return ret;
 }
