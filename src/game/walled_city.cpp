@@ -16,8 +16,8 @@
 //   the bit in its setup's +0x2C as it is picked up. Tricky's flame is a flameblast (#4F0, dll278).
 // - The King (WCKingEarthWalk, dll774) stands in his cage in the courtyard at (-7987, -874, -6896). A with him sets
 //   0x7FB, which plays his sequence: the SpellStone was taken by the RedEyes' leader, "bring it back to me, as only I
-//   can activate it". No text and no code activates it, and the stone BOSS TRex gives is carried as 0x83B, the bit the
-//   Volcano Force Point's second place takes (patches/boss_trex.c).
+//   can activate it". No text and no code activates it. Its carried bit, 0x83B, the Volcano Force Point's second place
+//   takes, and only that map's act 2 sets it (VFP_LevelControl, src/game/acts.cpp).
 // - The way in from SwapStone Hollow (setup point 0, (-8634, -733, -4413)) is a corridor south and then east along z
 //   -4800 to the RedEye-faced arch at x -7640, the gate, and the city beyond it. The prototype's arch is open.
 // - Tricky walks only inside his zones, map curves of type 0x26 (dll25 export 0 builds them, and dll211 0x53E4 puts
@@ -41,8 +41,10 @@
 // - Ten teeth (0xD5 at 10) set 0x821, which lets the bowl beside the arch be used, and A by it opens the gate (0x82D)
 //   and uses the teeth up. Until then the arch holds back a player coming from outside: one who starts inside the city
 //   walks out freely.
-// - BOSS TRex's defeat gives the stone as 0x82E, won but not active, and Sabre talking to the King with it has him
-//   activate it: 0x83B, carried on to the Volcano Force Point as on Original.
+// - BOSS TRex's defeat gives the stone as 0x82E, won but not active (patches/boss_trex.c), and Sabre talking to the
+//   King with it has him activate it: 0x82E is cleared and the Volcano Force Point moves to its act 2, whose level
+//   control hands the stone over as 0x83B (dino::third_stone_activated). On Original, with no King's part, the stone
+//   is activated as it is won.
 
 #include <cmath>
 #include <cstdint>
@@ -107,7 +109,6 @@ namespace {
     constexpr int ten_teeth = 0x821;
     constexpr int gate_open = 0x82D;
     constexpr int stone_won = 0x82E;
-    constexpr int stone_carried = 0x83B;
 
     struct Place {
         float x, y, z;
@@ -554,6 +555,11 @@ namespace {
         }
     }
 
+    void activate(uint8_t* rdram, recomp_context* ctx) {
+        set(rdram, ctx, stone_won, 0);
+        dino::third_stone_activated(rdram, ctx);
+    }
+
     void activate_stone(uint8_t* rdram, recomp_context* ctx, gpr player) {
         if (!get(rdram, ctx, stone_won)) {
             return;
@@ -565,8 +571,7 @@ namespace {
         if (king == 0 || !(MEM_BU(0x4DD, (gpr)(int32_t)MEM_W(0xB8, (gpr)king)) & 1)) {
             return;
         }
-        set(rdram, ctx, stone_won, 0);
-        set(rdram, ctx, stone_carried, 1);
+        activate(rdram, ctx);
         if (logging) {
             fprintf(stderr, "walled city: the King activates the SpellStone\n");
         }
@@ -585,18 +590,14 @@ void dino::add_walled_city_options(recomp::config::Config& general) {
         WalledCity::Restored);
 }
 
-// us.toml's hook after BOSS TRex's defeat has given the stone (dino_trex_beaten, patches/boss_trex.c): on Restored it
-// is won, for the King to activate.
+// us.toml's hook after BOSS TRex's defeat has given the stone as won (dino_trex_beaten, patches/boss_trex.c): on
+// Restored the King activates it, and on Original it is active at once.
 extern "C" void dino_walled_city_trex_beaten(uint8_t* rdram, recomp_context* ctx) {
-    if (!restored()) {
+    if (restored()) {
         return;
     }
     Calls calls(ctx);
-    set(rdram, ctx, stone_carried, 0);
-    set(rdram, ctx, stone_won, 1);
-    if (logging) {
-        fprintf(stderr, "walled city: the SpellStone is won, not yet active\n");
-    }
+    activate(rdram, ctx);
 }
 
 // us.toml's hook in Tricky's flame command (dll211 0x8D4): the id it checks its target's against.

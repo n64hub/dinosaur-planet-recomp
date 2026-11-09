@@ -273,7 +273,7 @@ sync act 3D9 7
 # Won from the west of the wall: the TRex lies across the corridor east of the player, so the way back is the long way
 # round the ring, west, north, east and south, to the south-east corner and out by the door the player came in by,
 # south of it, to the WarpPoint beyond it.
-sync next 83B
+sync next 82E
 3 0 to -14177 -9697
 10 0 to -14177 -8222
 25 0 to -12703 -8222
@@ -321,7 +321,7 @@ sync act 3D9 7
 9.7 0 chase 3D9 60 3
 # Won from the east of the wall: the way back is east to the south-east corner and out by the door the player came in
 # by, south of it, to the WarpPoint beyond it.
-sync next 83B
+sync next 82E
 3 0 to -12703 -9697
 15 0 to -12699 -10150
 22 0 to -12699 -10600

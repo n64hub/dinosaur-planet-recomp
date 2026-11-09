@@ -129,7 +129,8 @@ namespace {
     // The SpellStones after the first, each by the SpellPlace that takes it: a placement's +0x1E is its placed bit and
     // +0x20 the bit of the stone carried (VFP_SpellPlace 637 in map 4, DFP_SpellPlace in map 21). CloudRunner's, won in
     // the race (CRSpellstone, map 43, 0x49F), is carried as 0x2E8 to the Desert Force Point (placed, 0x5F3); Walled
-    // City's is carried as 0x83B to the Volcano Force Point's second place (0x878).
+    // City's is carried as 0x83B to the Volcano Force Point's second place (0x878): the King's activation puts that map
+    // in act 2 (its act, 0x4FE), whose level control gives 0x83B (acts.cpp), and the act stays 2 until it is placed.
     // SwapStone Circle's act, the 4-bit field 0xE7, moves a step each time the player enters map 14 (SC_levelcontrol,
     // dll519): to 3 with 0x2C5, to 8 carrying the first spirit, to 9 once it is released (0x316). Its chief
     // (SC_chieflightfoot, dll518) gives the Moon Mountain Pass key only at act 9: talked to, he sets 0x60E, which
@@ -141,7 +142,7 @@ namespace {
     // Golden Plains' PortalSpell (dll272, map 9) gives the portal spell, 0x5BD, before the Desert Force Point (task 70);
     // Dragon Rock's DR_SupPortal (754) opens only to it.
     const Bits portal_spell = { { 0x5BD, 1 } };
-    const Bits third_stone_carried = { { 0x83B, 1 } };
+    const Bits third_stone_carried = { { 0x83B, 1 }, { 0x4FE, 2 } };
     // Tricky's commands (his export 13, dll211 0x10D4, offers none without it): DarkIce Mines' boss (dll565) sets it as
     // Sabre rescues him, and Northern Wastes' Tricky (dll497) as he joins.
     const Bits tricky_commands = { { 0x4E4, 1 } };

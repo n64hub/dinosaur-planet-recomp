@@ -13,10 +13,15 @@
 //   the podium that takes the third SpellStone for the second path (VFP_PodiumPoint @0D5C, which sets 0x515), its
 //   seqpoint (@1380, holding 0x878), the door switch (@0D14) and the round door (@2B90) load in act 2 only, and the
 //   first SpellPlace and podium in act 1 only. VFP_LevelControl (dll619) sets the map's act to 1 in its constructor
-//   (0x58-0x70) and then reads it back, so its act 2 (0x4C0: the cutscene, then 0x83B and 0x22B, the stone given and
-//   activated) and its act 3 (0x69C: 0x4E9 and 0x63C, which moves Diamond Bay on to act 3, the Pointback's second
-//   egg in DBPointMum dll658 0xC0 and the stealer worms) never run. Here the act is 2 while the third SpellStone is
-//   carried (0x83B) and 3 once it is placed (0x878), both at the map's load and in that constructor.
+//   (0x58-0x70) and then reads it back, so its act 2 and act 3 never run. Its update hands over each act's stone
+//   when a timer runs out (dll619_024C: 130 ticks in its data at +0xBC0, less each frame's, back to 130 each time the
+//   DLL loads and 0 once it has fired): act 1 sets 0x123, the first SpellStone carried, its only setter; act 2
+//   (0x4C0) 0x83B and 0x22B, the third carried; act 3 (0x69C) 0x4E9, 0x63C, which moves Diamond Bay on to act 3 (the
+//   Pointback's second egg in DBPointMum dll658 0xC0 and the stealer worms), and 0x83C. The task list puts the third
+//   stone's activation at Walled City's King (task 83, "KING EARTHWALKER ACTIVATES THE SPELLSTONE"), so his
+//   activation moves the map to act 2 (dino::third_stone_activated, from walled_city.cpp), as the Queen sets act 11
+//   below, and act 2's own timer gives 0x83B. Here act 2 is kept once the map is in it and the act is 3 once the stone
+//   is placed (0x878), both at the map's load and in that constructor; any other act from 1 to 3 is 1.
 //   Act 11 is the Queen Earthwalker's: in SwapStone Hollow she sets map 4 to it before each of her two warps there
 //   (SHqueenearthwal dll507_04F8+0xb8 and +0x118, then 0x486 or 0x487 and warp entry 81), and only act 11 loads the
 //   two SHseqobjects that play those visits (30afa, played once 0x484 is set; 30afc, once 0x485 is) and the WarpPoint
@@ -24,7 +29,8 @@
 //   VFP_LevelControl (group 10), the only object that puts the act back to 1, so on Original the map stays in act 11
 //   after them: warp 81 with the first SpellStone carried (0x123) finds no SpellPlace. Here act 11 is left to the
 //   game while a visit is to play (0x486 without 0x484, or 0x487 without 0x485), and once both are spent the map
-//   loads in the story's act, as that constructor would have it. Any other act outside 1 to 3 is left alone.
+//   loads in act 1, as that constructor would have it, or 3 with the stone placed. The visits come with the Queen's
+//   white mushrooms, before the first stone is placed. Any other act outside 1 to 3 is left alone.
 // - Walled City (map 13). Its Sun and Moon Stones beside the boss door and the sockets on the TRex statues that take
 //   them (WCSunStone dll272 and dll785, group 4) load in act 2 only, where the RedEye teeth and their sockets load in
 //   act 1 only, and only in act 2 does WCLevelControl (dll779 0x1928) turn the block puzzles' counts into the bits
@@ -56,10 +62,10 @@ namespace {
     constexpr int walled_city = 13;
     constexpr int krazoa_palace = 3;
 
-    constexpr int third_stone_carried = 0x83B;
     constexpr int third_stone_placed = 0x878;
     constexpr int third_spirit_released = 0x317;
 
+    constexpr int third_stone_act = 2;
     constexpr int queen_act = 11;
     constexpr int queen_first_visit = 0x486;
     constexpr int queen_first_visit_played = 0x484;
@@ -131,10 +137,7 @@ namespace {
             if (get(rdram, ctx, third_stone_placed)) {
                 return 3;
             }
-            if (get(rdram, ctx, third_stone_carried)) {
-                return 2;
-            }
-            return 1;
+            return act == third_stone_act ? third_stone_act : 1;
         }
         if (map == walled_city && act == 1 && get(rdram, ctx, third_spirit_released)) {
             return 2;
@@ -164,10 +167,23 @@ void dino::add_third_stone_options(recomp::config::Config& general) {
         "Third SpellStone",
         "In the prototype, the Volcano Force Point and Walled City never get past the first visit, so the third "
         "SpellStone has nowhere to go, and nothing gives the moonseeds Krystal plants. <b>Restored</b> moves both "
-        "with the story and gives four moonseeds as the stone is placed. <b>Original is the prototype as it was "
-        "left</b>.",
+        "with the story, the force point on to its second visit once the stone is activated, and gives four "
+        "moonseeds as the stone is placed. <b>Original is the prototype as it was left</b>.",
         third_stone_options,
         ThirdStone::Restored);
+}
+
+// The third SpellStone activated, by Walled City's King or, with Walled City on Original, as it is won: on Restored the
+// Volcano Force Point moves to act 2, whose level control hands the stone over.
+void dino::third_stone_activated(uint8_t* rdram, recomp_context* ctx) {
+    if (!third_stone_restored()) {
+        return;
+    }
+    set_act(rdram, ctx, volcano_force_point, third_stone_act);
+    if (logging) {
+        fprintf(stderr, "acts: map %d to act %d, the third SpellStone activated\n", volcano_force_point,
+            third_stone_act);
+    }
 }
 
 bool dino::third_stone_restored() {
@@ -203,7 +219,7 @@ extern "C" void dino_acts_volcano_level_control(uint8_t* rdram, recomp_context* 
     int act;
     {
         Calls calls(ctx);
-        act = story_act(rdram, ctx, volcano_force_point, 1);
+        act = story_act(rdram, ctx, volcano_force_point, act_of(rdram, ctx, volcano_force_point));
     }
     ctx->r5 = act;
     if (logging) {
