@@ -476,10 +476,15 @@ the race (43) at (-20, 29) on layer -2.
   floor below, so on the prototype it calls from the balcony, out of reach (played). Fixed (Baby CloudRunners on
   Restored): the baby and its TriggerPoint are put on the hall's floor west of the balcony, at (-11170, 1866, 18604),
   as map 12 loads. Played twice from sideload 42a06 by the pool (`--place -12068,1866,18867,0 --bits
-  43,458=5242880`), south of the pit and east: group 21 on at (-11410, 18612), its call sent Kyte to 0x28 on the
-  balcony, and with Krystal stepped back to (-11400, 18620) for 75 s it came out (state 5); A beside it rescued it
-  (0x901, 0x252) and it reached its perch (0x2FF). Once, walked back up to it before Kyte was there, it hung in its
-  sequence for the rest of the run (50 s).
+  43,458=5242880`), south along the pool's west side to (-12080, 18600) and east along z 18606 (the pool lies east of
+  the sideload): group 21 on at (-11410, 18612), its call sent Kyte to 0x28 on the balcony, and with Krystal stepped
+  back to (-11400, 18620) for 75 s it came out (state 5); A beside it rescued it (0x901, 0x252) and it reached its
+  perch (0x2FF). Once, walked back up to it before Kyte was there, it hung in its sequence for the rest of the run
+  (50 s), and in three plays more it didn't: called from 30 away, Krystal walked out past 240 and back to it, twice
+  before Kyte was there and once after, 0x46E stayed 0x28 and Kyte reached the balcony's nodes, and the baby came out
+  whenever Krystal was beyond 85 with Kyte there: as she stepped back to (-11400, 18620), or on her way back in. 29B3
+  calls only within 85 and its crate's top is 79 above the floor, so from the floor its call needs Krystal right
+  beside the crate: at (-13270, 18306), 116 away, it never called.
   Map 30's 2B25, on the SharpClaw galleon (WarpPoint 2b14, entry 61), starts found: from `--story
   before-cloudrunner,61`, walked (-4300, -17185), (-4141, -17205), (-4138, -17440), (-4044, -17681), (-3990, -17820)
   and A, it is rescued (0x901, 0x45B, 0x251; played).
