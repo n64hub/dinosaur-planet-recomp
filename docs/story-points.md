@@ -418,9 +418,9 @@ the race (43) at (-20, 29) on layer -2.
   (main.cpp). Played four times, four wins: in the bay at 22-23 s, the stone at 42.5-45.1 s, 0x49A 9.7 s after it and
   0x49F at 65.4-68.1 s.
 - Bonehead, CFGuardian (369) in map 43, keeps its state in the field 0x4B and starts from it: 6 with the power on
-  (0x57), 9 with 0x43, 10 with 0x4BE (which needs 0x8D1 and 0x300), 12 with 0x4C1. At 12, 0x4B7 plays its sequence
-  11 and with 0x49A moves it to 13; at 13 the SpellStone used on it from the item menu sets 0x4AB, its sequence sets
-  0x4AA, and it goes to 14. Played from 13.
+  (0x57), 9 with 0x43, 10 with 0x4BE (which needs 0x8D1 and 0x300), 12 with 0x4C1. At 12, 0x4B7 plays its sequence 11
+  (map 43's TriggerPlane 30c34 sets 0x4B7 as the bay is entered, 30e8c clears it), and 0x49A moves it to 13; at 13 the
+  SpellStone used on it from the item menu sets 0x4AB, its sequence sets 0x4AA, and it goes to 14. Played from 13.
 - The dungeon (map 16, warp 12). Krystal starts in a cell; A held while walking into the green CFDungeonBlock pushes
   it, and she gets out behind it. The prison key (0x44) lies past CFPrisonGuard (375), who catches her within 150 of
   him and puts her back in the cell (his sequence, 0x574) unless she holds the key, 0x50 is set, or she casts the
@@ -460,10 +460,11 @@ one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
 Left to play: 29FA's rescue (no way up to its ledge found), the babies 29B3, map 30's and map 15's (from the master
 chest), Kyte landing at the gold perch (she stays by the sideload that loaded her, so 0x8D1, 0x4BE and 0x4C1 are read,
-not played; the way to the race waits on 0x4BE too). Read from the ROM, nothing sets 0x4B7 or 0x4B8 (CFGuardian's
-sequence at 0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches by the main door take, but by
-the two ZBombs there. 0x4DC is TriggerPlane 31a68's, at (-9917, 1445, 18272), set on one crossing and cleared on the
-other, and CFLevelControl turns it into 0x4DD, whose sequence sets 0x4DE.
+not played; the way to the race waits on 0x4BE too). Read from the ROM, nothing sets 0x4B8 (CFGuardian's sequence at
+0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches by the main door take: the two ZBombs there
+make it (their setup's +0x18). Neither is needed to finish (docs/restored-content.md, The plan). 0x4DC is TriggerPlane
+31a68's, at (-9917, 1445, 18272), set on one crossing and cleared on the other, and CFLevelControl turns it into 0x4DD,
+whose sequence sets 0x4DE.
 
 ## Golden Plains and the Desert Force Point
 

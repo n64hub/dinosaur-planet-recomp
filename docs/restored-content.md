@@ -268,7 +268,105 @@ facing the receptacle, and Kyte's flame is her scroll's second row at night); a 
 
 Each: what was chosen, every ROM setter and getter of what it touches, which other restoration reads what it sets,
 and what else the ROM offers. "Clash" marks a ROM source found for what the choice stands in for: each is fixed the
-ROM's way. "(?)" marks a reading not checked in full.
+ROM's way. "(?)" marks a reading not checked in full. The plan says what becomes of each.
+
+### The plan
+
+The aim is the route the developers meant, read from the ROM: the task list (ROM file 19, tasks 1 to 106 with text,
+one list in the story's order, each with the SwapStone's clue for it), the unused text in the same file, object and
+def names, placements and acts, and how the finished stretches do the same thing. Star Fox Adventures, the game the
+prototype became, is a hint where both have a stretch, never evidence. Three rules:
+
+- The route is gated only where the ROM gates it. A stretch the ROM leaves open beside the route stays open, and a
+  restoration doesn't make it a step: Cape Claw's tablet room loads from Kyte's rescue (task 17) to Willow Grove's
+  release.
+- The ROM's mechanism comes before ours: a stand-in goes once the ROM's own way is found, and one that unlocks several
+  beats several.
+- What looks cut (text no object uses, as "the 6 SpellStones!") is left out; what is placed or coded and can't be
+  reached is restored, beside the route where the ROM has it beside the route.
+
+Three stretches cascade; every other choice sets bits nothing else reads.
+
+- The Krazoa route: the shrines' wins, Warlock Mountain's acts, WG's release (0x366, sequence 0x12), Cape Claw's act
+  9 and entry 77, the tablet room (0x52B), Krazoa Palace (its act, the fire door, the wings' 0x6A7-0x6AA), the red
+  Krazoa, Drakor, the ending.
+- The stones: BOSS TRex (0x82E), the King (task 83), the volcano's act 2 (0x83B, 0x22B), its act 3 on 0x878 (0x63C,
+  Diamond Bay's act 3), the moonseeds (0x86A), the third spirit (0x317, Walled City's act 2), the Sun and Moon
+  Stones, EC's shrine; and the dragon's stone (0x7A8), the Desert Force Point's second place.
+- CloudRunner Fortress: the babies (0x24F-0x253, perches 0x2FC-0x300), the treasure door (0x30A), the treasure rooms
+  (0x526, 0x528, 0x8CC), the master chest's baby (0x253, 0x300), with the gold (0x8D1) 0x4BE, the pool, the race
+  (0x2E8), Bonehead (0x4AA).
+
+What changes, in the order it is built, the redone choices first:
+
+- **Krazoa Palace's act** (part 2, a bug of the route as built): Cape Claw's TriggerPlane 30ec4 loads in act 1 and
+  fires on 0x2C5, Kyte freed (task 17); it sets Cape Claw's act 2 and Krazoa Palace's (map 3) act 14, which loads
+  151 of the palace's 415 placements and neither KP_Transporter (42cdf, 42ce0, acts 1-13, 15 and 16). The palace
+  route was played only from `--place`. On Restored the palace loads in act 1 (`src/game/acts.cpp`, as the volcano's
+  act is moved), played from a new game's Cape Claw to the palace.
+- **The third SpellStone's hand-over** (replaces BOSS TRex's stone and the King's activation): the volcano's level
+  control hands over each stone in the act it loads in: act 1's timer sets 0x123, the first stone carried, its only
+  setter, and act 2's sets 0x83B and 0x22B (dll619_024C, +0x24C, +0x410, +0x428). Task 83, "KING EARTHWALKER
+  ACTIVATES THE SPELLSTONE", and his "Bring it back to me, as only I can activate it" put the activation at the
+  King. So the King's activation moves the volcano to act 2, as the Queen sets its act 11 (dll29's export 16), and
+  act 2 gives 0x83B; the defeat sets 0x82E only, nothing of ours sets 0x83B, and `acts.cpp` no longer moves the act
+  on it, which ends the circle. Act 3 stays on 0x878. `before-third-stone`'s story point moves with it.
+- **The moonseeds** (replaces four given at 0x878): task 91, "COLLECTED MOONSEEDS FOR KRYSTAL" with the clue "SEARCH
+  IN DARK, WET PLACES", is Sabre's, after 90 (the stone placed) and before 92 (the swap); a SwapStone Hollow
+  ThornTail says "Moonseeds grow in dark damp places.", and the item is "MOON SEEDS". MMP_moonseed (def 528) is
+  dll214, a sequence's actor, not a pickup; WM_MoonSeedMoun is dll331's scenery; nothing raises 0x86A, a count of 3
+  bits. So Sabre finds them in the dark, wet cave under the Hollow (map 8, SwapStone Hollow 2), four for the four
+  MMP_mseedrecept (41a59, 41a5b-41a5d), each a pickup counting 0x86A up as SHbluemushroom (dll502) counts 0xC1.
+  Where in map 8 they lie is the choice left.
+- **When Kyte finds a baby** (replaces "within 400"): her export 24 reads a flag of the curve node she stands on
+  (dll212_319C, set for node types 8, 9, 21 and 22), and the waiting babies 236A, 29FA and 29B3 have find curves of
+  those types beside them (groups 0x10, 0x25 and 0x28, 0x1B) that nothing sends her to. 0x46E, her target group, is
+  what sends her (TriggerPlanes' action 0x1C, FindKyteObject, PerchObject). Restored sets 0x46E to a waiting baby's
+  find group as Krystal comes within its near radius (+0x18), and Kyte's own path code does the rest. FindKyteObject
+  31858 by 236A sends her to 0xF, a node not linked to 0x10 (?). Map 30's baby (2b25) starts found, and map 15's
+  (31b9c) comes out of the master chest (CFSupTreasureCh 31d0d) to item 0x336: both the ROM's own. 29FA's ledge
+  (group 21, loaded by TriggerPoint 31bf3 at the baby, rescue reach 30) has no way up found: the choice left.
+- **The gold** (a bug, not a choice): PerchObject 429d8's chain is whole (0x46E to 0xC0, curve 429D9, message 5,
+  0x8D1). Kyte didn't land because sideload 31877 makes her on the deck, whose curves (group 0x11) join none of the
+  other 338, so she can't find a path to 0xC0. Played first with Kyte following from the corridor; if her joining
+  leaves her on the deck, she is moved to the nearest curve off it once 0x43 is set, always on.
+- **The treasure caves' way in** (Treasure Lift likely goes): task 66, "ENTERED THE TREASURE CAVES UNDER THE
+  FORTRESS" with "DRAINED POOLS HAVE HIDDEN DOORS", the signs "TREASURE ROOMS ... the door will only open when Regal
+  Perches are in use" and "WIND LIFT ... Please use lever to change wind direction". The ROM's way: four perches
+  (0x2FC-0x2FF) set 0x30A, which opens the CFTreasureDoors (2a9b, 2bef); planes 31d9d and 31dac set 0x526,
+  CFseqobject 31d99 0x528 and map 15's 429c1 0x8CC, on which CFLevelControl loads the super chests and the master
+  chest; its baby sets 0x300, and with 0x8D1, 0x4BE drains the pool. Played after the babies and the gold: if the
+  treasure doors reach map 15 (?), Treasure Lift goes. Wind Bridge stays: the barrels cross the wind at the
+  corridor's height.
+- **CloudRunner's bits with no setter**: nothing to build. 0x4B7 is set by map 43's TriggerPlane 30c34 as the bay is
+  entered and only plays Bonehead's talks; his state 12 goes to 13 on 0x49A alone. 0x4B8 (SwapStone Circle's act 5,
+  0x4DD) and 0x4DC to 0x4DE (a scene after the race, read by nothing) aren't needed to finish; hit type 0xF is the
+  two ZBombs' by the main door (their setup's +0x18). Left as the ROM has them.
+- **Cape Claw's act and the tablet room** (Open, decided): the room loads in acts 2 and 3, from task 17, and act 9
+  (WG's release) drops it. Nothing in the ROM orders the room before WG's shrine, and its tasks, 133 to 136 (bits
+  0x238, 0x239, 0x237, 0x3AC), are numbered past the story's last, 106. So it stays beside the route: on Restored
+  Cape Claw stays in act 2 while 0x52B is clear and takes act 9 once it is set (`acts.cpp`), and entry 77
+  (setuppoint 33f90, acts 1-13) lands in either. No gate on WG's shrine.
+- **The third tablet** (decided once its text is found): text 0x201, "I took this before the Sharpclaw could get their
+  hands on it ... It might be of use to you back in Cape Claw", gives a tablet away from Cape Claw; 0x237 is the one
+  tablet bit with no placement, and CCkrazoaTabletA (dll214) is a sequence's actor for it. No DLL names 0x201, so a
+  sequence carries it: which one (ROM file 13's text events) is found first. If a placed sequence carries it, the
+  tablet comes from there and the sand worm's arena loses it; if none does, it stays.
+- **The Queen in Walled City** (simplified): WCQueenEarthWal's name puts her in Walled City, no def is a "Jungle
+  Door", and dll507, the Hollow's Queen, has no step past 7. Where she stands stays, and she is met by her own talk
+  reach (dll773 0x4EC, 100) with Tricky out, in place of 150 and 400. Her unused lines (0x219, 0x21A: "I forbid you
+  to enter that evil place ... Follow me, I will open the Jungle Door for you") are looked for with 0x201's.
+- **The ending** (replaces the title alone): the credits are the ROM's: dll78, menu 15, shows text 0x1FD, and
+  nothing opens it (EndObject, dll299, is empty). After Drakor's fall the credits play, then the title.
+
+Kept as they are: Tricky's run's trigger, the shrines' ways in, GP's and NW's spirits, acts 6 and 7's check, who sets
+0x366, entry 77, the fallen column, the tablet room's end (0x52B), Krazoa Palace's shaft, wings and red Krazoa
+(KP_sequences' four sequences and KP_FinDoor's 0x441 hold no data: the palace's scenes were never made), the fourth
+SpellStone from the dragon (no guardian is tied to it, and "The Last SpellStone! ... Only he can activate it!" and
+"the 6 SpellStones!" read as earlier designs), the dragon's door, the ice spell, the arena's magic, the force point's
+second lift (below), the place's group, Walled City's act 2 (tasks 97 to 99), the meteor's trigger (94's gas vents),
+the flame switch, EC's Transporter (102), the RedEye chase (77) and ten teeth (78, "TO ENTER THE CITY"). Still
+open: the logs.
 
 ### Landed
 
@@ -298,7 +396,8 @@ ROM's way. "(?)" marks a reading not checked in full.
 - **Entry 77** (Krazoa Shrines): Cape Claw's setuppoint 7 (@08F0), (1457, 156, 16940), by its west entrance, which
   act 9 loads. Act 9 adds no placement of its own: it loads act 8's less 28 of its curves, and setuppoint e7b, 68 to
   the west, loads only in acts 12, 13, 15 and 16. Cascade: no trigger act 9 loads sets an act (TriggerSetups 30dfb and
-  3001c, to act 1, and TriggerPlane 30ec4, to act 2, are acts 12 and up's), so Cape Claw stays in act 9, which holds
+  3001c, to act 1, are acts 12 and up's; TriggerPlane 30ec4, to act 2, fires on 0x2C5, Kyte freed, before any shrine),
+  so Cape Claw stays in act 9, which holds
   none of the tablet room's receptacles and set tablets (acts 2 and 3) or its lights (CCkrazoabright, 1 to 3), as acts
   4 to 8 hold none: Cape Claw after the tablet room (Open). The ROM offers: the tablet room, Krazoa Palace or Drakor,
   none tied to act 9.
@@ -336,8 +435,10 @@ ROM's way. "(?)" marks a reading not checked in full.
 - **The fourth SpellStone** (Kamerian Dragon): the dragon dies at 0 health and leaves a CRSpellstone (0x7A8, then 0x5F4
   once placed), and it and the Nurse stay gone. 0x7A8: no ROM setter; read by DFP SpellPlace 40323, seqpoint 4031e,
   target block 401bb and FXEmits. Cascade: 0x5F4 drives SwapStone Circle's meter blocks 32fcd and 32ff7, and
-  `after-dragon-rock` carries it. The ROM offers: a CRSpellstone (35335) in Golden Plains' group 3 with no bits (?);
-  four KD_Sequences nothing triggers (?); DFP_TargetBlock 401bb's chain, half unreachable, whose end is 0x7A8.
+  `after-dragon-rock` carries it. 0x7A8 is the place's gate, DFP_TargetBlock 401bb's chain's end, not a stone carried:
+  place 40323 takes the stone the force point's act carries. The ROM offers nothing else: CRSpellstone 35335 in
+  Golden Plains (act 3, group 3, which only act 2 turns on) has no bits and stands in the race's set, and the four
+  KD_Sequences hold no sequence (+0x1E 0xFF).
 - **The dragon's room's door** (Kamerian Dragon): the arena's north wall, under the room's own entrance plane
   (0x41AF3), warps into the room by entry 89 once the arena is won (0x609), and the stone, 3 s after it is picked up,
   back by entry 84; both empty, no ROM sender. At the wall, not at the win, so the Warrior can still be freed after
@@ -357,11 +458,14 @@ ROM's way. "(?)" marks a reading not checked in full.
   only once freed (0x655), and freed he is still bitten. Played: from `before-dragon-rock` in one run, five picked up
   on the top and given him as the fight starts, and the fight won (docs/story-points.md).
 - **The ending** (Ending): back to the title by dll67's way after 15 quiet updates, the save as it was. The ROM offers:
-  the TRex's defeat loads the front end the same way (dll702); no credits or text.
+  the TRex's defeat loads the front end the same way (dll702), and the credits, dll78's menu 15, which nothing opens
+  (the plan).
 - **The force point's second lift** (Desert Force Point): a second DFPLift1 under the stub at (-275, 9280), its top at
   -1313 and bottom at -1486, on 0x5E8 (the round door's switch). The ROM offers: its own lift (33ea7, on 0x5E3); the
   act-3 DFP_Textblock chain (0x7BF to 0x7C4, blocks at y -1212 and -1223) and DFP_Platform1, which move only from
-  0x7BF, set only by a debug branch of dll638 (?: whether they reach the walkway isn't checked).
+  0x7BF, which DFP_LevelControl's act 3 gives (dll638_0ECC, with 0x5E8) and its constructor never lets run. The
+  chain isn't a way up: its first and third blocks stand at the walkway's height, and the platforms rise to the
+  floor's.
 - **The place's group** (Desert Force Point): group 7 on while the player is between y -1300 and -1200. The ROM offers:
   the planes at (955, -1435, 8973) and (1896, -1459, 8623), which turn it on.
 - **The treasure lift's way down** (Treasure Lift): 0x8C8 set as the wind starts with the player more than 150 above
@@ -387,7 +491,7 @@ ROM's way. "(?)" marks a reading not checked in full.
   read it). Cascade: act 2 loads WCSunStone, the sockets (0x25A, 0x25B, 0x202, 0x243) and the temples (0x812, 0x813),
   and drops act 1's teeth. The ROM offers: nothing sets Walled City's act.
 - **The moonseeds** (Third SpellStone): four given as the third stone is placed (0x878). Cascade: the four receptacles,
-  then the plants, which want Kyte's flame (0x46E) at night. The ROM offers: task 90, "COLLECTED MOONSEEDS FOR KRYSTAL",
+  then the plants, which want Kyte's flame (0x46E) at night. The ROM offers: task 91, "COLLECTED MOONSEEDS FOR KRYSTAL",
   is Sabre's, with the clue "SEARCH IN DARK, WET PLACES", a talker says "Moonseeds grow in dark damp places.", the
   pickup MMP_moonseed has a def and is placed nowhere, and WM_MoonSeedMoun ("MoonSeed Mound") is Warlock Mountain's.
   So the ROM has them found, not given, and doesn't say where.
@@ -416,7 +520,7 @@ ROM's way. "(?)" marks a reading not checked in full.
   -3165), and task 76's "ONLY TRICKY CAN FIND HIS MOM".
 - **The RedEye chase** (Walled City): Tricky's sideload at (-8250, -733, -4800) in zone 184; a RedEye (WCTrexChase) at
   (-7820, -735, -4810) with a flame point (a type-0x24 curve) at (-7900, -735, -4800); offered within 300, flame 150,
-  catch 70, give-up 600. Task 78's "TRICKY'S FLAME BEGINS THE CHASE!" is the ROM's; the rest is ours.
+  catch 70, give-up 600. Task 77's "TRICKY'S FLAME BEGINS THE CHASE!" is the ROM's; the rest is ours.
 - **Ten teeth** (Walled City): a tooth per catch, counted in the 4 bits at 0xD5 (no ROM setter or getter); at ten,
   0x821 lets the bowl at (-7720, -748, -4700), used by A within 80, set 0x82D, the gate; the arch holds Sabre back at x
   -7660 till then. 0x821 and 0x82D: no ROM setter or getter. The ROM offers: only the boss door's two teeth (0x81E,
