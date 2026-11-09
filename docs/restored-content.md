@@ -290,10 +290,9 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Open
 
-Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the walk
-into the moonseed's hollow with Kyte (planted and grown there, the ROM's own code needs no fix: the moonseed is used
-facing the receptacle, and Kyte's flame is her scroll's second row at night); a hit on Warlock Mountain's laser targets
-(WL_LaserTarget, dll595), whose 29c1 lets EC's guards go (0x2FA), and which a script's aimed shots have not set.
+Not played yet, so what it needs isn't known (docs/story-points.md, The third SpellStone and the moonseeds): a hit on
+Warlock Mountain's laser targets (WL_LaserTarget, dll595), whose 29c1 lets EC's guards go (0x2FA), and which a
+script's aimed shots have not set.
 
 ## 3. Choices
 

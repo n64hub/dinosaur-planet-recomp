@@ -884,14 +884,25 @@ Played from here on the desktop build, each from the one before it but where a `
   which plays her sequence 3 and sets 0x3FF; DB_FlameSwitch rises with it, Tricky's flame from beside it lights it
   (0x3D9), the bridge rises, the light beams carry Sabre to the egg (0x86D as A takes it), and the egg used on her
   from the items menu sets 0x39E (`src/game/diamond_bay.cpp` has the steps and what stopped each).
-- The moonseed (tasks 92 and 93): on Restored, at night, from the receptacle's hollow (`--story before-dragon-rock
-  --place -7725,1030,15565,0 --bits 86A=4,42e=64 --time 22 --sidekick kyte`): Krystal faces the receptacle 41a5c (a `to`
-  line at strength 0.5), A, C-right twice (the food bag is the first row), A plants a moonseed (0x86A 4 to 3, 0x868);
-  C-down twice and A send Kyte's flame (0x46E 0xAD), and 9 s later the seed grows (0x85A, 0x85B, the bush and the vine).
-  Krystal climbs the vine with the stick up (acts 27 and 28) to the ledge above, and steps off it east into the canyon.
-  A walk to the receptacle with Kyte from a sideload was not found: the canyon's slope up to that ledge is a drop the
-  other way, a walk from warp 73 stops at its foot (-7389,924,15535), and one from the pass's west setuppoint (41324,
-  -8629,1028,15874) at the moon rock's ledge (-8131,1066,15569).
+- The moonseeds (tasks 92 and 93), all four, on Restored and at night (`--story before-dragon-rock --time 22`), each
+  from the setuppoint a load of the pass puts Krystal at, with its groups on (`--place` there and `--bits
+  86A=4,42e=<its mask>`) and Kyte out of the sideload beside it, no `--sidekick`: Krystal faces the receptacle (a `to`
+  line at strength 0.5), A, C-right twice (the food bag is the first row), A plants a moonseed (0x86A 4 to 3 and its
+  planted bit); C-down twice and A send Kyte's flame (0x46E to its curve), and 9 to 16 s later the seed grows (its two
+  bits, the bush and the vine). The setuppoints count from the east entry (their +0x18, 0101) to the Transporter
+  (0108), and the hollows come in that order:
+  - 41a5b from 3056c (0102, -7399,912,18860, `42e=4`), up the slope south: 0x866, curve 0xAC, 0x856 and 0x857. Its
+    vine climbs (the stick up, acts 27 and 28) to a ledge at y 1086.
+  - 41a5d from 412fe (0103, -7429,1022,18058, `42e=8`): its hollow is 100 below that ledge, and the stick held right
+    over the edge drops Krystal in (at half she stops on it, act 19): 0x869, 0xAE, 0x864 and 0x865.
+  - 41a59 from 41322 (0104, -7402,920,16824, `42e=528`), on the pass's floor: 0x867, 0xAA, 0x858 and 0x859. Its vine
+    climbs to a ledge at y 1050, from which the stick up goes west toward 41323 (0105).
+  - 41a5c from 41324 (0106, -8629,1028,15874, `42e=64`), with the meteor moved (`--bits 803,804,89b,88c=3`, the meteor
+    below): east through the vents' trench, up past MagicPlant 41174 (its hint opens as Krystal nears it, and A shuts
+    it) and south into the hollow: 0x868, 0xAD, 0x85A and 0x85B. Without the meteor moved the walk stops in the trench
+    under it (-8032,968,15784), so this seed comes after task 94, and the moon rock's ledge (-8131,1066,15569) is no
+    way in. Its vine climbs to a ledge at y 1099 east of it, and Krystal steps off it east into the canyon that the
+    pass's Transporter (warp 73) opens on.
 - The test of fear's way in: from warp 73 (`--bits 42e=385`), A on the pass's Transporter 24 s in lands Krystal in
   MMShrine (map 32) 16 s later. The test itself is the shrine's (The shrines).
 - The meteor (task 94): the three MMP_moonrock carried into vents 3, 4 and 6 count 0x88C to 3 and set 0x89B, and
@@ -955,8 +966,8 @@ the hall and onto the column, which rises to y 22; in act 9 the same walk to its
 to y 25 (acts 7 and 9 have no guards and no TriggerArea 2972). CC's column (@1358, act 6 and GP's act 8) and MM's
 release (act 4) are west of the pad.
 
-Not played from here: a walk into the moonseed's hollow from where a player can be with Kyte, and the other three
-receptacles' seeds; task 84's log (no ThornTail sells one, as for the first); and a hit on a WL_LaserTarget (dll595, its
+Not played from here: the pass in one walk, from its east entry through the four hollows in turn (each is played from
+its own setuppoint, The moonseeds above); task 84's log (no ThornTail sells one, as for the first); and a hit on a WL_LaserTarget (dll595, its
 hit is func_80025F40's): a dozen of Sabre's aimed shots at 29c1 from z 2330 to 2700, and some at the hall's, set no bit.
 
 ## The shrines
