@@ -18,9 +18,11 @@
 // (message 0x7000A, 0x96C), as SHbluemushroom (dll502) counts 0xC1. Its def is Cape Claw's gold nugget
 // (CCgoldnuggetPic, object 0x5AF), a plain one of dll272's (its item record's type 1 with no sequence, and an id dll272
 // tests for nowhere), drawn with MMP_moonseed's model (0xF7) at its scale, 1: func_80021450 loads an object's models
-// from its def's list (0x80021774-0x800217C8), and the hook there gives a seed placed here the moonseed's. Their
-// picked-up bits are 0x6AB-0x6AE, saved bits in ROM file 55 (bank 1) that nothing in the code or the maps uses. On
-// Third SpellStone's Original (acts.cpp) none lie there, as the prototype.
+// from its def's list (0x80021774-0x800217C8), and the hook there gives a seed placed here the moonseed's. As it is
+// picked up the player opens a scroll with the text its def names at +0xA2 (dll210_4910 0x900EDD78), the nugget's
+// 0x103, "SHINEY NUGGET| Cape Claw": a seed's is 0x62, "MOON SEEDS| Grow Moon Seeds", the item's own text in ROM
+// file 19 that no def names. Their picked-up bits are 0x6AB-0x6AE, saved bits in ROM file 55 (bank 1) that nothing in
+// the code or the maps uses. On Third SpellStone's Original (acts.cpp) none lie there, as the prototype.
 //
 // The meteor (task 94, "MOVED METEOR TO REACH SHRINE ENTRANCE"): three MMP_moonrock (dll445, uids 425FA-425FC, in no
 // group and every act) are carried and dropped into MMP_gyservent's vents (dll446, group 6); a rock dropped within 20 of
@@ -55,6 +57,7 @@ namespace {
     constexpr int cave = 8;
     constexpr int seed_object = 0x5AF;
     constexpr int seed_model = 0xF7;
+    constexpr int seed_text = 0x62;
 
     struct Seed {
         float x, y, z;
@@ -63,7 +66,7 @@ namespace {
     };
     // World positions, map 8's cell at x -8320, z -2560.
     constexpr Seed seeds[] = {
-        { -8150.0f, -1085.0f, -2420.0f, 0x00, 0x6AB },
+        { -8220.0f, -1085.0f, -2225.0f, 0x00, 0x6AB },
         { -7300.0f, -1090.0f, -2050.0f, 0x40, 0x6AC },
         { -7990.0f, -1075.0f, -1600.0f, 0x80, 0x6AD },
         { -7860.0f, -1075.0f, -1440.0f, 0xC0, 0x6AE },
@@ -158,6 +161,15 @@ extern "C" void dino_moonseeds_frame(uint8_t* rdram, recomp_context* ctx) {
 extern "C" void dino_moonseeds_model(uint8_t* rdram, recomp_context* ctx) {
     if (spawning && MEM_W(0x130, ctx->r29) == seed_object) {
         ctx->r4 = seed_model;
+    }
+}
+
+// us.toml's hook in dll210_4910 once it has read the scroll's text (0x900EDD78) from the def of the object the player
+// holds, $v0: a seed, a nugget counting the moonseeds, gets the moonseeds' text.
+extern "C" void dino_moonseeds_scroll(uint8_t* rdram, recomp_context* ctx) {
+    gpr held = ctx->r2;
+    if (MEM_H(0x46, held) == seed_object && MEM_H(0x2C, (gpr)MEM_W(0x4C, held)) == moonseeds) {
+        ctx->r4 = seed_text;
     }
 }
 // us.toml's hook in dll445_0628 (0xA14), where it has set or cleared 0x89B by the rocks in vents 3, 4 and 6.

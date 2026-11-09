@@ -832,6 +832,13 @@ func = "func_80021450"
 before_vram = 0x80021780
 text = '{ void dino_moonseeds_model(uint8_t*, recomp_context*); dino_moonseeds_model(rdram, ctx); }'
 
+# The moonseeds: the player's pickup (dll210_4910 0x900EDD78) once it has read the scroll's text from the held object's
+# def, which for a moonseed is the moonseeds' text.
+[[patches.hook]]
+func = "dll210_4910"
+before_vram = 0x900EDD7C
+text = '{ void dino_moonseeds_scroll(uint8_t*, recomp_context*); dino_moonseeds_scroll(rdram, ctx); }'
+
 # The meteor (src/game/moonseeds.cpp): MMP_moonrock's vent count (dll445_0628 0xA14), once it has set or cleared 0x89B,
 # sets the meteor's sequence trigger nothing else sets.
 [[patches.hook]]

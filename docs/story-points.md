@@ -683,10 +683,16 @@ inventory with it selected, and A uses it on what is in reach (`--input` lines `
   from 100 units, plays its sequence, which opens the round door down a corridor, and the sequence's event sets
   0x515 (dll633 0x3EC, by the map's act).
 - The third SpellStone: the SpellPlace of act 2 (637) loads within 224 units of (-14849,-1169,-1279), above the
-  core, and takes the stone with no reach of its own: it sets 0x878, and `src/game/moonseeds.cpp` gives four
-  moonseeds then (0x86A, which nothing in the ROM raises). The SpellPlace's seqpoint (630 @1380) holds 0x878 as
-  both its trigger and its done bit, so by its code its sequence, the only one that sets 0x63C (sequence 1032), never
-  plays; VFP_LevelControl's act 3 sets it instead.
+  core, and takes the stone with no reach of its own: it sets 0x878, and from then `src/game/moonseeds.cpp` lays
+  four moonseeds in the cave under SwapStone Hollow (0x86A, which nothing in the ROM raises). The SpellPlace's
+  seqpoint (630 @1380) holds 0x878 as both its trigger and its done bit, so by its code its sequence, the only one
+  that sets 0x63C (sequence 1032), never plays; VFP_LevelControl's act 3 sets it instead.
+- Finding the moonseeds (task 91): in SwapStone Hollow 2 (map 8), the cave under the Hollow, two lie at the pool
+  room's edges (-8220,-2225 its west corner, -7300,-2050 its north side) and two in the corridor north of it
+  (-7990,-1600 and -7860,-1440, by the white mushrooms). A picks one up as it does any collectable, from within its
+  reach; its first pickup's scene (MOON SEEDS, Grow Moon Seeds) waits for A, about 7 s in, and as it closes the seed
+  sets its own bit (0x6AB-0x6AE) and raises 0x86A by one. A picked-up seed isn't laid again. `--story
+  swapstone-hollow --bits 878` starts in the pool room, and `--place -7866,-1076,-1711` puts Sabre in the corridor.
 - The moonseeds: each of Moon Mountain Pass's four MMP_mseedrecept (722, groups 2, 3, 4 and 6) takes one used on it,
   lowers 0x86A and sets its planted bit (0x868 for the one at -7692,1006,15565, in group 6). Krystal's inventory (dll1's
   list 0) shows the moonseed while 0x86A is above 0, and A uses it on the receptacle only while she faces it and has it
