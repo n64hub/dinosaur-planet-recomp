@@ -68,3 +68,6 @@
   prototype ever showed, play on black, then the title.
 - The thin bands of garbage across the top and bottom of the picture in play are gone: the game's picture now
   reaches the window's top and bottom.
+- CloudRunner Fortress: once freed from the courtyard's roof, Kyte flies on with Krystal, so she can be sent to the
+  gold perch above the courtyard and, with the babies home, the pool over the way to the race drains. In the
+  prototype she only ever circled the roof.
