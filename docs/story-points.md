@@ -85,7 +85,7 @@ file 19, each task's name and clue), which says when the player swaps.
   four of those spirits. The task list stops before these (from task 107 it holds placeholders), so their order and
   who plays them are not known from the ROM.
 - `before-cloudrunner`: Krystal at Moon Mountain Pass (warp 73), with two spirits and the first SpellStone placed,
-  and SwapStone Circle at its act 9, where its chief gives the pass's key (CloudRunner Fortress).
+  where SwapStone Circle moves itself on to its act 9, whose chief gives the pass's key (CloudRunner Fortress).
 - `before-desert-force-point`: Krystal in Golden Plains, at its setuppoint 0 where the way from SwapStone Circle comes
   in, carrying CloudRunner's SpellStone. Its warp, 31, stands under the sand: a start there falls and is put back.
 - `before-walled-city`: Sabre in Walled City at its setuppoint 0, where the way from SwapStone Hollow comes in,
@@ -166,7 +166,7 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   its change to the block loaded before, and the bottom's block loads again as the player comes down the stairs, with
   its lines as the ROM has them. A HitAnimator makes its change again only when its block is missing or its bit
   changes, so every update now makes it again, always on as a plain bug fix (`src/game/hit_animator.cpp`).
-- The arena (groups 0 to 2, `--bits 5dc=7`): DR_Creators (738) send Skeetlas (615), at most 20, at DR_EarthWarrior
+- The arena (groups 1 and 2, `--bits 5dc=6`): DR_Creators (738) send Skeetlas (615), at most 20, at DR_EarthWarrior
   (713), shackled there. It is won when 0x628 is set, by the Warrior's update once 0x789 is 3 and no Skeetla is left,
   which plays DR_Seqobj 0x339C6's sequence 7, and its end sets 0x609 (on the top it opens the CloudRunner's cage,
   DR_Cage, DR_CageControl and DR_CloudRunner). 0x789 counts the three DRLavaControls (737) put out: each loses a
@@ -218,7 +218,8 @@ Tasks 107 on are placeholders ("TASK 107 NAME"). Past them the ROM still has:
   The bag is given from the C-right menu, Krystal's first (dll1, the player's object 0x1F), with the staff put away
   (the give is tested in dll210_BA38, her idle state): C-right shows her bags (0x163, 0x164 and 0x165, each its own
   bit), A opens them, C-right twice rolls to the food bag (0x387, icon 0x2EF), A opens it, and A on the meat gives it
-  to what she faces. Only 0x164 has a setter, WL_LevelControl (dll607 0x0194) as Warlock Mountain loads in act 6,
+  to what she faces. Only 0x164 has setters: the foodbagMedium pickups (dll272, its +0x1C), 30cf3 in Warlock
+  Mountain's act 2 and 2a30 in its act 6, and WL_LevelControl (dll607 0x0194) as Warlock Mountain loads in act 6,
   which Cape Claw's shrine won sets (dll486 0x0C44), and `before-dragon-rock` and `after-dragon-rock` set it. Then
   DR_Seqobj 0x339C4 (group 1, on from the door's trigger) plays sequence 2, the lever pulled, and sets 0x5FE, which
   opens the DR_Shackles (747), and his update (dll713 0x0670), while his health is above 0, sets 0x654. The lever's
@@ -366,13 +367,16 @@ over black with the objects floating, so a test there needs the bit: `--story be
 
 Tasks 56 to 68, played from `before-cloudrunner` on the desktop build a link at a time, each started with `--place`
 and the bits of the links before it. Two links needed a fix to the game (the treasure lift and the babies, each behind
-a setting), and the story point did too (SwapStone Circle's act, and the SharpClaw disguise for the dungeon).
+a setting), and so did the key: SwapStone Circle never reached its act 9 in a player's game.
 World coordinates: the fortress (map 12) lies at cell (-15, 29), its treasure caves (15) at (-20, 28) on layer -1 and
 the race (43) at (-20, 29) on layer -2.
 
 - The key. SwapStone Circle's chief (SC_chieflightfoot, 518) gives it only at the circle's act 9, the 4-bit field
   0xE7, which SC_levelcontrol (519) moves on as the player enters map 14. Talked to, he sets 0x60E and 0x60F, and his
-  sequence sets 0x611, the bit Moon Mountain Pass's padlock needs. Played.
+  sequence sets 0x611, the bit Moon Mountain Pass's padlock needs. The circle gets to act 9 only from act 8, and each
+  swap back to Krystal puts it in act 2 (The maps' acts), so `src/game/acts.cpp` moves it on, always. Played from
+  `before-cloudrunner --place -1124,335,17140,0 --bits e7=2,4a6=1`, the circle as a swap leaves it: act 9 as it
+  loaded, and A on the chief set 0x60E at 5.0 s and the key at 17.2 s.
 - The courtyard. Its roof (CFBlastedRoof, 389, about 110 above the courtyard's floor at its middle, group 8 of 0x458) is
   the deck Kyte is shut in on, and blows at the third barrel blown under it: it counts hits of type 5, a CFbarrel's
   explosion (388 0x12A4-0x1314, reach 100, 10 up), one a barrel, each moving 0x2DE+n to 0x2DF+n and 0x900 to n+1, and
@@ -461,7 +465,7 @@ the race (43) at (-20, 29) on layer -2.
   off a second and riding at the claw again, and the fifth drops the stone by the claw, where the bike picks it up: a
   ram with a turn back past the stone's place (-13416, 18825) took 11-14 s, and two of six plays so ran out of fuel
   before the fifth. `tools/cloudrunner_race_input.txt` is the `--input` script that wins it, from `--story
-  before-cloudrunner --place -13460,1262,18866,-2,0 --bits 4a3=7,4a0,4ba`, steering the bike with `ride` lines
+  before-cloudrunner --place -13460,1262,18866,-2,0 --bits 4a3=7,4ba`, steering the bike with `ride` lines
   (main.cpp). Played four times, four wins: in the bay at 22-23 s, the stone at 42.5-45.1 s, 0x49A 9.7 s after it and
   0x49F at 65.4-68.1 s.
 - Bonehead, CFGuardian (369) in map 43, keeps its state in the field 0x4B and starts from it: 6 with the power on
@@ -471,8 +475,10 @@ the race (43) at (-20, 29) on layer -2.
 - The dungeon (map 16, warp 12). Krystal starts in a cell; A held while walking into the green CFDungeonBlock pushes
   it, and she gets out behind it. The prison key (0x44) lies past CFPrisonGuard (375), who catches her within 150 of
   him and puts her back in the cell (his sequence, 0x574) unless she holds the key, 0x50 is set, or she casts the
-  SharpClaw disguise (spell 0x40, her state 0x40): disguised, she walks past him to the key (played;
-  `before-cloudrunner` gives 0x40). The three cell locks (dll308) take the key from the item menu and open their doors, 0x45 0x257, 0x46
+  SharpClaw disguise (spell 0x40, her state 0x40): disguised, she walks past him to the key (played). Bonehead
+  teaches it here: talked to through his cell's bars in his first state, he plays his list's sequence 142, which sets
+  0x40, and his group (3 of 0x47C) comes on at TriggerPlane b9a as she leaves her cell, 500 from the guard. Played from
+  `before-cloudrunner --place -11880,1310,20005,0 --bits 47c=8`, A on him: 0x40 at 12.5 s. The three cell locks (dll308) take the key from the item menu and open their doors, 0x45 0x257, 0x46
   0x258 and 0x47 0x259. Bonehead's cell's lock has to be targeted from its east: from the west he, talking, takes A.
   The cage switches (CFCageSwitch, 384) take the key the same way and play their sequence, whose message 0xA0005 sets
   the switch's bit: the uncle's, at (-11708, 1368, 20410), sets 0x4D (played), and CFPrisonUncle (376) sets 0x50 as the
@@ -641,28 +647,37 @@ Each with what shows it, by the DLL that reads or sets it (`dll <n>`) or the tas
 `tools/dino.py calls bit <bit>` lists every call that sets or reads one with an immediate bit, and a name added to
 `syms/names.toml` shows wherever the tool prints it.
 
-`to_first_shrine`, what the game has set by the first shrine:
+`to_swapstone_hollow` and `to_first_shrine`, what the game has set by the hollow and by the first shrine (each
+value's setter is in The values a point sets, below):
 
 - 0xD0: task 3, Randorn. Set by WM_Wizard (598), read by SB_KyteCage (581) and SB_CageKyte (583).
 - 0xB4, 0x2B2, 0x70: tasks 4, 5 and 6, the warp crystal. 0x70 is read by IMIceMountain (408).
 - 0x37A, 0x4D3, 0xAB: tasks 7, 8 and 9: Prince Earthwalker, the race, the tunnel.
+- 0x15A: read by SHswapstone (515) as Rocky's greeting already given. Sequence 263 sets it at Krystal's first
+  meeting with him in SwapStone Circle, before Ice Mountain, so `swapstone-hollow` has it.
 - 0xBF: task 10, SwapStone Hollow, set by SHqueenearthwal (507).
-- 0x15A: task 12, read by SHswapstone (515).
-- 0x3A0: task 14, swapped to Krystal.
 - 0x88, 0x3B0, 0x2C5, 0x615: tasks 15 to 18 in Cape Claw: the bribe (CCguardgiving, 447), Lightfoot (CClightfoot, 449),
   Kyte, the courtyard (0x2C5 and 0x615 are read by CClevcontrol, 460).
 - 0x2D, 0x1D7, 0x40: spells, the bits that show them on the spell scroll (dll1's menu 6), and the value its message
   0x80002 hands the player (dll210 0x1DDC), held at her state's +0x87C (dll210's export 50). CClightfoot sets 0x1D7
-  with task 16, "COLLECTED FORCEFIELD SPELL". WL_LevelControl (607 0x1118) sets all three in its first update each
-  time it loads, until the fourth spirit (0x318), so Krystal has them from her first visit to Warlock Mountain; the
-  MMShrine's and WGShrine's controls (466, 488) set 0x40 too. 0x40 is the SharpClaw disguise: cast, it puts her in a
-  SharpClaw's shape and drains her magic, and CFPrisonGuard (375) and ClubSharpClaw (215) let her by.
+  with task 16, "COLLECTED FORCEFIELD SPELL". WL_LevelControl (607) sets 0x2D in its first update in acts 2 to 7
+  (0x0940 on), not act 1, Krystal's first visit: act 2 comes with Discovery Falls' shrine won (DFSH_Shrine, 433), so
+  the projectile spell comes with the first spirit. 0x40 is the SharpClaw disguise: cast, it puts her in a SharpClaw's
+  shape and drains her magic, and CFPrisonGuard (375) and ClubSharpClaw (215) let her by. Bonehead teaches it in
+  CloudRunner's dungeon (CloudRunner Fortress, above), and later MMShrine's and WGShrine's controls (466, 488) and
+  WL_LevelControl's act 5 (0x1118) set it too.
+- 0x3A0, task 14, swapped to Krystal, is set by nothing: only TriggerPlane 300b8 in Cape Claw names it, by an action
+  of flags 0x04 alone, which never runs (dll325 0xA2C-0xAD8 runs one only with a direction's flag, 0x01 or 0x02). It
+  is CCnewseqobject 4260d's trigger, so no point sets it: set, that scene would play, which no player sees.
 
 The spirits, set in this order by WL_seqpoint (611) and read by WL_LevelControl (607):
 
-- First: 0x316, 0x21F. Second: 0x277, 0x21B. Third: 0x317, 0x21C. Fourth: 0x318, 0x21D.
+- First, Discovery Falls': 0x277, 0x21B. Second, Diamond Bay's: 0x316, 0x21F. Third, Moon Mountain Pass's: 0x317,
+  0x21C. Fourth, the Earthwalker Temple's: 0x318, 0x21D. Each release's seqpoint loads in one of Warlock Mountain's
+  acts: 2191 (trigger 0x277) in act 2, which Discovery Falls' shrine sets, and 2583 (0x316) in act 3, Diamond Bay's.
 
-`first_stone`: 0x104 (task 29) and 0x22E (task 39) on the way there, and 0x877, placed: VFP_SpellPlace (637) in the
+`first_stone`: 0x104 (task 29) and 0x22E on the way there, Tricky's commands and flame from DarkIce Mines (tasks 30
+to 40), and 0x877, placed: VFP_SpellPlace (637) in the
 Volcano Force Point takes it as its placed bit, with 0x123 as the stone carried. And 0x4E9, which VFP_LevelControl
 (619) sets on that visit and Diamond Bay's act counts (The maps' acts). Carrying is 0x123 or 0x2E8, which
 SHswapstone refuses a swap on ("You cannot swap when holding a SpellStone"), so a point leaves both clear.
@@ -685,6 +700,64 @@ with no code. A dock placed there with flows down the river gave a log that was 
 a tenth of Diamond Bay's depth. A BWLog (793) moves only on DFriverflows' pushes: A while riding makes the rider hop
 (0x2B8), the stick turns it, and A twice with the stick to a side gets off (dll793 0x1600).
 
+## The values a point sets
+
+Each value `src/game/story.cpp`'s points set by hand, by its list there, with its setter in a player's game and where
+on the way that comes, from the ROM's code, sequences and placements (`tools/dino.py calls bit <bit>`, which lists the
+triggers that set a bit, turn a map's groups on or off or set its act, beside the calls and sequences). Each setter
+comes before the first point that sets the value. Task numbers are the task list's (ROM file 19).
+
+| value | list | setter | where on the way |
+|---|---|---|---|
+| 0xD0 | `to_swapstone_hollow` | WM_Wizard (598, 0x072C) | Warlock Mountain's act 1, meeting Randorn (task 3) |
+| 0xB4 | `to_swapstone_hollow` | TriggerPlane 42c9d (map 11, crossed forward); sequence 218 by WL_podium | by the warp door 30b1c (task 4) |
+| 0x2B2 | `to_swapstone_hollow` | SC_sequences 2733's played bit (map 14, trigger 0x95, always 1) | Krystal's first arrival at SwapStone Circle (task 5) |
+| 0x70 | `to_swapstone_hollow` | IMMultiSeq 300ff (311), its step 1 done; TriggerPlane 3cc2 sets the step's trigger, 0x6F | NewIceMt1 (map 23), from the start (task 6) |
+| 0x37A | `to_swapstone_hollow` | IMSeqObject 3afb's played bit (map 25), after TriggerPlane 300c0 (0x3A3) and IMIceMountain (408 0x0AB4, 0x379) | Prince Earthwalker's scene (task 7) |
+| 0x4D3 | `to_swapstone_hollow` | NWboulder 30398 (274 0x1D2C) at its first impact | Northern Wastes' group 1, from plane 3051f at the Ice Mountain end (task 8) |
+| 0xAB | `to_swapstone_hollow` | WallAnimator 30a21 (355) at the end of its animation | Northern Wastes' west end, by SwapStone Hollow (task 9) |
+| 0x15A | `to_swapstone_hollow` | sequence 263 (SHseqobject 41fd9, map 14, trigger 0x3EB) | Rocky's greeting at SwapStone Circle, before Ice Mountain. Was `to_first_shrine`'s, so the hollow's stone greeted Sabre again |
+| 0xBF | `to_first_shrine` | SHqueenearthwal (507 0x00A0) | SwapStone Hollow, the Queen (task 10) |
+| 0x88 | `to_first_shrine` | CCguardgiving (447 0x00CC) | Cape Claw, the bribe (task 15) |
+| 0x3B0 | `to_first_shrine` | CClightfoot (449) | Cape Claw (task 16) |
+| 0x2C5 | `to_first_shrine` | CCCellDoor 30482 (308) used holding CCCellKey 30481's 0x3ED | Cape Claw's group 4, Kyte freed (task 17) |
+| 0x615 | `to_first_shrine` | CCportcullis 30487 (307 0x05E4) once levers 0x41E and 0x604 are pulled | Cape Claw's courtyard (task 18) |
+| 0x1D7 | `to_first_shrine` | CClightfoot (449 0x02B8), CCspellpage (450) | Cape Claw (task 16) |
+| 0x3A0 | none now | nothing: TriggerPlane 300b8's only action never runs (The bits) | was `to_first_shrine`'s; it started a scene of Cape Claw's no player sees |
+| 0x2D | `first_spirit` | WL_LevelControl (607) in acts 2 to 7; VFP_LevelControl (619), DFP_LevelControl (638), WGSH_Shrine (488) | Warlock Mountain after Discovery Falls' shrine. Was `to_first_shrine`'s, a shrine early |
+| 0x40 | `disguise` | sequence 142, Bonehead's (CFGuardian 2a4f, map 16) | CloudRunner's dungeon, before the prison guard. Was `to_first_shrine`'s, from the first shrine to the third |
+| 0x277, 0x21B | `first_spirit` | WL_seqpoint 2191's release (611 0x04B4), Warlock Mountain's act 2 | Discovery Falls' spirit (task 26). Was `second_spirit`'s |
+| 0x104 | `first_stone` | sequence 745 by NWMultiSeq (map 10) | Northern Wastes (task 29) |
+| 0x4E4 | `first_stone` | NWtricky (497) as he joins; DIM_Boss (565); sequence 139 | Northern Wastes and DarkIce Mines (tasks 28 to 40). Was set only from `before-walled-city` |
+| 0x172 | `first_stone` | SnowClaw 1602 (215) beaten | DarkIce Mines. As 0x4E4 |
+| 0x245, 0x27 | `first_stone` | DIMSnowHorn1 1a5e's talk (712 0x2470) | DarkIce Mines, after the SnowClaw. As 0x4E4 |
+| 0x22E | `first_stone` | NWseqobject 41ec3's played bit (trigger 0x22B, the Guardian, 496 0x2254), loaded in Northern Wastes' act 2, which TriggerPlane 41e5a sets (action 0x18) | Northern Wastes, the Guardian's activation (task 42) |
+| 0x4E9 | `first_stone` | VFP_LevelControl (619) in acts 1 and 3; TriggerPlanes 42670 (map 4) and 42528 (map 35) | the first visit to the Volcano Force Point |
+| 0x877 | `first_stone` | VFP_SpellPlace 42804's placed bit (map 4, act 1) | the first SpellStone placed (task 50) |
+| 0x316, 0x21F | `second_spirit` | WL_seqpoint 2583's release (611 0x04B4), Warlock Mountain's act 3 | Diamond Bay's spirit (task 54). Was `first_spirit`'s |
+| 0xE7 = 9 | none now | `src/game/acts.cpp`, always (The maps' acts); SC_levelcontrol (519 0x08B4) only from act 8 | SwapStone Circle, entered with both spirits released (task 56). Was `circle_act_9`, which no player's game reached |
+| 0x317, 0x21C | `third_spirit` | WL_seqpoint 27ab's release (611), Warlock Mountain's act 4 (0x317 its done bit on Restored) | Moon Mountain Pass's spirit (task 97) |
+| 0x318, 0x21D | `fourth_spirit` | WL_seqpoint 2983's sequence 0xA (611), act 5 | the Earthwalker Temple's spirit (tasks 104, 105). The way to it needs 0x2F3, which WL_LevelControl (607 0x1118) sets from WL_LaserTarget 29c1's 0x2FA: a setter, its hit not played |
+| 0x49F, 0x2E8 | `second_stone_carried` | CFseqobject 30cca's sequence 0x18 (0x49F), CRSpellstone 30c30 picked up (0x2E8), map 43 | the race won (task 67), played |
+| 0x49F, 0x5F3 | `second_stone` | DFP_SpellPlace 35111 (map 21, reached by Desert Force Point's lift on Restored); GP_LevelControl (547) | the second SpellStone placed (task 72) |
+| 0x5BD | `portal_spell` | PortalSpell 34d2b picked up (map 9) | Golden Plains (task 70) |
+| 0x4FE = 2 | `third_stone_carried` | the King's activation (`src/game/walled_city.cpp`, `acts.cpp`) | Walled City (task 83) |
+| 0x83B | `third_stone_carried` | VFP_LevelControl's act 2 timer (619, map 4) | as Sabre comes into the Volcano Force Point: `before-third-stone` sets it a map early, in Diamond Bay, where nothing reads it |
+| 0x878 | `third_stone` | VFP_SpellPlace 41e21's placed bit (map 4, act 2) | the third SpellStone placed (task 90), played |
+| 0x7A8 | `fourth_stone_carried` | `src/game/dragon_rock.cpp`, Kamerian Dragon on Restored: the dragon's stone | after Dragon Rock |
+| 0x164 | `food_bag` | foodbagMedium 30cf3 (Warlock Mountain's act 2) and 2a30 (act 6) picked up (272); WL_LevelControl (607 0x0194) in act 6 | Warlock Mountain, before Dragon Rock |
+
+The `--bits` the play notes above start a stretch with each have a setter on the way too, the game's or a
+restoration's, but for three. Group 0 of Dragon Rock's arena (0x5DC) is turned on by nothing: no trigger, setuppoint
+or sequence of map 52's, and every dll29 export 19 call naming map 52 turns on group 2 or 4. Its one control,
+DRLavaControl 33e6f, is a second, weaker one for 0x5D9 beside 33e74 in group 1, so the fight is won without it, and
+the notes start the arena with `5dc=6`, groups 1 and 2, which TriggerPlane 33e62 turns on at its door. 0x4A0 is set by
+nothing either: CRCloudRace (729 0x0178) reads it, sets 0x4BA if it is set and goes on either way, and 0x4BA comes from
+ClubSharpClaw 42a32 beaten, so the race starts without it. And `42e=-1` turns on more of Moon Mountain Pass than play
+ever does, as its note says. Others worth knowing: 0x36A is Walled City's group field, 0x86A the moonseeds' count and
+0xD5 the teeth's, and a setuppoint's group mask (+0x1C) is applied only by a new game, the title and the dev menu
+(`func_80048054`, from `func_800141A4`), never by a warp.
+
 ## Object groups
 
 A map's objects come in groups, and most of a level's enemies and props load only while their group is on. Each
@@ -703,8 +776,8 @@ than play ever loads, and `--bits 42e=385` groups 0, 7 and 8, where the pass's T
 
 A TriggerPlane turns a group off as the player crosses it, and the group's objects are freed then, whatever holds
 them. SwapStone Circle's small baskets and crates are in its group 1, which the planes at about (-50, 377, 17013) and
-(220, 325, 17301) turn off, in world coordinates (the map lies at -1920, 15360). Dragon Rock's fight is in groups 0
-to 2 (`--story new-game,88 --bits 5dc=7`): DR_Creator (738) sends Skeetlas (615), at most 20, at DR_EarthWarrior
+(220, 325, 17301) turn off, in world coordinates (the map lies at -1920, 15360). Dragon Rock's fight is in groups 1
+and 2 (`--story new-game,88 --bits 5dc=6`): DR_Creator (738) sends Skeetlas (615), at most 20, at DR_EarthWarrior
 (713), in group 2 at (1576, -1831, -6066), the only object they go for there.
 
 ## The maps' acts
@@ -717,7 +790,7 @@ numbered by the u16 at +0x1F90 + 2 × map in dll29's data: 0x4FE the Volcano For
 other objects in each act. A level's control object sets its act, or a sequence does (dll3's event 0x1D, the act of
 the map the playing object is in), and ROM file 13 holds one such event, which sets act 3.
 
-`src/game/acts.cpp` moves four maps' acts with the story, at each map load (the header has the evidence), and
+`src/game/acts.cpp` moves five maps' acts with the story, at each map load (the header has the evidence), and
 `DINO_LOG_ACTS=1` prints each act it moves or leaves:
 
 - The Volcano Force Point: act 2 from the King's activation of Walled City's SpellStone, 3 once it is placed (0x878).
@@ -746,6 +819,13 @@ the map the playing object is in), and ROM file 13 holds one such event, which s
   act 9 after that release, and only acts 2 and 3 load the room's receptacles and tablets (1 to 3 its lights).
   Played from `before-wg-shrine --place 13447,472,1612,0 --bits e4=7,366` (WG's release site in act 7, its sequence
   0x12 at 48 s) and from `before-sand-worm --bits ee=2,52b,222`: docs/restored-content.md, The plan.
+- SwapStone Circle (0xE7), always: act 2, 3 or 8 loads as 9 once Discovery Falls' and Diamond Bay's spirits are
+  released (0x277, 0x316), until the chief has given the key (0x611). SC_levelcontrol (519 0x08B4) moves the circle on
+  as the player enters: to 3 with 0x2C5, to 8 while Krystal carries Discovery Falls' spirit (mask 1), to 9 once
+  Diamond Bay's is released, and the chief gives the key only in 9. But SHswapstone (515 0x0448, at 0x708 and 0x970)
+  puts it in act 2 at each swap to Krystal, and Diamond Bay's spirit is Sabre's, won and released between two swaps, so
+  she finds the circle in act 2, then 3, and never 8 with 0x316 set. Warp 14
+  lands on the SwapStone's pad, where Rocky's scene holds the player: start beside the chief with `--place`.
 
 A map's act is kept in the save, so a death or retry restores the act the map had when the level started, and the
 map's next load moves it on again. Diamond Bay moves by itself: act 2 from the first SpellStone (0x4E9) holds the

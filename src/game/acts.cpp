@@ -2,6 +2,7 @@
 // with Third SpellStone on Restored (the default); on Original both stay in act 1 as in the prototype. Krazoa Palace
 // is kept out of the act that drops its Transporters, with Krazoa Palace on Restored (the default), and Cape Claw out
 // of the one that drops its tablet room until the room is solved, with Krazoa Tablets on Restored (the default).
+// SwapStone Circle is moved on to the act whose chief gives Moon Mountain Pass's key, always.
 //
 // Each map has an act, a story value of 4 bits that dll29's export 15 reads and export 16 sets (map 4's is bit 0x4FE,
 // Walled City's 0xE6, Diamond Bay's 0x3EE: the u16 at +0x1F90 + 2 * map in dll29's data). A new game puts every map
@@ -9,7 +10,7 @@
 // set (byte +5 for acts 9 to 16). Sequences set the act of the map the playing object is in (dll3's event 0x1D, at
 // 0x6DF0: a word act << 16 | 0x746 of ROM file 13), and the one such event in all of file 13 sets act 3. Of the code
 // that sets a map's act by its number (`tools/dino.py calls dll29.16`), only the Queen Earthwalker names map 4 or 13
-// (below), only dll611 map 29, and the rest set their own map's act or another's. The four acts this file moves:
+// (below), only dll611 map 29, and the rest set their own map's act or another's. The five acts this file moves:
 // - Volcano Force Point (map 4). Its second SpellPlace (@15B8, VFP_SpellPlace dll637: placed bit 0x878, carried 0x83B),
 //   the podium that takes the third SpellStone for the second path (VFP_PodiumPoint @0D5C, which sets 0x515), its
 //   seqpoint (@1380, holding 0x878), the door switch (@0D14) and the round door (@2B90) load in act 2 only, and the
@@ -55,6 +56,14 @@
 //   bank 1), which the release sets in the same function (dll611 0x4B4) before sequence 0x12 plays. 0x367 and 0x368
 //   are bank 0, not saved, and the warp point clears 0x367 as it warps. Entry 77's setuppoint (33f90) loads in acts 1
 //   to 13, so the warp lands in either.
+// - SwapStone Circle (map 14, act bits 0xE7), always: a plain bug in what the prototype has. Its chief
+//   (SC_chieflightfoot, dll518) gives Moon Mountain Pass's key (0x60E, then his sequence's 0x611) only in act 9, and
+//   SC_levelcontrol (dll519_08B4) moves the act one step as the player enters: below 3 to 3 with 0x2C5, 3 to 8 while
+//   Krystal carries Discovery Falls' spirit (mask 1), 8 to 9 once Diamond Bay's is released (0x316, task 54, the key
+//   being task 56). But each swap back to Krystal puts the circle in act 2 (SHswapstone, dll515_0448 0x708 and 0x970),
+//   and Diamond Bay's spirit is Sabre's, won and released between two swaps, so a player who carried Discovery Falls'
+//   spirit through act 8 finds the circle in act 2, then 3, and the key never comes. Here act 2, 3 or 8 loads as 9 once
+//   both spirits are released (0x277, 0x316) and until the key is given (0x611); the swap's act 2 comes back after.
 
 #include <cstdint>
 #include <cstdio>
@@ -75,6 +84,7 @@ namespace {
     constexpr int walled_city = 13;
     constexpr int krazoa_palace = 3;
     constexpr int cape_claw = 29;
+    constexpr int swapstone_circle = 14;
 
     constexpr int third_stone_placed = 0x878;
     constexpr int third_spirit_released = 0x317;
@@ -93,6 +103,11 @@ namespace {
     constexpr int after_willow_grove_act = 9;
     constexpr int tablets_solved = 0x52B;
     constexpr int willow_grove_released = 0x222;
+
+    constexpr int key_act = 9;
+    constexpr int first_spirit_released = 0x277;
+    constexpr int second_spirit_released = 0x316;
+    constexpr int pass_key = 0x611;
 
     const std::string third_stone = "third_stone";
 
@@ -149,7 +164,8 @@ namespace {
 
     // The act the story has the map in, from the one it is in: the volcano's from acts 1 to 3, and from the Queen's
     // act 11 once her visits are spent; the palace's act 1 from 14; Cape Claw's act 2 from 9 until the tablet room is
-    // solved, and 9 from 2 or 3 once it is and Willow Grove's spirit is released.
+    // solved, and 9 from 2 or 3 once it is and Willow Grove's spirit is released; SwapStone Circle's 9 from 2, 3 or 8
+    // once the first two spirits are released, until the key is given.
     int story_act(uint8_t* rdram, recomp_context* ctx, int map, int act) {
         if (map == volcano_force_point) {
             if (act == queen_act ? queen_visit_pending(rdram, ctx) : act < 1 || act > 3) {
@@ -174,6 +190,10 @@ namespace {
                 get(rdram, ctx, willow_grove_released)) {
                 return after_willow_grove_act;
             }
+        }
+        if (map == swapstone_circle && (act == 2 || act == 3 || act == 8) && get(rdram, ctx, first_spirit_released) &&
+            get(rdram, ctx, second_spirit_released) && !get(rdram, ctx, pass_key)) {
+            return key_act;
         }
         return act;
     }
@@ -225,10 +245,11 @@ bool dino::third_stone_restored() {
 // us.toml's hook at the end of func_80045BF4, which has loaded map $s0 and placed none of its objects yet.
 extern "C" void dino_acts_map_loaded(uint8_t* rdram, recomp_context* ctx) {
     int map = (int32_t)ctx->r16;
-    bool restored = map == volcano_force_point || map == walled_city ? dino::third_stone_restored() :
+    bool moved = map == volcano_force_point || map == walled_city ? dino::third_stone_restored() :
         map == krazoa_palace ? dino::krazoa_palace_restored() :
-        map == cape_claw && dino::krazoa_tablets_restored();
-    if (!restored) {
+        map == cape_claw ? dino::krazoa_tablets_restored() :
+        map == swapstone_circle;
+    if (!moved) {
         return;
     }
     Calls calls(ctx);

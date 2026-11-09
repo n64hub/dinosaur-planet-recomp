@@ -96,6 +96,12 @@ Fixed:
   sharpclaw beside them, pulls the lever that opens his shackles, but its scene looked at the lever from outside the
   level and left Krystal falling into the void, and the respawn took it all back. The scene now plays on the gallery
   and in the arena, it ends with her where she gave the meat, and walking to the arena's south side frees him.
+- SwapStone Circle's chief never gave Krystal the key to Moon Mountain Pass, so nothing after it, CloudRunner
+  Fortress on, could be reached from a player's save: he gives it only in a later part of the circle's story, which
+  the SwapStone's swap back to Krystal always set back. The circle now moves on to it once Diamond Bay's spirit is
+  released, until he has given the key.
+- The story from a new game to its ending: every story value a stretch was tested from now has where a player's
+  game sets it on the way there (docs/story-points.md, The values a point sets), and the one that didn't is above.
 - Drakor's end (Ending on Restored): the last fight is won as the ROM has it, by a hit with the staff and a walk to
   the Kamerian Diamond in the room below, and the end of Drakor's fall now plays the game's own credits, which nothing
   opened, then goes back to the title with the save as it was. The prototype started the fight again after his fall,
@@ -159,7 +165,6 @@ Fixed:
 Under way:
 
 - Crashes in the game's own code still to find: the skeletons' hits.
-- The rest of the story, played from a new game to its ending, and whatever stops a player there.
 
 ## The ROM
 
