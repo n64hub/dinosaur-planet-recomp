@@ -152,7 +152,8 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 `src/game/krazoa.cpp`; PRs 27 and 31.
 
 - CCkrazoaBits counts three tablet bits, 0x234, 0x236 and 0x237, and nothing sets 0x237: the third tablet is missing.
-  Where it lies is a choice (part 3).
+  Where it lies is a choice (part 3). Text 0x201, "It might be of use to you back in Cape Claw", is HighTop's
+  hand-over of the first, 0x234, in Discovery Falls (part 3, The plan).
 - The tablet room's puzzle ends in a state with no handler, and CCkrazoaBits, placed by distance in the room, missed
   a tablet picked up elsewhere: the pickup counts the third itself.
 - Entries 71 and 72 land in the tablet room with no plane crossed, so they set 0x2C0, which the planes on the way in
@@ -273,6 +274,11 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Open
 
+- **HighTop's tablet scene** (Krazoa Tablets; card 17942258671990000): Discovery Falls' CCseqobject 34add plays
+  sequence 873, HighTop (DFanimhightop) handing Krystal the first tablet with text 0x201, and sets 0x234 as it
+  starts, but its trigger is 0x96, never, and TriggerPlane 34adc beside it sets 0x234 in its place. On Restored,
+  crossing 34adc plays the scene, which gives the tablet.
+
 Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the walk
 into the moonseed's hollow with Kyte (planted and grown there, the ROM's own code needs no fix: the moonseed is used
 facing the receptacle, and Kyte's flame is her scroll's second row at night); a hit on Warlock Mountain's laser targets
@@ -376,15 +382,19 @@ What changes, in the order it is built, the redone choices first:
   13447,472,1612,0 --bits e4=7,366`): sequence 0x12 at 48 s, then Cape Claw loaded in act 2 by its west entrance,
   and the tablet room (entry 72) held its receptacles; with 0x52B set it stayed in act 9; on Original, act 9. From
   `before-sand-worm --bits ee=2,52b`, act 2, and with 0x222 too, act 9.
-- **The third tablet** (decided once its text is found): text 0x201, "I took this before the Sharpclaw could get their
-  hands on it ... It might be of use to you back in Cape Claw", gives a tablet away from Cape Claw; 0x237 is the one
-  tablet bit with no placement, and CCkrazoaTabletA (dll214) is a sequence's actor for it. No DLL names 0x201, so a
-  sequence carries it: which one (ROM file 13's text events) is found first. If a placed sequence carries it, the
-  tablet comes from there and the sand worm's arena loses it; if none does, it stays.
+- **The third tablet** (kept): text 0x201, "I took this before the Sharpclaw could get their hands on it ... It might
+  be of use to you back in Cape Claw", is shown by one sequence, 873 (`tools/dino.py text 0x201`), in the track of
+  its actor DFanimhightop (HighTop), beside Krystal and CCkrazoaTabletA. CCseqobject lists 873 at index 7, and the
+  one CCseqobject placed with that index is 34add in Discovery Falls (map 6), whose played_bit, which dll309 sets as
+  the scene starts, is 0x234: the first tablet, which TriggerPlane 34adc beside it sets in its place (its trigger is
+  0x96, never). So 0x201 hands over the tablet the prototype already gives, nothing gives 0x237, and the third
+  tablet stays in the sand worm's arena. The scene itself is restored from the ROM (part 2, Open).
 - **The Queen in Walled City** (simplified): WCQueenEarthWal's name puts her in Walled City, no def is a "Jungle
   Door", and dll507, the Hollow's Queen, has no step past 7. Where she stands stays, and she is met by her own talk
   reach (dll773 0x4EC, 100) with Tricky out, in place of 150 and 400. Her unused lines (0x219, 0x21A: "I forbid you
-  to enter that evil place ... Follow me, I will open the Jungle Door for you") are looked for with 0x201's.
+  to enter that evil place ... Follow me, I will open the Jungle Door for you") are shown by no sequence and passed by
+  no DLL (the TriggerPlanes that name 0x219 and 0x21A pass them to func_80000450, action 0x0D, not to the text box):
+  cut text, left out.
 - **The ending** (replaces the title alone): the credits are the ROM's: dll78, menu 15, shows text 0x1FD, and
   nothing opens it (EndObject, dll299, is empty). After Drakor's fall the credits play, then the title.
   Built (PR 64): over the front end, with the screen cleared to black while they show (nothing clears it there), and
@@ -393,8 +403,10 @@ What changes, in the order it is built, the redone choices first:
 Kept as they are: Tricky's run's trigger, the shrines' ways in, GP's and NW's spirits, acts 6 and 7's check, who sets
 0x366, entry 77, the fallen column, the tablet room's end (0x52B), Krazoa Palace's shaft, wings and red Krazoa
 (KP_sequences' four sequences and KP_FinDoor's 0x441 hold no data: the palace's scenes were never made), the fourth
-SpellStone from the dragon (no guardian is tied to it, and "The Last SpellStone! ... Only he can activate it!" and
-"the 6 SpellStones!" read as earlier designs), the dragon's door, the ice spell, the arena's magic, the force point's
+SpellStone from the dragon (no guardian is tied to it; "The Last SpellStone! ... Only he can activate it!", 0x1FE, is
+Sabre's in sequence 858, which DR_Seqobj 40669 plays once the bottom's shaft plane 4052f sets 0x7CC, with Tricky, an
+AnimSpellstone and a cave-in: it shows the stone and gives none, setting only 0x7CD, and who "he" is is unread (?);
+"the 6 SpellStones!" reads as an earlier design), the dragon's door, the ice spell, the arena's magic, the force point's
 second lift (below), the place's group, Walled City's act 2 (tasks 97 to 99), the meteor's trigger (94's gas vents),
 the flame switch, EC's Transporter (102), the RedEye chase (77) and ten teeth (78, "TO ENTER THE CITY"). Still
 open: the logs.
@@ -444,7 +456,8 @@ open: the logs.
 - **The third tablet's place** (Krazoa Tablets): a CCKrazoaTabletP with 0x237 at (3574, -257, 16514), where the sand
   worm's arena has CCnewseqobject 42BDF, which nothing triggers (its trigger 0x96 is never), placed once the worm is
   dead (0x3FB, dll461). 0x237: no ROM setter; dll458 reads it. Cascade: 0x23B, 0x23C (the settlement room's door),
-  0x238-0x23A, 0x3A9. The ROM offers: 42BDF's sequence 8, untriggered (?).
+  0x238-0x23A, 0x3A9. The ROM offers: 42BDF's sequence (index 8, sequence 148: the worm and Krystal, no tablet),
+  untriggered; text 0x201's sequence gives 0x234, not 0x237 (The plan).
 - **Cape Claw's act 9 after the tablet room** (Krazoa Tablets): sequence 0x12 sets Cape Claw's act 9 at WG's release
   (dll611 0x664, its only setter), and act 9 holds none of the tablet room, so a player who came to the release with
   the room unsolved could never set 0x52B, the palace's fire door. Act 9 loads as act 2, the act Kyte's rescue sets
