@@ -736,6 +736,37 @@ func = "func_80002490"
 before_vram = 0x80002620
 text = "{ int32_t dino_view_margin(uint8_t*); int32_t m = dino_view_margin(rdram); ctx->r7 = ADD32(ctx->r7, 6 - m); ctx->r3 = ADD32(ctx->r3, m - 6); }"
 
+# A texture drawn in tiles loads the rows its mesh reads (src/game/tiled_textures.cpp): dll76_18A8 has written a tile's
+# load and size when it reaches 0x900AC45C, where its vertices begin (and each batch of them after: those find no
+# tile's commands before them).
+[[patches.hook]]
+func = "dll76_18A8"
+before_vram = 0x900AC45C
+text = '{ void dino_tiled_texture_rows(uint8_t*, recomp_context*); dino_tiled_texture_rows(rdram, ctx); }'
+
+# The boot's sketched picture fills the frame's height (src/game/boot_picture.cpp): dll60 draws it behind the Nintendo
+# logo and dll61 behind Rareware's, each by a call of dll76's export 2 (at 0x90098A34 and 0x9009940C), into the list
+# whose pointer's address is $a0 there and 0x60($sp) or 0x40($sp) once it returns.
+[[patches.hook]]
+func = "dll60_0504"
+before_vram = 0x90098A34
+text = '{ void dino_boot_picture_begin(uint8_t*, recomp_context*); dino_boot_picture_begin(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll60_0504"
+before_vram = 0x90098A3C
+text = '{ void dino_boot_picture_end(uint8_t*, recomp_context*, int32_t); dino_boot_picture_end(rdram, ctx, 0x60); }'
+
+[[patches.hook]]
+func = "dll61_02D8"
+before_vram = 0x9009940C
+text = '{ void dino_boot_picture_begin(uint8_t*, recomp_context*); dino_boot_picture_begin(rdram, ctx); }'
+
+[[patches.hook]]
+func = "dll61_02D8"
+before_vram = 0x90099414
+text = '{ void dino_boot_picture_end(uint8_t*, recomp_context*, int32_t); dino_boot_picture_end(rdram, ctx, 0x40); }'
+
 # The minimap keeps to the left: dll59_0148's display list pointer is $a0, then 0x68($sp).
 [[patches.hook]]
 func = "dll59_0148"

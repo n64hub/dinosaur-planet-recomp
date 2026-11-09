@@ -78,3 +78,7 @@
   where she turns to talk, a little closer than before.
 - Krazoa Tablets on Restored: in Discovery Falls, HighTop hands Krystal the first Krazoa tablet in his own scene,
   which the prototype built and never played: it gave the tablet with no scene as she walked past.
+- The sketched picture behind the Rareware and Nintendo logos at boot no longer has seams across it, through the
+  dinosaur's head and the stones.
+- The sketched picture behind the Rareware and Nintendo logos at boot fills the window's height, with no black bands
+  above and below it; with Aspect Ratio Expand it shows whole across a widescreen window.

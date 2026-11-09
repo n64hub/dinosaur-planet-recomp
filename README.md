@@ -170,7 +170,8 @@ The prototype's ROM as a big-endian `.z64` of 64 MiB with MD5 `49f7bb346ade39d19
 Each option a modern port adds has a value that plays as the console does. The defaults are the modern ones.
 
 - **Aspect Ratio** (Graphics): Expand widens the world to the window, and a cutscene's bars and the screen's clear
-  reach its sides. Original is the console's 4:3.
+  reach its sides. Original is the console's 4:3. The picture behind the boot's Nintendo and Rareware logos fills
+  the frame's height, its sides cropped a little in 4:3 and whole with Expand.
 - **HUD Placement** (Graphics): the minimap and the panels at the picture's sides move out to 16:9's edges with
   16:9 and the window's with Expand. Original keeps them where the console puts them. Dialogue and subtitles stay
   centred.
