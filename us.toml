@@ -348,6 +348,17 @@ func = "func_80017254"
 before_vram = 0x80017254
 text = "{ void dino_late_frees_mode(uint8_t*, recomp_context*); dino_late_frees_mode(rdram, ctx); }"
 
+# A sky switched and freed in one frame: dll7 keeps the sky at D_6650 (its GOT's 0xC entry + 0x30) and sets D_6438 for a
+# change of sky made at once. Its draw (dll7_102C) takes the change's path at 0x9001F5D0 also with no sky, and with
+# D_6438 set there it reads the textures at +0x18 and +0x1C of the sky with no test. In the room past Warlock Mountain's
+# laser hall WL_LevelControl (dll607_1118) sets the sky again each frame, and dll7's update (dll7_21CC) set D_6438 and
+# then freed the sky (dll7_30FC), so the draw read address 0x1C and crashed as the player came in. With no sky it goes
+# on as for no change, at 0x9001F70C, the path it takes on every frame without one.
+[[patches.hook]]
+func = "dll7_102C"
+before_vram = 0x9001F5D0
+text = "{ if (MEM_W(0x30, MEM_W(0xC, ctx->r28)) == 0) goto L_9001F70C; }"
+
 # Item pickups: a pickup (dll272) taken with A gives dll3 the object the player's pickup sequence holds up (dll3_9E58,
 # from +6 of the block at its def's +0x18) and plays the player's pickup (state 0x2A), whose end starts the player's
 # sequence 0 (dll210_16220), the one whose event hands the item over. That sequence's VariableObject (object 0x443)
