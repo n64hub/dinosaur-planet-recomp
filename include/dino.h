@@ -56,8 +56,9 @@ namespace dino {
     // SwapStone Hollow's Tricky's Run setting (swapstone_hollow.cpp).
     void add_swapstone_hollow_options(recomp::config::Config& general);
     // The Krazoa shrines', Cape Claw's Krazoa tablets' and Krazoa Palace's settings (krazoa.cpp), and whether the
-    // palace's is on Restored (acts.cpp).
+    // tablets' and the palace's are on Restored (acts.cpp).
     void add_krazoa_options(recomp::config::Config& general);
+    bool krazoa_tablets_restored();
     bool krazoa_palace_restored();
     // Drakor's fight's end setting (drakor.cpp).
     void add_drakor_options(recomp::config::Config& general);

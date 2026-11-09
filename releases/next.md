@@ -71,3 +71,5 @@
 - CloudRunner Fortress: once freed from the courtyard's roof, Kyte flies on with Krystal, so she can be sent to the
   gold perch above the courtyard and, with the babies home, the pool over the way to the race drains. In the
   prototype she only ever circled the roof.
+- Krazoa Tablets on Restored: Cape Claw's tablet room stays until it is solved. In the prototype it went away at Willow
+  Grove's spirit's release, so a player who came there with it unsolved could never open Krazoa Palace's fire door.
