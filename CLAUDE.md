@@ -108,7 +108,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   Warlock Mountain for three spirits: the General tab's Krazoa Shrines setting, Restored by default, finishes them out
   of what the ROM holds, and Original leaves them as the console plays them (`src/game/krazoa.cpp`'s header has the
   order, the bits and the evidence). Its Krazoa Tablets setting, Restored by default, does the same for Cape Claw's
-  tablet room: the third tablet and the way on to Krazoa Palace.
+  tablets: HighTop handing over the first in Discovery Falls, the third tablet and the way on to Krazoa Palace.
 - **The Kamerian Dragon.** Under Dragon Rock (map 53) the fight is built and can't be won: its health runs out and
   nothing reads it, and nothing gives the fourth SpellStone (0x7A8) that the Desert Force Point's other place takes.
   The General tab's Kamerian Dragon setting, Restored by default, has it die there and leave that stone, and Original

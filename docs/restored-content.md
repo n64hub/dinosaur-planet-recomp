@@ -154,6 +154,11 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 - CCkrazoaBits counts three tablet bits, 0x234, 0x236 and 0x237, and nothing sets 0x237: the third tablet is missing.
   Where it lies is a choice (part 3). Text 0x201, "It might be of use to you back in Cape Claw", is HighTop's
   hand-over of the first, 0x234, in Discovery Falls (part 3, The plan).
+- HighTop's scene: Discovery Falls' CCseqobject 34add plays sequence 873, HighTop (DFanimhightop) handing Krystal
+  the first tablet with text 0x201, and sets 0x234 as it starts, but its trigger is 0x96, never, and TriggerPlane
+  34adc beside it sets 0x234 in its place (action 0x12, arg 0x4234, no other plane in any map). Restored skips that
+  set and reads 34add's trigger as set once the plane is crossed, so the scene plays and gives the tablet, which
+  Discovery Falls' CCkrazoaBits (34b50) counts; Original keeps the plane's silent set.
 - The tablet room's puzzle ends in a state with no handler, and CCkrazoaBits, placed by distance in the room, missed
   a tablet picked up elsewhere: the pickup counts the third itself.
 - Entries 71 and 72 land in the tablet room with no plane crossed, so they set 0x2C0, which the planes on the way in
@@ -274,11 +279,6 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Open
 
-- **HighTop's tablet scene** (Krazoa Tablets; card 17942258671990000): Discovery Falls' CCseqobject 34add plays
-  sequence 873, HighTop (DFanimhightop) handing Krystal the first tablet with text 0x201, and sets 0x234 as it
-  starts, but its trigger is 0x96, never, and TriggerPlane 34adc beside it sets 0x234 in its place. On Restored,
-  crossing 34adc plays the scene, which gives the tablet.
-
 Not played yet, so what they need isn't known (docs/story-points.md, The third SpellStone and the moonseeds): the walk
 into the moonseed's hollow with Kyte (planted and grown there, the ROM's own code needs no fix: the moonseed is used
 facing the receptacle, and Kyte's flame is her scroll's second row at night); a hit on Warlock Mountain's laser targets
@@ -394,7 +394,7 @@ What changes, in the order it is built, the redone choices first:
   one CCseqobject placed with that index is 34add in Discovery Falls (map 6), whose played_bit, which dll309 sets as
   the scene starts, is 0x234: the first tablet, which TriggerPlane 34adc beside it sets in its place (its trigger is
   0x96, never). So 0x201 hands over the tablet the prototype already gives, nothing gives 0x237, and the third
-  tablet stays in the sand worm's arena. The scene itself is restored from the ROM (part 2, Open).
+  tablet stays in the sand worm's arena. The scene itself is restored from the ROM (part 2, Krazoa Tablets).
 - **The Queen in Walled City** (simplified): WCQueenEarthWal's name puts her in Walled City, no def is a "Jungle
   Door", and dll507, the Hollow's Queen, has no step past 7. Where she stands stays, and she is met by her own talk
   reach (dll773 0x4EC, 100) with Tricky out, in place of 150 and 400. Her unused lines (0x219, 0x21A: "I forbid you
