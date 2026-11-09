@@ -129,7 +129,9 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   export 24 answers yes: she is on a find node, the curves beside each baby that nothing sends her to. The General
   tab's Baby CloudRunners setting, Restored by default, sends her there (her curve group, 0x46E) as Krystal comes near
   a waiting baby, which comes out once she steps back from its call, and Original leaves them hidden (the same
-  header).
+  header). Kyte flies only along curves joined to the one her path started from, and the courtyard's deck, where she
+  is shut in, has six that join no others: once she is freed (0x43) her path starts again off the deck, always on, so
+  she can fly to the babies and the gold perch (0x8D1).
 - **BOSS TRex.** The TRex's defeat loads the front end with no SpellStone. The General tab's BOSS TRex setting, Restored
   by default, gives the third SpellStone as won (0x82E) and the way back to Walled City in its place, and Original goes
   to the title as the prototype did. The fixes that let the fight be won at all (the floor switches' pads, the TRex's

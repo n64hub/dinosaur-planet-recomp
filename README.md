@@ -111,6 +111,9 @@ Fixed:
 - CloudRunner Fortress's baby CloudRunners (Baby CloudRunners on Restored): Kyte's mother hid five, and Kyte never
   found the ones waiting for her, so they never came out to be rescued. A waiting baby calls as Krystal comes near,
   Kyte now flies to where it hides, and once Krystal steps back it comes out for her to rescue.
+- CloudRunner Fortress's gold perch: once freed from the courtyard's roof, Kyte only ever circled it, so she never
+  flew to the gold perch above the courtyard when told to, and the pool over the way to the race never drained. She
+  now flies on with Krystal once she is freed.
 - Picking up an item, a key, a crystal, a tooth or a SpellStone: the item's scene made a second Sabre and never
   ended, and could crash.
 - Walled City: standing on either pressure switch crashed the game, and nothing could hit the sun and moon beacons,

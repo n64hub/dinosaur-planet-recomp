@@ -540,7 +540,29 @@ bit = 0x901
 name = "babies_rescued"  # counted by CFCloudBaby (dll373)
 [[bit]]
 bit = 0x8D1
-name = "kyte_gold_perch"  # PerchObject (dll718)'s curve's +0x32 bit, set by Kyte's message 5
+name = "kyte_gold_perch"  # PerchObject (dll718)'s curve's +0x32 bit, set by Kyte's message 5, while she sits there
+[[bit]]
+bit = 0x46E
+name = "kyte_curve_group"  # the group of curves Kyte flies to (src/game/cloudrunner.cpp)
+[[bit]]
+bit = 0x454
+name = "kyte_to_group"  # her path starts at 0x46E's group, where she is put (dll212_0CE8)
+[[bit]]
+bit = 0x41
+name = "kyte_shut_in"  # on the courtyard's deck; CFLevelControl holds 0x46E at its curves' 0x11
+[[bit]]
+bit = 0x43
+name = "kyte_freed"  # CFExplodeFloor's pieces
+[[bit]]
+bit = 0x4BE
+name = "gold_and_babies"  # CFLevelControl, from 0x8D1 and 0x300: drains the pool to the race, Bonehead's state 10
+[[bit]]
+bit = 0x4C1
+name = "bonehead_state_12"  # CFseqobject 32DDA's sequence on 0x300
+[[export]]
+dll = 25
+index = 12
+name = "kyte_curve"  # (object, group): the curve of type 0x22 nearest it in that group, or in any with -1
 # Dragon Rock (src/game/dragon_rock.cpp, src/game/hit_animator.cpp, docs/story-points.md).
 [[bit]]
 bit = 0x5CE

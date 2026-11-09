@@ -45,6 +45,20 @@
 // nearest the baby (within 400; dll26's table holds the map's curves), and Kyte's own path code flies her there, where
 // her flag brings it out once Krystal steps back from its call. Once the baby is rescued 0x46E goes back to what it
 // was, unless something has set it since.
+//
+// The deck (always on), read from the ROM:
+// - Kyte flies only along curves joined to the one her path started from. Her path starts (dll212_0CE8, while her
+//   state's +0x4 is 0) from the curve nearest her of any group, whose group becomes 0x46E, or with 0x454 set from the
+//   nearest of 0x46E's group, where she is put. Each node after (dll212_1404) is on a path through the links to 0x46E's
+//   group (nearest the player), and with none she takes a neighbour and 0x46E becomes its group: what she was sent to
+//   is dropped. A curve's group is its placement's +0x5.
+// - Shut in on the courtyard's roof (0x41 without 0x43) CFLevelControl (dll400_0914) holds 0x46E at 0x11 and sets
+//   0x454, so she is on the deck's six curves (deck_curves), which join none of the fortress's others, and nothing moves
+//   her off once 0x43 frees her: she circles the deck whatever sends her elsewhere, PerchObject 429D8's star to the gold
+//   perch (0xC0, whose curve sets 0x8D1 as she lands) included.
+//
+// What it changes: once 0x43 is set, a path start passes over the deck's curves for the nearest curve off it, and
+// with 0x46E still at 0x11 and Kyte out her path starts again.
 
 #include <cstdint>
 #include <cstdio>
