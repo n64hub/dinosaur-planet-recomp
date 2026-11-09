@@ -247,11 +247,14 @@ extern "C" void dino_cloud_baby_update(uint8_t* rdram, recomp_context* ctx) {
         }
         bool waiting = !hidden && (state == 0 || state == 1 || state == 4);
         if (sent.baby == baby && state == rescued) {
-            if (get(rdram, ctx, kyte_group) == sent.group) {
+            int32_t now = get(rdram, ctx, kyte_group);
+            if (now == sent.group) {
                 set(rdram, ctx, kyte_group, sent.before);
             }
             if (logging) {
-                fprintf(stderr, "cloudrunner: baby %08X rescued, 0x46E back to %X\n", (uint32_t)baby, sent.before);
+                fprintf(stderr, now == sent.group ? "cloudrunner: baby %08X rescued, 0x46E back to %X\n" :
+                    "cloudrunner: baby %08X rescued, 0x46E left at %X, set since\n", (uint32_t)baby,
+                    now == sent.group ? sent.before : now);
             }
             sent = Sent{};
         } else if (waiting && player != 0 &&

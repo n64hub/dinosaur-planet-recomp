@@ -326,7 +326,8 @@ What changes, in the order it is built, the redone choices first:
   (dll212_319C, set for node types 8, 9, 21 and 22), and the waiting babies 236A, 29FA and 29B3 have find curves of
   those types beside them (groups 0x10, 0x25 and 0x28, 0x1B) that nothing sends her to. 0x46E, her target group, is
   what sends her (TriggerPlanes' action 0x1C, FindKyteObject, PerchObject). Restored sets 0x46E to a waiting baby's
-  find group as Krystal comes within its near radius (+0x18), and Kyte's own path code does the rest. FindKyteObject
+  find group as Krystal comes within its near radius (+0x18), and Kyte's own path code does the rest; the baby comes
+  out once Krystal steps back from its call (played: 236A and 29B3 found and rescued). FindKyteObject
   31858 by 236A sends her to 0xF, a node not linked to 0x10 (?). Map 30's baby (2b25) starts found, and map 15's
   (31b9c) comes out of the master chest (CFSupTreasureCh 31d0d) to item 0x336: both the ROM's own. 29FA's ledge
   (group 21, loaded by TriggerPoint 31bf3 at the baby, rescue reach 30) has no way up found: the choice left.
@@ -549,7 +550,7 @@ open: the logs.
   (read by 429d6 and dll400); 0x4C1 is set by CFseqobject 32dda on 0x300. 0x4B7 (dll369 reads and clears it,
   TriggerPlane 30e8c clears it) and 0x4B8 (dll519, dll400 read it) have no setter. 0x4DC is set and cleared by
   TriggerPlane 31a68 at (-9917, 1445, 18272), and dll400 turns it into 0x4DD, whose sequence sets 0x4DE.
-- **The babies left**: 29FA's ledge, 29B3, map 30's and map 15's from the master chest.
+- **The babies left**: 29FA's ledge, map 30's and map 15's from the master chest.
 - **The logs** (tasks after 0x22B and task 84): no ThornTail sells one, SHriver is a placement with no code, and the
   hollow has no dock.
 
