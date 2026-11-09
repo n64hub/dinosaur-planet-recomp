@@ -55,8 +55,10 @@ namespace dino {
     bool camera_forward(float* x, float* z);
     // SwapStone Hollow's Tricky's Run setting (swapstone_hollow.cpp).
     void add_swapstone_hollow_options(recomp::config::Config& general);
-    // The Krazoa shrines' and Cape Claw's Krazoa tablets' settings (krazoa.cpp).
+    // The Krazoa shrines', Cape Claw's Krazoa tablets' and Krazoa Palace's settings (krazoa.cpp), and whether the
+    // palace's is on Restored (acts.cpp).
     void add_krazoa_options(recomp::config::Config& general);
+    bool krazoa_palace_restored();
     // Drakor's fight's end setting (drakor.cpp).
     void add_drakor_options(recomp::config::Config& general);
     // The Kamerian Dragon's fight's end setting (dragon_rock.cpp).

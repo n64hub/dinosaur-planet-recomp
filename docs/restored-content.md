@@ -157,12 +157,14 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 
 ### Krazoa Palace
 
-`src/game/krazoa.cpp`; PRs 37 and 42.
+`src/game/krazoa.cpp` and `src/game/acts.cpp`; PRs 37, 42 and 63.
 
 - Its 19 objects have defs and none is placed: the four consoles (0x58F-0x592), the four text blocks in the same
   order (0x593-0x596, DFP_Textblock's DLL), the section doors, the last door and the red Krazoa. Restored places them;
   where, and in which order, are choices (part 3).
 - Every object a restoration places has flag 1 at +4, or the object loop frees it once the camera is far (PR 42).
+- Cape Claw's TriggerPlane 30ec4 sets the palace's act 14 (0x8EC) as Kyte is freed (0x2C5, task 17), and act 14
+  loads 151 of its 415 placements, none of its own and neither KP_Transporter: it loads as act 1 (PR 63).
 
 ### Kamerian Dragon
 
@@ -307,7 +309,8 @@ What changes, in the order it is built, the redone choices first:
   fires on 0x2C5, Kyte freed (task 17); it sets Cape Claw's act 2 and Krazoa Palace's (map 3) act 14, which loads
   151 of the palace's 415 placements and neither KP_Transporter (42cdf, 42ce0, acts 1-13, 15 and 16). The palace
   route was played only from `--place`. On Restored the palace loads in act 1 (`src/game/acts.cpp`, as the volcano's
-  act is moved), played from a new game's Cape Claw to the palace.
+  act is moved), played from a new game's Cape Claw to the palace. Built (PR 63): played across the plane, which set
+  act 14, to the palace's Transporters, on both settings.
 - **The third SpellStone's hand-over** (replaces BOSS TRex's stone and the King's activation): the volcano's level
   control hands over each stone in the act it loads in: act 1's timer sets 0x123, the first stone carried, its only
   setter, and act 2's sets 0x83B and 0x22B (dll619_024C, +0x24C, +0x410, +0x428). Task 83, "KING EARTHWALKER
