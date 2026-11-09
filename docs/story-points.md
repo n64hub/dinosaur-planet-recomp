@@ -511,10 +511,14 @@ the race (43) at (-20, 29) on layer -2.
   sets 0x330, and CFExplodeTunnel 31b76 then sets 0x33A. Map 15 places no barrel, so one comes down the shaft:
   Treasure Lift on Restored lowers a carrier once 0x2E1 is set. Played from `--place -12900,2049,18690,0 --bits
   8ff,8c9,8ca,8cf,2e1,43,34f,359,458=8192` (the wall takes 0x8C9): barrel 2e32 lifted, carried west along z 18655
-  and north up the corridor into the wind, lowered with it to map 15 (0x8C8, y 1859), and set down in the passage
-  east to the tunnel, which starts east of (-12890, 19100); swung at there, it blew. Not played: a blast that
-  reaches the tunnel. Within about 110 of the GuardClaw, A locks onto it and the swings go its way, and within 20 of
-  the barrel A lifts it again. From `--place -12850,1845,19110,-1 --bits 2e1,43,34f,359,45a=4,330@6`: 0x33A 1.6 s
+  and north up the corridor into the wind, lowered with it to map 15 (0x8C8, y 1859), carried north along x -12900
+  and east round (-12882, 19072) up the passage to the tunnel, and set down at (-12840, 1844, 19128); three swings at
+  it from behind, from x -12845 to -12834, blew it, and 0x330 came with the blast and 0x33A 1.7 s later (played; the
+  blast took 4 of her 12 health). Each swing that lands counts one at the barrel's state +0x12 and the third blows it
+  (dll388 0x1228-0x12A4), a blast of radius 100 that tunnel 31b7a, at (-12763, 1915, 19121), 71 above the passage's
+  floor, takes from there. Within about 110 of the GuardClaw (east of about x -12831) A locks onto it and the swings
+  go its way: swung at from x -12810 to -12820, a barrel at x -12797 took none in three tries. A carry and a set-down
+  keep the count. From `--place -12850,1845,19110,-1 --bits 2e1,43,34f,359,45a=4,330@6`: 0x33A 1.6 s
   after 0x330, the chest let go, A at it gave 0x336. From `--place -12330,1840,18530,-1 --bits
   2e1,43,34f,359,45a=256,336`: A, C-right, A at the master chest took 0x336 (0x337), and the baby set 0x253 and
   reached its perch (0x300) 11 s later.
@@ -545,9 +549,9 @@ the object takes it in the frame the player presses A with it targeted: dll2 set
 the player inside its radius and within 100 units of its height. dll1's export 7 answers whether the item used is the
 one asked for. In an `--input` script, standing at the object: A, C-right, A.
 
-Left to play: a barrel's blast at map 15's tunnel 31B7A, the way on foot to the master chest (group 8, which
-CFLevelControl loads on 0x8CC, which only a treasure door's plane leads to: a treasure room's platforms crossed to its
-door), and so the gold with all five on their perches in one run (0x8D1,
+Left to play: the way on foot to the master chest (group 8, which CFLevelControl loads on 0x8CC, which only a treasure
+door's plane leads to: a treasure room's platforms crossed to its door), the GuardClaw's chest opened and its 0x336
+taken in the same run as the barrel's blast, and so the gold with all five on their perches in one run (0x8D1,
 0x4BE and 0x4C1 are played with 0x2FC-0x300 set by `--bits`). Read from the ROM,
 nothing sets 0x4B8 (CFGuardian's sequence at 0x1D5C), and Krystal makes no hit of type 0xF, which the ProjectileSwitches
 by the main door take: the two ZBombs there make it (their setup's +0x18). Neither is needed to finish

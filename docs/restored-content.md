@@ -558,7 +558,8 @@ open: the logs.
 - **The treasure lift's way down** (Treasure Lift): 0x8C8 set as the wind starts with the player more than 150 above
   its base and not carrying, or carrying once 0x2E1 (the courtyard roof blown) is set: the roof needs no more barrels,
   and map 15's tunnel needs one. 0x8C8: CFWindSwitch (dll386) sets, dll370 reads. Cascade: the treasure caves
-  (map 15), a barrel to tunnel 31b7a (0x330, 0x33A, the chest's item 0x336, the master chest's baby). The ROM offers: the
+  (map 15), a barrel to tunnel 31b7a (0x330, 0x33A, the chest's item 0x336, the master chest's baby), played as far as
+  0x33A with a barrel lowered and blown there (docs/story-points.md, CloudRunner Fortress). The ROM offers: the
   levers only; the treasure doors (0x30A) open onto the caves' east half, walled off from them (The plan, The
   treasure caves' way in). The race isn't reached this way (the bottom's east is a grate) but by the pool on 0x4BE.
 - **Where 29FA waits** (Baby CloudRunners): 29FA (map 12's group 21) and TriggerPoint 31bf3, which loads that group,
