@@ -29,19 +29,22 @@
 // - Waiting to be found (states 0, 1 and 4) it asks Kyte, the sidekick (0x8002394C), every frame (0x2050): her export
 //   24, her state's +0x1C8 & 0x200000. Yes brings it out to face her (state 5), and Krystal rescues it by pressing A
 //   within its +0x1A (0x07A0): 0x901 counts it, its bit is set, and it flies to its golden perch (0x2FC-0x300). With
-//   Krystal within its +0x18 (0x0410: 70 or 85) a waiting baby starts its call (sequence 1, in state 0).
+//   Krystal within its +0x18 (0x0410: 70 or 85) a waiting baby plays its call (sequence 1, in state 0) in place of
+//   asking, so it comes out only once she is further away. Kyte's yes is any find node's, so every waiting baby loaded
+//   comes out while she is on one, and goes back once she leaves.
 // - A found baby asks again each frame (0x0924): no and it flies home and back to the state it had.
 // - Kyte's flag is the curve node she flies to: as she reaches one (dll212_319C) her +0x1C8 takes its node type's flags
 //   (dll212's D_48B8), and types 8, 9, 21 and 22 carry 0x200000. She flies along map curves of type 0x22 inside one
 //   group, 0x46E (dll212_0CE8; a curve's +0x4, as dll25's export 12 reads it), which TriggerPlanes (action 0x1C),
 //   FindKyteObject (dll720) and PerchObject (dll718) set. Each waiting baby has find nodes beside it in a group of
-//   their own (236A 0x10, 154 away; 29FA 0x28 on its ledge, 70; 29B3 0x1B, 40), and nothing in the ROM sets 0x46E to
-//   one of them, so no baby waiting to be found ever comes out. FindKyteObject 31858 by 236A sends her to 0xF, a node
-//   of type 5.
+//   their own (236A 0x10, 154 away; 29FA 0x28 on its ledge, 70; 29B3 0x1B, a loop round its crate that she circles,
+//   40), and nothing in the ROM sets 0x46E to one of them, so no baby waiting to be found ever comes out.
+//   FindKyteObject 31858 by 236A sends her to 0xF, a node of type 5.
 //
 // What Restored changes: as Krystal comes within a waiting baby's +0x18, 0x46E is set to the group of the find node
 // nearest the baby (within 400; dll26's table holds the map's curves), and Kyte's own path code flies her there, where
-// her flag brings it out. Once the baby is rescued 0x46E goes back to what it was, unless something has set it since.
+// her flag brings it out once Krystal steps back from its call. Once the baby is rescued 0x46E goes back to what it
+// was, unless something has set it since.
 
 #include <cstdint>
 #include <cstdio>

@@ -128,7 +128,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **CloudRunner Fortress's baby CloudRunners.** A baby waiting to be found (CFCloudBaby, dll373) comes out when Kyte's
   export 24 answers yes: she is on a find node, the curves beside each baby that nothing sends her to. The General
   tab's Baby CloudRunners setting, Restored by default, sends her there (her curve group, 0x46E) as Krystal comes near
-  a waiting baby, and Original leaves them hidden (the same header).
+  a waiting baby, which comes out once she steps back from its call, and Original leaves them hidden (the same
+  header).
 - **BOSS TRex.** The TRex's defeat loads the front end with no SpellStone. The General tab's BOSS TRex setting,
   Restored by default, gives the third SpellStone (0x83B) and the way back to Walled City in its place, and Original
   goes to the title as the prototype did. The fixes that let the fight be won at all (the floor switches' pads, the
