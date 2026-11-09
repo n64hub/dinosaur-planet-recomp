@@ -118,6 +118,11 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   tiles: each row of tiles loaded from a row of texels further down than its mesh reads, so the picture stepped a
   texel and then two where the rows of tiles meet, seams through the dinosaur's head and the stones. Each tile now
   loads the rows and columns its mesh reads (us.toml, `src/game/tiled_textures.cpp`).
+- The world's blocks under the player: the game loads them around the camera, not the player, so a scene whose
+  camera cuts to a part of the map whose blocks leave his out let the player fall through the block that went:
+  Warlock Mountain's sequence 9 (297b, "Father.", on the way to EC's release) dropped him out of the world as it
+  ended. The player's cell now stays marked beside the camera's (us.toml, func_80046BC8 at 0x80047178,
+  `src/game/streaming.cpp`).
 
 ### Tricky's Run
 
@@ -293,12 +298,6 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
 - The task list has tasks 75 to 83 here, and the ROM has the Queen (WCQueenEarthWal, dll773, code and no placement),
   the chases (WCTrexChase 777 and WCSabreChase 778, DLLs that only draw) and a bowl (WCTeethBowl), placed nowhere. The
   King (dll774) says he activates the stone and sets nothing. All the rest is choices (part 3).
-
-### Open
-
-Found in play, not fixed yet (docs/story-points.md, The third SpellStone and the moonseeds): on the way to EC's
-release, once 297b's sequence 9 ends, the player falls through the corridor's floor at (13995, 13, 1610) and out of
-the world, and comes back in the laser hall.
 
 ## 3. Choices
 

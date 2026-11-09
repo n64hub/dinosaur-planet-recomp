@@ -60,6 +60,9 @@ Fixed:
   fall into the pit in either of Walled City's temples, which loads the city again and made an object the game no
   longer has, and the room past Warlock Mountain's laser hall, whose sky was freed on the frame the player came in
   and drawn after.
+- A scene whose camera cuts away from the player could unload the ground under him, and he fell out of the world as
+  it ended: Warlock Mountain's "Father." scene, on the way to Walled City's spirit's release, did. The ground the
+  player stands on now stays loaded.
 - Cape Claw's SandEels: a beaten eel that loads again, as one does when the player comes back to the sand worm,
   started its sound every frame until no other sound in Cape Claw could play.
 - SwapStone Hollow's white mushrooms: one of the three down under the hollow can get stuck where it stands, and caught
