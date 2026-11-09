@@ -185,6 +185,74 @@ dll = 210
 index = 58
 name = "wind_push"  # (player, speed): stores it at its state+0x808, read by BA38 (src/game/cloudrunner_barrels.cpp)
 
+# Walled City's moon temple (src/game/temples.cpp, docs/story-points.md).
+[[export]]
+dll = 210
+index = 70
+name = "floor_type"  # (player): the type of the floor it stands on, -1 off the ground (0x21 the moon lift's top)
+[[export]]
+dll = 779
+index = 14
+name = "cell_position"  # WCLevelControl's push grid: a cell's place, x -6152+48i, z -7528+48j for the moon's
+[[export]]
+dll = 779
+index = 18
+name = "block_cell"  # the cell a WCPushBlock stands in
+[[export]]
+dll = 779
+index = 20
+name = "push_block"  # slides it to the cell before the next block, onto a tile (2), or to the grid's edge (4)
+[[field]]
+of = "state"
+dll = 786
+offset = 0x0
+name = "lift_wait"  # WCMoonTempleLif: ticks before it moves again, 300 as it starts up or down
+[[field]]
+of = "state"
+dll = 786
+offset = 0x4
+name = "lift_up"
+[[field]]
+of = "state"
+dll = 787
+offset = 0x0
+name = "brightness_to"  # WCApertureSymbo: what its brightness (obj+0x36) moves toward, dll787_0490's
+[[field]]
+of = "state"
+dll = 787
+offset = 0x2
+name = "symbol_phase"  # 0 before the door, 1 waiting for the light, 2 lit
+[[field]]
+of = "setup"
+dll = 787
+offset = 0x1A
+name = "lit_above"  # the brightness above which it sets lit_bit (200)
+[[field]]
+of = "setup"
+dll = 787
+offset = 0x1E
+name = "lit_bit"  # 0x829 for the moon's
+[[field]]
+of = "setup"
+dll = 787
+offset = 0x20
+name = "door_bit"  # 0x25D for the moon's: set as it loads, it starts at symbol_phase 1
+[[bit]]
+bit = 0x811
+name = "moon_blocks_placed"  # dll782 adds one as a WCPushBlock lands on its tile; WCLevelControl sets 0x813 at 4
+[[bit]]
+bit = 0x813
+name = "moon_temple_open"  # the trigger of seqobject 41458, the temple's door
+[[bit]]
+bit = 0x25D
+name = "moon_door_open"  # seqobject 41458 sets it as the door opens
+[[bit]]
+bit = 0x829
+name = "moon_symbol_lit"  # the trigger of seqobject 41474, the moon in the ring
+[[bit]]
+bit = 0x244
+name = "moon_temple_way_in"  # seqobject 41474 sets it as the way in opens
+
 # CloudRunner Fortress (src/game/cloudrunner.cpp, docs/story-points.md).
 [[export]]
 dll = 212

@@ -693,6 +693,25 @@ bool dino::story_object_act(uint8_t* rdram, int oid, int act) {
     return false;
 }
 
+// The time of day, in hours (-1 with no sky loaded): dll7's, as the report prints it and --input's sync hour lines
+// (src/main/main.cpp) wait for it.
+float dino::story_hours(uint8_t* rdram, recomp_context* ctx) {
+    float hours = -1.0f;
+    int32_t sky = word(rdram, dll7_handle);
+    if (sky != 0) {
+        gpr sp = ctx->r29;
+        ctx->r29 -= 0x20;
+        ctx->r4 = ctx->r29 + 0x10;
+        MEM_W(0x10, ctx->r29) = 0;
+        call(rdram, ctx, word(rdram, word(rdram, sky) + 4 + 4 * dll7_get_time));
+        uint32_t t = MEM_W(0x10, ctx->r29);
+        memcpy(&hours, &t, 4);
+        hours /= 3600.0f;
+        ctx->r29 = sp;
+    }
+    return hours;
+}
+
 // --input's menu lines (src/main/main.cpp): the menu the game shows, as story_report prints it. 9 is the game over's,
 // on which A continues where the player fell, at full health and with the bits as they were, and C-right moves to
 // its other choice, a load of the last save.
@@ -750,20 +769,7 @@ void dino::story_report(uint8_t* rdram, recomp_context* ctx, double seconds) {
     // a climb tells by it.
     gpr player_state = (gpr)(int32_t)MEM_W(0xB8, (gpr)object);
     int act = player_state != 0 ? (int16_t)MEM_H(0x26C, player_state) : -1;
-    // The time of day, in hours (-1 with no sky loaded).
-    float hours = -1.0f;
-    int32_t sky = word(rdram, dll7_handle);
-    if (sky != 0) {
-        gpr sp = ctx->r29;
-        ctx->r29 -= 0x20;
-        ctx->r4 = ctx->r29 + 0x10;
-        MEM_W(0x10, ctx->r29) = 0;
-        call(rdram, ctx, word(rdram, word(rdram, sky) + 4 + 4 * dll7_get_time));
-        uint32_t t = MEM_W(0x10, ctx->r29);
-        memcpy(&hours, &t, 4);
-        hours /= 3600.0f;
-        ctx->r29 = sp;
-    }
+    float hours = story_hours(rdram, ctx);
     fprintf(stderr, "story: %.1f s map %d at %.0f %.0f %.0f menu %d, health %d/%d, magic %d/%d, %.2f h, act %d\n", seconds, map,
         fx, fy, fz, word(rdram, current_menu), MEM_BU(1, stats), MEM_BU(2, stats), (int16_t)MEM_H(4, stats),
         (int16_t)MEM_H(6, stats), hours, act);

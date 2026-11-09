@@ -366,7 +366,9 @@ static std::string game_thread_name(const OSThread* t) {
 // act of its state machine (dll18's, state +0x26C: an enemy's attack or pause, which then runs as long as its
 // animation does), and "sync state <object id hex> <x> <z> <reach> <offset hex> <mask hex> <value hex>" for a drawn
 // object of that id within reach of that place to hold that value under the mask in that byte of its state (obj+0xB8: a
-// laser's beam going off, for a crossing timed to it). Between lines "choose", "or" and "end" are ways, each starting with a sync line: the way whose
+// laser's beam going off, for a crossing timed to it), and "sync hour <from> <to>" for the game's time of day to be from
+// one hour to the other (over midnight where the first is the later), once the part before has started: what plays
+// only at an hour of the night, after a part whose length the game decides. Between lines "choose", "or" and "end" are ways, each starting with a sync line: the way whose
 // first sync comes first plays, the others never start, and what follows "end" goes on from that way's last part (an
 // enemy that comes either way round). A choose holds no other. In place of x y, "to <x> <z> [strength]" walks the
 // player toward that place, the stick that far over (1 by default: a walk slow enough to leap a gap, where a run goes
@@ -401,7 +403,7 @@ static std::atomic<float> steer_stick_y = 0.0f;
 // Each sync line's bit (or object for a near), and the --input time it started (-1 until then). Part 0, before any,
 // starts at 0. A part waits for one of its after parts to have started (the part before it, or each way's last part
 // after a choose's end); the first parts of a choose's ways share a choice, of which one only starts.
-enum class SyncKind { First, Next, Near, Act, State };
+enum class SyncKind { First, Next, Near, Act, State, Hour };
 static constexpr int max_input_ways = 4;
 struct InputPart {
     SyncKind kind;
@@ -443,11 +445,20 @@ static bool input_part_waits(int i) {
     return false;
 }
 
+// A sync hour line's window: from one hour to the other, over midnight where the first is the later.
+static bool in_hours(float hours, float from, float to) {
+    if (hours < 0.0f) {
+        return false;
+    }
+    return from <= to ? hours >= from && hours < to : hours >= from || hours < to;
+}
+
 static void start_input_part(int i) {
     input_part_start[i] = script_seconds();
     fprintf(stderr, "--input: part %d (sync %s0x%X) at %.1f s\n", i,
         input_part[i].kind == SyncKind::Next ? "next " : input_part[i].kind == SyncKind::Near ? "near " :
-        input_part[i].kind == SyncKind::Act ? "act " : input_part[i].kind == SyncKind::State ? "state " : "",
+        input_part[i].kind == SyncKind::Act ? "act " : input_part[i].kind == SyncKind::State ? "state " :
+        input_part[i].kind == SyncKind::Hour ? "hour " : "",
         input_part[i].bit, input_part_start[i].load());
 }
 
@@ -499,6 +510,7 @@ static void load_input_script(const char* path) {
         else if (input_parts < max_input_parts && (sscanf(line, "sync next %x", &part.bit) == 1 ? (part.kind = SyncKind::Next, true) :
             sscanf(line, "sync near %x %f %f %f", &part.bit, &part.x, &part.z, &part.reach) == 4 ? (part.kind = SyncKind::Near, true) :
             sscanf(line, "sync act %x %d", &part.bit, &part.act) == 2 ? (part.kind = SyncKind::Act, true) :
+            sscanf(line, "sync hour %f %f", &part.x, &part.z) == 2 ? (part.bit = 0, part.kind = SyncKind::Hour, true) :
             sscanf(line, "sync state %x %f %f %f %x %x %x", &part.bit, &part.x, &part.z, &part.reach, &part.offset, &part.mask,
                 &part.value) == 7 ? (part.kind = SyncKind::State, true) :
             sscanf(line, "sync %x", &part.bit) == 1)) {
@@ -586,7 +598,7 @@ extern "C" void dino_input_bit_set(int bit, int value) {
     for (int i = input_parts - 1; i >= 1; i--) {
         const InputPart& part = input_part[i];
         if (value == 0 || part.bit != bit || part.kind == SyncKind::Near || part.kind == SyncKind::Act ||
-            part.kind == SyncKind::State) {
+            part.kind == SyncKind::State || part.kind == SyncKind::Hour) {
             continue;
         }
         if (part.kind == SyncKind::Next ? !input_part_waits(i) : input_part_start[i] >= 0.0) {
@@ -737,6 +749,7 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
         if (input_part_waits(i) &&
             (part.kind == SyncKind::Near ? dino::story_object_near(rdram, ctx, part.bit, part.x, part.z, part.reach) :
              part.kind == SyncKind::Act ? dino::story_object_act(rdram, part.bit, part.act) :
+             part.kind == SyncKind::Hour ? in_hours(dino::story_hours(rdram, ctx), part.x, part.z) :
              part.kind == SyncKind::State && dino::story_object_state(rdram, part.bit, part.x, part.z, part.reach,
                  part.offset, part.mask, part.value))) {
             start_input_part(i);
