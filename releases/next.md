@@ -76,3 +76,5 @@
   Grove's spirit's release, so a player who came there with it unsolved could never open Krazoa Palace's fire door.
 - Walled City on Restored: Sabre meets the Queen EarthWalker when he walks up to her with Tricky, at the distance
   where she turns to talk, a little closer than before.
+- Krazoa Tablets on Restored: in Discovery Falls, HighTop hands Krystal the first Krazoa tablet in his own scene,
+  which the prototype built and never played: it gave the tablet with no scene as she walked past.

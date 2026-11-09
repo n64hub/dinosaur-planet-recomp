@@ -77,8 +77,9 @@
 //   reads and resets 0x1E7 (us.toml).
 //
 // Cape Claw's Krazoa tablets: three are carried into the tablet room (map 29) and set in its receptacles, and its
-// puzzle then opens the way on. Krazoa Tablets is its own setting: on Restored (the default) the third tablet is found
-// and the puzzle's end leads on, and on Original both are as the console plays them. Read from the ROM:
+// puzzle then opens the way on. Krazoa Tablets is its own setting: on Restored (the default) HighTop hands over the
+// first tablet, the third is found and the puzzle's end leads on, and on Original all three are as the console plays
+// them. Read from the ROM:
 // - CCkrazoaBits (dll458, uid 34B04) counts a tablet into 0x23B and sets 0x23C for each of 0x234, 0x236 and 0x237,
 //   the bits of the three pickups. 0x234 is a Discovery Falls TriggerPlane, 0x236 a CCKrazoaTabletP (object 0x2ED,
 //   dll308: +0x1B 1 hides it once its bit +0x1C is set) in the settlement room. Nothing in the ROM places one with
@@ -88,7 +89,14 @@
 //   and counts each that has turned set since (0xB4), but it is placed by distance in the tablet room, so a tablet
 //   picked up by the worm went uncounted (played): the pickup counts the third itself (dll308 0x288, once it set its
 //   bit), and CCkrazoaBits keeps 0x237 as set.
-// - CCkrazoabright (dll457, uid 34872) runs the room in states, its first update choosing one from bits (0xB4):
+// - HighTop's scene: Discovery Falls (map 6) places CCseqobject 34ADD (dll309, local 148,0,1695), which plays its
+//   list's index 7, sequence 873: HighTop (DFanimhightop) gives Krystal the first tablet (CCkrazoaTabletA) with text
+//   0x201, "It might be of use to you back in Cape Claw" (tools/dino.py text 0x201). Its played bit (+0x18), which
+//   dll309's update sets as the scene starts (0x2A8), is 0x234, but its trigger (+0x1A) is 0x96, which is never set,
+//   and TriggerPlane 34ADC beside it (local 293,38,1552) sets 0x234 itself (action 0x12, arg 0x4234, the one plane
+//   in any map with it), so the tablet came with no scene. Restored skips that set and has the scene object read its
+//   trigger as set once the plane is crossed, so the scene plays and sets 0x234, which Discovery Falls' own
+//   CCkrazoaBits (34B50) counts as it counted the plane's.// - CCkrazoabright (dll457, uid 34872) runs the room in states, its first update choosing one from bits (0xB4):
 //   0x3AC 4, 0x4D6 3, 0x393 2, else 1. State 1 (0x420): the four perch switches' six lights, solved by each switch
 //   once, plays sequence 0, whose data sets 0x393. State 2 (0x728): the two levers (0x41E, 0x604) set 0x4D6 and play
 //   sequence 1. State 3 (0x808): the three beacons and the three tablets set in (0x3DD-0x3DF, 0x238-0x23A) play
@@ -243,7 +251,9 @@ namespace {
     constexpr int tablet_pickup = 0x2ED;
 
     constexpr int increment_bit = 0x80014930; // (bit): adds one to its value
+    constexpr int first_tablet = 0x234;
     constexpr int third_tablet = 0x237;
+    constexpr int never = 0x96;               // the bit whose getter answers 0, HighTop's scene's trigger
     constexpr int tablets_counted = 0x23B;    // the tablets counted, which the receptacles read (+0x1E)
     constexpr int tablet_new = 0x23C;         // opens the settlement room (dll307)
     constexpr int tablets_done = 0x52B;       // Cape Claw's tablet room solved, Restored
@@ -263,6 +273,7 @@ namespace {
     constexpr float textblock_reach = 60.0f;
 
     int warlock_act = 0; // as WL_LevelControl last read it, for dll611's release
+    bool hightop_crossed = false; // TriggerPlane 34ADC crossed with 0x234 clear, until HighTop's scene reads it
 
     // DINO_LOG_KRAZOA set (development): each object placed, spirit given and mask taken back is printed.
     const bool logging = std::getenv("DINO_LOG_KRAZOA") != nullptr;
@@ -542,9 +553,10 @@ void dino::add_krazoa_options(recomp::config::Config& general) {
     general.add_enum_option(
         krazoa_tablets,
         "Krazoa Tablets",
-        "Cape Claw's third Krazoa tablet is found where the sand worm fell, the tablet room stays until it is solved, "
-        "and its last puzzle opens a Transporter to Krazoa Palace. <b>Original is the prototype as it was left</b>: the third tablet is nowhere, "
-        "and the last puzzle leads nowhere.",
+        "HighTop hands Krystal the first Krazoa tablet in Discovery Falls, Cape Claw's third is found where the sand "
+        "worm fell, the tablet room stays until it is solved, and its last puzzle opens a Transporter to Krazoa "
+        "Palace. <b>Original is the prototype as it was left</b>: the first tablet comes with no scene, the third is "
+        "nowhere, and the last puzzle leads nowhere.",
         krazoa_tablets_options,
         KrazoaTablets::Restored
     );
@@ -911,6 +923,40 @@ extern "C" void dino_krazoa_tablet_picked(uint8_t* rdram, recomp_context* ctx) {
 extern "C" void dino_krazoa_tablet_bits(uint8_t*, recomp_context* ctx) {
     if (tablets_restored()) {
         ctx->r2 = 1;
+    }
+}
+
+// us.toml's hook in a plane's actions (dll325_09B4), before its bit action with arg 0x4234: TriggerPlane 34ADC sets
+// the first tablet in place of HighTop's scene. On Restored, while 0x234 is clear, the crossing is kept for the scene
+// and the answer 1 skips the set.
+extern "C" int dino_krazoa_hightop_plane(uint8_t* rdram, recomp_context* ctx) {
+    if (!tablets_restored()) {
+        return 0;
+    }
+    {
+        Calls calls(rdram, ctx);
+        if (get(rdram, ctx, first_tablet)) {
+            return 0;
+        }
+    }
+    if (logging && !hightop_crossed) {
+        fprintf(stderr, "krazoa: Discovery Falls' tablet plane crossed, HighTop's scene next\n");
+    }
+    hightop_crossed = true;
+    return 1;
+}
+
+// us.toml's hook in CCseqobject's update (dll309_0124, at 0x230), on the answer of its trigger bit in $v0, its
+// setup in $s0, which it reaches only while its played bit is clear: HighTop's scene, waiting on 0x96 to set 0x234,
+// reads it as set once the plane is crossed, and plays.
+extern "C" void dino_krazoa_hightop_scene(uint8_t* rdram, recomp_context* ctx) {
+    if (!hightop_crossed || (int16_t)MEM_H(0x1A, ctx->r16) != never || (int16_t)MEM_H(0x18, ctx->r16) != first_tablet) {
+        return;
+    }
+    hightop_crossed = false;
+    ctx->r2 = 1;
+    if (logging) {
+        fprintf(stderr, "krazoa: HighTop's scene plays\n");
     }
 }
 
