@@ -923,10 +923,10 @@ Tricky's flame).
 
 Fixed (Walled City on Restored, `src/game/walled_city.cpp`, whose header has the evidence):
 
-- The Queen stands in the corridor outside the gate, at (-8330, -733, -4720). Sabre coming to her with Tricky near
-  meets her (0x80A). She gives nothing: Tricky's flame is the one he learned in DarkIce Mines. Tricky comes from a
-  sideload beside her: he walks only inside his zones (type-0x26 curves), and the corridor's are unlinked, so he is
-  made in the RedEye's, 184.
+- The Queen stands in the corridor outside the gate, at (-8330, -733, -4720). Sabre coming within her own talk
+  reach (100: dll773's state 1 moves to 2) with Tricky out meets her (0x80A). She gives nothing: Tricky's flame is the
+  one he learned in DarkIce Mines. Tricky comes from a sideload beside her: he walks only inside his zones (type-0x26
+  curves), and the corridor's are unlinked, so he is made in the RedEye's, 184.
 - A RedEye (WCTrexChase) waits by the arch, in Tricky's target list (0x33), and offers his flame within 300. Its flame
   point, a type-0x24 curve of kind 4 at (-7900, -735, -4800), is added to the curves' table with the map. Tricky's
   flame reaching it makes it mad: it runs at Sabre, roars as it catches him, and a tooth (WCTrexTooth) falls between
@@ -941,7 +941,9 @@ Fixed (Walled City on Restored, `src/game/walled_city.cpp`, whose header has the
   bowl, and Sabre through the gate. With no teeth the gate held. From `--place -7987,-874,-6790,0,0 --bits
   82e,36a=32` the King's talk activated the stone. The fight giving 0x82E was not played to its end. On Original none
   of it is placed and the arch is open. With the flame from the story point and none from the Queen, the same start
-  met the Queen at 8.8 s, and the RedEye got mad at Tricky's flame, roared and dropped the tenth tooth.
+  met the Queen at 8.8 s, and the RedEye got mad at Tricky's flame, roared and dropped the tenth tooth. Met by her own
+  talk reach, from `--story before-walled-city`: Sabre held 135 from her for 5 s didn't meet her, and walking on met
+  her 95 from her; at the RedEye Tricky's flame made it mad, and it roared and dropped a tooth.
 
 ## The warp table
 

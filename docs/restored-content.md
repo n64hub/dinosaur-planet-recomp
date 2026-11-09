@@ -395,12 +395,16 @@ What changes, in the order it is built, the redone choices first:
   the scene starts, is 0x234: the first tablet, which TriggerPlane 34adc beside it sets in its place (its trigger is
   0x96, never). So 0x201 hands over the tablet the prototype already gives, nothing gives 0x237, and the third
   tablet stays in the sand worm's arena. The scene itself is restored from the ROM (part 2, Krazoa Tablets).
-- **The Queen in Walled City** (simplified): WCQueenEarthWal's name puts her in Walled City, no def is a "Jungle
+- **The Queen in Walled City** (simplified, built): WCQueenEarthWal's name puts her in Walled City, no def is a "Jungle
   Door", and dll507, the Hollow's Queen, has no step past 7. Where she stands stays, and she is met by her own talk
   reach (dll773 0x4EC, 100) with Tricky out, in place of 150 and 400. Her unused lines (0x219, 0x21A: "I forbid you
   to enter that evil place ... Follow me, I will open the Jungle Door for you") are shown by no sequence and passed by
   no DLL (the TriggerPlanes that name 0x219 and 0x21A pass them to func_80000450, action 0x0D, not to the text box):
-  cut text, left out.
+  cut text, left out. Built (`src/game/walled_city.cpp`): 0x80A is set once her state (dll18's, +0x268) is 2, which
+  dll773_04D0 moves her to from 1 with the player within 100 by her own distance (+0x828), and a sidekick is out.
+  Played from `before-walled-city` on Restored: Sabre stood 135 from her for 5 s and didn't meet her (150 did), met
+  her walking on, 95 and 97 from her in two runs, and at the RedEye by the gate Tricky's flame made it mad, and it
+  roared and dropped a tooth.
 - **The ending** (replaces the title alone): the credits are the ROM's: dll78, menu 15, shows text 0x1FD, and
   nothing opens it (EndObject, dll299, is empty). After Drakor's fall the credits play, then the title.
   Built (PR 64): over the front end, with the screen cleared to black while they show (nothing clears it there), and
@@ -587,9 +591,10 @@ open: the logs.
   Original, where the sockets never load, 0x264 as before. Cascade: the shrine (map 33, entry 40) and its return to
   68, the pad's own (part 2). The ROM offers: what shows the pad in map 36 is not read (?) (PR 54).
 - **The Queen in Walled City** (Walled City): at (-8330, -733, -4720), in the corridor outside the gate; met (0x80A,
-  no ROM setter or getter) with Sabre within 150 and Tricky within 400. The ROM offers: task 75's clue "CHECK AGAIN
-  WHERE TRICKY'S MOTHER ONCE STOOD", where she stood in SwapStone Hollow (SHqueenearthwal 120e, at -8656, -835,
-  -3165), and task 76's "ONLY TRICKY CAN FIND HIS MOM".
+  no ROM setter or getter) once her own talk check has passed (dll773_04D0: her state 1 moves to 2, where it stays,
+  with Sabre within 100) and Tricky is out. The ROM offers: task 75's clue "CHECK AGAIN WHERE TRICKY'S MOTHER ONCE
+  STOOD", where she stood in SwapStone Hollow (SHqueenearthwal 120e, at -8656, -835, -3165), and task 76's "ONLY
+  TRICKY CAN FIND HIS MOM".
 - **The RedEye chase** (Walled City): Tricky's sideload at (-8250, -733, -4800) in zone 184; a RedEye (WCTrexChase) at
   (-7820, -735, -4810) with a flame point (a type-0x24 curve) at (-7900, -735, -4800); offered within 300, flame 150,
   catch 70, give-up 600. Task 77's "TRICKY'S FLAME BEGINS THE CHASE!" is the ROM's; the rest is ours.

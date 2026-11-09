@@ -224,6 +224,16 @@ index = 20
 name = "push_block"  # slides it to the cell before the next block, onto a tile (2), or to the grid's edge (4)
 [[field]]
 of = "state"
+dll = 773
+offset = 0x268
+name = "queen_talk_state"  # WCQueenEarthWal's dll18 state: 1 waiting, 2 once the player came within 100 (dll773_04D0)
+[[field]]
+of = "state"
+dll = 773
+offset = 0x828
+name = "queen_player_distance"  # set each frame by dll773's update (func_80016298), read by its talk check
+[[field]]
+of = "state"
 dll = 786
 offset = 0x0
 name = "lift_wait"  # WCMoonTempleLif: ticks before it moves again, 300 as it starts up or down

@@ -10,7 +10,8 @@
 //   THE KING EARTHWALKER, 80-82 the beacons, the boss door and the boss, and 83 KING EARTHWALKER ACTIVATES THE
 //   SPELLSTONE ("don't forget about the King").
 // - Objects made for them and placed nowhere: WCQueenEarthWal (#4FB, dll773, a dll18 character that turns to a player
-//   within 100), WCTrexChase (#506, dll777: it draws its model and does nothing else), WCSabreChase (#508, dll778, the
+//   within 100: her state 1, dll773_04D0, moves to state 2 once her own distance to the player, +0x828 of her state,
+//   is under 100, and she stays there; dll18 keeps the state at +0x268), WCTrexChase (#506, dll777: it draws its model and does nothing else), WCSabreChase (#508, dll778, the
 //   same) and WCTeethBowl (#4FD, dll308, the game's object a player uses with A, which waits for a bit and sets one).
 //   The teeth are WCTrexTooth (#522, dll272, the collectable of the boss door's two), and the collectable adds one to
 //   the bit in its setup's +0x2C as it is picked up. Tricky's flame is a flameblast (#4F0, dll278).
@@ -29,8 +30,8 @@
 //   learns it in DarkIce Mines: its SnowHorn sets 0x245 (dll712 0x2470) once the SnowClaw by it is beaten (0x172).
 //
 // What Restored adds, with bits no code and no placement uses (the 4 bits at 0xD5 count the teeth):
-// - The Queen stands in the corridor. Sabre coming to her with Tricky near (or alone, if no sidekick is out) has met
-//   her (0x80A), and from then the RedEye by the gate can be angered, with the flame Tricky learned in DarkIce Mines
+// - The Queen stands in the corridor. Sabre has met her (0x80A) once her own talk check has passed (her state 2) with
+//   Tricky out, and from then the RedEye by the gate can be angered, with the flame Tricky learned in DarkIce Mines
 //   (she gives nothing: the ROM's own giver is that SnowHorn). Tricky comes from a sideload (dll269) in zone 184,
 //   beside her.
 // - The RedEye (WCTrexChase) waits by the gate, in list 0x33, and offers the flame to Sabre within 300 of it. Tricky
@@ -126,8 +127,7 @@ namespace {
     constexpr float gate_z_low = -4960.0f;
     constexpr float gate_z_high = -4640.0f;
 
-    constexpr float meet_reach = 150.0f;
-    constexpr float tricky_reach = 400.0f;
+    constexpr int queen_talked = 2;  // dll773's state once the player came within its talk reach
     constexpr float flame_reach = 150.0f;
     constexpr float offer_reach = 300.0f;
     constexpr float bowl_reach = 80.0f;
@@ -489,17 +489,18 @@ namespace {
     }
 
     void meet_queen(uint8_t* rdram, recomp_context* ctx, gpr player) {
-        if (get(rdram, ctx, queen_met) || ground_distance(rdram, (gpr)state.queen, player) > meet_reach) {
+        gpr queen_state = (gpr)(int32_t)MEM_W(0xB8, (gpr)state.queen);
+        if (get(rdram, ctx, queen_met) || queen_state == 0 || (int16_t)MEM_H(0x268, queen_state) != queen_talked) {
             return;
         }
         call(rdram, ctx, sidekick_object);
-        gpr tricky = ctx->r2;
-        if (tricky != 0 && ground_distance(rdram, (gpr)state.queen, tricky) > tricky_reach) {
+        if (ctx->r2 == 0) {
             return;
         }
         set(rdram, ctx, queen_met, 1);
         if (logging) {
-            fprintf(stderr, "walled city: met the Queen (%s)\n", tricky != 0 ? "with Tricky" : "no sidekick out");
+            fprintf(stderr, "walled city: met the Queen, Sabre %.0f from her\n",
+                ground_distance(rdram, (gpr)state.queen, player));
         }
     }
 
