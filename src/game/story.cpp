@@ -643,6 +643,22 @@ bool dino::story_steer(uint8_t* rdram, recomp_context* ctx, int oid, int sphere,
     return true;
 }
 
+// --input's place lines (src/main/main.cpp): the player moved to (x, y, z). An object's position is at +0x0C, which
+// the game copies to +0x18 each frame (+0x18 moved alone was put back the next frame), and +0x80 and +0x8C hold where
+// it was the frames before: all four are moved, so the move starts with no step from the old place.
+void dino::story_move_player(uint8_t* rdram, recomp_context* ctx, float x, float y, float z) {
+    call(rdram, ctx, player_object);
+    gpr player = (gpr)(int32_t)ctx->r2;
+    if (player == 0) {
+        return;
+    }
+    for (int at : { 0x0C, 0x18, 0x80, 0x8C }) {
+        memcpy(&MEM_W(at, player), &x, 4);
+        memcpy(&MEM_W(at + 4, player), &y, 4);
+        memcpy(&MEM_W(at + 8, player), &z, 4);
+    }
+}
+
 // --input's sync near lines (src/main/main.cpp): whether a drawn object of that id (as story_steer chases) stands
 // within reach of (x, z) on the ground. 0 is the player, whichever character plays (Sabre's object id is 0, Krystal's
 // is not), drawn or not.

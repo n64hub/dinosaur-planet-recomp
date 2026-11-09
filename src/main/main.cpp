@@ -379,7 +379,10 @@ static std::string game_thread_name(const OSThread* t) {
 // within reach (20 and 30 units by default): dino_story_pass works out the stick each pass
 // (story.cpp's story_steer), so a script finds a place or an enemy that moves, whichever way the camera turned.
 // "ride to <x> <z> [reach]" and "ride <object id hex> [reach]" do the same for a player on a vehicle that turns by
-// stick x and goes by stick y (story_steer's ride), until within reach (0, never, by default). A line "menu <n>
+// stick x and goes by stick y (story_steer's ride), until within reach (0, never, by default). "place <x> <y> <z>"
+// moves the player there once, as the line starts, with the stick centred (story.cpp's story_move_player): dropped from
+// above one place after another, a run maps where a room has floor, and from a place a script tries a walk or a leap
+// over and over without the walk there. A line "menu <n>
 // <buttons hex>" presses those buttons, a fifth of a second each half second with the stick centred, in place of the
 // script's lines whenever the game shows menu n (story.cpp's story_menu): "menu 9 8000" continues after a game over,
 // wherever in the script it comes, as a player does. The parts' clocks go on meanwhile.
@@ -394,12 +397,17 @@ struct ScriptedInput {
     float to_x, to_z, reach;
     float strength;
     int match = -1, match_oid = 0, match_from = 0;
+    bool place;
+    float place_y;
 };
 static std::vector<ScriptedInput> input_script;
 // The steering line being played (to or chase), and the stick the last pass worked out for it.
 static std::atomic<const ScriptedInput*> steering = nullptr;
 static std::atomic<float> steer_stick_x = 0.0f;
 static std::atomic<float> steer_stick_y = 0.0f;
+// The place line last started, which the next pass moves the player to, and the one it last moved her for.
+static std::atomic<const ScriptedInput*> placing = nullptr;
+static const ScriptedInput* placed = nullptr;
 // Each sync line's bit (or object for a near), and the --input time it started (-1 until then). Part 0, before any,
 // starts at 0. A part waits for one of its after parts to have started (the part before it, or each way's last part
 // after a choose's end); the first parts of a choose's ways share a choice, of which one only starts.
@@ -548,6 +556,11 @@ static void load_input_script(const char* path) {
             if (in.reach <= 0.0f) {
                 in.reach = 30.0f;
             }
+            in.part = input_parts - 1;
+            input_script.push_back(in);
+        }
+        else if (line[0] != '#' && sscanf(line, "%lf %x place %f %f %f", &in.at, &in.buttons, &in.to_x, &in.place_y, &in.to_z) == 5) {
+            in.place = true;
             in.part = input_parts - 1;
             input_script.push_back(in);
         }
@@ -737,6 +750,9 @@ extern "C" void dino_story_pass(uint8_t* rdram, recomp_context* ctx) {
     if (input_menu >= 0) {
         shown_menu = dino::story_menu(rdram);
     }
+    if (const ScriptedInput* in = placing.exchange(nullptr)) {
+        dino::story_move_player(rdram, ctx, in->to_x, in->place_y, in->to_z);
+    }
     if (const ScriptedInput* in = steering) {
         float x, y;
         dino::story_steer(rdram, ctx, in->oid, in->sphere, in->to_x, in->to_z, in->reach, in->ride, &x, &y, in->match, in->match_oid,
@@ -796,6 +812,10 @@ static bool get_n64_input(int player_index, uint16_t* buttons_out, float* x_out,
             }
         }
         steering = steer_line != nullptr && steer_line->steer ? steer_line : nullptr;
+        if (steer_line != nullptr && steer_line->place && steer_line != placed) {
+            placed = steer_line;
+            placing = steer_line;
+        }
         if (input_menu >= 0 && shown_menu == input_menu) {
             *buttons_out = fmod(now, 0.5) < 0.2 ? (uint16_t)input_menu_buttons : 0;
             *x_out = 0.0f;
