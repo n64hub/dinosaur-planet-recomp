@@ -1127,18 +1127,8 @@ func = "dll732_3AF8"
 before_vram = 0x902AB16C
 text = '{ void dino_snow_bike_wall_point(uint8_t*, recomp_context*); dino_snow_bike_wall_point(rdram, ctx); }'
 
-# CloudRunner Fortress's baby CloudRunners (src/game/cloudrunner.cpp): CFCloudBaby's test for Kyte (dll373 0x2050) after
-# her export 24 answers, the same answer asked again by a found baby (0x0924), and its update (0x01A0) for the log.
-[[patches.hook]]
-func = "dll373_2050"
-before_vram = 0x901A7FEC
-text = '{ void dino_cloud_baby_found(uint8_t*, recomp_context*); dino_cloud_baby_found(rdram, ctx); }'
-
-[[patches.hook]]
-func = "dll373_01A0"
-before_vram = 0x901A6858
-text = '{ void dino_cloud_baby_follows(uint8_t*, recomp_context*); dino_cloud_baby_follows(rdram, ctx); }'
-
+# CloudRunner Fortress's baby CloudRunners (src/game/cloudrunner.cpp): CFCloudBaby's update (dll373 0x01A0), which
+# sends Kyte to a waiting baby's find node.
 [[patches.hook]]
 func = "dll373_01A0"
 before_vram = 0x901A60D4
