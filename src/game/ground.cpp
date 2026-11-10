@@ -12,13 +12,13 @@
 // 14888). The faces and lines are the ROM's, so the console would drop her too (not played there).
 //
 // dino_ground_keep_out, us.toml's hook after func_80046BC8 (each frame), looks at the loaded blocks' faces over the
-// player's place. With one at or below his feet it keeps the place as where he last stood. With none there, one above
-// his feet, and the floor test finding no floor under him (his floor type, dll210.70, is -1), he is inside the rock,
-// and his place (+0xC and +0x18: x, y and z) goes back to the last, if that is within 60 units (no warp or cutscene
-// jump). So a wall whose line is missing holds him as the line would, and nothing else changes: a step off a ledge
-// into the open has no face over him, a step under an overhang has the ground beneath, and on an object's floor (a
-// lift, a bridge) his floor type is not -1. Played: held at that wall for 30 s with the stick against it, where the
-// same walk fell 9 s in. DINO_LOG_GROUND=1 prints each time he is put back.
+// player's place, each facing up or down by its normal. He is inside the ground when the nearest face above his feet
+// faces up, so he is behind it, and no face that faces up is at or under his feet; a ceiling over him faces down, and
+// under an overhang or a bridge of the map the floor is still under him. Inside, his place (+0xC and +0x18: x, y and z)
+// goes back to the last where he stood on the ground (his floor type, dll210.70, not -1) on such a floor and not inside,
+// if that is within 60 units (no warp or cutscene jump). The floor type alone doesn't tell: sliding off a steep face
+// into the rock he is on the ground. So a wall whose line is missing holds him as the line would, and nothing else
+// changes. DINO_LOG_GROUND=1 prints each time he is put back.
 //
 // A block (the table at 0x800B96B4, by the slot each layer's grid of marks at 0x800B96D0 gives the cell; streaming.cpp
 // says how the grid is laid) holds its vertices at +4 (16 bytes each: x, y and z as halfwords, x and z from its
@@ -47,6 +47,8 @@ namespace {
     constexpr float cell_size = 640.0f;
     constexpr int floor_type_offset = 4 + 4 * 70;
     constexpr float farthest_back = 60.0f;
+    // How far above the player's place a face still counts as the floor under his feet.
+    constexpr float feet = 1.0f;
 
     struct Place {
         float local[3];
@@ -92,6 +94,12 @@ namespace {
         }
     }
 
+    // A face's normal's y, as func_800493B4 packs it into its second word (14 bits from bit 4, 8192 straight up).
+    int normal_y(uint32_t packed) {
+        int y = (int)((packed >> 4) & 0x3FFF);
+        return y & 0x2000 ? y - 0x4000 : y;
+    }
+
     // The height of the face (x1, z1)-(x2, z2)-(x3, z3) at (x, z), if (x, z) is over it.
     bool height_at(const float v[3][3], float x, float z, float* y) {
         float d = (v[1][2] - v[2][2]) * (v[0][0] - v[2][0]) + (v[2][0] - v[1][0]) * (v[0][2] - v[2][2]);
@@ -108,10 +116,12 @@ namespace {
         return true;
     }
 
-    // Whether the loaded blocks have a face over (x, z) above y, and one at or below it.
-    void faces_over(uint8_t* rdram, float x, float y, float z, bool* above, bool* below) {
-        *above = false;
-        *below = false;
+    // Whether the loaded blocks' nearest face over (x, z) above y faces up, so that (x, y, z) is behind it, inside the
+    // ground, and whether one that faces up is at or below y, a floor.
+    void faces_over(uint8_t* rdram, float x, float y, float z, bool* inside, bool* floor) {
+        *inside = false;
+        *floor = false;
+        float nearest_above = INFINITY;
         int cell_x = (int)floorf(x / cell_size), cell_z = (int)floorf(z / cell_size);
         int gx = cell_x - (int32_t)MEM_W(0, grid_corner_x), gz = cell_z - (int32_t)MEM_W(0, grid_corner_z);
         if (gx < 0 || gx >= 16 || gz < 0 || gz >= 16) {
@@ -156,11 +166,15 @@ namespace {
                     if (!height_at(v, lx, lz, &face_y)) {
                         continue;
                     }
-                    if (face_y > y) {
-                        *above = true;
+                    bool up = normal_y((uint32_t)MEM_W(4, faces + 8 * f)) > 0;
+                    if (face_y > y + feet) {
+                        if (face_y < nearest_above) {
+                            nearest_above = face_y;
+                            *inside = up;
+                        }
                     }
-                    else {
-                        *below = true;
+                    else if (up) {
+                        *floor = true;
                     }
                 }
             }
@@ -184,14 +198,16 @@ extern "C" void dino_ground_keep_out(uint8_t* rdram, recomp_context* ctx) {
     *ctx = saved;
 
     Place now = place_of(rdram, player);
-    bool above, below;
-    faces_over(rdram, now.world[0], now.world[1], now.world[2], &above, &below);
-    if (below) {
-        safe.known = true;
-        safe.place = now;
+    bool inside, floor;
+    faces_over(rdram, now.world[0], now.world[1], now.world[2], &inside, &floor);
+    if (!inside || floor) {
+        if (on_ground && floor && !inside) {
+            safe.known = true;
+            safe.place = now;
+        }
         return;
     }
-    if (on_ground || !above || !safe.known) {
+    if (!safe.known) {
         return;
     }
     float dx = now.world[0] - safe.place.world[0], dz = now.world[2] - safe.place.world[2];
