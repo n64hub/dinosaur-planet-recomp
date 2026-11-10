@@ -1,5 +1,5 @@
-// The player never walks into the ground: off the ground under a face of the world's blocks with none beneath him,
-// inside the rock, he goes back to where he last stood on one. A plain bug fix, always on.
+// The player never walks into the ground: behind a face of the world's blocks that faces up, with no floor under him,
+// inside the rock, he goes back to where he last stood on the ground. A plain bug fix, always on.
 //
 // The world's blocks hold faces, which are drawn and which the floor test stands the player on, and lines, the walls he
 // walks into (each block's list at +0x18, 20 bytes a line, its count at +0x3E). A face steeper than he can climb is no
@@ -15,10 +15,13 @@
 // player's place, each facing up or down by its normal. He is inside the ground when the nearest face above his feet
 // faces up, so he is behind it, and no face that faces up is at or under his feet; a ceiling over him faces down, and
 // under an overhang or a bridge of the map the floor is still under him. Inside, his place (+0xC and +0x18: x, y and z)
-// goes back to the last where he stood on the ground (his floor type, dll210.70, not -1) on such a floor and not inside,
-// if that is within 60 units (no warp or cutscene jump). The floor type alone doesn't tell: sliding off a steep face
-// into the rock he is on the ground. So a wall whose line is missing holds him as the line would, and nothing else
-// changes. DINO_LOG_GROUND=1 prints each time he is put back.
+// goes back to the last where he stood on the ground (his floor type, dll210.70, not -1) on such a floor, not inside,
+// if that is within 60 units (no warp or a sequence's jump: Dragon Rock's arena door moves him 171 down in a frame).
+// The floor test alone doesn't tell: sliding off a steep face into the rock he is on the ground. His speed down (+0x28)
+// and his air time (his state's +0x32C, ticks) go back to 0 with him: held against the wall he is falling to the game,
+// and the air time it adds up would hurt him as he lands (dll210_CC24 reads it) and, past about 230, put him back at
+// the setup point. So a wall whose line is missing holds him as the line would, and nothing else changes.
+// DINO_LOG_GROUND=1 prints each time he is put back.
 //
 // A block (the table at 0x800B96B4, by the slot each layer's grid of marks at 0x800B96D0 gives the cell; streaming.cpp
 // says how the grid is laid) holds its vertices at +4 (16 bytes each: x, y and z as halfwords, x and z from its
@@ -47,6 +50,10 @@ namespace {
     constexpr float cell_size = 640.0f;
     constexpr int floor_type_offset = 4 + 4 * 70;
     constexpr float farthest_back = 60.0f;
+    // The player's speed down, and his air time in ticks (his state's +0x32C), which dll210_CC24 reads as he lands.
+    constexpr gpr fall_speed = 0x28;
+    constexpr gpr state_offset = 0xB8;
+    constexpr gpr air_time = 0x32C;
     // How far above the player's place a face still counts as the floor under his feet.
     constexpr float feet = 1.0f;
 
@@ -210,8 +217,9 @@ extern "C" void dino_ground_keep_out(uint8_t* rdram, recomp_context* ctx) {
     if (!safe.known) {
         return;
     }
-    float dx = now.world[0] - safe.place.world[0], dz = now.world[2] - safe.place.world[2];
-    if (dx * dx + dz * dz >= farthest_back * farthest_back) {
+    float dx = now.world[0] - safe.place.world[0], dy = now.world[1] - safe.place.world[1],
+          dz = now.world[2] - safe.place.world[2];
+    if (dx * dx + dy * dy + dz * dz >= farthest_back * farthest_back) {
         safe.known = false;
         return;
     }
@@ -221,4 +229,6 @@ extern "C" void dino_ground_keep_out(uint8_t* rdram, recomp_context* ctx) {
             now.world[1], now.world[2], safe.place.world[0], safe.place.world[1], safe.place.world[2]);
     }
     set_place(rdram, player, safe.place);
+    set_real(rdram, player + fall_speed, 0.0f);
+    MEM_H(air_time, word(rdram, player + state_offset)) = 0;
 }
