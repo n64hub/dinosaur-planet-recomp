@@ -127,6 +127,13 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   a death leaves its bit 0x11 clear, so with the game over's "Use Duster?" up she stood up behind it, the camera under
   the quicksand that killed her. It now waits while the player is in a scene or the game over's menu is up (us.toml,
   dll547_00F0).
+- Walls without a line: a block's faces are what the player stands on and its lines the walls he walks into, and a
+  face too steep to climb is no floor, so where the prototype left a rock wall without a line along its foot he
+  walked onto its slope and dropped through the inside of the rock into the void: Golden Plains' rock wall north of
+  the portal-spell door (block 399, cell (1, 23)) put Krystal back at the setup point. A step behind a face of the
+  loaded blocks that faces up, with no floor under him, now goes back to where he last stood on the ground, his fall
+  speed and air time cleared so the hold neither hurts him nor puts him back (us.toml, func_80046BC8 at 0x80047330,
+  `src/game/ground.cpp`).
 
 ### Tricky's Run
 

@@ -960,10 +960,12 @@ func = "func_80046BC8"
 before_vram = 0x80047178
 text = '{ void dino_streaming_keep_player_cell(uint8_t*, recomp_context*); dino_streaming_keep_player_cell(rdram, ctx); }'
 
+# Each frame, once the map streamer is done: the restorations' objects, and the player kept out of the ground where a
+# wall has no line, a plain bug, so always (src/game/ground.cpp).
 [[patches.hook]]
 func = "func_80046BC8"
 before_vram = 0x80047330
-text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); void dino_walled_city_frame(uint8_t*, recomp_context*); void dino_moonseeds_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); dino_walled_city_frame(rdram, ctx); dino_moonseeds_frame(rdram, ctx); }'
+text = '{ void dino_krazoa_place_objects(uint8_t*, recomp_context*); void dino_force_point_frame(uint8_t*, recomp_context*); void dino_walled_city_frame(uint8_t*, recomp_context*); void dino_moonseeds_frame(uint8_t*, recomp_context*); dino_krazoa_place_objects(rdram, ctx); dino_force_point_frame(rdram, ctx); dino_walled_city_frame(rdram, ctx); dino_moonseeds_frame(rdram, ctx); void dino_ground_keep_out(uint8_t*, recomp_context*); dino_ground_keep_out(rdram, ctx); }'
 
 # WL_LevelControl's update (dll607 0x298) once it has read Warlock Mountain's act, and its acts 6 and 7, which ask
 # whether their spirit is released by 0x366, a bit nothing sets: on Restored they ask CC's (0x221) and WG's (0x222)
