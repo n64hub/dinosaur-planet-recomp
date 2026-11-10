@@ -652,6 +652,12 @@ open: the logs.
   gives 0x83B. On Walled City's Original, with no King's part, the defeat activates it. 0x82E: no ROM setter or
   getter. The ROM offers: task 83 and the King's "only I can activate it" put the activation at him, and the
   volcano's act 2 gives 0x83B (above); the second SpellStone has no won and activated pair either.
+- **Golden Plains' heat scene** (kept): GP_LevelControl (dll547_00F0) adds to its state +0 each frame Krystal is
+  in map 9 (unless 0x643), and past 600 sets 0x11 and plays her sequence 9 once: the camera cuts to her face as she
+  wipes her brow, then cuts back behind her. 0x11 is in bank 0, not saved, which a restart also clears (a
+  death, or a sink in quicksand that puts her back), so it plays once a session and again after each restart. It
+  plays as the prototype has it, cuts and all: the camera's swing to her face there is this scene, not a fault. It
+  waits only while she is in a scene or the game over's menu is up (Plain bugs, always on).
 
 ### Open
 

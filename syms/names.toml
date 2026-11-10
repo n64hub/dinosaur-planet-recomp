@@ -785,3 +785,20 @@ name = "after_shrines"  # Warlock Mountain's seqpoint 30055 plays sequence 0x12 
 [[bit]]
 bit = 0x367
 name = "cape_claw_warp_shown"  # sequence 0x12 sets it; it shows WM_WarpPoint 3008c, to entry 77
+
+# The camera (dll2, its modes; dll84 is the follow camera, mode 0x54, src/game/camera.cpp).
+[[export]]
+dll = 2
+index = 6
+name = "set_camera_mode"  # (mode, a1, a2, size, data): dll2_0630 queues it; dll3_730C sets 0x5E for a sequence
+
+# Golden Plains' heat scene: GP_LevelControl (dll547) adds to state +0 each frame Krystal is in map 9 (unless bit
+# 0x643 is set), and past 600 plays her sequence 9 (she wipes her brow, the camera on her face) once (dll547_00F0).
+[[field]]
+of = "state"
+dll = 547
+offset = 0x0
+name = "heat_timer"
+[[bit]]
+bit = 0x11
+name = "gp_heat_scene_played"  # bank 0, not saved: the scene plays once a session

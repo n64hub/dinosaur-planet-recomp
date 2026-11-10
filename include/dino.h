@@ -14,6 +14,8 @@ namespace dino {
     // The game's code sections (register_overlays.cpp) and the patches over it (register_patches.cpp).
     void register_overlays();
     void register_patches();
+    // What the executable gives mods (recomp_api.cpp).
+    void register_mod_exports();
 
     // --story, --place, --bits, --report, --watch-bits, --time and --sidekick (story.cpp, development).
     bool story_choose(const char* name);
