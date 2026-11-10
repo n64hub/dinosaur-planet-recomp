@@ -656,6 +656,10 @@ open: the logs.
   TriggerPlane 30e8c clears it) and 0x4B8 (dll519, dll400 read it) have no setter. 0x4DC is set and cleared by
   TriggerPlane 31a68 at (-9917, 1445, 18272), and dll400 turns it into 0x4DD, whose sequence sets 0x4DE.
 - **The babies left**: 29FA's ledge, map 30's and map 15's from the master chest.
+- **Golden Plains' heat scene**: GP_LevelControl (dll547_00F0) adds to its state +0 each frame Krystal is in
+  map 9 (unless 0x643), and past 600 sets 0x11 and plays her sequence 9 once: the camera cuts to her face as she
+  wipes her brow, then cuts back behind her. 0x11 is in bank 0, not saved, so it plays once a session. The
+  prototype's own, not a fault; whether to keep it, ease the camera into it or play it once a save is asked.
 - **The logs** (tasks after 0x22B and task 84): no ThornTail sells one, SHriver is a placement with no code, and the
   hollow has no dock.
 
