@@ -1,1 +1,0 @@
-- The boot's sketched picture behind the Nintendo and Rareware logos has no seams left: where its tiles meet, the drawing now runs on without a step.
