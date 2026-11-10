@@ -34,8 +34,15 @@
 // same modes and as many triangles) were paired across. In the frames between, the block was drawn half a cell from
 // its place, parts of the scene flickering into each other at each step. The blocks are drawn in an order sorted by
 // depth, with objects between, and a block's matrix is loaded again after each object: the group is pushed before a
-// block's first load and set anew at each other one, popped before an object and at the end. What else the world
-// draws by itself (sky, particles) has no group and RT64 pairs it, as it does for any game.
+// block's first load and set anew at each other one, popped before an object and at the end. A group's matrices pair
+// in the order they are loaded (order_linear): all of a block's are the same matrix, so any order pairs them right,
+// where RT64's own pairing within a group goes by alike draws, and those change as the order does. A block drawn after
+// another takes up the modes it left, and an object sorted into a block splits its draws, so a block whose place in
+// the order changes at a step, as the player's own and the one ahead of it do when the player crosses into a cell,
+// would pair with nothing and be drawn half a cell off for a frame, over the player's feet. A block that wasn't drawn
+// the frame before, or is loaded more times than then, still pairs with nothing and is drawn where it is, which is off
+// only in the frames between a step's two. What else the world draws by itself (sky, particles) has no group and RT64
+// pairs it, as it does for any game.
 //
 // What the commands cost: 24 bytes of the 36,000-byte list per object, 16 per camera, 16 for a step and 16 a block's
 // matrix load (13 loads a frame at most in SwapStone Hollow, Warlock Mountain and CloudRunner Fortress), with 8 for each
@@ -279,7 +286,7 @@ extern "C" void dino_interp_block(uint8_t* rdram, recomp_context* ctx, uint32_t 
     gpr list = (gpr)(int32_t)list_address;
     gpr gfx = (gpr)(int32_t)MEM_W(0, list);
     write_group(rdram, &gfx, (id >> 1) | 1, mode_decompose, !block_pushed, false,
-        origin_stepped ? component_interpolate : component_auto, component_skip, order_auto);
+        origin_stepped ? component_interpolate : component_auto, component_skip, order_linear);
     MEM_W(0, list) = (int32_t)gfx;
     block_pushed = true;
 }

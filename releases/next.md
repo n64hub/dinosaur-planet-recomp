@@ -97,3 +97,5 @@
 - Parts of the scene no longer flicker into each other for a frame as the player walks: at each step of the world's
   map cells, a piece of the level, such as Warlock Mountain's walls or SwapStone Hollow's cliffs, could be drawn for
   one in-between frame where its neighbour was.
+- The ground near the player no longer jumps out of place for a frame as the player walks from one of the map's
+  cells into the next: in Golden Plains' pit by the Desert Force Point, a slab of sand flashed over Krystal's legs.
