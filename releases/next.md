@@ -94,3 +94,6 @@
   guards' room to the second. In the prototype the first target hit shut both scenes for good, and nothing went up.
 - A scene whose camera cuts away from the player no longer unloads the ground under him: past Warlock Mountain's laser
   hall, on the way to Walled City's spirit's release, the player fell out of the world as the "Father." scene ended.
+- Parts of the scene no longer flicker into each other for a frame as the player walks: at each step of the world's
+  map cells, a piece of the level, such as Warlock Mountain's walls or SwapStone Hollow's cliffs, could be drawn for
+  one in-between frame where its neighbour was.
