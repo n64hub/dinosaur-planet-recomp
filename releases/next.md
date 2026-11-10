@@ -101,3 +101,5 @@
   cells into the next: in Golden Plains' pit by the Desert Force Point, a slab of sand flashed over Krystal's legs.
 - Mods: a mod can print to the console with `recomp_printf`, and hook the game's DLLs as well as its main code, and
   `mod_template/` is a working example mod to start from (README, Mods).
+- Golden Plains: after Krystal dies, the "Use Duster?" menu stays over her death scene. She no longer stands up
+  behind it with the camera under the ground.
