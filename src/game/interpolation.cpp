@@ -25,11 +25,22 @@
 //
 // Each object's model (func_80035000) is a group by the object, its model and the last cut, so each joint pairs in
 // order with its own and two alike objects can't swap. The model's vertices, which the skinning writes anew each
-// frame, are interpolated with it. An object that jumps gets a new group too. What the world draws by itself (its map
-// blocks, sky, particles) has no group and RT64 pairs it, as it does for any game.
+// frame, are interpolated with it. An object that jumps gets a new group too.
 //
-// What the commands cost: 24 bytes of the 36,000-byte list per object, 16 per camera and 16 for a step. The fullest list measured in
-// the levels of eight areas was 11,200 bytes and a title screen's, which draws no objects, 29,800.
+// Each of the map's blocks is a group by the block and its cell's place in the world (func_80042DA0 draws them, after
+// func_80043E00 has given each a slot and a matrix). RT64 pairs a matrix with no group with the frame before's nearest
+// in the world's coordinates, which on a step is the wrong one: every block moves by the step, a cell, which is a
+// block's size, so a block's new matrix is exactly its neighbour's old one, and any two whose draws are alike (the
+// same modes and as many triangles) were paired across. In the frames between, the block was drawn half a cell from
+// its place, parts of the scene flickering into each other at each step. The blocks are drawn in an order sorted by
+// depth, with objects between, and a block's matrix is loaded again after each object: the group is pushed before a
+// block's first load and set anew at each other one, popped before an object and at the end. What else the world
+// draws by itself (sky, particles) has no group and RT64 pairs it, as it does for any game.
+//
+// What the commands cost: 24 bytes of the 36,000-byte list per object, 16 per camera, 16 for a step and 16 a block's
+// matrix load (13 loads a frame at most in SwapStone Hollow, Warlock Mountain and CloudRunner Fortress), with 8 for each
+// object between blocks. The fullest list measured in the levels of eight areas was 11,200 bytes and a title screen's,
+// which draws no objects, 29,800.
 
 #include <algorithm>
 #include <cmath>
@@ -59,6 +70,7 @@ namespace {
     constexpr uint32_t camera_count = 12;
 
     constexpr uint32_t origin_address = 0x80092A70;
+    constexpr uint32_t list_address = 0x800B51CC;                     // The list's pointer, as func_80042DA0 keeps it.
     constexpr uint32_t id_auto = 0xFFFFFFFF;                          // G_EX_ID_AUTO: paired by RT64, as with no group.
 
     // Measured over eight areas and the opening: the camera steps 0-9 units and 0-340 of 65,536 of a turn a game frame,
@@ -141,6 +153,7 @@ namespace {
     uint32_t world_cuts = 0;
     uint32_t origin_x = 0, origin_z = 0;
     bool origin_stepped = false;
+    bool block_pushed = false;
     bool logging = getenv("DINO_LOG_CUTS") != nullptr;            // Prints each cut and jump, to tune the limits above.
 
     uint32_t object_id(uint32_t object, uint32_t model, uint32_t jumps) {
@@ -149,6 +162,16 @@ namespace {
         id = (id ^ jumps) * 0xC2B2AE35u;
         id = (id ^ world_cuts) * 0x27D4EB2Fu;
         return (id >> 1) | 1;                                         // Neither G_EX_ID_IGNORE nor G_EX_ID_AUTO.
+    }
+
+    void pop_block(uint8_t* rdram) {
+        if (block_pushed) {
+            gpr list = (gpr)(int32_t)list_address;
+            gpr gfx = (gpr)(int32_t)MEM_W(0, list);
+            write(rdram, &gfx, op_pop_group, 1);
+            MEM_W(0, list) = (int32_t)gfx;
+            block_pushed = false;
+        }
     }
 }
 
@@ -161,6 +184,7 @@ extern "C" void dino_interp_frame(uint8_t* rdram, recomp_context* ctx) {
     origin_stepped = (x != origin_x) || (z != origin_z);
     origin_x = x;
     origin_z = z;
+    block_pushed = false;
     if (origin_stepped) {
         write_group(rdram, &gfx, id_auto, mode_decompose, false, false, component_interpolate, component_skip, order_auto);
         if (logging) {
@@ -237,4 +261,30 @@ extern "C" void dino_interp_object_end(uint8_t* rdram, recomp_context* ctx) {
     gpr gfx = ctx->r10;
     write(rdram, &gfx, op_pop_group, 1);
     ctx->r10 = gfx;
+}
+
+// In func_80042DA0, before it loads a block's matrix (0x80042F34 the one at +0x40, 0x80042F74 the one at +0): s6 is the
+// block, and sp + 0xA4 the address of its slot's two matrices, a translation by its place in the grid of cells about
+// the world's origin, 0 to 15 cells along x and z.
+extern "C" void dino_interp_block(uint8_t* rdram, recomp_context* ctx, uint32_t matrix_offset) {
+    gpr matrix = (gpr)(int32_t)((((uint32_t)MEM_W(0xA4, ctx->r29) + matrix_offset) & 0x1FFFFFFF) | 0x80000000);
+    gpr origin = (gpr)(int32_t)origin_address;
+    // The translation's whole parts, x and z, in the halfwords at +0x18 and +0x1C (an Mtx's row 3).
+    int32_t x = (int32_t)lroundf(read_float(rdram, origin)) + (int16_t)((uint32_t)MEM_W(0x18, matrix) >> 16);
+    int32_t z = (int32_t)lroundf(read_float(rdram, origin + 4)) + (int16_t)((uint32_t)MEM_W(0x1C, matrix) >> 16);
+    uint32_t id = (uint32_t)ctx->r22 * 0x9E3779B1u;
+    id = (id ^ (uint32_t)x) * 0x85EBCA6Bu;
+    id = (id ^ (uint32_t)z) * 0xC2B2AE35u;
+    id = (id ^ matrix_offset ^ (world_cuts << 8)) * 0x27D4EB2Fu;
+    gpr list = (gpr)(int32_t)list_address;
+    gpr gfx = (gpr)(int32_t)MEM_W(0, list);
+    write_group(rdram, &gfx, (id >> 1) | 1, mode_decompose, !block_pushed, false,
+        origin_stepped ? component_interpolate : component_auto, component_skip, order_auto);
+    MEM_W(0, list) = (int32_t)gfx;
+    block_pushed = true;
+}
+
+// In func_80042DA0, before it draws an object between the blocks (0x80042E84), and at its end (0x800436AC).
+extern "C" void dino_interp_block_end(uint8_t* rdram, recomp_context* ctx) {
+    pop_block(rdram);
 }

@@ -98,9 +98,10 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
 - **Microcodes.** Audio: `n_aspMain`, recompiled by RSPRecomp from `aspMain.us.toml`, with the second part it
   loads over its own text as an overlay slot. librecomp's vector unit uses
   SSE4.1, so `RecompiledFuncs` builds with `-march=nehalem` on x86-64.
-- **Interpolation.** Four hooks in `us.toml` call `src/game/interpolation.cpp`, which writes RT64's extended commands
+- **Interpolation.** Eight hooks in `us.toml` call `src/game/interpolation.cpp`, which writes RT64's extended commands
   into the list the game is building: its header says how. Each camera has a group that a cut changes, a frame cut in
-  puts the world in a group of its own, and each object's model is a group by the object. The world's origin steps by
+  puts the world in a group of its own, each object's model is a group by the object, and each map block a group by
+  the block and its cell, so a step never pairs a block with its neighbour. The world's origin steps by
   640 units as the player walks, which isn't a cut: `RT64_INTERPOLATE_CAMERA_EYE` and `RT64_UNEVEN_FRAME_RATES`, on in
   `CMakeLists.txt`, cancel that step and keep blending through frames of 3 VIs, and a frame whose origin steps has the
   world and each model interpolate their translations, which RT64 by itself drops for a step that size.

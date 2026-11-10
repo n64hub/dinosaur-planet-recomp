@@ -396,6 +396,29 @@ func = "func_80035000"
 before_vram = 0x80035774
 text = '{ void dino_interp_object_end(uint8_t*, recomp_context*); dino_interp_object_end(rdram, ctx); }'
 
+# func_80042DA0 draws the map's blocks, sorted, with objects between them: each block's matrix load (0x80042F34 the one
+# at +0x40, 0x80042F74 the one at +0) gets a group by the block and its cell, popped before an object (0x80042E84) and
+# at the end (0x800436AC). The list's pointer is in memory, at 0x800B51CC, at each.
+[[patches.hook]]
+func = "func_80042DA0"
+before_vram = 0x80042E84
+text = '{ void dino_interp_block_end(uint8_t*, recomp_context*); dino_interp_block_end(rdram, ctx); }'
+
+[[patches.hook]]
+func = "func_80042DA0"
+before_vram = 0x80042F34
+text = '{ void dino_interp_block(uint8_t*, recomp_context*, uint32_t); dino_interp_block(rdram, ctx, 0x40); }'
+
+[[patches.hook]]
+func = "func_80042DA0"
+before_vram = 0x80042F74
+text = '{ void dino_interp_block(uint8_t*, recomp_context*, uint32_t); dino_interp_block(rdram, ctx, 0); }'
+
+[[patches.hook]]
+func = "func_80042DA0"
+before_vram = 0x800436AC
+text = '{ void dino_interp_block_end(uint8_t*, recomp_context*); dino_interp_block_end(rdram, ctx); }'
+
 # The game's hand-written math (its matrix, vector and spline routines, the conversion of a float matrix into the
 # fixed-point one the RSP reads, and the skinning of its models) uses the odd float registers as registers of their
 # own, as the CPU does with Status.FR set: libultra's C code is built for FR clear, where an odd register is the high
