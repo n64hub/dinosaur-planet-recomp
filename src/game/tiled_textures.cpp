@@ -1,18 +1,24 @@
-// A texture too big for TMEM, drawn in 64-texel tiles: the rows its tiles loaded. A plain bug fix, always on.
+// A texture too big for TMEM, drawn in 64-texel tiles: where its tiles load from. A plain bug fix, always on.
 //
 // dll76_18A8 draws such a texture tile by tile, a row of tiles at a time (the boot's sketched picture behind the
-// Rareware and Nintendo logos: 320x192 I8, 5 tiles across and 3 down). For each it loads the tile into TMEM and sets
-// the tile the mesh draws with, both from s = the tile's number counted from the first (its $s5) times the tile's
-// width, and t = 63 times its row ($s4). The mesh's s follows the same count, so across a row it draws right. But the
-// load's address is the image's at (s, t), and an s past the image's width runs on into its next row: a tile in row r
-// loaded from r rows below the t it was given. The mesh's t are the image's own rows, 64 a row of tiles, so with the
-// tile at 63r the drawn rows were 64r + r to 64r + 63 + r, the last r of them past what was loaded: at the seams
-// between the rows of tiles the picture jumped a texel and then two (on a console as well, where a texel is two of the
-// 480 lines), which a window's resolution shows as a step through the drawing.
+// Rareware and Nintendo logos: 320x192 I8, 5 tiles across and 3 down). Each tile's mesh is a 63-texel square of the
+// picture's: its corners 63 texels apart on the screen, where the next tile's start. So the tiles overlap by a texel,
+// each one's last row and column the next one's first, which a filtered texture needs to meet its neighbour with no
+// seam: tile (c, r) shows the image's texels 63c to 63c + 63 across and 63r to 63r + 63 down.
 //
-// us.toml calls dino_tiled_texture_rows where a tile's commands are written: it moves its load to the column it is in
-// and to the rows the mesh reads, 64r on (its height times r), and the tile's t with it; the tile's s stays as the mesh
-// has it. A list that isn't those seven commands, or a tile not at 63r, is left alone.
+// For each tile the function loads 64x64 texels into TMEM and sets the tile the mesh draws with, both from s = the
+// tile's number counted from the first (its $s5) times 64 and t = 63 times its row ($s4), and the mesh's texture
+// coordinates follow the same count, 64 a tile: s from 64 times the tile's number, t from 64r. So the tile's t (63r)
+// is r less than the mesh's, and the load's address is the image's at (s, t), where an s past the image's width runs
+// on into its next row: a tile in row r loaded from r rows below 63r, and each column from 64c, not 63c. On a console
+// as well the picture skipped a texel at every column of tiles and jumped one, then two, at the rows, where the mesh
+// read past what was loaded, which a window's resolution shows as steps through the drawing (the stones and the
+// figure's head).
+//
+// us.toml calls dino_tiled_texture_rows where a tile's commands are written: it loads the tile from the texels it
+// shows, (63c, 63r) on (its width and height less a texel, times c and r), and moves the tile's t to the mesh's, 64r
+// (its height times r); the tile's s is already the mesh's. A list that isn't those seven commands, or a tile not at
+// 63r, is left alone.
 
 #include <cstdint>
 
@@ -54,9 +60,10 @@ extern "C" void dino_tiled_texture_rows(uint8_t* rdram, recomp_context* ctx) {
     if (lrs < uls || lrt < ult || ult != row * (height - 4) || size_first != first_word(0xF2, uls, ult)) {
         return;
     }
-    uint32_t s = column * width, t = row * height;
+    uint32_t s = column * (width - 4), t = row * (height - 4);
     MEM_W(0, load) = (int32_t)first_word(0xF4, s, t);
     MEM_W(4, load) = (int32_t)last_word(load_last >> 24, s + width - 4, t + height - 4);
-    MEM_W(0, size) = (int32_t)first_word(0xF2, uls, t);
-    MEM_W(4, size) = (int32_t)last_word(size_last >> 24, (size_last >> 12) & 0xFFF, t + height - 4);
+    uint32_t mesh_t = row * height;
+    MEM_W(0, size) = (int32_t)first_word(0xF2, uls, mesh_t);
+    MEM_W(4, size) = (int32_t)last_word(size_last >> 24, (size_last >> 12) & 0xFFF, mesh_t + height - 4);
 }

@@ -115,9 +115,11 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   and scissor now take the whole frame and the picture fills the window; a cutscene's letterbox keeps them (us.toml,
   `src/game/view_rows.cpp`).
 - The boot's sketched picture behind the Rareware and Nintendo logos, and any texture dll76_18A8 draws in 64-texel
-  tiles: each row of tiles loaded from a row of texels further down than its mesh reads, so the picture stepped a
-  texel and then two where the rows of tiles meet, seams through the dinosaur's head and the stones. Each tile now
-  loads the rows and columns its mesh reads (us.toml, `src/game/tiled_textures.cpp`).
+  tiles: each tile's mesh is 63 texels square, so the tiles share their edge texels, but each column of tiles loaded
+  from 64 texels on and each row from a row further down than its mesh reads, so the picture skipped a texel at every
+  column of tiles and jumped one, then two, at the rows: seams through the figure's head and the stones. Each tile
+  now loads the 64 texels from 63 times its column and its row, as its mesh reads them (us.toml,
+  `src/game/tiled_textures.cpp`).
 - The world's blocks under the player: the game loads them around the camera, not the player, so a scene whose
   camera cuts to a part of the map whose blocks leave his out let the player fall through the block that went:
   Warlock Mountain's sequence 9 (297b, "Father.", on the way to EC's release) dropped him out of the world as it
