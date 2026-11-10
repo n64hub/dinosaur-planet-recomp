@@ -1,0 +1,25 @@
+# Example mod for Dinosaur Planet: AI Slop Recomp, and a starting point for your own. Build it with `make` and
+# `RecompModTool mod.toml build` (README, Mods), then put build/*.nrm in the game's mods folder.
+
+[manifest]
+# Unique ID: long enough that no other mod will pick it. The mod menu shows display_name instead.
+id = "dinoplanet_hello_mod"
+version = "1.0.0"
+display_name = "Hello Mod"
+description = """
+Example mod for Dinosaur Planet: AI Slop Recomp. Keeps the player's magic full, and prints each story bit the game \
+changes to the console."""
+short_description = "Example mod: full magic, story bits printed."
+authors = [ "Dinosaur Planet: AI Slop Recomp" ]
+game_id = "dinoplanet"
+minimum_recomp_version = "0.0.1"
+dependencies = []
+optional_dependencies = []
+native_libraries = []
+
+[inputs]
+elf_path = "build/mod.elf"
+mod_filename = "dinoplanet_hello_mod"
+func_reference_syms_file = "../syms/dinoplanet.syms.toml"
+data_reference_syms_files = []
+additional_files = []

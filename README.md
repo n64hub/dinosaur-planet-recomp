@@ -10,13 +10,13 @@
 > [Dinosaur Planet decompilation](https://github.com/zestydevy/dinosaur-planet).
 >
 > Its developers ask that AI not be used on their work. So use this one only if you want to use AI on a Dinosaur
-> Planet recomp yourself, or you're simply thirsty for slop.
+> Planet recomp yourself, or you're simply thirsty for slop. And please don't throw shade at its developers for that
+> wish: everyone is allowed to wish things.
 
 Report this one's bugs here, not to Dinosaur Planet: Recompiled. None of it is offered to the projects it builds on,
 which don't take AI-written code.
 
-This project only accepts AI contributions: code, fixes and docs written by AI agents. Work written by hand belongs in
-Dinosaur Planet: Recompiled instead.
+AI contributions are welcome and encouraged here: code, fixes and docs written by or with AI agents.
 
 A native PC port of the December 2000 prototype of Rare's *Dinosaur Planet* for the N64, made by static recompilation
 ([N64Recomp](https://github.com/N64Recomp/N64Recomp) + [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime) +
@@ -28,10 +28,23 @@ and the DLLs are loaded and unloaded by the game's own loader (`src/game/dlls.cp
 The repo holds no ROM, no asset from the game and no data extracted from it: you supply your own ROM, and nothing in
 git or CI is made from one except the function names, addresses and sizes in `syms/`.
 
-**Status:** not released. The desktop build plays from the title through a new game's name entry and the opening
-cutscene into the first level, blended to your display's frame rate from the game's 30 frames a second (Graphics:
-Framerate Display by default, Original for the console's). The prototype's progression fixes are under way
-(Progression fixes).
+Where the prototype is unfinished, what this recomp restores is inferred from the ROM's own code and data, so it may
+differ from other restorations of the game. Each restoration is behind a setting, Restored by default, and Original
+plays the ROM as it is there; `docs/restored-content.md` marks which of them are choices the ROM doesn't make.
+
+**Status:** the desktop build, for Windows and Linux, plays the prototype from a new game to Drakor's end and the
+credits, blended to your display's frame rate from the game's 30 frames a second (Graphics: Framerate Display by
+default, Original for the console's). AI agents have played every stretch of the story from where it starts
+(`docs/story-points.md`), but nobody has yet played it through in one go, so a stretch may still stop you (Known
+issues).
+
+## Known issues
+
+- Expect graphical glitches: textures tiled wrong, letterbox bars where none belong, and sprites and objects that flicker.
+- A place where the game crashes, softlocks or has no way on, which the progression fixes missed or fell short at.
+
+Report either [here](https://github.com/n64hub/dinosaur-planet-recomp/issues), saying where you were and what you did,
+with a screenshot for a glitch.
 
 ## Progression fixes
 
@@ -230,6 +243,42 @@ Each option a modern port adds has a value that plays as the console does. The d
   goes back to the title. Original is the prototype as it was left: after his fall the fight starts again.
 
 Controls are rebound in Controls. A cutscene's camera and the first person view are the game's own in either mode.
+
+## Mods
+
+The desktop build loads N64Recomp mods (`.nrm`) and RT64 texture packs (`.rtz`) from the `mods` folder in its
+settings folder: `%LOCALAPPDATA%\DinosaurPlanetPrototype\mods` on Windows, `~/.config/DinosaurPlanetPrototype/mods` on
+Linux, or `mods` beside the program when a `portable.txt` is there. It turns on a mod it finds, and the launcher's Mods
+menu turns each on and off. The mod game id is `dinoplanet`. A mod can:
+
+- **hook any of the game's functions**, the main segment's and those of the DLLs the game loads as it plays, with
+  `RECOMP_HOOK("name")` (on entry, with the same arguments) or `RECOMP_HOOK_RETURN("name")` (just before it returns),
+  or replace one with `RECOMP_PATCH`. The names are in `syms/dinoplanet.syms.toml`: `func_<address>` in the main
+  segment and `dll<n>_<offset>` in DLL n, its offset in the DLL's text. A DLL's function is hooked wherever the game
+  loads the DLL, and runs only while it is loaded.
+- **call the game's functions** by those names, and read and write its memory by address;
+- **use what the program gives mods** (`mod_template/include/dino_api.h`): `recomp_printf` to the console,
+  `recomp_alloc` and `recomp_free`, and the runtime's mod config and UI calls.
+
+`syms/names.toml` says what each function, export and address worked out so far is (`bit_set` is `func_80014670`),
+and `tools/dino.py dis` prints a function with those names in it (`dis dll210.1`, the player's update). A name is the
+function's address, so it lasts as long as the function's place in the ROM. With no decompilation of this game, a
+replacement means writing the whole function in C, so hooks are the practical tool.
+
+**Writing one:** copy `mod_template/`, a working mod that keeps the player's magic full (a hook on the player's DLL,
+dll210) and prints each story bit the game changes (a hook on `bit_set`, which calls `bit_get`). It needs `syms/` and
+no ROM. With the submodules (Building) and a clang with a MIPS backend:
+
+```sh
+bash tools/build_n64recomp.sh            # the runtime's pinned N64Recomp, so the mod format matches
+make -C mod_template CC=<MIPS clang> LD=<ld.lld>
+cd mod_template && ../build/n64recomp/RecompModTool mod.toml build   # writes build/dinoplanet_hello_mod.nrm
+```
+
+Put the `.nrm` in the `mods` folder. `mod.toml`'s `minimum_recomp_version` is checked against the program's version.
+
+The web page (`docs/web.md`) loads no mods of a player's own: the runtime recompiles a mod's code to machine code as
+it loads it, which a browser can't run.
 
 ## Building
 
