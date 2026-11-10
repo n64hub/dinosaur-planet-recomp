@@ -966,6 +966,7 @@ int main(int argc, char** argv) {
 
     dino::register_overlays();
     dino::register_patches();
+    dino::register_mod_exports();
 
     // One player, on any pad or the keyboard.
     recompinput::players::set_single_player_mode(true);

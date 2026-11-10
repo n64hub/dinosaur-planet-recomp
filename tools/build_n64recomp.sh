@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Builds the recompilers the runtime pins (lib/N64ModernRuntime/N64Recomp: N64Recomp and RSPRecomp) into
-# build/n64recomp, configuring it the first time (and again for another cmake); arguments go to that configure.
+# Builds the recompilers the runtime pins (lib/N64ModernRuntime/N64Recomp: N64Recomp and RSPRecomp) and its mod tool
+# (RecompModTool, README: Mods) into build/n64recomp, configuring it the first time (and again for another cmake);
+# arguments go to that configure.
 # tools/recompile.sh runs it first, and a build that is up to date costs nothing.
 #
 # It patches lib/ first, with N64Recomp-browser's patches and then the game's own (runtime-patches/apply.cmake, which
@@ -24,4 +25,4 @@ if [[ ! -f "$bin/build.ninja" ]]; then
     cmake -S lib/N64ModernRuntime/N64Recomp -B "$bin" -G Ninja -DCMAKE_BUILD_TYPE=Release "$@" > "$bin.log" 2>&1 ||
         { tail -20 "$bin.log"; exit 1; }
 fi
-ninja -C "$bin" N64RecompCLI RSPRecomp >> "$bin.log" 2>&1 || { tail -20 "$bin.log"; exit 1; }
+ninja -C "$bin" N64RecompCLI RSPRecomp RecompModTool >> "$bin.log" 2>&1 || { tail -20 "$bin.log"; exit 1; }
