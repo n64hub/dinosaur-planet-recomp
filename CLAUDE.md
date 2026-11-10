@@ -27,6 +27,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   (`src/game/recomp_api.cpp`), the libultra functions the runtime lacks (`src/game/libultra.cpp`), the HUD's and the
   clear's widescreen placement (`src/game/widescreen.cpp`), the 3D picture's top and bottom rows
   (`src/game/view_rows.cpp`), the player's cell kept loaded beside the camera's (`src/game/streaming.cpp`), the
+  player kept out of the ground where a wall has no line (`src/game/ground.cpp`), the
   free camera and mouse (`src/game/camera.cpp`), the Krazoa shrines' ways in and steps (`src/game/krazoa.cpp`), the
   Kamerian Dragon's end
   (`src/game/dragon_rock.cpp`), Drakor's end (`src/game/drakor.cpp`), CloudRunner Fortress's treasure lift
@@ -180,7 +181,7 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   `DINO_LOG_DRAKOR=1` the end of Drakor's fall, `DINO_LOG_DRAGON=1` the Kamerian Dragon's state, health and end,
   `DINO_LOG_FORCE_POINT=1` the Desert Force Point's lift placed and its place's group turned on,
   `DINO_LOG_WALLED_CITY=1` each object `src/game/walled_city.cpp` places and each step of the chase, the gate and the
-  stone, `DINO_LOG_EFFECTS=1`
+  stone, `DINO_LOG_GROUND=1` each step into the ground `src/game/ground.cpp` takes back, `DINO_LOG_EFFECTS=1`
   each effect drawn after its object was freed,
   `DINO_DRAGON_HEALTH=<n>` starts its fight with n health, and `DINO_CHECK_HEAP=1` each block of the game's heaps
   written past its end, with the tag of what asked for it (`src/game/heap.cpp`). On Windows `tools/grab_window.ps1`

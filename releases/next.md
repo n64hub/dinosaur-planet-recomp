@@ -99,3 +99,6 @@
   one in-between frame where its neighbour was.
 - The ground near the player no longer jumps out of place for a frame as the player walks from one of the map's
   cells into the next: in Golden Plains' pit by the Desert Force Point, a slab of sand flashed over Krystal's legs.
+- The player no longer walks into a rock wall and falls out of the world where the prototype left the wall without
+  its edge: in Golden Plains, walking along the rock wall north of the portal-spell door dropped Krystal into the
+  void and back to the start of the area. Such a wall now stops the player as the others do.

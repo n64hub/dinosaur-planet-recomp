@@ -123,6 +123,12 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   Warlock Mountain's sequence 9 (297b, "Father.", on the way to EC's release) dropped him out of the world as it
   ended. The player's cell now stays marked beside the camera's (us.toml, func_80046BC8 at 0x80047178,
   `src/game/streaming.cpp`).
+- Walls without a line: a block's faces are what the player stands on and its lines the walls he walks into, and a
+  face too steep to climb is no floor, so where the prototype left a rock wall without a line along its foot he
+  walked onto its slope and dropped through the inside of the rock into the void: Golden Plains' rock wall north of
+  the portal-spell door (block 399, cell (1, 23)) put Krystal back at the setup point. A step that leaves the ground
+  under a face of the loaded blocks with none beneath now goes back to where he last stood on one (us.toml,
+  func_80046BC8 at 0x80047330, `src/game/ground.cpp`).
 
 ### Tricky's Run
 
