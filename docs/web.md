@@ -4,8 +4,8 @@ Dinosaur Planet: AI Slop Recomp plays in a browser: built with Emscripten on N64
 `DinosaurPlanet.html` (the launcher, the recomp's menus, SDL2's audio and keyboard, the ROM from Load ROM, and the saves
 kept in IndexedDB; `lib/N64Recomp-browser/frontend/CMakeLists.txt`'s header says what each part does), drawn through
 WebGPU. The page is built from your ROM like the desktop program, so it is never built in CI and never published with
-the game in it. It is not published at all yet: the game is held unreleased (N64Recomp-browser's `docs/publishing.md`),
-so its page is built and played but not put on the hub.
+the game in it. It is published on the hub at [n64hub.com/dinosaur-planet](https://n64hub.com/dinosaur-planet/), built where
+the ROM is (N64Recomp-browser's `docs/publishing.md`).
 
 What is the game's own stays here: the `EMSCRIPTEN` branches of `CMakeLists.txt` that make the game a page,
 `tools/build_web.sh`, the prebuilt shader list (`src/rt64_shaders.txt`, recorded by `tools/shader_plan.json`; the
