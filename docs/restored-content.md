@@ -123,6 +123,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   Warlock Mountain's sequence 9 (297b, "Father.", on the way to EC's release) dropped him out of the world as it
   ended. The player's cell now stays marked beside the camera's (us.toml, func_80046BC8 at 0x80047178,
   `src/game/streaming.cpp`).
+- Golden Plains: GP_LevelControl's heat scene (Krystal's sequence 9, the camera on her face) started over her death:
+  a death leaves its bit 0x11 clear, so with the game over's "Use Duster?" up she stood up behind it, the camera under
+  the quicksand that killed her. It now waits while the player is in a scene or the game over's menu is up (us.toml,
+  dll547_00F0).
 
 ### Tricky's Run
 
