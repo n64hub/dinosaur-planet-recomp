@@ -32,3 +32,4 @@ __pycache__/
 /*.log
 /*.bak
 build-*.log
+/mod_template/build/

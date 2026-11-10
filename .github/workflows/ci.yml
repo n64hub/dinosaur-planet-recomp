@@ -222,6 +222,14 @@ jobs:
         run: ninja -C build librecomp ultramodern rt64 recompui recompinput nfd
       - name: Build the patches
         run: ninja -C build PatchesLib
+      # The example mod as the README's Mods builds one, which checks the mod toolchain end to end against syms/.
+      - name: Example mod (mod_template)
+        run: |
+          bash tools/build_n64recomp.sh -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+          make -C mod_template
+          cd mod_template && ../build/n64recomp/RecompModTool mod.toml build
+          test -s build/dinoplanet_hello_mod.nrm
       - name: Compile the game's own sources
         run: |
           objs=$(ninja -C build -t targets all |
