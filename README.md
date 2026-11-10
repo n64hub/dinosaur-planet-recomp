@@ -40,7 +40,8 @@ issues).
 
 ## Known issues
 
-- Expect graphical glitches: textures tiled wrong, letterbox bars where none belong, and sprites and objects that flicker.
+- Expect graphical glitches: textures tiled wrong, letterbox bars where none belong, and sprites and objects that
+  flicker.
 - A place where the game crashes, softlocks or has no way on, which the progression fixes missed or fell short at.
 
 Report either [here](https://github.com/n64hub/dinosaur-planet-recomp/issues), saying where you were and what you did,
@@ -252,8 +253,8 @@ Linux, or `mods` beside the program when a `portable.txt` is there. It turns on 
 menu turns each on and off. The mod game id is `dinoplanet`. A mod can:
 
 - **hook any of the game's functions**, the main segment's and those of the DLLs the game loads as it plays, with
-  `RECOMP_HOOK("name")` (on entry, with the same arguments) or `RECOMP_HOOK_RETURN("name")` (just before it returns),
-  or replace one with `RECOMP_PATCH`. The names are in `syms/dinoplanet.syms.toml`: `func_<address>` in the main
+  `RECOMP_HOOK("name")` (on entry, with the same arguments) or `RECOMP_HOOK_RETURN("name")` (just before it returns,
+  with no arguments: an entry hook keeps what it needs), or replace one with `RECOMP_PATCH`. The names are in `syms/dinoplanet.syms.toml`: `func_<address>` in the main
   segment and `dll<n>_<offset>` in DLL n, its offset in the DLL's text. A DLL's function is hooked wherever the game
   loads the DLL, and runs only while it is loaded.
 - **call the game's functions** by those names, and read and write its memory by address;
@@ -275,7 +276,8 @@ make -C mod_template CC=<MIPS clang> LD=<ld.lld>
 cd mod_template && ../build/n64recomp/RecompModTool mod.toml build   # writes build/dinoplanet_hello_mod.nrm
 ```
 
-Put the `.nrm` in the `mods` folder. `mod.toml`'s `minimum_recomp_version` is checked against the program's version.
+Put the `.nrm` in the `mods` folder (the Mods menu's Open Mods Folder), or pick it with the menu's Install Mods.
+`mod.toml`'s `minimum_recomp_version` is checked against the program's version.
 
 The web page (`docs/web.md`) loads no mods of a player's own: the runtime recompiles a mod's code to machine code as
 it loads it, which a browser can't run.

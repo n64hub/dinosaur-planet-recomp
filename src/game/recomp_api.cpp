@@ -1,7 +1,7 @@
 // The natives the patches call (patches/syms.ld gives each a dummy address that N64Recomp turns into a call by name),
 // of which there are none yet, and the functions the executable gives mods: a mod imports them from "*"
-// (RECOMP_IMPORT("*", ...), mod_template/include/dino_api.h), beside the runtime's own (recomp_alloc, the mod config and
-// UI calls) and the patches library's exports.
+// (RECOMP_IMPORT("*", ...), mod_template/include/dino_api.h), beside the runtime's own (recomp_alloc, the mod config
+// and UI calls) and the patches library's exports.
 
 #include <bit>
 #include <cstdio>
