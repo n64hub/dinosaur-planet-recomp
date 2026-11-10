@@ -123,6 +123,10 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   Warlock Mountain's sequence 9 (297b, "Father.", on the way to EC's release) dropped him out of the world as it
   ended. The player's cell now stays marked beside the camera's (us.toml, func_80046BC8 at 0x80047178,
   `src/game/streaming.cpp`).
+- Golden Plains: GP_LevelControl's heat scene (Krystal's sequence 9, the camera on her face) started over her death:
+  a death leaves its bit 0x11 clear, so with the game over's "Use Duster?" up she stood up behind it, the camera under
+  the quicksand that killed her. It now waits while the player is in a scene or the game over's menu is up (us.toml,
+  dll547_00F0).
 - Walls without a line: a block's faces are what the player stands on and its lines the walls he walks into, and a
   face too steep to climb is no floor, so where the prototype left a rock wall without a line along its foot he
   walked onto its slope and dropped through the inside of the rock into the void: Golden Plains' rock wall north of
@@ -657,8 +661,10 @@ open: the logs.
   volcano's act 2 gives 0x83B (above); the second SpellStone has no won and activated pair either.
 - **Golden Plains' heat scene** (kept): GP_LevelControl (dll547_00F0) adds to its state +0 each frame Krystal is
   in map 9 (unless 0x643), and past 600 sets 0x11 and plays her sequence 9 once: the camera cuts to her face as she
-  wipes her brow, then cuts back behind her. 0x11 is in bank 0, not saved, so it plays once a session. It plays as
-  the prototype has it, cuts and all: the camera's swing to her face there is this scene, not a fault.
+  wipes her brow, then cuts back behind her. 0x11 is in bank 0, not saved, which a restart also clears (a
+  death, or a sink in quicksand that puts her back), so it plays once a session and again after each restart. It
+  plays as the prototype has it, cuts and all: the camera's swing to her face there is this scene, not a fault. It
+  waits only while she is in a scene or the game over's menu is up (Plain bugs, always on).
 
 ### Open
 

@@ -1203,6 +1203,17 @@ func = "dll547_0018"
 before_vram = 0x9021DB44
 text = '{ void dino_force_point_golden_plains(uint8_t*, recomp_context*); dino_force_point_golden_plains(rdram, ctx); }'
 
+# GP_LevelControl's update counts the player's time in the heat and, past 600, plays her sequence 9 (she wipes her
+# brow, the camera on her face) once, setting 0x11 (dll547 0x2B8-0x320), whatever she is doing. The player's death
+# leaves 0x11 clear again with the game over's menu up ("Use Duster?", menu 9) and her death scene (sequence 8) playing,
+# so the scene started over the death: she stood up behind the menu, the camera in front of her face in the quicksand
+# that killed her, under the ground. Past 600, it waits while the player is in a scene (+0xB4 not -1) or the game
+# over's menu is up, the time kept, so it plays once she is free, as a hook above does for the pickup's scene.
+[[patches.hook]]
+func = "dll547_00F0"
+before_vram = 0x9021DD48
+text = '{ if (MEM_H(0xB4, ctx->r16) != -1 || MEM_W(0, (int32_t)0x800A7D84) == 9) goto L_9021DDA8; }'
+
 [[patches.hook]]
 func = "dll641_009C"
 before_vram = 0x90259204
