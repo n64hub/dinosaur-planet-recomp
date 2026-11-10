@@ -32,11 +32,13 @@ Where the prototype is unfinished, what this recomp restores is inferred from th
 differ from other restorations of the game. Each restoration is behind a setting, Restored by default, and Original
 plays the ROM as it is there; `docs/restored-content.md` marks which of them are choices the ROM doesn't make.
 
-**Status:** the desktop build, for Windows and Linux, plays the prototype from a new game to Drakor's end and the
-credits, blended to your display's frame rate from the game's 30 frames a second (Graphics: Framerate Display by
-default, Original for the console's). AI agents have played every stretch of the story from where it starts
-(`docs/story-points.md`), but nobody has yet played it through in one go, so a stretch may still stop you (Known
-issues).
+**Status:** v0.1.0, the first release, for Windows and Linux
+([releases](https://github.com/n64hub/dinosaur-planet-recomp/releases), `releases/`), and the same game in a browser at
+[n64hub.com/dinosaur-planet](https://n64hub.com/dinosaur-planet/) (`docs/web.md`). It plays the prototype from a new
+game to Drakor's end and the credits, blended to your display's frame rate from the game's 30 frames a second
+(Graphics: Framerate Display by default, Original for the console's). AI agents have played every stretch of the
+story, each from its own starting point (`docs/story-points.md`), but never in one sitting, so a stretch may still stop
+you (Known issues).
 
 ## Known issues
 
