@@ -32,7 +32,7 @@ Where the prototype is unfinished, what this recomp restores is inferred from th
 differ from other restorations of the game. Each restoration is behind a setting, Restored by default, and Original
 plays the ROM as it is there; `docs/restored-content.md` marks which of them are choices the ROM doesn't make.
 
-**Status:** v0.1.3, for Windows and Linux
+**Status:** v0.1.4, for Windows and Linux
 ([releases](https://github.com/n64hub/dinosaur-planet-recomp/releases), `releases/`), and the same game in a browser at
 [n64hub.com/dinosaur-planet](https://n64hub.com/dinosaur-planet/) (`docs/web.md`). It plays the prototype from a new
 game to Drakor's end and the credits, blended to your display's frame rate from the game's 30 frames a second
