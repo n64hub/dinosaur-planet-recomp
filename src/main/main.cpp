@@ -983,6 +983,14 @@ int main(int argc, char** argv) {
 
     // Skip Buffering: RT64 presents a framebuffer once the game swaps to it at a VI. Present Early, which shows one as
     // soon as a task fills it, is untried with this game.
+    // Render to RAM stays RT64's default, the exact copy of each list's frame into RDRAM, on the desktop and the page,
+    // though on the page each list waits 5-6 ms for it: the game's CPU reads its frames. Pausing copies the frame on
+    // screen (D_800BCCA8) to the pause menu's backdrop (D_800BCE08, func_8005DA10's _bcopy), which a frame a list old
+    // would do; but a cutscene's ghosting (transition 10: CloudRunner Fortress's sequence 65, SwapStone Circle's 424
+    // and 427, and others) has func_8005324C average the frame its list just drew (D_800BCCAC) into the one on screen
+    // every frame, once func_80037924 has seen the list done, and that blend is the frame swapped in next: it needs the
+    // newest frame in RAM at the list's end, and a copy landing a list late would write over the blend. Its CPU writes
+    // a frame otherwise only on the crash screen (func_800630D4, func_80062D38).
     ultramodern::renderer::callbacks_t renderer_callbacks{
         .create_render_context = [](uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
             return recompui::renderer::create_render_context(rdram, window_handle, ultramodern::renderer::PresentationMode::SkipBuffering, developer_mode);

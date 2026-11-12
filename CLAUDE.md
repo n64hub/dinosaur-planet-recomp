@@ -163,7 +163,8 @@ This repo is the game: its recompilation, the hooks and patches over it, the des
   Third SpellStone setting, Restored by default, moves both maps' acts with the story and, once the stone is placed,
   lays four moonseeds in the cave under SwapStone Hollow for Sabre to find, and Original leaves them as they were (`src/game/acts.cpp` and `src/game/moonseeds.cpp` have the
   evidence, docs/story-points.md, The maps' acts, how they move).
-- **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`).
+- **Input.** The game is one player's: port 1 has a controller with a Rumble Pak (`main.cpp`), and every pad plays
+  it, so N64Recomp-browser's new-recomp checklist's item 3 (each controller a port of its own) doesn't apply.
 - **Testing.** `--boot` starts the game from the launcher's first frame once the ROM is stored (`--boot-after
   <seconds>` that long after it), `--window <w>x<h>` sizes the window, `--input <file>` plays port 1 from a script of
   timed button states, which can wait for a bit the game sets, an enemy's place or act, and take whichever of two
