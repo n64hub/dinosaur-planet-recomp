@@ -1,2 +1,0 @@
-- A cutscene's bottom bar reaches the window's bottom edge: the grey strip with noise in it under the bar is gone, since the game now fills the frame's last row.
-- The renderer and runtime are updated to N64Recomp-browser v0.190.0's: the picture reaches the window's last row at any window height, where a black row was left at some.
