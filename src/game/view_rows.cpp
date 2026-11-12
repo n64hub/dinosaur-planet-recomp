@@ -20,6 +20,11 @@
 // fills the rows outside the rectangle black, as the game's own bars are filled, before anything else of the frame; a
 // cutscene's bars still fill them in the game's colour after it. Their right side is the frame's width, as the
 // widescreen hook beside it makes the game's, so RT64 takes them to the window's sides.
+//
+// The frame's last row, 239, was never filled either, cutscene or not: func_80037A14's first scissor, under which the
+// full clear, the bars and these fills are drawn, ends a row short (its lower right, which it cuts, is height - 1), so
+// below a cutscene's bottom bar a strip of the framebuffer's old contents showed across the window. us.toml's
+// instruction patch at 0x80037A7C gives it the frame's height.
 
 #include <cstdint>
 

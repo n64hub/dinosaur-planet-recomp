@@ -742,6 +742,15 @@ func = "func_80037A14"
 before_vram = 0x80037C6C
 text = "ctx->r7 = ADD32(ctx->r7, 1);"
 
+# The frame's last row (src/game/view_rows.cpp). func_80037A14's first scissor, under which its fills and a cutscene's
+# bars are drawn, is (0, 0) to (width - 1, height - 1) in 10.2 (0x80037A6C-0x80037AC4), and a scissor's lower right is
+# the first row it cuts, so row 239 was never filled and kept what a screen before left in that framebuffer. Its bottom
+# takes the frame's height, as libultra's own scissors do. (addiu $t6, $a2, -1 -> addiu $t6, $a2, 0)
+[[patches.instruction]]
+func = "func_80037A14"
+vram = 0x80037A7C
+value = 0x24CE0000
+
 # The 3D picture's rows (src/game/view_rows.cpp). A letterbox the game leaves unfilled: with no full clear to do (its
 # flag 1, $t3, is clear at 0x80037C58), func_80037A14 fills the rows outside the world's rectangle black, its display
 # list pointer in $s0, before it looks for a cutscene's bars.

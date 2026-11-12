@@ -114,6 +114,9 @@ Each is a bug in what the prototype has, so it needs no evidence beyond the bug.
   and half of the boot screens' "PUBLISHED BY" line. The world's viewport already reaches past them, so its clears
   and scissor now take the whole frame and the picture fills the window; a cutscene's letterbox keeps them (us.toml,
   `src/game/view_rows.cpp`).
+- A cutscene's bottom bar: the frame's last row was never filled (func_80037A14's first scissor ends a row short of
+  the frame), so a grey strip of what a screen before left there ran under the bar across the window. The scissor
+  takes the frame's height (us.toml, `src/game/view_rows.cpp`).
 - The boot's sketched picture behind the Rareware and Nintendo logos, and any texture dll76_18A8 draws in 64-texel
   tiles: each tile's mesh is 63 texels square, so the tiles share their edge texels, but each column of tiles loaded
   from 64 texels on and each row from a row further down than its mesh reads, so the picture skipped a texel at every
