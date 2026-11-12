@@ -93,8 +93,8 @@ uncapped:
 - Firefox builds each section as its area first draws, with the game waiting: about 3 s at the opening and at
   SwapStone Hollow, a fraction of a second for the others. Then it plays as Chrome does, with no misses or errors.
 - The extended plan missed 7 shaders in DarkIce Mines and the Walled City, which are in the list.
-- In a play the page's heap can climb about 9 MB a second, and then a malloc past its 1536 MB (`Aborted(OOM)`)
-  stops the page about two and a half minutes in, so the extended plan doesn't reach its end. Some builds and runs
-  hold flat; what holds the memory isn't found yet. The page stays unpublished until that is fixed.
+- The extended plan plays to its end at 3840 wide in Chrome and in Firefox, 4.3 minutes through every area it starts,
+  with no out of memory and no WebGPU errors. Before N64Recomp-browser v0.181.0 the page's heap climbed about 9 MB
+  a second in a play until a malloc past its 1536 MB (`Aborted(OOM)`) stopped it.
 - At Cape Claw's sand worm fight the game prints `Sound state allocate failed - sndId 97` many times a second: its
   own message, from its sound code.
