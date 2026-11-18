@@ -1,0 +1,42 @@
+# Dinosaur Planet's soak (item 8d): one round of 2.5 minutes through a player's first minutes and a level, by the
+# Linux build's tools/frame_dump.mjs --soak 160, given the program arguments
+#   --args "--story new-game,15@75 --bits 452=450 --report"
+# so that at 75 s on the game's input clock it starts SwapStone Hollow (warp 15) with its Queen, Tricky and mushrooms
+# on (docs/story-points.md), and prints where the player is once a second to stderr. A round plays the logos and the
+# title to the game select (menu 5, the word at 0x800A7D84), a New Game as a player makes one with the keyboard's
+# defaults (Space is A, Enter Start, WASD the stick): A on the first file, an A for a name and END (the name screen is
+# menu 6), A on the new file until the game is in play (menu 1), then random input on the stick and A through the
+# opening on the pterodactyl until the story starts SwapStone Hollow, a walk out and back along its river with random
+# input between, its pause menu (menu 8) opened and closed, and random input to the end. The pause menu stands still
+# for 3 s, under the soak's 10.
+1 until 0x800A7D84 0xFFFFFFFF 5 90
+3 shot select
+3 key Space 100
+3.4 until 0x800A7D84 0xFFFFFFFF 6 15
+5 key Space 100
+5.4 key S 1500
+7.2 key D 100
+7.6 key D 100
+8 key D 100
+8.4 until 0x800A7D84 0xFFFFFFFF 5 15 Space
+10.5 until 0x800A7D84 0xFFFFFFFF 1 30 Space
+14 shot opening
+14 random W,A,S,D,Space
+62 random off
+64 peek 0x800A7D84
+66 shot swapstone
+67 key W 2500
+70 key D 700
+71 key W 2500
+74 key A 1200
+76 key W 1500
+78 key S 3000
+81.5 random W,A,S,D,Space
+96 random off
+97 key Enter 100
+98 shot pause
+100 key Enter 100
+101 random W,A,S,D,Space
+130 random off
+130 shot end
+131 end
