@@ -1,0 +1,28 @@
+# The save run of the save check (N64Recomp-browser's tools/frame_dump.mjs --saves, with tools/load_plan.txt): a New
+# Game made as a player makes one, with the keyboard's defaults (Space is A, WASD the stick). At the game select (the
+# menu word 0x800A7D84 = 5), A on the first file opens the name screen (6), and AAJJR is typed on its grid (A, A, the
+# stick down to J, J, J, down to R, R, each tap held 100 ms: Xvfb repeats a longer hold), the stick held down to the
+# bottom row and three taps right to END, and A on END: dll64 writes the new game to the Flash
+# (saves/<game id>.bin) and the game select comes back (5). The game then keeps the file's name, word-aligned and after
+# a zero word, in its copy of the save, so a key the game took twice fails this run, which checks nothing, and not the
+# load run's find.
+0 until 0x800A7D84 0xFFFFFFFF 5 120
+2 key Space 100
+2.5 until 0x800A7D84 0xFFFFFFFF 6 15
+4 key Space 100
+5 key Space 100
+6 key S 100
+7 key Space 100
+8 key Space 100
+9 key S 100
+10 key Space 100
+11 shot name
+12 key S 1500
+14 key D 100
+15 key D 100
+16 key D 100
+17 until 0x800A7D84 0xFFFFFFFF 5 15 Space
+18 find typed 0x00000000,0x41414A4A 5
+18.5 saves changed 15
+20 shot saved
+21 end
