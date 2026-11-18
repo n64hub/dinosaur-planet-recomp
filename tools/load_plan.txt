@@ -1,0 +1,25 @@
+# The load run of the save check (N64Recomp-browser's tools/frame_dump.mjs --saves), after tools/save_plan.txt, the
+# program started again in the same folder: at the game select (the menu word 0x800A7D84 = 5) the game has read its
+# files off the Flash, and AAJJR is in RDRAM (word-aligned, after a zero word) only if it came off the Flash: nothing
+# else in the game spells it. Nothing is written by then. Then a second New Game, AAA on the second file (the stick down
+# to it, A, then A three times on the name grid, down to its bottom row and right to END), is written through the
+# check's links.
+0 until 0x800A7D84 0xFFFFFFFF 5 120
+2 find player 0x00000000,0x41414A4A 20
+2.5 shot select
+3 saves same
+4 key S 100
+6 key Space 100
+6.5 until 0x800A7D84 0xFFFFFFFF 6 15
+8 key Space 100
+9 key Space 100
+10 key Space 100
+11 shot name
+12 key S 1500
+14 key D 100
+15 key D 100
+16 key D 100
+17 until 0x800A7D84 0xFFFFFFFF 5 15 Space
+18 saves changed 15
+20 shot created
+21 end

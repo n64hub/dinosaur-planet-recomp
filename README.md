@@ -309,6 +309,11 @@ On Linux the same lines take `clang` and `clang++` in place of `clang-cl`, and t
 `build/DinosaurPlanet` (`.exe` on Windows) from the repo's root, pick the ROM with Load ROM, then Start Game.
 `tools/release.sh`'s header says how a release is built.
 
+`tools/save_plan.txt` and `tools/load_plan.txt` check that a desktop build finds its save again after a restart: a New
+Game made on the name screen, then the game select reading it back off the Flash and a second New Game written, with
+the saves behind symlinks, played on the Linux build by N64Recomp-browser's `tools/frame_dump.mjs --saves` (its header
+says how). Their headers say what each step reads.
+
 `syms/` is written from the ROM by `tools/gen_syms.py` (its header says how; it needs spimdisasm and n64sym's
 signatures). Only a change to how it finds functions needs it again.
 
