@@ -5,15 +5,14 @@ Dinosaur Planet: AI Slop Recomp plays in a browser: built with Emscripten on N64
 kept in IndexedDB; `lib/N64Recomp-browser/frontend/CMakeLists.txt`'s header says what each part does), drawn through
 WebGPU. The page is built from your ROM like the desktop program, so it is never built in CI and never published with
 the game in it. It is published on the hub at [n64hub.com/dinosaur-planet](https://n64hub.com/dinosaur-planet/), built where
-the ROM is (N64Recomp-browser's `docs/publishing.md`).
+the ROM is.
 
 What is the game's own stays here: the `EMSCRIPTEN` branches of `CMakeLists.txt` that make the game a page,
 `tools/build_web.sh`, the prebuilt shader list (`src/rt64_shaders.txt`, recorded by `tools/shader_plan.json`; the
 list's header says how to record it again), the play plans (`tools/play_plan.json`, `tools/play_plan_extended.json`)
 and the survey they share (`tools/survey.js`). The rest is N64Recomp-browser's: `docs/porting.md` (WebGPU and the
 shaders, prebuilt shader lists, Emscripten), `docs/playing.md` (playing and measuring a page), `docs/forks.md` and
-`docs/findings.md`. Every play of this game's page is a line in N64Recomp-browser's `plays.jsonl` (game `dino`), never a
-record here.
+`docs/findings.md`.
 
 ## Build it
 
@@ -84,8 +83,7 @@ was missed in, or, for a screen any area shows (the pause menu), to section 0.
 
 ## How it plays
 
-Every run is in N64Recomp-browser's `plays.jsonl` (game `dino`); what they show, on a desktop GPU on a busy host,
-uncapped:
+What its runs show, on a desktop GPU on a busy host, uncapped:
 
 - Chrome builds the whole list behind the launcher, and the regular plan plays with no shader misses and no WebGPU
   errors, its frame gaps 2.8 ms at the median and 4.5-4.8 ms at the 99th percentile: the page presents at the
