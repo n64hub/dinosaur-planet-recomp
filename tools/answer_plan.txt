@@ -1,0 +1,23 @@
+# The desktop build's answer plan (ops docs/new-recomp.md, 4d: a press reaches the picture at once and the view stays
+# where the stick leaves it), for frame_dump.mjs's answer steps with its stand-in pad and --no-dump, at the default
+# limits (500 ms to answer, 1000 ms to settle). Its steps are capture_window.ps1's, at seconds since the program
+# started (an until's wait moves the rest on).
+# It reaches the game select (menu 5, the word at 0x800A7D84) past the logos and the title, a menu that holds still,
+# and moves its cursor down on the stick (lefty) and on S, each moved back by an untimed step, then down on the stick
+# held 1.5 s. Only the lit item's lettering changes, under 1% of the whole window, so each answer looks in a region
+# over the menu's column (0.2,0.32,0.37,0.45: x, y, width and height as fractions of the window). The game's view a
+# player turns is a follow camera that swings round behind Krystal for 2.5 s after she stops, by itself.
+# v0.1.5 passes: the stick's move answered in 100 ms and settled in 3 ms, S's in 296 and 15 ms, the 1.5 s hold's in
+# 100 and 2 ms (drift 1.3-1.8% in the region).
+1 until 0x800A7D84 0xFFFFFFFF 5 90
+4 shot select
+5 answer select-stick lefty 32767 0.4 500 1000 0.2,0.32,0.37,0.45
+10 pad lefty -32768
+10.4 pad lefty 0
+12 shot back1
+13 answer select-key key:S 1 0.4 500 1000 0.2,0.32,0.37,0.45
+18 key W 100
+20 shot back2
+21 answer select-hold lefty 32767 1.5 500 1000 0.2,0.32,0.37,0.45
+26 shot end
+27 end
