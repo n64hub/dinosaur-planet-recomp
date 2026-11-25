@@ -1,0 +1,767 @@
+{
+  "$schema": "https://recomplauncher.com/schema/recomplauncher.json",
+  "format": 1,
+  "name": "Dinosaur Planet: AI Slop Recomp",
+  "repo": "n64hub/dinosaur-planet-recomp",
+  "start": {
+    "program": [
+      "DinosaurPlanet.exe",
+      "DinosaurPlanet"
+    ]
+  },
+  "config": [
+    {
+      "id": "general",
+      "format": "json",
+      "file": [
+        {
+          "path": "{install}/general.json",
+          "if": "{install}/portable.txt"
+        },
+        {
+          "path": "{config}/DinosaurPlanetPrototype/general.json",
+          "if": "{install}/DinosaurPlanet"
+        },
+        {
+          "path": "{local}/DinosaurPlanetPrototype/general.json"
+        }
+      ]
+    },
+    {
+      "id": "graphics",
+      "format": "json",
+      "file": [
+        {
+          "path": "{install}/graphics.json",
+          "if": "{install}/portable.txt"
+        },
+        {
+          "path": "{config}/DinosaurPlanetPrototype/graphics.json",
+          "if": "{install}/DinosaurPlanet"
+        },
+        {
+          "path": "{local}/DinosaurPlanetPrototype/graphics.json"
+        }
+      ]
+    },
+    {
+      "id": "sound",
+      "format": "json",
+      "file": [
+        {
+          "path": "{install}/sound.json",
+          "if": "{install}/portable.txt"
+        },
+        {
+          "path": "{config}/DinosaurPlanetPrototype/sound.json",
+          "if": "{install}/DinosaurPlanet"
+        },
+        {
+          "path": "{local}/DinosaurPlanetPrototype/sound.json"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "id": "rumble_strength",
+      "label": "Rumble Strength",
+      "help": "Controls the strength of rumble when using a controller that supports it. Setting this to zero will disable rumble.",
+      "in": "general",
+      "group": "General",
+      "slider": {
+        "key": "rumble_strength",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "format": "%d"
+      },
+      "defaults": {
+        "rumble_strength": "25"
+      }
+    },
+    {
+      "id": "gyro_sensitivity",
+      "label": "Gyro Sensitivity",
+      "help": "Controls the sensitivity of gyro aiming when using items in first person for controllers that support it. Setting this to zero will disable gyro. Note: To recalibrate controller gyro, set the controller down on a still, flat surface for 5 seconds.",
+      "in": "general",
+      "group": "General",
+      "slider": {
+        "key": "gyro_sensitivity",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "format": "%d"
+      },
+      "defaults": {
+        "gyro_sensitivity": "25"
+      }
+    },
+    {
+      "id": "mouse_sensitivity",
+      "label": "Mouse Sensitivity",
+      "help": "How far the mouse turns the camera: at 50% a count turns it 0.1 degrees. Left click is B and right click Z. 0% is the original game: no mouse, and the pointer stays free.",
+      "in": "general",
+      "group": "General",
+      "slider": {
+        "key": "mouse_sensitivity",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "format": "%d"
+      },
+      "defaults": {
+        "mouse_sensitivity": "50"
+      }
+    },
+    {
+      "id": "joystick_deadzone",
+      "label": "Joystick Deadzone",
+      "help": "Applies a deadzone to joystick inputs.",
+      "in": "general",
+      "group": "General",
+      "slider": {
+        "key": "joystick_deadzone",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "format": "%d"
+      },
+      "defaults": {
+        "joystick_deadzone": "5"
+      }
+    },
+    {
+      "id": "background_input_mode",
+      "label": "Background Input Mode",
+      "help": "Allows the game to read controller input when out of focus. This setting does not affect keyboard input.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Off",
+          "set": {
+            "background_input_mode": "\"Off\""
+          }
+        },
+        {
+          "label": "On",
+          "set": {
+            "background_input_mode": "\"On\""
+          }
+        }
+      ],
+      "defaults": {
+        "background_input_mode": "\"On\""
+      }
+    },
+    {
+      "id": "free_camera",
+      "label": "Free Camera",
+      "help": "The right stick and the mouse turn the camera around the player, and the D-pad plays the C buttons in the stick's place. Original is the console's camera: it follows by itself, and the right stick plays the C buttons.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "free_camera": "\"Original\""
+          }
+        },
+        {
+          "label": "On",
+          "set": {
+            "free_camera": "\"On\""
+          }
+        }
+      ],
+      "defaults": {
+        "free_camera": "\"On\""
+      }
+    },
+    {
+      "id": "invert_camera_y",
+      "label": "Invert Camera Y",
+      "help": "Moving the mouse or the right stick up looks down.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Off",
+          "set": {
+            "invert_camera_y": "\"Off\""
+          }
+        },
+        {
+          "label": "On",
+          "set": {
+            "invert_camera_y": "\"On\""
+          }
+        }
+      ],
+      "defaults": {
+        "invert_camera_y": "\"Off\""
+      }
+    },
+    {
+      "id": "tricky_run",
+      "label": "Tricky's Run",
+      "help": "In the prototype, Tricky never runs to his mother in SwapStone Hollow, the run the Queen Earthwalker's clue asks the player to watch. Restored starts it as the player comes near. Original is the prototype as it was left.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "tricky_run": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "tricky_run": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "tricky_run": "\"Restored\""
+      }
+    },
+    {
+      "id": "krazoa_shrines",
+      "label": "Krazoa Shrines",
+      "help": "Restored: all eight Krazoa shrines can be reached and played, Cape Claw's test ends once its baddie is beaten, and each spirit is released at Warlock Mountain. Original is the prototype as it was left: three shrines are reached from the world, Cape Claw's test never ends, and Willow Grove's, Golden Plains' and Northern Wastes' spirits have nowhere to go.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "krazoa_shrines": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "krazoa_shrines": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "krazoa_shrines": "\"Restored\""
+      }
+    },
+    {
+      "id": "krazoa_tablets",
+      "label": "Krazoa Tablets",
+      "help": "HighTop hands Krystal the first Krazoa tablet in Discovery Falls, Cape Claw's third is found where the sand worm fell, the tablet room stays until it is solved, and its last puzzle opens a Transporter to Krazoa Palace. Original is the prototype as it was left: the first tablet comes with no scene, the third is nowhere, and the last puzzle leads nowhere.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "krazoa_tablets": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "krazoa_tablets": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "krazoa_tablets": "\"Restored\""
+      }
+    },
+    {
+      "id": "krazoa_palace",
+      "label": "Krazoa Palace",
+      "help": "Krazoa Palace's four wings each have a section door, a console and a text block, and the four open the last door to the red Krazoa, which sends the player on to Drakor. Original is the prototype as it was left: the palace's rooms stand empty and lead nowhere.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "krazoa_palace": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "krazoa_palace": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "krazoa_palace": "\"Restored\""
+      }
+    },
+    {
+      "id": "ending",
+      "label": "Ending",
+      "help": "Once Drakor is beaten and his fall has played, the game's own credits play, then the title. Original is the prototype as it was left: after his fall the fight starts again, and the game never ends.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "ending": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "ending": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "ending": "\"Restored\""
+      }
+    },
+    {
+      "id": "kamerian_dragon",
+      "label": "Kamerian Dragon",
+      "help": "The ice spell on Dragon Rock's top can be picked up and cast, and the Skeetla arena at its bottom fills Krystal's magic while its fight is on, the Earth Warrior there takes Dragon Rock's blue mushrooms from Krystal's items, and the arena, once won, leads into the Kamerian Dragon's room. The dragon dies once its health runs out, and leaves the fourth SpellStone for the Desert Force Point, which leads back out. Original is the prototype as it was left: the ice spell can't be taken or cast, the arena can't be won, nothing leads to the room, the fight never ends, and the fourth SpellStone is nowhere.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "kamerian_dragon": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "kamerian_dragon": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "kamerian_dragon": "\"Restored\""
+      }
+    },
+    {
+      "id": "desert_force_point",
+      "label": "Desert Force Point",
+      "help": "The prototype's Golden Plains fills the second SpellStone's place on every load, and nothing leads up to it. Restored leaves the place empty until the stone is placed and adds a lift to the duct that leads there, in the corridor behind the round door. Original is the prototype as it was left.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "desert_force_point": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "desert_force_point": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "desert_force_point": "\"Restored\""
+      }
+    },
+    {
+      "id": "treasure_lift",
+      "label": "Treasure Lift",
+      "help": "In CloudRunner Fortress the wind lift past the blasted wall lowers a player who steps in from the top, the way down to the treasure caves, and once the courtyard roof is blown one carrying a barrel too. Original is the prototype as it was left: from the top the wind only ever blows up, and the caves can't be reached.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "treasure_lift": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "treasure_lift": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "treasure_lift": "\"Restored\""
+      }
+    },
+    {
+      "id": "cloud_babies",
+      "label": "Baby CloudRunners",
+      "help": "In CloudRunner Fortress the baby CloudRunners Kyte's mother hid come out to be rescued once Kyte finds them, and the one on a balcony nothing reaches waits on the hall's floor below it. Original is the prototype as it was left: three of the five never come out, and that one can't be reached.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "cloud_babies": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "cloud_babies": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "cloud_babies": "\"Restored\""
+      }
+    },
+    {
+      "id": "wind_bridge",
+      "label": "Wind Bridge",
+      "help": "In CloudRunner Fortress the wind over the shaft past the blasted wall holds a player carrying a barrel, so the barrels reach the courtyard and blow its roof. Original is the prototype as it was left: carrying one, she falls to the shaft's bottom.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "wind_bridge": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "wind_bridge": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "wind_bridge": "\"Restored\""
+      }
+    },
+    {
+      "id": "boss_trex",
+      "label": "BOSS TRex",
+      "help": "In the prototype, beating the TRex goes back to the title with no SpellStone. Restored gives the third SpellStone and opens the way back to Walled City. Original is the prototype as it was left.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "boss_trex": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "boss_trex": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "boss_trex": "\"Restored\""
+      }
+    },
+    {
+      "id": "third_stone",
+      "label": "Third SpellStone",
+      "help": "In the prototype, the Volcano Force Point and Walled City never get past the first visit, so the third SpellStone has nowhere to go, and nothing gives the moonseeds Krystal plants. Restored moves both with the story, the force point on to its second visit once the stone is activated, and lays four moonseeds in the cave under SwapStone Hollow once the stone is placed. Original is the prototype as it was left.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "third_stone": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "third_stone": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "third_stone": "\"Restored\""
+      }
+    },
+    {
+      "id": "walled_city",
+      "label": "Walled City",
+      "help": "The prototype never built Walled City's way in or its King's part: the Queen EarthWalker is missing, the gate stands open, and the third SpellStone is active as soon as it is won. Restored brings the Queen to the corridor outside, has Sabre anger a RedEye with Tricky's flame for ten teeth that open the gate, and has the King activate the stone. Original is the prototype as it was left.",
+      "in": "general",
+      "group": "General",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "walled_city": "\"Original\""
+          }
+        },
+        {
+          "label": "Restored",
+          "set": {
+            "walled_city": "\"Restored\""
+          }
+        }
+      ],
+      "defaults": {
+        "walled_city": "\"Restored\""
+      }
+    },
+    {
+      "id": "res_option",
+      "label": "Resolution",
+      "help": "Sets the output resolution of the game. Original matches the game's original 240p resolution. Original 2x will render at 480p. Auto will scale based on the game window's resolution.",
+      "in": "graphics",
+      "group": "Graphics",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "res_option": "\"Original\""
+          }
+        },
+        {
+          "label": "Original 2x",
+          "set": {
+            "res_option": "\"Original2x\""
+          }
+        },
+        {
+          "label": "Auto",
+          "set": {
+            "res_option": "\"Auto\""
+          }
+        }
+      ],
+      "defaults": {
+        "res_option": "\"Auto\""
+      }
+    },
+    {
+      "id": "ds_option",
+      "label": "Downsampling Quality",
+      "help": "Renders at a higher resolution and scales it down to the output resolution for increased quality. Only available in Original and Original 2x resolution. Note: 4x downsampling quality at Original 2x resolution may cause performance issues on low end devices, as it will cause the game to render at almost 4k internal resolution.",
+      "in": "graphics",
+      "group": "Graphics",
+      "choices": [
+        {
+          "label": "Off",
+          "set": {
+            "ds_option": "0"
+          }
+        },
+        {
+          "label": "2x",
+          "set": {
+            "ds_option": "2"
+          }
+        },
+        {
+          "label": "4x",
+          "set": {
+            "ds_option": "4"
+          }
+        }
+      ],
+      "defaults": {
+        "ds_option": "0"
+      }
+    },
+    {
+      "id": "ar_option",
+      "label": "Aspect Ratio",
+      "help": "Sets the horizontal aspect ratio. Original uses the game's original 4:3 aspect ratio. Expand will adjust to match the game window's aspect ratio.",
+      "in": "graphics",
+      "group": "Graphics",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "ar_option": "\"Original\""
+          }
+        },
+        {
+          "label": "Expand",
+          "set": {
+            "ar_option": "\"Expand\""
+          }
+        }
+      ],
+      "defaults": {
+        "ar_option": "\"Expand\""
+      }
+    },
+    {
+      "id": "wm_option",
+      "label": "Window Mode",
+      "help": "Sets whether the game should display Windowed or Fullscreen. You can also use F11 or Alt + Enter to toggle this option.",
+      "in": "graphics",
+      "group": "Graphics",
+      "choices": [
+        {
+          "label": "Windowed",
+          "set": {
+            "wm_option": "\"Windowed\""
+          }
+        },
+        {
+          "label": "Fullscreen",
+          "set": {
+            "wm_option": "\"Fullscreen\""
+          }
+        }
+      ],
+      "defaults": {
+        "wm_option": "\"Windowed\""
+      }
+    },
+    {
+      "id": "rr_option",
+      "label": "Framerate",
+      "help": "Sets the game's output framerate. This option does not affect gameplay. Note: If you have issues with Display mode while using an external frame limiter, use Manual mode instead and configure it to that same frame limit.",
+      "in": "graphics",
+      "group": "Graphics",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "rr_option": "\"Original\""
+          }
+        },
+        {
+          "label": "Display",
+          "set": {
+            "rr_option": "\"Display\""
+          }
+        },
+        {
+          "label": "Manual",
+          "set": {
+            "rr_option": "\"Manual\""
+          }
+        }
+      ],
+      "defaults": {
+        "rr_option": "\"Display\""
+      }
+    },
+    {
+      "id": "rr_manual_value",
+      "label": "Manual Framerate",
+      "help": "The framerate Manual draws the game at. This option does not affect gameplay.",
+      "in": "graphics",
+      "group": "Graphics",
+      "slider": {
+        "key": "rr_manual_value",
+        "min": 20,
+        "max": 240,
+        "step": 1,
+        "format": "%d"
+      },
+      "defaults": {
+        "rr_manual_value": "60"
+      },
+      "when": {
+        "rr_option": "\"Manual\""
+      }
+    },
+    {
+      "id": "msaa_option",
+      "label": "MS Anti-Aliasing",
+      "help": "Sets the multisample anti-aliasing (MSAA) quality level. This reduces jagged edges in the final image at the expense of rendering performance. Note: This option won't be available if your GPU does not support programmable MSAA sample positions, as it is currently required to avoid rendering glitches.",
+      "in": "graphics",
+      "group": "Graphics",
+      "choices": [
+        {
+          "label": "None",
+          "set": {
+            "msaa_option": "\"None\""
+          }
+        },
+        {
+          "label": "2X",
+          "set": {
+            "msaa_option": "\"MSAA2X\""
+          }
+        },
+        {
+          "label": "4X",
+          "set": {
+            "msaa_option": "\"MSAA4X\""
+          }
+        }
+      ],
+      "defaults": {
+        "msaa_option": "\"MSAA2X\""
+      }
+    },
+    {
+      "id": "hr_option",
+      "label": "HUD Placement",
+      "help": "Adjusts the placement of HUD elements to fit the selected aspect ratio. Expand will use the aspect ratio of the game's output window.",
+      "in": "graphics",
+      "group": "Graphics",
+      "choices": [
+        {
+          "label": "Original",
+          "set": {
+            "hr_option": "\"Original\""
+          }
+        },
+        {
+          "label": "16:9",
+          "set": {
+            "hr_option": "\"Clamp16x9\""
+          }
+        },
+        {
+          "label": "Expand",
+          "set": {
+            "hr_option": "\"Expand\""
+          }
+        }
+      ],
+      "defaults": {
+        "hr_option": "\"Clamp16x9\""
+      }
+    },
+    {
+      "id": "main_volume",
+      "label": "Main Volume",
+      "help": "Controls the main volume of the game.",
+      "in": "sound",
+      "group": "Sound",
+      "slider": {
+        "key": "main_volume",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "format": "%d"
+      },
+      "defaults": {
+        "main_volume": "100"
+      }
+    }
+  ],
+  "saves": [
+    "{install}/saves",
+    "{config}/DinosaurPlanetPrototype/saves",
+    "{local}/DinosaurPlanetPrototype/saves"
+  ],
+  "system": {
+    "windows": {
+      "version": "10"
+    },
+    "linux": {
+      "glibc": "2.35"
+    }
+  }
+}
