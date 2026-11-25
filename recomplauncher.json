@@ -1,7 +1,7 @@
 {
   "$schema": "https://recomplauncher.com/schema/recomplauncher.json",
   "format": 1,
-  "name": "Dinosaur Planet: Recompiled",
+  "name": "Dinosaur Planet: AI Slop Recomp",
   "repo": "n64hub/dinosaur-planet-recomp",
   "start": {
     "program": [

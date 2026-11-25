@@ -29,6 +29,7 @@ __pycache__/
 /saves/
 /*.json
 !/recomplauncher.json
+!/.recomp.json
 /mods/
 /*.log
 /*.bak
